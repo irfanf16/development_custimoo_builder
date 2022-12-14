@@ -130,13 +130,15 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
       transparent_logo: recent_logo.transparent_logo_url, smart_transparent_logo: recent_logo.smart_transparent_logo_url,
       original_logo_url: recent_logo.original_logo_url, original_logo: recent_logo.original_logo, is_smart_transparent: false,
       url: recent_logo.logo_url, id: recent_logo.id, is_vector: recent_logo.is_vector, is_recent_logo: true,
-      logo_name: recent_logo.logo_nam
+      logo_name: recent_logo.logo_name
     }
+    delete this.customLogo.scaleX
+    delete this.customLogo.scaleY
     await this.$store.commit('SET_CUSTOM_LOGOS', {
       logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
     })
     if(this.customLogoIndex == 0) {
-      await this.addRemoveTeamLogoOnAllProducts('add', this.customLogo)
+      await this.addRemoveTeamLogoOnAllProducts('add', recent_logo)
     }
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')

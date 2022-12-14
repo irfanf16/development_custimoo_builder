@@ -1,19 +1,17 @@
 import { Component, Vue } from 'vue-property-decorator'
-import { getLogoSettingsObject } from '@/helpers/Helpers'
+import {getLogoSettingsObject, getLogoUpdatedProps} from '@/helpers/Helpers'
 
 @Component
 export default class CustomLogosMixin extends Vue{
   public addRemoveTeamLogoOnAllProducts(action = 'add', team_logo: Record<any, any> = {}) {
     const custom_logos = this.$store.getters.getCustomLogos('all')
     if(action == 'add') {
-      const team_logo_obj = { "id": team_logo.id, "url": team_logo.url, "original_logo": team_logo.original_logo_url,
-        "original_logo_url": team_logo.original_logo_url, "transparent_logo": team_logo.transparent_logo,
-        "smart_transparent_logo": team_logo.smart_transparent_logo, "is_smart_transparent": team_logo.is_smart_transparent,
-        is_vector: team_logo.is_vector, logo_name: team_logo.logo_name
-      }
+      const team_logo_obj = getLogoUpdatedProps(team_logo)
       for(const product_id in custom_logos) {
         const product_team_logo = custom_logos[product_id][0]
         if(product_team_logo) {
+          delete product_team_logo.scaleX
+          delete product_team_logo.scaleY
           this.$store.commit('SET_CUSTOM_LOGOS', {
             product_id: product_id, logo_index: 0, custom_logos: {...product_team_logo, ...team_logo_obj}
           })
@@ -35,7 +33,7 @@ export default class CustomLogosMixin extends Vue{
       logo_setting_at_index = {...getLogoSettingsObject(), ...logo_setting_at_index, ...default_values}
       this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: logo_index, custom_logos: logo_setting_at_index})
     }
-    await self.$eventBus.$emit("customLogoRemoved", logo_index, true)
+    await self.$eventBus.$emit("customLogoRemoved", logo_index)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 }

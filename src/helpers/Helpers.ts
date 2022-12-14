@@ -10,12 +10,13 @@ import {http} from "@/httpCommon";
 import {parseInt, findIndex} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
 import {eventBus} from "@/event/eventBus"
+import VueRouter from 'vue-router'
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
     originalWidth: 57, originalHeight: 57, width: 57, height: 57, name_of_placement: "chest", side: "front", x_axis: 300,
     y_axis: 300, is_locked: false, logo_name: null, original_logo: null, transparent_logo: null, smart_transparent_logo: null,
-    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_recent_logo: false,
+    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_replace_success: false,
     logo_index: 0, is_vector: false
   }
   return {...default_obj, ...default_values}
@@ -471,7 +472,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       if(roster_details){
         for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
           const roster_detail = roster_details[roster_index]
-          // console.log('roster_detail', roster_detail)
           const text_object = {
             size: roster_detail.size,
             quantity: roster_detail.quantity,
@@ -561,14 +561,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
                       const boundingBox = path.getBoundingBox()
                       boundingBox.y1 = Math.abs(boundingBox.y1)
-                      const width = boundingBox.x2 - boundingBox.x1
-                      const height = boundingBox.y1 + boundingBox.y2
+                      const width = boundingBox.x2 - boundingBox.x1 + parseInt(custom_text_item.outline_width)
+                      const height = boundingBox.y1 + boundingBox.y2 + parseInt(custom_text_item.outline_width)
                       const svg_string = path.toSVG()
                       const parser = new DOMParser();
                       const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
                       // dom_svg.style.translate = '0px ' + height + 'px'
                       text_item_object.svg_height = height
-                      let transform_height = height;
+                      let transform_height = height - parseInt(custom_text_item.outline_width) / 2; // As Transform needs half of the stroke width to show top and bottom equally of stroke
                       if (custom_text.type == 'name') {
 
                         let minus_height = false;
@@ -587,11 +587,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                         if (minus_height)
                           transform_height -= 15;
                       }
-                      // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
-                      dom_svg.setAttribute('transform', 'translate(-1 ' + transform_height + ')')
+                      dom_svg.setAttribute('transform', 'translate(0 ' + transform_height + ')')
+                      dom_svg.setAttribute('paint-order', 'stroke')
+                      dom_svg.setAttribute('stroke-location', 'outside')
 
                       const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                        '<svg stroke-location="outside" style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                        '<svg stroke-location="outside" paint-order="outside" style="width:100%; height: auto;" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                         'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 
@@ -698,7 +699,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         // front_design:front_design,
         product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,
-        is_private: selected_product.is_private?true:false,
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
       }
@@ -1150,10 +1150,6 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
 
     svg_string += `\n</g>\n</svg>`;
 
-    // console.log( getSVGNumbers(numbers_array));
-
-    // const factory_product:Record<any,any> = await parseFactoryProduct(factory_product_content);
-
     const svg_doc = await getDocFromString(svg_string);
     const production_file_info:Record<any, any> = {
       width: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("width"),
@@ -1555,6 +1551,10 @@ const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
 }
 
+const exitFromEditMode = () => {
+  Store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null })
+}
+
 const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
   let jwtToken = localStorage.getItem('jwtToken')
   if(to.query && to.query.token && jwtToken){
@@ -1598,43 +1598,27 @@ const fetchCustomer = async (jwtToken:string) => {
 
 const setVueVersion = async () => {
   const is_loggedIn = await localStorage.getItem('jwtToken');
-  const is_restored = await localStorage.getItem('is_restored');
   let customer_id = 0;
   if(is_loggedIn) {
     const customer = Store.getters.getCustomer;
     customer_id = customer.id;
   }
-  await http.get('get-reset-store?customer_id='+customer_id)
-    .then(async (res) =>{
-      if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
-        if(is_loggedIn && res.data.isCustomerStoreReset <= 0){
-          console.log('logged in');
-          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).catch(error => {
-            handleResponseException(error)
-            console.info("error while setting reset store", error)
-          });
-          if(is_restored != 'yes')
-            await restore();
-        }else if(is_loggedIn == null && is_restored != 'yes') {
-          console.log('not logged in and not restored');
-          await restore();
-        }else{
-          console.log('none')
-        }
+  await http.get('get-reset-store?customer_id='+customer_id).then((res) => {
+    if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
+      if(is_loggedIn && res.data.isCustomerStoreReset == 0){
+        http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).then(() => {
+          restore();
+        })
       }
-    })
-    .catch(error => {
-      handleResponseException(error)
-      console.info("error while getting company", error)
-    });
+    }
+  })
 }
 
 async function restore(){
-  await localStorage.setItem('is_restored', 'yes');
   await Store.dispatch('resetStore');
-  console.log('restored');
-  //location.reload()
-  return
+  setTimeout(() => {
+    location.reload()
+  }, 2500)
 }
 
 const getProductColors = (product_id = null, append_locker_colors = true ) => {
@@ -1757,7 +1741,8 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
     category_index: category_index,
     category_id: category_id,
     customized: Store.getters.getCustomized,
-    personalized: Store.getters.getPersonalized
+    personalized: Store.getters.getPersonalized,
+    private_product: Store.getters.getPrivateProduct,
   }
 }
 
@@ -1797,8 +1782,22 @@ const setDefaultColors = () => {
   Store.commit('SET_DEFAULT_COLORS', default_colors_object)
 }
 
-const getVectorExtensions = () => {
-  return ['svg', 'pdf', 'ai', 'eps', 'tiff']
+const getExtensionsFor = (type = '') => {
+  const type_extensions = {
+    raster: ['jpg','gif','png','jpeg'],
+    vector: ['svg', 'pdf', 'ai', 'eps', 'tiff']
+  }
+  if(type) {
+    return type_extensions[type]
+  } else {
+    return [...type_extensions['raster'], ...type_extensions['vector']]
+  }
+}
+
+const validateLogoType = (type: string, file_name:string) => {
+  const type_extensions = getExtensionsFor(type)
+  const file_extension = getExtensionFromString(file_name)
+  return type_extensions.includes(file_extension)
 }
 
 const getExtensionFromString = (string: string) => {
@@ -1808,6 +1807,76 @@ const getExtensionFromString = (string: string) => {
   }
   return extension
 }
+
+const getUrlParameter = (name = '') => {
+  if(name) {
+    const url = window.parent.window.location.href
+    name = name.replace(/[[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  }
+  const hash_url = window.parent.window.location.hash
+  return hash_url.replace('#/', '')
+}
+
+const routerPush = (router, route_name) => {
+  const router_url = router.resolve({name: route_name})
+  if(router_url) {
+    window.parent.window.location.hash = router_url.href;
+  }
+}
+
+const showError = (err) => {
+  if (typeof err === 'string') {
+    VsToast.show({
+      title: err,
+      variant: 'error',
+      timeout: 5000,
+      position: "bottom-left"
+    });
+  } else {
+    const errors = err.response.data.errors;
+    const errArr: string[] = [];
+    Object.keys(errors).map((field) => {
+      errArr.push(errors[field][0]);
+    });
+    errArr.forEach(element => {
+      VsToast.show({
+        title: element,
+        variant: 'error',
+        duration: 5000,
+        position: 'bottom-left'
+      });
+    })
+  }
+}
+
+const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
+  return {
+    id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
+    transparent_logo: updated_logo.transparent_logo_url, smart_transparent_logo: updated_logo.smart_transparent_logo_url,
+    is_smart_transparent: updated_logo.is_smart_transparent ? true : false, is_vector: updated_logo.is_vector ? true : false,
+    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success ? true : false
+  }
+}
+
+const getSantaModalConfig = () => {
+  /*
+  * icon = {success, error, info}
+  * */
+  return {
+    name: 'santa-confirm-modal', icon: 'success', title: '', text: 'This is default text', confirm_text: 'Ok', cancel_text: null,
+    click_to_close: false
+  }
+}
+
+const getDomDocument = (vue_component) => {
+  return vue_component.$root.$options.shadowRoot ? vue_component.$root.$options.shadowRoot : document;
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1816,7 +1885,8 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData, rosterDetailsInit, initCustomLogosNew,
-  getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getImageFromCanvas, getDefaultColorsObject, setDefaultColors,
-  getVectorExtensions, getExtensionFromString
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
+  rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
+  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
+  routerPush, getSantaModalConfig, getDomDocument
 };

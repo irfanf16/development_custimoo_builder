@@ -7,7 +7,13 @@ Vue.use(Vue2TouchEvents);
 
 import VModal from 'vue-js-modal'
 import 'vue-js-modal/dist/styles.css'
+import vSelect from "vue-select";
+import 'vue-select/dist/vue-select.css';
+
+
 Vue.use(VModal, {})
+
+Vue.component("v-select", vSelect);
 
 // Vue.directive('tooltip', VTooltip)
 // Vue.directive('close-popover', VClosePopover)
@@ -96,6 +102,9 @@ Vue.prototype.$logData = logData;
 
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+
+import SantaModal from "@/plugins/santaModal/SantaModal.js";
+Vue.use(SantaModal)
 
 Vue.use(VueSweetalert2);
 new Vue({

@@ -257,11 +257,12 @@ import ModalAction from "@/mixins/ModalAction";
                 this.hideVModal('add-to-lockerroom');
                 this.showLoader = false
               } else {
-                if(!this.$store.getters.getIsShareDesign){
-                  this.$emit('open-locker-room', this.tabIndex);
-                }else{
-                  this.hideVModal('add-to-lockerroom');
-                }
+                // if(!this.$store.getters.getIsShareDesign){
+                //   this.$emit('open-locker-room', this.tabIndex);
+                // }else{
+                //   this.hideVModal('add-to-lockerroom');
+                // }
+                this.hideVModal('add-to-lockerroom');
               }
           }else{
             //as the exception has been caught above so here we just need to return if there is any error in api response

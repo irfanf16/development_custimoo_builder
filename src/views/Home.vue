@@ -8,7 +8,7 @@
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
-                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
+                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" @adjustTotalTabs="adjustTotalTabs"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                         @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
@@ -74,10 +74,13 @@
                         </Popper>
                       </template>
                     </template>
+
                     <template v-if="isCustomerAuthenticated">
                       <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
                       <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
                     </template>
+                    <b-button v-else @click="setActionBeforeLogin('generatePdf')"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
+
                     <template v-if="getProductEditInfoObject.type == 'order_product'">
                       <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
                                 v-if="getProductEditInfoObject.order_product_info.order_products.active_index != 0">Previous</b-button>
@@ -99,14 +102,12 @@
                     <li class="d-flex flex-wrap align-items-center">
                       <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
                       <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated && company.platform == 'self'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
-                      <a style="margin-left:6px" :href="company.login_code.logout_action"  v-if="isCustomerAuthenticated && company.platform == 'cdnExceptLogin' && company.login_code.logout_type == 'url'"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></a>
-
+                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
                     </li>
                     <li><a>
                       <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
                     </a></li>
-                    <li v-if="isCustomerAuthenticated">
+                    <li v-if="isCustomerAuthenticated && false">
                       <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
                       <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
                         <template v-for="(notification, ind) in notifications" >
@@ -134,10 +135,10 @@
                 <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
                   <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
                   <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
-                  <b-button variant="outline-secondary" :class="{'pulse-animation': isColorShuffled}" v-if="usingColorLogos && imageColors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
+                  <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
                 <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
-                <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+                <LockerRoomModal  :mainTotalTabs="mainTotalTabs" @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                 <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
                 <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
@@ -207,7 +208,7 @@
                       <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
                       <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
                       <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                      <b-dropdown-item v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin')"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
+                      <b-dropdown-item v-if="isCustomerAuthenticated"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
                     </b-dropdown>
                   </div>
                 </div>
@@ -219,18 +220,19 @@
                 <div class="twoD-view">
                   <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
                     <template v-if="selectedProduct.productstyles[styleIndex]" >
-                      <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
-                        <div v-if="design.design_show == 1" class="image-holder" ref="scene-holder" :key="'front'+design.id">
+                      <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
+                        <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
                                  modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                                 :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
+                                 :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                 modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                  :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
 
                           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
                                  modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
@@ -247,7 +249,7 @@
                   <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">
                     <template v-if="isCustomerAuthenticated">
                       <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <b-button v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" :disabled="canvasImage.scene == null">
+                        <b-button v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart(null)" :disabled="canvasImage.scene == null">
                           Update Cart
                         </b-button>
                         <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -255,7 +257,7 @@
                         </b-button>
                       </template>
                     </template>
-                    <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel">Cancel</b-button>
+                    <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel" v-if="!cartLoading">Cancel</b-button>
                   </template>
 
                   <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
@@ -266,7 +268,6 @@
                     </b-button>
 
                     <template v-else-if="isCustomerAuthenticated">
-
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                           <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
@@ -275,12 +276,13 @@
                                 Add to Cart
                               </b-button>
                             </span>
-                            <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+
+                            <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                               <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                                 Finalize Design
                               </b-button>
                             </span>
-                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart">
+                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart(null)">
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
@@ -289,20 +291,26 @@
                           </template>
                          </template>
                       </template>
-
                     </template>
+
+                    <span v-else-if="notVectorLogosCount > 0 && isRosterOpened">
+                      <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+                        Finalize Design
+                      </b-button>
+                    </span>
+
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
                         <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
                           <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
                         </span>
-                        <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+                      </template>
+                      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                           <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                             Finalize Design
                           </b-button>
                         </span>
-                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                      </template>
                      </template>
                   </template>
 
@@ -310,7 +318,7 @@
                 </div>
               </div>
             </div>
-            <ReplaceLogos />
+            <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink(lockerProductIndex)"/>
             <div class="sideNav" v-if="mobileScreen">
               <ul>
                 <li v-if="selectedProduct.is_logo_allowed">
@@ -351,28 +359,9 @@
           </div>
 
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
-            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen" @hideAll="hideAll"
-                             :categories="categories" @retrieveProducts="retrieveProducts" v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
-<!--            mobile view code-->
-<!--            <div class="customize_controls" :class="{'other_tab': showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && mobileScreen">-->
-<!--              <span class="close minimizer" @click="this.hideAll" title="Minimize"><b-icon-dash /></span>-->
-<!--              <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>-->
-
-<!--              <div>-->
-<!--                <LogoUploader @switchTabs="switchTabs" @ @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>-->
-<!--              </div>-->
-<!--            </div>-->
-<!--            <div v-else-if="mobileScreen" class="open-logo-uploader customize_controls">-->
-<!--              <span class="fs-3 font-weight-bold d-inline-flex pb-1">Logo Uploader</span>-->
-<!--              <span @click="switchTabs(0, true)" class="maximizer close">-->
-<!--              <svg height="1em" width="1em" fill="currentColor" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"-->
-<!--                   viewBox="0 0 16 16">-->
-<!--                <polygon points="0,11.8 0,0 11.8,0 "/>-->
-<!--                <polygon points="16,4.3 16,16 4.3,16 "/>-->
-<!--              </svg>-->
-<!--            </span>-->
-<!--            </div>-->
-<!--            mobile view code end-->
+            <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen"
+                             @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" @setRosterOpen="setRosterOpen"
+                             v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
           </b-col>
         </template>
       </b-row>
@@ -417,7 +406,7 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject
+  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject, getUrlParameter, setDefaultColors
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -426,7 +415,7 @@ import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import {filter, findIndex} from 'lodash'
 import opentype from 'opentype.js'
-import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import { FetchCategories, HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 import Store from "@/store";
 
 Vue.filter('formatDate', function(value:string) {
@@ -459,7 +448,6 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     let self: Record<any, any> = this;
-    await this.adjustTotalTabs();
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
     /*
@@ -474,7 +462,10 @@ Vue.filter('formatDate', function(value:string) {
       await this.initProductsFonts(products, resolve)
     })
 
-    this.is_shared_product = this.$route.params.name ?  true : false
+    const shared_url = getUrlParameter()
+    if (shared_url?.includes('share')) {
+      this.is_shared_product = true
+    }
 
     await http.get(`/get-settings`).then((res) => {
       this.$store.commit('SET_SETTING', res.data.result.settings)
@@ -501,48 +492,52 @@ Vue.filter('formatDate', function(value:string) {
     if(sync_id) {
       await resetLastActiveProductData()
     }
-    await this.$store.dispatch('setCategories', {
-      query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}&private=${last_active_product_obj.private_product}`
-    })
-    let query_params = await this.setQueryParams()
-    await this.retrieveProducts(query_params)
-    this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
-    this.jwtToken = localStorage.getItem('jwtToken') as string
-    // await this.$store.dispatch('setJwtToken')
-    if(!localStorage.getItem('browserToken')){
-      await this.$store.dispatch('setBrowserToken')
-    }
-
-    if (this.isCustomerAuthenticated){
-      await this.$store.dispatch('getNotifications')
-      await  getPermissions()
-      let show_cart = await this.$store.getters.getShowCart
-      if(show_cart){
-        this.showVModal('cart-modal');
+    // await this.$store.dispatch('setCategories', {
+    //   query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}&private=${last_active_product_obj.private_product}`
+    // })
+    const categories_promise = this.fetchCategories();
+    categories_promise.then(async (response) => {
+      let query_params = await this.setQueryParams()
+      await this.retrieveProducts(query_params)
+      this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
+      this.jwtToken = localStorage.getItem('jwtToken') as string
+      // await this.$store.dispatch('setJwtToken')
+      if(!localStorage.getItem('browserToken')){
+        await this.$store.dispatch('setBrowserToken')
       }
-      this.prevRoute = null
-    }else{
 
-      if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
-        setTimeout( () => {
-         this.gotoLogin();
-        },5000)
-       }
+      if (this.isCustomerAuthenticated){
+        await this.$store.dispatch('getNotifications')
+        await  getPermissions()
+        let show_cart = await this.$store.getters.getShowCart
+        if(show_cart){
+          this.showVModal('cart-modal');
+        }
+        this.prevRoute = null
+      }else{
 
-    }
+        if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
+          setTimeout( () => {
+            this.gotoLogin();
+          },5000)
+        }
 
-    if(this.$route.query.tabIdx){
-      this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
-    }
-    await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
-      await this.getLockers(false,false,resolve);
-    })
-    await this.$eventBus.$on('updateCart', async (resolve: any) => {
-      await this.addToCart(resolve);
-    })
-    await this.$eventBus.$on('updateOrder', async (resolve: any) => {
-      await this.UpdateOrderProducts(false,false,resolve);
-    })
+      }
+
+      if(this.$route.query.tabIdx){
+        this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
+      }
+    });
+
+      await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
+        await this.getLockers(false,false,resolve);
+      })
+      await this.$eventBus.$on('updateCart', async (resolve: any) => {
+        await this.addToCart(resolve);
+      })
+      await this.$eventBus.$on('updateOrder', async (resolve: any) => {
+        await this.UpdateOrderProducts(false,false,resolve);
+      });
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {
@@ -555,7 +550,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
-  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode) {
+  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories) {
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
@@ -625,6 +620,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   ]
   public is_shared_product = false;
   public is_admin_token = localStorage.getItem('adminToken');
+  public pulse_info: Record<any, any> = {
+    use_original_colors: true, shuffle: true, use_logo_colors: true
+  }
 
   private setRosterOpen(val: boolean) {
     this.isRosterOpened = val
@@ -644,6 +642,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo();
+  }
+
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }
@@ -661,10 +663,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getLockerTabsIndex
   }
 
-  get usingColorLogos(): [Record<any, any>] {
-    return this.$store.getters.getUsingColorLogos;
-  }
-
   get productLockerId(): number {
     return this.$store.getters.getProductLockerId;
   }
@@ -677,20 +675,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.showOtherTab = value
   }
 
-  private adjustTotalTabs() {
-    this.mainTotalTabs = 3
-
-    if (!this.selectedProduct.is_logo_allowed) {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
-
-    if (!this.selectedProduct.allow_name_number) {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
-
-    if (this.selectedProduct.product_type === 'personalized') {
-      this.mainTotalTabs = (this.mainTotalTabs - 1)
-    }
+  public adjustTotalTabs(totalTabs: number) {
+    this.mainTotalTabs = totalTabs
   }
 
   private swapSide(textIndex: number) {
@@ -750,8 +736,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.hideOtherTab()
       self.$store.dispatch('setActiveTab', ind);
     } else {
-      // console.log(ind, isHome)
-
       this.hideOtherTab()
       if ($(".sideNav li a").length) {
         customizer_tabs = $(".sideNav li a")
@@ -902,6 +886,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
       })
       non_vector_logos_count = non_vector_logos.length
+      if(non_vector_logos.length == 0){
+        setTimeout(()=>{
+          this.hideVModal('replace-logo');
+          this.hideVModal('rostermodal');
+        }, 3000)
+      }
     }
     return non_vector_logos_count
   }
@@ -1107,20 +1097,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.buyNow()
     } else if (this.actionBeforeLogin == 'addToCart') {
       this.isRosterOpened = true;
-      this.addToCart()
+      this.addToCart(null)
     } else if (this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
+    } else if (this.actionBeforeLogin == 'generatePdf') {
+      this.generatePdf()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
   }
 
   private async addToCart(resolve:any=null) {
-    await this.addToCartMixin(this.products_fonts);
+    await this.addToCartMixin(this.products_fonts,resolve);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       this.showVModal('cart-modal')
-    }
-    if(resolve){
-      resolve(true);
     }
   }
 
@@ -1207,9 +1196,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  private cancelEdit() {
+  private async  cancelEdit() {
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
-    this.retrieveProducts();
+    const categories_promise = this.fetchCategories();
+    categories_promise.then(() => {
+      this.retrieveProducts();
+    });
   }
 
   public async getLockers(share_url = false, show_add_to_locker_modal = false,resolve:any = null){
@@ -1279,11 +1271,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }).catch(async errorResponse => {
         handleResponseException(errorResponse)
         self.exitFromEditMode();
-        let query_params = await self.setQueryParams()
-        self.retrieveProducts(query_params)
-        if(resolve){
-          resolve(false);
-        }
+        const categories_promise = this.fetchCategories();
+        categories_promise.then(async (response)=> {
+          let query_params = await self.setQueryParams()
+          self.retrieveProducts(query_params)
+          if(resolve){
+            resolve(false);
+          }
+        })
+
       })
     }
   }
@@ -1334,6 +1330,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await this.$store.dispatch('logoutCustomer');
       this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
+      if(this.company.platform != 'self') {
+        if (this.company.login_code.logout_type == 'url') {
+          window.location.href = this.company.login_code.logout_action
+        } else {
+          eval(this.company.login_code.logout_action)
+        }
+      }
     }
   }
 
@@ -1369,7 +1372,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
           }
         }
-        // console.log("modal opens from here")
         this.showVModal('locker-modal')
 
         if (this.ref.saveToLockerModal) {
@@ -1411,34 +1413,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   shuffleLogoColors() {
-    this.isColorShuffled = false
-    if (this.imageColors.length > 1) {
-      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
-      let imageColors = JSON.parse(JSON.stringify(this.imageColors)).filter((imageColor: Record<any, any>) => {
-        return imageColor.hex
-      })
-
-      let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
-        if (currentIndex !== 1) return previousValue;
-
-        array.sort(() => Math.random() - 0.5)
-        return array;
-      }
-
-      while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
-        imageColors.reduce(shuffle)
-      }
-
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-      imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-        this.$store.dispatch('setDefaultColor', {
-          index: index,
-          color: imageColor.hex,
-          pantone: imageColor.pantone,
-          name: imageColor.name
-        })
-      })
-    }
+    let self: Record<any, any> = this
+    this.pulse_info.shuffle = false
+    const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
+    this.logoColorsInfo.colors = shuffled
+    this.logoColorsInfo.is_shuffled = true
+    setDefaultColors()
+    self.$eventBus.$emit('changeDefaultColors')
   }
 
   public rollbackPreviousColors(): void {
@@ -1470,37 +1451,47 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public async resetStore() {
     const self: Record<any, any> = this;
 
-    const response = await this.editModeConfirmation();
+    const editConfirmation = this.editModeConfirmation();
+    editConfirmation.then(async (response) => {
+      const ok = await this.ref['reset-changes'].showConfirm()
+      if (ok) {
+        this.$store.commit('RESET_LAST_ACTIVE_DATA')
+        const categories_promise = this.fetchCategories();
+        categories_promise.then(async (response) => {
+          if (response) {
+            await this.exitFromEditMode()
+            this.hideLockerProductUpdateButton()
+            this.updateOrderItemProducts = null;
+            await self.$eventBus.$emit('useProductOriginalColors')
+            await this.$store.dispatch('resetStore')
+            this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
+            await self.$eventBus.$emit('resetTextsCanvas')
+            await self.$eventBus.$emit('resetLogosCanvas')
+            await this.$store.dispatch('setTabMain', {value: 0});
+            (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+            await this.$store.dispatch('SET_LOGO_COLORS', [])
+            await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+            await this.$store.dispatch("setProductsRosters")
+            let query_params = await this.setQueryParams()
+            await this.retrieveProducts(query_params)
+            if (this.mobileScreen) {
+              this.showDesign()
+              this.switchTabs(0, true)
+            }
 
-    const ok = await this.ref['reset-changes'].showConfirm()
-
-    if (ok) {
-      this.$store.commit('RESET_LAST_ACTIVE_DATA')
-      this.$store.dispatch('setCategories', {
-        query_params: `customized=1&personalized=0&private=0`
-      })
-      await this.exitFromEditMode()
-      this.hideLockerProductUpdateButton()
-      this.updateOrderItemProducts = null;
-      await self.$eventBus.$emit('useProductOriginalColors')
-      await this.$store.dispatch('resetStore')
-      this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
-      await self.$eventBus.$emit('resetTextsCanvas')
-      await self.$eventBus.$emit('resetLogosCanvas')
-      await this.$store.dispatch('setTabMain',{value: 0});
-      (this.$refs['ItemToCustomize'] as Record<any,any>).setSliderIndex();
-      await this.$store.dispatch('SET_LOGO_COLORS', [])
-      await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-      await this.$store.dispatch("setProductsRosters")
-      await this.retrieveProducts()
-    }
-
-    if (this.mobileScreen) {
-      this.showDesign()
-      this.switchTabs(0, true)
-    }
-
-    this.isRosterOpened = false
+            this.isRosterOpened = false
+          }
+        })
+      } else {
+        if (response === true || response === false) {
+          const categories_promise = this.fetchCategories();
+          categories_promise.then(async (response) => {
+            let query_params = await this.setQueryParams()
+            await this.retrieveProducts(query_params)
+          });
+        }
+      }
+    })
   }
 
   get hideColorSection() {
@@ -1521,20 +1512,25 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self: Record<any, any> = this;
     // await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
     // await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-    let query_params = await this.setQueryParams()
-    await this.retrieveProducts(query_params);
-    if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
-      await this.showVModal('cart-modal')
-    } else if (this.company.platform === 'wordpress' && !this.isCollectionView) {
-      window.location.href = this.company.company_domain + '/cart'
-    }
+    const categories_promise = this.fetchCategories();
+    categories_promise.then(async (response) => {
+      if(response){
+        let query_params = await this.setQueryParams()
+        await this.retrieveProducts(query_params);
+        if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
+          await this.showVModal('cart-modal')
+        } else if (this.company.platform === 'wordpress' && !this.isCollectionView) {
+          window.location.href = this.company.company_domain + '/cart'
+        }
+      }
+    })
+
   }
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
     let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&private=${this.$store.getters.getPrivateProduct}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
-
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
       if (url_obj.searchParams.has(query_param_array[0])) {
@@ -1544,7 +1540,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       }
     })
     url = url_obj.pathname + url_obj.search;
-
     http.get(url).then(async (response: Record<any, any>) => {
       if (response.data.products.data.length > 0) {
         const validate_data = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
@@ -1560,13 +1555,26 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             self.showLoader = false;
             await self.$store.dispatch('setSearchLoader', false)
           }
-          await self.retrieveProducts()
+          this.exitFromEditMode();
+          resetLastActiveProductData();
+          const categories_promise = this.fetchCategories('customized');
+          categories_promise.then(async (response) => {
+            await self.retrieveProducts()
+            await self.$store.dispatch('setSearchLoader', false)
+          });
           return false;
         }
       } else {
         this.showError("No Product Found")
         self.showLoader = false
-        await self.$store.dispatch('setSearchLoader', false)
+        this.exitFromEditMode();
+        resetLastActiveProductData();
+        const categories_promise = this.fetchCategories('customized');
+        categories_promise.then(async (response) => {
+          await self.retrieveProducts()
+          await self.$store.dispatch('setSearchLoader', false)
+        });
+
       }
     }, (error) => {
       console.error("Error while getting order detail", error?.response?.data?.message)
@@ -1601,7 +1609,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       `activity_id=${this.$route.query.activity_id}`, 'active_product_type=order_product', `update_order_product_id=${next_prev_product_id}`
     ];
     self.showLoader = true;
-    await self.retrieveProducts(query_params);
+    const categories_promise = this.fetchCategories();
+    categories_promise.then(async (response) => {
+      if(response){
+        await self.retrieveProducts(query_params);
+      }
+    });
   }
 
   async UpdateOrderProducts(resolve:any= null) {

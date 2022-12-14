@@ -73,7 +73,6 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
       }
 
       public homeScreen() {
-          // console.log(this.$store.getters.getMainTab);
         this.$router.push('/')
 
         if(this.manageComponents.mobileScreen){

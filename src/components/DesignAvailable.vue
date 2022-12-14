@@ -11,7 +11,7 @@
                  :logos="selectedProduct.productstyles[styleIndex].logo"
                  :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                  :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
-                 :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
+                 :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
         </a>
         <h3>{{ design.design_name }}</h3>
       </div>
@@ -55,6 +55,9 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
+  get selected_product_id(): number{
+    return this.$store.getters.getSelectedProductId
+  }
   get selectedProductIndex(): number{
     return this.$store.getters.getSelectedIndex
   }
@@ -89,8 +92,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
     })
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     this.$store.dispatch('setActiveTab', -1)
-    this.$store.commit('SET_SUFFLE', false)
-    console.log(self.styleIndex, ' style index design index ', index)
+    this.$store.commit('SET_SHUFFLE', false)
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
       if (index == key) {
         Vue.set(design, 'design_show', 1)

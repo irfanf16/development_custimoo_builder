@@ -1,3 +1,4 @@
+<script src="../mixins/LockerProduct.ts"></script>
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
     <Navbar />
@@ -97,6 +98,9 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.use(VueSweetalert2);
 
+import SantaModal from "@/plugins/santaModal/SantaModal.js";
+Vue.use(SantaModal)
+
 // import Echo from "laravel-echo";
 // window.io = require('socket.io-client');
 // window.Echo = new Echo({
@@ -110,12 +114,12 @@ Vue.use(VueSweetalert2);
 //   },
 // });
 
-import {getCompany, getPermissions} from "@/helpers/Helpers"
-import { authenticateUser } from '../helpers/Helpers'
+import CommonImportMixin from '../mixins/CommonImportMixin'
+
 export default {
   store, router,
   name: "Customizer",
-  mixins: [LockerProducts],
+  mixins: [LockerProducts, CommonImportMixin],
   computed: {
     isCustomerAuthenticated: function() {
       return this.$store.getters.isCustomerAuthenticated
@@ -132,7 +136,6 @@ export default {
     }
   },
   mounted: async function() {
-    await getCompany();
 
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
     let ele = window.parent.document.getElementById('e88d412d-dfc3-4628-910b-8c0d7237a371')?.querySelector('[data-ux="Container"]')
@@ -149,7 +152,6 @@ export default {
       ubuntu_font.append = '@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap")'
       document.head.append(ubuntu_font)
     }
-    await getCompany();
 
     // This will only work on your root Vue component since it's using $parent
     const { shadowRoot } = this.$parent.$options
@@ -162,38 +164,10 @@ export default {
       shadowRoot.appendChild(faStyles)
     }
 
-    // const token = this.$router.currentRoute.query.token
-    const token = this.getParameterByName('token')
-    if (token){
-      localStorage.setItem('jwtToken', token)
-      localStorage.setItem('adminToken', token)
-      await authenticateUser(token)
-      await this.$store.dispatch('resetStore')
-      await this.$router.push({name: 'Home'})
-    } else{
-      let storageInterval = setInterval(()=>{
-        let jwtToken = localStorage.getItem('jwtToken');
-        if(jwtToken && jwtToken !=''){
-          authenticateUser(jwtToken)
-          clearInterval(storageInterval);
-        }
-      }, 500)
-    }
-
     // const customer =  this.$store.getters.getCustomer;
     // window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
     //   this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     // })
-  },
-  methods:{
-    getParameterByName(name, url = window.location.href) {
-      name = name.replace(/[[\]]/g, '\\$&');
-      let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-        results = regex.exec(url);
-      if (!results) return null;
-      if (!results[2]) return '';
-      return decodeURIComponent(results[2].replace(/\+/g, ' '));
-    }
   }
 }
 </script>

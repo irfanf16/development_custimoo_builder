@@ -17,9 +17,12 @@ import {
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
+import {eventBus} from "@/event/eventBus";
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
+    personalized_count: 0 ,
+    customized_count:0,
     private_product_count:0,
     searchLoader: false,
     showLoader:true,
@@ -203,6 +206,12 @@ const ProductAttributes:Module<any, any> = {
     SET_STOCK_COUNT(state:Record<any,any>, payload:number){
       state.stock_count = payload;
     },
+    SET_PERSONALIZED_COUNT(state:Record<any,any>, payload:number){
+      state.personalized_count = payload;
+    },
+    SET_CUSTOMIZED_COUNT(state:Record<any,any>, payload:number){
+      state.customized_count = payload;
+    },
     SET_PRIVATE_PRODUCT_COUNT(state:Record<any,any>, payload:number){
       state.private_product_count = payload;
     },
@@ -287,14 +296,16 @@ const ProductAttributes:Module<any, any> = {
       }
       else {
         const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
-        const custom_logo_index = payload.logo_index
-        let product_custom_logos = state.customLogos[product_id]
+        const custom_logo_index = payload.custom_logo_index
+        const product_custom_logos = state.customLogos[product_id]
         if(custom_logo_index >= 0) {
-          let product_custom_logo = product_custom_logos[custom_logo_index]
-          product_custom_logo = {...product_custom_logo, ...payload.data}
+          const product_custom_logo = product_custom_logos[custom_logo_index]
+          state.customLogos[product_id][custom_logo_index] = {...product_custom_logo, ...payload.data}
         }
         else {
-          product_custom_logos = payload.data
+          const custom_logos: Record<any,any> = state.customLogos[product_id];
+          state.customLogos[product_id] = {...custom_logos, ...payload.data}
+
         }
       }
     },
@@ -628,10 +639,14 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        const index = color.index
+        // const index = color.index
+        const index = state.svgGroups.findIndex((svgGroup) => { return svgGroup.id === color.id  });
         delete color.index
-        color = {...state.svgGroups[index], ...color}
-        Vue.set(state.svgGroups, index, color)
+        if(index >= 0){
+          color = {...state.svgGroups[index], ...color}
+          Vue.set(state.svgGroups, index, color)
+        }
+
       }
     },
     updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){
@@ -780,6 +795,7 @@ const ProductAttributes:Module<any, any> = {
       state.customLogoObjects = [];
       state.customLogos = {};
       await initCustomLogosNew(state.products)
+      eventBus.$emit('set-logo-tab-index')
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
@@ -889,7 +905,7 @@ const ProductAttributes:Module<any, any> = {
     SET_ACTIVE_TAB(state:Record<any, any>, payload){
       state.activeTab = payload
     },
-    SET_SUFFLE(state:Record<any, any>, payload) {
+    SET_SHUFFLE(state:Record<any, any>, payload) {
       state.showShuffle = payload
     },
     UPDATE_USING_COLOR_LOGOS(state:Record<any, any>, payload: boolean){
@@ -1315,6 +1331,12 @@ const ProductAttributes:Module<any, any> = {
     getPrivateProductCount(state:Record<any,any>){
       return state.private_product_count;
     },
+    getPersonalizedCount(state:Record<any,any>){
+      return state.personalized_count;
+    },
+    getCustomizedCount(state:Record<any,any>){
+      return state.customized_count;
+    },
     getHideSaveLockerButton(state:Record<any,any>){
       return state.hideSaveLockerButton;
     },
@@ -1378,13 +1400,23 @@ const ProductAttributes:Module<any, any> = {
       if(payload && 'query_params' in payload) {
         url += `?${payload.query_params}`
       }
-      const response = await http.get(url).catch((e: any) => {
-        console.error('error while getting categories',e)
-      });
-      if(response) {
-        await commit('categories', response.data)
-      }
-
+      return new Promise((resolve, reject) => {
+        http.get(url).then( async (response: Record<any,any>) => {
+          if(response) {
+            await commit('categories', response.data.data)
+            await commit('SET_PRIVATE_PRODUCT', response.data.private_product);
+            await commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
+            await commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: response.data.personalized})
+            await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
+            await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
+            await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
+            resolve(response.data.no_product_found);
+          }
+        }).catch((e: any) => {
+          console.error('error while getting categories',e)
+          reject(false);
+        });
+      })
     },
     setCustomLogos({commit}, payload){
       commit('customLogos', payload)
@@ -1451,6 +1483,12 @@ const ProductAttributes:Module<any, any> = {
     },
     setStockCount({commit},payload){
       commit('SET_STOCK_COUNT',payload);
+    },
+    setCustomizedCount({commit},payload){
+      commit('SET_CUSTOMIZED_COUNT',payload);
+    },
+    setPersonalizedCount({commit},payload){
+      commit('SET_PERSONALIZED_COUNT',payload);
     },
     setPrivateProductCount({commit},payload){
       commit('SET_PRIVATE_PRODUCT_COUNT',payload);

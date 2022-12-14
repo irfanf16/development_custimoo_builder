@@ -1,28 +1,13 @@
 <template>
   <div class="h-100">
     <div class="customization-tabs" :class="{'is-mobile': mobileScreen}">
-      <b-tabs v-model="tabIndex" :key="selectedProduct.allow_name_number">
+      <b-tabs ref="customization-tabs" v-model="tabIndex" :key="selectedProduct.allow_name_number">
         <div class="myscroll" ref="myscroll">
-<!--          <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
-            <button @click="setHideTab('logoHide', !hideTab.logoHide)" class="tab-close-btn d-lg-none"></button>
-            <template #title>
-              <a @click="setHideTab('logoHide', true)" >
-                <span class="icon-holder">
-                  <font-awesome-icon style="size: 1em" :icon="['fas', 'image']"/>
-                </span>
-                Logo
-              </a>
-            </template>
-            <div class="logo-placement-tabs" v-if="hideTab.logoHide">
-              <LogoPlacementTabs @setColorShuffled="(val) => $emit('setColorShuffled', val)" :isColorShuffled="isColorShuffled" v-if="Object.keys(customLogos).length > 0" :numberOfLogosAllowed="selectedProduct.allowed_logos_count"
-                                 :logosSetting="selectedProduct.logos_setting"/>
-            </div>
-          </b-tab>-->
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
-                <span :class="{'no-vector-logos': vectorImageConstraint?non_vector_logos_count > 0 : false }">
-                  <span v-if="vectorImageConstraint?non_vector_logos_count > 0:false" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order!`" class="logos-error">
+                <span :class="{'no-vector-logos': vectorImageConstraint? non_vector_logos_count > 0 : false }">
+                  <span v-if="vectorImageConstraint? non_vector_logos_count > 0 : false" v-b-tooltip="`Logo uploaded are not in vector format`" class="logos-error">
                     <b-icon-exclamation-circle-fill />
                   </span>
                   <span class="icon-holder">
@@ -68,7 +53,7 @@
               </a>
             </template>
             <div class="d-none d-lg-block">
-                <CustomizationText :customTextIndex="customTextIndex" />
+                <CustomizationText :customTextIndex="customTextIndex" :productColors="productColors" :key="selectedProduct.id" />
             </div>
 <!--            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">-->
 <!--              <b-tabs>-->
@@ -157,6 +142,8 @@ import {filter} from "lodash"
     this.productColorsManipulation()
     this.fontsColorsManipulation()
     this.fontsList()
+    const self: Record<any, any> = this;
+    self.$eventBus.$on("setTotalTabs", this.setTotalTabs)
   },
 })
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
@@ -292,6 +279,10 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     this.productColorsManipulation()
   }
 
+  public setTotalTabs() {
+    this.$emit('adjustTotalTabs', (this.$refs['customization-tabs'] as Record<any, any>)?.getTabs().length-2)
+  }
+
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
   }
@@ -424,7 +415,8 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     let non_vector_logos_count = 0
     if(custom_logos && custom_logos.length > 0) {
       const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
-        return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+        // return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+        return custom_logo.is_vector == false
       })
       non_vector_logos_count = non_vector_logos.length
     }

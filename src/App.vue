@@ -16,11 +16,7 @@ import {LockerProducts} from "@/mixins/LockerProduct";
 // window.io = require('socket.io-client');
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-
-import {authenticateUser, getCompany, getPermissions, processColorsCustom} from '@/helpers/Helpers'
-import store from "@/store";
-import {i18n} from '@/i18n';
-import Gleap from 'gleap'
+import CommonImportMixin from '@/mixins/CommonImportMixin'
 
 // console.log(localStorage.getItem('access_tokens'))
 // if(process.env.VUE_APP_ENABLE_SOCKET == undefined) {
@@ -47,38 +43,8 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
     Header,
     Navbar
   },
+  mixins: [CommonImportMixin],
   async mounted() {
-    let elem = document.createElement('link');
-    elem.rel = ' stylesheet'
-    elem.type = 'text/css';
-    elem.href= 'https://cdn.custimoo.com/gulip/gulip.min.css';//Link of the css file
-    document.head.appendChild(elem);
-
-    if(process.env.NODE_ENV === 'production') {
-      window.addEventListener('keydown', (e) => {
-        if ((e.altKey === true || e.metaKey === true) && (e.key === 'u' ||  e.key === 'U')) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      });
-      window.addEventListener('touchstart', (e) => {
-        if(e.touches.length > 2) {
-          Gleap.startFeedbackFlow("bugreporting")
-        }
-      })
-    }
-    await getCompany().then(function (){
-      const current_locale = i18n.locale;
-      i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
-    });
-    // const token = this.$router.currentRoute.query.token as string
-    const token = this.getParameterByName('token');
-    if (token){
-      localStorage.setItem('jwtToken', token)
-      localStorage.setItem('adminToken', token)
-      await authenticateUser(token)
-      await this.$store.dispatch('resetStore')
-      await this.$router.push({name: 'Home'})
-    }
 
     // const customer =  this.$store.getters.getCustomer;
 
@@ -127,15 +93,6 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
     })
   }
 
-  public getParameterByName(name:string, url = window.location.href) {
-    name = name.replace(/[[\]]/g, '\\$&');
-    let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, ' '));
-  }
-
 }
 </script>
 
@@ -151,6 +108,7 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  background: #fff;
 }
 
 [v-cloak] {display: none}
