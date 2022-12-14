@@ -264,8 +264,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public svg_groups_ready = false
   public other_side_logos: any[] = []
   public otherSideTexts: any[] = []
-  public logoIndex = 0
-  public textIndex = 0
   public ctx: any = {}
   public verticalLines: Record<any, any>[] = []
   public horizontalLines: Record<any, any>[] = []
@@ -933,7 +931,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let logoLength = 0
     let textLength = 0
     canvas.getObjects().forEach((obj: Record<any, any>) => {
-      if ('logoIndex' in obj) {
+      if ('logo_index' in obj) {
         logoLength++
       }
       if ('custom_text_index' in obj) {
@@ -943,7 +941,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return { logoLength, textLength }
   }
   public addGuideLine(e: Record<any, any>, canvas: Record<any, any>, vertical_line: Record<any, any>, horizontal_line: Record<any, any>, relativeCanvasWidth: number, relativeCanvasHeight: number) {
-
     if (!this.drawLines) {
       canvas.add(vertical_line);
       canvas.add(horizontal_line);
@@ -998,7 +995,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public addGuideForMultipleObjects(canvas: Record<any, any>, selectedObject: Record<any, any>) {
-    var activeObject = selectedObject,
+    let activeObject = selectedObject,
       canvasObjects = canvas.getObjects(),
       activeObjectCenter = activeObject.getCenterPoint(),
       activeObjectLeft = activeObjectCenter.x,
@@ -1015,10 +1012,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     // It should be trivial to DRY this up by encapsulating (repeating) creation of x1, x2, y1, and y2 into functions,
     // but we're not doing it here for perf. reasons -- as this a function that's invoked on every mouse move
 
-    for (var i = canvasObjects.length; i--;) {
+    for (let i = canvasObjects.length; i--;) {
       if (canvasObjects[i] === activeObject) continue;
 
-      if ('logoIndex' in canvasObjects[i] || 'textIndex' in canvasObjects[i]) {
+      if ('logo_index' in canvasObjects[i] || 'custom_text_index' in canvasObjects[i]) {
 
         var objectCenter = canvasObjects[i].getCenterPoint(),
           objectLeft = objectCenter.x,
