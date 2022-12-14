@@ -12,7 +12,7 @@ SantaModal.install = (Vue) => {
     /*
     * @param santa_modal_data = {string|Object}
     * */
-    show: (santa_modal_data) => {
+    show: (santa_modal_data,self) => {
       const modal_data_type = santa_modal_data.constructor.name
       let modal_data =  getSantaModalConfig()
       if(modal_data_type == 'String') {
@@ -20,7 +20,13 @@ SantaModal.install = (Vue) => {
       } else {
         modal_data = {...modal_data, ...santa_modal_data}
       }
-      dom_document.body.appendChild(instance.$el);
+      if(self.$root.$options.shadowRoot){
+        self.$root.$options.shadowRoot.appendChild(instance.$el);
+      }
+      else{
+        document.body.appendChild(instance.$el);
+      }
+
       return instance.show(modal_data)
     },
     hide: () => {
