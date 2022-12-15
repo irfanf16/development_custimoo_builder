@@ -848,7 +848,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
           let zoom = canvas.getZoom();
           zoom *= 0.999 ** delta;
-          if (zoom > 20) zoom = 20;
+          if (zoom > 10) zoom = 10;
           if (zoom < 1) {
             zoom = 1;
             canvas.viewportTransform = default_view_port as number[];
@@ -994,18 +994,19 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public addGuideForMultipleObjects(canvas: Record<any, any>, selectedObject: Record<any, any>) {
+  public addGuideForMultipleObjects(canvas: fabric.Canvas, selectedObject: Record<any, any>) {
+    this.viewportTransform = canvas.viewportTransform
     let activeObject = selectedObject,
       canvasObjects = canvas.getObjects(),
       activeObjectCenter = activeObject.getCenterPoint(),
       activeObjectLeft = activeObjectCenter.x,
       activeObjectTop = activeObjectCenter.y,
-      activeObjectBoundingRect = activeObject.getBoundingRect(),
+      activeObjectBoundingRect = this.getZoomCompensatedBoundingRect(activeObject, canvas),
       activeObjectHeight = activeObjectBoundingRect.height / this.viewportTransform[3],
       activeObjectWidth = activeObjectBoundingRect.width / this.viewportTransform[0],
       horizontalInTheRange = false,
       verticalInTheRange = false,
-      transform = canvas._currentTransform;
+      transform = canvas.viewportTransform;
 
     if (!transform) return;
 
@@ -1017,10 +1018,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
       if ('logo_index' in canvasObjects[i] || 'custom_text_index' in canvasObjects[i]) {
 
-        var objectCenter = canvasObjects[i].getCenterPoint(),
+        let objectCenter = canvasObjects[i].getCenterPoint(),
           objectLeft = objectCenter.x,
           objectTop = objectCenter.y,
-          objectBoundingRect = canvasObjects[i].getBoundingRect(),
+          objectBoundingRect = this.getZoomCompensatedBoundingRect(canvasObjects[i], canvas),
           objectHeight = objectBoundingRect.height / this.viewportTransform[3],
           objectWidth = objectBoundingRect.width / this.viewportTransform[0];
 
@@ -1156,7 +1157,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public isInRange(value1: number, value2: number) {
     value1 = Math.round(value1);
     value2 = Math.round(value2);
-    for (var i = value1 - this.aligningLineMargin, len = value1 + this.aligningLineMargin; i <= len; i++) {
+    for (let i = value1 - this.aligningLineMargin, len = value1 + this.aligningLineMargin; i <= len; i++) {
       if (i === value2) {
         return true;
       }
@@ -1173,7 +1174,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       canvas = this.backCanvas
     }
 
-    const modelBoundingRect = texture.getBoundingRect()
+    const modelBoundingRect = this.getZoomCompensatedBoundingRect(texture, canvas)
     let boundingRect = {
       left: modelBoundingRect.left,
       right: modelBoundingRect.left + modelBoundingRect.width,
@@ -1242,8 +1243,29 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
       return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, max_call)
     } else {
+      console.log('mac call exceded', max_call)
+      const viewportMatrix = canvas.viewportTransform as Record<any, any>;
+      pointX = pointX + viewportMatrix[4] * canvas.getZoom()
+      pointY = pointX + viewportMatrix[5] * canvas.getZoom()
       return {left: pointX, top: pointY}
     }
+  }
+
+  public getZoomCompensatedBoundingRect(fabricObject, canvas: fabric.Canvas) {
+    //fabricObject is the object you want to get the boundingRect from
+    fabricObject.setCoords();
+    let boundingRect = fabricObject.getBoundingRect();
+    let zoom = canvas.getZoom();
+    const viewportMatrix = canvas.viewportTransform as Record<any, any>
+    //there is a bug in fabric that causes bounding rects to not be transformed by viewport matrix
+    //this code should compensate for the bug for now
+    boundingRect.top = (boundingRect.top - viewportMatrix[5]) / zoom;
+    boundingRect.left = (boundingRect.left - viewportMatrix[4]) / zoom;
+    boundingRect.width /= zoom;
+    boundingRect.height /= zoom;
+
+    return boundingRect;
+
   }
 
   public addToOtherSide(target: any, side: string, clone_again = false) {
@@ -1263,7 +1285,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         add_index = target.logo_index
       }
 
-      const modelBoundingRect = texture.getBoundingRect()
+      const modelBoundingRect = this.getZoomCompensatedBoundingRect(texture, canvas)
       let boundingRect = {
         left: modelBoundingRect.left,
         right: modelBoundingRect.left + modelBoundingRect.width,
@@ -1344,6 +1366,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           addLeft = modelSpaceRight + outside
           addTop = target.top
         }
+
+        const viewportMatrix = canvas.viewportTransform as Record<any, any>
+        addLeft = addLeft + Math.abs(viewportMatrix[4])
+        addTop = addTop + viewportMatrix[5]
 
         if(clone_again) {
           if (otherSideObjects[add_index]) {
