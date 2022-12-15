@@ -1450,11 +1450,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async resetStore() {
     const self: Record<any, any> = this;
-
     const editConfirmation = this.editModeConfirmation();
     editConfirmation.then(async (response) => {
       const ok = await this.ref['reset-changes'].showConfirm()
       if (ok) {
+        this.search_products = '';
+        (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
         const categories_promise = this.fetchCategories();
         categories_promise.then(async (response) => {

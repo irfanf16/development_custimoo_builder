@@ -236,11 +236,17 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       //search function
       await self.$store.dispatch('setSearchLoader', true)
       self.showLoader = true;
-      const categories_promise =  this.fetchCategories(`title=${self.search_products}`);
+      let product_filter : string | null = null;
+      if(self.search_products){
+        product_filter = `title=${self.search_products}`;
+      }
+      const categories_promise =  this.fetchCategories(product_filter);
       categories_promise.then(() => {
         let query_params: string[] = [];
-        if(self.search_products){
+        if(this.getSelectedCategory && this.getSelectedCategory.category_id){
           query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
+        }
+        if(self.search_products){
           query_params.push(`title=${self.search_products}`)
         }
         this.$emit('retrieveProducts', query_params)
@@ -299,7 +305,14 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         if(retrieve_products) {
           await resetLastActiveProductData()
           await this.exitFromEditMode()
-          await this.$emit('retrieveProducts')
+          let query_params: string[] = [];
+          if(this.getSelectedCategory && this.getSelectedCategory.category_id){
+            query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
+          }
+          if(self.search_products){
+            query_params.push(`title=${self.search_products}`)
+          }
+          this.$emit('retrieveProducts', query_params)
         }
       }
     });
@@ -313,7 +326,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: category_index, category_id: selected_category.id});
       await this.$store.commit('SET_SELECTED_CATEGORY', {category_id:selected_category.id, category_index: category_index })
         let query_params: string[] = [];
-        query_params.push(`category_id=${selected_category.id}`);
+       if (selected_category && selected_category.id){
+         query_params.push(`category_id=${selected_category.id}`);
+        }
         if(self.search_products){
           query_params.push(`title=${self.search_products}`);
         }
