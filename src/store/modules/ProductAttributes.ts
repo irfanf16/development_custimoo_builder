@@ -120,6 +120,10 @@ const ProductAttributes:Module<any, any> = {
     products_next_page_no: null, //null value mean has no more pages,
     products_rosters:{},
     active_roster_index:0,
+    selectedCategory: {
+      category_index: 0,
+      category_id: null
+    },
     logo_colors_info: {
       /*
       * while adding/removing property make  sure to add/remove property in helpers method logoColorInfoDefaultObject()
@@ -253,7 +257,10 @@ const ProductAttributes:Module<any, any> = {
         state.selectedCategories = [];
         state.selectedCategories.push(category_id);
      },
-     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
+    SET_SELECTED_CATEGORY(state:Record<any,any>, payload){
+      state.selectedCategory = {category_id:payload.category_id, category_index:payload.category_index};
+    },
+    customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
        if(customLogo && customLogo.custom_logo){
          const newCustomLogo = customLogo.custom_logo
          if('logoIndex' in newCustomLogo && newCustomLogo.logoIndex != null) {
@@ -1213,6 +1220,9 @@ const ProductAttributes:Module<any, any> = {
     getSelectedCategories: state => {
       return state.selectedCategories
     },
+    getSelectedCategory: state => {
+      return state.selectedCategory;
+    },
     /*
     * product_id could be number or string. If product_id = 'all' it will return all products logos and return type will be object.
     * If it's number then it will return custom logos against product id and return type will be array
@@ -1403,6 +1413,14 @@ const ProductAttributes:Module<any, any> = {
       return new Promise((resolve, reject) => {
         http.get(url).then( async (response: Record<any,any>) => {
           if(response) {
+            const categories = response.data.data;
+            let category_index = 0 ;
+            if(categories && categories.length){
+              category_index = categories.findIndex((category) => {
+                return category.id === response.data.product_category_id
+              });
+            }
+
             await commit('categories', response.data.data)
             await commit('SET_PRIVATE_PRODUCT', response.data.private_product);
             await commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
@@ -1410,6 +1428,7 @@ const ProductAttributes:Module<any, any> = {
             await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
             await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
             await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
+            await commit("SET_SELECTED_CATEGORY",{ category_id : response.data.product_category_id, category_index : category_index});
             resolve(response.data.no_product_found);
           }
         }).catch((e: any) => {

@@ -649,7 +649,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
             type: 'locker',
             id: product.id,
             customer_id: this.customer ? this.customer.id : '',
-            product_id: this.selectedProduct.product_id
+            product_id: product.product_id
           }
           let shared_url = "";
           if (product.shared_url) {

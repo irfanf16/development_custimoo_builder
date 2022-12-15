@@ -1702,8 +1702,8 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
   let category_id = null
   let category_index = 0
   if(categories.length > 0) {
-    const selected_categories = Store.getters.getSelectedCategories
-    category_id = selected_categories[0] ? selected_categories[0] : null
+    const selected_category = Store.getters.getSelectedCategory
+    category_id = selected_category.category_id ? selected_category.category_id : null
     if(category_id) {
       category_index = findIndex(categories, ['id', category_id])
       if(category_index == -1) {
