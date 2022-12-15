@@ -1864,6 +1864,20 @@ const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
   }
 }
 
+const getSantaModalConfig = () => {
+  /*
+  * icon = {success, error, info}
+  * */
+  return {
+    name: 'santa-confirm-modal', icon: 'success', title: '', text: 'This is default text', confirm_text: 'Ok', cancel_text: null,
+    click_to_close: false
+  }
+}
+
+const getDomDocument = (vue_component) => {
+  return vue_component.$root.$options.shadowRoot ? vue_component.$root.$options.shadowRoot : document;
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1875,5 +1889,5 @@ export {
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
-  routerPush
+  routerPush, getSantaModalConfig, getDomDocument
 };

@@ -31,23 +31,23 @@
                            :data-room-index="i"
                            :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                            :data-product-index="ind">
-                      <label :key="ind" class="w-100" :class="product.class ? 'selected': ''"
+                        <div class="fs-2" v-if="product.roster_count">Total Products: <strong class="font-weight-bolder">{{product.roster_count}}</strong></div>
+                        <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                              @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
-                        <div class="image-holder">
-                          <div>
+                          <div class="image-holder">
+                            <div>
+                              <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
+                              <template v-if="room.active_tab">
+                                <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                                <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
+                              </template>
 
-                            <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <template v-if="room.active_tab">
-                              <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                              <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
-                            </template>
-
+                            </div>
                           </div>
-                        </div>
-                        <div class="d-none d-lg-block product-description text-center">
-                          <p>{{ product.product_name }}</p>
-                        </div>
-                      </label>
+                          <div class="d-none d-lg-block product-description text-center">
+                            <p>{{ product.product_name }}</p>
+                          </div>
+                        </label>
 
                       <ul class="product-icons">
                         <li v-if="!getSelectionMode.readonly">
@@ -369,6 +369,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''
   public yearly_planner_template_id = null;
+  @Prop({required: true}) mainTotalTabs:number;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
 
   private observerCallback = (mutationsList:any, observer:any) => {
@@ -408,6 +409,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
 
   private editRoster = () =>{
+    this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1})
     this.hideVModal('locker-modal')
     this.showVModal('rostermodal')
   }

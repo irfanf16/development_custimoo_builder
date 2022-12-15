@@ -98,6 +98,9 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.use(VueSweetalert2);
 
+import SantaModal from "@/plugins/santaModal/SantaModal.js";
+Vue.use(SantaModal)
+
 // import Echo from "laravel-echo";
 // window.io = require('socket.io-client');
 // window.Echo = new Echo({
