@@ -1258,7 +1258,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showLoader = true
       await http.post('updatelockerproduct', locker).then(async (successResponse) => {
         let response_data = successResponse.data;
-        let toast_type = "error"
+        let toast_type = "success"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         this.hideLockerProductUpdateButton(true)
