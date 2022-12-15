@@ -871,25 +871,6 @@ const activityStatus = {
   },
 }
 
-const urlToBase64 =  (url:string) => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function() {
-      if(xhr.status == 200) {
-        const reader = new FileReader();
-        reader.onloadend = function() {
-          resolve(reader.result);
-        }
-        reader.readAsDataURL(xhr.response);
-      } else {
-        reject(`Error (status = ${xhr.status}, status text = ${xhr.statusText}) while getting file from url ${xhr.responseURL}`);
-      }
-    };
-    xhr.open('GET', url);
-    xhr.responseType = 'blob';
-    xhr.send();
-  });
-}
 
 const getFileExtensionType = (type: string, file_extension:string) => {
   const extensions: Record<any, any> = {
@@ -1873,9 +1854,30 @@ const getSantaModalConfig = () => {
   }
 }
 
-const getDomDocument = (vue_component) => {
-  return vue_component.$root.$options.shadowRoot ? vue_component.$root.$options.shadowRoot : document;
+const getDomDocument = () => {
+  const dom_document = document.querySelector(getWebComponentNames())
+  return dom_document ? dom_document?.shadowRoot : document
 }
+
+const urlToBase64 = async (urls) => {
+  const response = await http.post('url_to_base64', {file_urls: urls}).catch((errorResponse) => {
+    console.error('Error while converting url to base64', errorResponse)
+  })
+  return response ? response.data.result.base64_files : []
+}
+
+const getWebComponentNames = (return_string = true): any => {
+  if(return_string) {
+    return "v-customizer, v-order-detail"
+  } else {
+    return ["v-customizer, v-order-detail"]
+  }
+}
+
+const isShadowDom = () => {
+  return document.querySelector(getWebComponentNames()) ? true : false
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -1888,5 +1890,5 @@ export {
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
-  routerPush, getSantaModalConfig, getDomDocument
+  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom
 };

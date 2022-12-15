@@ -406,7 +406,11 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject, getUrlParameter, setDefaultColors
+  getRandom,
+  resetLastActiveProductData,
+  lastActiveProductDefaultObject,
+  getUrlParameter,
+  setDefaultColors, isShadowDom, getDomDocument
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";

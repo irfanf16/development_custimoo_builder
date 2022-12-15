@@ -1,5 +1,6 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
+    <div class="loader global" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
     <div class="order-wrapper" v-if="order && order.id">
       <div class="d-flex justify-content-between align-items-center">
         <div class="fs-4 font-weight-bolder order-title p-2">Order # {{ order.order_no }}</div>
@@ -42,15 +43,31 @@
 
                   <div class="images-grid p-2 d-flex gap-1 w-100">
                     <div class="d-flex align-items-stretch flex-wrap gap-1">
-                      <div class="feedback-block" :key="activity_itm_ind" v-for="(activity_item, activity_itm_ind) in item_status_activity.activity_items">
+                      <div class="feedback-block" :key="activity_item_index" v-for="(activity_item, activity_item_index) in item_status_activity.activity_items">
                         <div class="feedback-images" v-if="activity_item.activity_files"
-                             @click="enlargeActivityFiles(activity_item.activity_files)" style="cursor:pointer;">
+                             @click="showPreview(activity_item)" style="cursor:pointer;">
                           <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files"
                                :src="`${storage_url}${activity_file.url}`" alt="">
+                          <template>
+                            <div class="actions nested-actions" :key="`details-btn-${activity_item_index}`">
+                              <button class="order-detail-btn btn btn-secondary btn-sm"
+                                      @click.stop="downloadStatusActivityImages(activity_item.activity_files)" style="padding: 3px 5px !important;" :key="`preview-btn-${activity_item_index}`">
+                                <svg style="width:1em;height:1em" viewBox="0 0 24 24">
+                                  <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                                </svg>
+                              </button>
+
+                              <button class="btn btn-secondary btn-sm" title="View details" style="padding: 3px 5px !important;"
+                                      @click.stop="showActivityItemDetail(order_item_index, item_status_activity_index, activity_item_index)">
+                                <b-icon-list-ul />
+                              </button>
+                            </div>
+
+                          </template>
                         </div>
-                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_itm_ind == 0 && order_item.tracking_no)" :key="`afd-${activity_itm_ind}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no)" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else>
-                          <div class="feedback-text" :key="`afd-${activity_itm_ind}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
+                          <div class="feedback-text" :key="`afd-${activity_item_index}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
                       </div>
                     </div>
@@ -187,7 +204,6 @@
            :reset="true"
            name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true"
            @close="$store.commit('Change_Locker_Active_Tab', 0)"  @opened="showMarkerActionButtons">
-      <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="d-flex align-items-center gap-2">
           <div class="font-weight-bold pl-1">
@@ -290,6 +306,143 @@
         <button class="btn btn-dark text-white">Download Preview Images</button>
       </div>
     </modal>
+
+    <modal :adaptive="true"
+           height="auto"
+           :minWidth="1300"
+           :scrollable="true"
+           name="product-preview" ref="product-preview" :hide-footer="true">
+
+      <div class="modal-header fs-4 d-flex justify-content-between p-3">
+        <div class="font-weight-bold pl-1">
+          Preview Images
+        </div>
+
+        <span class="modal-close cursor-pointer" @click="$modal.hide('product-preview')">
+              <BIconX />
+            </span>
+      </div>
+
+      <div class="px-3 pt-3 d-flex justify-content-center">
+        <div class="badge badge-light fs-2 p-2 text-muted"> <b-icon-search class="text-info"></b-icon-search> Please hover over the images to zoom!</div>
+      </div>
+      <div class="d-flex w-100 justify-content-center gap-1 py-4 px-3">
+        <zoom-on-hover :img-normal="this.storage_url+this.front_preview" :img-zoom="this.storage_url+this.front_preview" :scale="2"></zoom-on-hover>
+        <zoom-on-hover :img-normal="this.storage_url+this.back_preview" :img-zoom="this.storage_url+this.back_preview" :scale="2"></zoom-on-hover>
+      </div>
+    </modal>
+
+    <modal :width="1300"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+           name="order-detail" ref="order-detail" id="order-detail" size="xl" :hide-footer="true">
+
+      <div class="modal-header fs-4 d-flex justify-content-between p-3">
+        <div class="font-weight-bold pl-1">
+          Order Details
+        </div>
+        <span class="modal-close cursor-pointer" @click="$modal.hide('order-detail')">
+          <BIconX />
+        </span>
+      </div>
+      <template v-if="order && activity_item_info.factory_product">
+        <b-row class="mt-3 mx-2">
+          <b-col class="col-2">
+            <strong>Company:</strong> {{order.hasOwnProperty('company_name')?order.company_name: ""}}
+          </b-col>
+          <b-col class="col-2">
+            <strong>Customer:</strong> {{order.customer.first_name + order.customer.last_name}}
+          </b-col>
+          <b-col class="col-2">
+            <strong>Email:</strong> {{order.customer.email}}
+          </b-col>
+          <b-col class="col-2">
+            <strong>Product:</strong> {{activity_item_info.factory_product.product_name}}
+          </b-col>
+          <b-col class="col-2">
+            <a :href="`${storage_url}${order.design_file}`"  class="btn btn-dark mx-1" v-if="order.design_file">Download Pdf</a>
+          </b-col>
+          <b-col class="col-2">
+            <a :href="`${api_url}/order/${order_id}/product/${activity_item_info.factory_product.id}/export`"
+               :download="`order_${order.order_no}_product_${activity_item_info.factory_product.product_name}.xlsx`"
+               class="btn btn-dark mx-1"
+            >
+              Download Excel
+            </a>
+          </b-col>
+        </b-row>
+        <b-row class="mt-3 mx-2">
+          <b-col class="col-6 order-detail-roster">
+            <h4>Roster Detail</h4>
+            <template>
+              <b-table
+                :items="activity_item_info.factory_product.product_roster_detail"
+                :fields="roster_headers"
+                hover
+                sorter
+                class="bg-gray-200"
+              >
+                <template #cell(number)="data">
+                  <template v-if="data.item.number">
+                    <img style="height: 27px;" :alt="data.item.number"
+                      :src="`data:image/svg+xml;charset=utf-8,${encodeURIComponent(activity_item_info.factory_product
+                        .product_custom_text_objects.roster[data.index].number.items[0].svg)}`"
+                    />
+                  </template>
+                </template>
+                <template #cell(name)="data">
+                  <template v-if="data.item.text">
+                    <img :alt="data.item.text"
+                      :src="`data:image/svg+xml;charset=utf-8,${encodeURIComponent(activity_item_info.factory_product
+                        .product_custom_text_objects.roster[data.index].name.items[0].svg)}`"  style="height: 27px;"
+                      />
+                  </template>
+                </template>
+              </b-table>
+            </template>
+            <template v-if="activity_item_info.factory_product.product_roster_detail.length == 0">
+              <b-row class="bg-gray-200">
+                <b-col class="col-12">
+                  No roster exists
+                </b-col>
+              </b-row>
+            </template>
+          </b-col>
+          <b-col class="col-6">
+            <div class="d-flex justify-content-between">
+              <h4>Production Image</h4>
+            </div>
+
+            <div class="w-100 mt-3">
+              <div class="d-flex align-items-center justify-content-center w-100 gap-1">
+                <img class="flex-shrink-1" style="max-width: calc(50% - 0.5rem);" alt=""
+                     :key="`item-${activity_item_info.item_index}-status-${activity_item_info.status_activity_index}-item-
+                        ${activity_item_info.status_activity_item_index}-file-0`"
+                     :src="`${storage_url}${order.items[activity_item_info.item_index].status_activities[activity_item_info.status_activity_index]
+                     .activity_items[activity_item_info.status_activity_item_index].activity_files[0].url}`">
+                <img class="flex-shrink-1" style="max-width: calc(50% - 0.5rem);" alt=""
+                     :key="`item-${activity_item_info.item_index}-status-${activity_item_info.status_activity_index}-item-
+                        ${activity_item_info.status_activity_item_index}-file-1`"
+                     :src="`${storage_url}${order.items[activity_item_info.item_index].status_activities[activity_item_info.status_activity_index]
+                        .activity_items[activity_item_info.status_activity_item_index].activity_files[1].url}`">
+              </div>
+
+              <div class="px-3 pb-3 d-flex mt-1 justify-content-center">
+                <button class="btn btn-dark text-white" v-if="!loadingPreviewImages" @click="downloadStatusActivityImages()">Download Preview Images</button>
+                <button class="btn btn-dark text-white" v-else disabled><b-icon-arrow-counterclockwise class="b-icon-animation-spin-reverse" /> Please wait...</button>
+              </div>
+            </div>
+
+
+          </b-col>
+        </b-row>
+
+      </template>
+
+
+    </modal>
   </div>
 </template>
 
@@ -298,7 +451,12 @@ import Vue from 'vue'
 import {Component, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import $ from 'jquery'
-import {handleResponseException, logData, activityStatus} from "@/helpers/Helpers";
+import {
+  handleResponseException,
+  logData,
+  activityStatus,
+  urlToBase64, getDomDocument
+} from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
 import OrderFlowStatusLine from "@/components/OrderFlowStatusLine.vue";
@@ -311,6 +469,8 @@ import {getCompany} from "@/helpers/Helpers";
 
 @Component<OrderDetail>({
   async mounted() {
+    this.activity_item_info = this.getOrderItemStatusActivityInfoDefaultObject()
+    this.api_url = `${process.env.VUE_APP_API_BASE_URL}/api`
     await getCompany();
 
     let self = this;
@@ -402,7 +562,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     completed: 'completed'
   }
 
-  //data props starts
+  /*
+  * data props starts
+  * */
   public activity_sample_files = []
   public activity_navigation_index = 0
   public activity_items :Record<any, any> = {
@@ -421,14 +583,34 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   public auth_customer = this.$store.getters.getCustomer
   public enlarged_activity_files: Record<any, any>[] = []
+  // this data prop is being initialized in mounted method
+  public activity_item_info: Record<any, any> = {}
+  public front_preview = ''
+  public back_preview = ''
+  public loadingPreviewImages = false
+  public product_texts: any = []
+  public custom_logos: any = []
+  public roster_headers = [
+    {key: 'size', label: 'Size'}, {key: 'quantity', label: 'Quantity'}, {key: 'number', label: 'Number'}, {key: 'name', label: 'Name'}
+  ]
+  public api_url =  ''
 
-  //data props ends
+  /*
+  * data props ends
+  * */
 
   get company():Record<any, any>{
     return this.$store.getters.getCompany
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
+  }
+
+  async getOrderItemStatusActivityInfoDefaultObject(values = {}) {
+    const default_obj =  {
+      item_index: null, status_activity_index: null, status_activity_item_index: null, factory_product: null
+    }
+    return {...default_obj, ...values}
   }
 
 
@@ -553,12 +735,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       console.log(errorResponse);
     });
   }
-  public resetActivityData(){
-    this.activity_data.order_item_id = null
-    this.activity_data.status = null
-    this.activity_sample_files = []
-    this.activity_data.message = null
-  }
   public showMarkerArea(ref_index: number){
     this.markerActive = true
     let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
@@ -668,11 +844,43 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }, 2000)
   }
 
-  enlargeActivityFiles(activity_files: Record<any, any>[]) {
-    this.enlarged_activity_files = activity_files
-    this.$modal.show('enlarged-activity-files-modal')
+  showPreview(activity_item,factory_id){
+    this.front_preview = `${activity_item.activity_files[0].url}`
+    this.back_preview = `${activity_item.activity_files[1].url}`
+    this.$modal.show('product-preview')
   }
 
+  async downloadStatusActivityImages(activity_files = []) {
+    const {item_index, status_activity_index, status_activity_item_index} = this.activity_item_info
+    if(activity_files.length == 0) {
+      activity_files = this.order.items[item_index].status_activities[status_activity_index].activity_items[status_activity_item_index].activity_files
+    }
+    const activity_files_paths = activity_files.map(activity_file => {
+      return activity_file.url
+    })
+    this.showLoader = true
+    const base64_files = await urlToBase64(activity_files_paths)
+    this.showLoader = false
+    const dom_document = getDomDocument()
+      base64_files.forEach((base64_file, base64_file_index) => {
+        let activity_file = dom_document.createElement("a");
+        activity_file.href = base64_file;
+        activity_file.download = activity_files[base64_file_index].name
+        activity_file.click();
+      })
+  }
+
+  async showActivityItemDetail(item_index, status_activity_index, status_activity_item_index) {
+    const order_item = this.order.items[item_index]
+    const activity_item = order_item.status_activities[status_activity_index].activity_items[status_activity_item_index]
+    const factory_product_index = findIndex(order_item.factory_products, ['id', activity_item.factory_product_id])
+    const activity_item_info = {
+      item_index: item_index, status_activity_index: status_activity_index, status_activity_item_index,
+      factory_product: order_item.factory_products[factory_product_index]
+    }
+    this.activity_item_info = await this.getOrderItemStatusActivityInfoDefaultObject(activity_item_info)
+    this.$modal.show('order-detail');
+  }
 
 }
 </script>
