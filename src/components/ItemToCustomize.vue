@@ -236,16 +236,16 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       //search function
       await self.$store.dispatch('setSearchLoader', true)
       self.showLoader = true;
-     // const itemCarousel = self.$refs['itemsCarousel'] as Record<any, any>
-     //  await self.$store.dispatch("updateMainProductsInfo",  {has_more_products: false, next_page: null});
-      // this.$emit('update:search_products', self.search_products)
       const categories_promise =  this.fetchCategories(`title=${self.search_products}`);
       categories_promise.then(() => {
-        let query_params = [`title=${self.search_products}`]
+        let query_params: string[] = [];
+        if(self.search_products){
+          query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
+          query_params.push(`title=${self.search_products}`)
+        }
         this.$emit('retrieveProducts', query_params)
       });
 
-     // itemCarousel.setSliderIndex();
     }, 700);
   }
 
@@ -312,7 +312,11 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       await resetLastActiveProductData()
       self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: category_index, category_id: selected_category.id});
       await this.$store.commit('SET_SELECTED_CATEGORY', {category_id:selected_category.id, category_index: category_index })
-        let query_params = [`category_id=${selected_category.id}`]
+        let query_params: string[] = [];
+        query_params.push(`category_id=${selected_category.id}`);
+        if(self.search_products){
+          query_params.push(`title=${self.search_products}`);
+        }
         this.$emit('retrieveProducts', query_params)
   }
 
