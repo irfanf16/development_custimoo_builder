@@ -6,7 +6,7 @@
       <div class="color-holder">
         <div class="color-container pt-2">
           <div class="color-box" v-for="(logo_color, logoColorIndex) in logoColorsInfo.colors"
-               @click="selectLogoColor(logoColorIndex)" :title="logo_color.name"
+               @click="selectLogoColor(logo_color, logoColorIndex)" :title="logo_color.name"
                :class="{'active-swatch' : logoColorIndex == active_logo_color_index, 'noColor': !logo_color.hex}"
                :style="{background: logo_color.hex ? logo_color.hex : '#fff', cursor: 'pointer'}" :key="logoColorIndex + logo_color.name">
             <template v-if="logo_color.hex">
@@ -128,6 +128,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
 
   public deleteLogoColor(logo_color_index: number) {
     this.logoColorsInfo.colors[logo_color_index] = { hex: null, name: null, pantone: null }
+    this.$set(this.logoColorsInfo.colors, logo_color_index, { hex: null, name: null, pantone: null })
   }
 
   public useOriginalColors() {
@@ -162,7 +163,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     self.$eventBus.$emit('changeDefaultColors')
   }
 
-  public selectLogoColor(logo_color_index: number) {
+  public selectLogoColor(logo_color: Record<any, any>, logo_color_index: number) {
     if(this.active_logo_color_index == logo_color_index) {
       this.active_logo_color_index = -1
     }

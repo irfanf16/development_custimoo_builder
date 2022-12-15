@@ -1262,7 +1262,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showLoader = true
       await http.post('updatelockerproduct', locker).then(async (successResponse) => {
         let response_data = successResponse.data;
-        let toast_type = "error"
+        let toast_type = "success"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         this.hideLockerProductUpdateButton(true)
@@ -1454,11 +1454,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async resetStore() {
     const self: Record<any, any> = this;
-
     const editConfirmation = this.editModeConfirmation();
     editConfirmation.then(async (response) => {
       const ok = await this.ref['reset-changes'].showConfirm()
       if (ok) {
+        this.search_products = '';
+        (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
         const categories_promise = this.fetchCategories();
         categories_promise.then(async (response) => {
