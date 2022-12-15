@@ -279,38 +279,6 @@
            height="auto"
            :minWidth="1300"
            :scrollable="true"
-           name="enlarged-activity-files-modal" ref="enlarged-activity-files-modal" @closed="enlarged_activity_files = []" :hide-footer="true">
-
-      <div class="modal-header fs-4 d-flex justify-content-between p-3">
-        <div class="font-weight-bold pl-1">
-          Preview Images
-        </div>
-
-        <span class="modal-close cursor-pointer" @click="$modal.hide('product-preview')">
-              <BIconX />
-            </span>
-      </div>
-
-      <div class="px-3 pt-3 d-flex justify-content-center">
-        <div class="badge badge-light fs-2 p-2 text-muted"> <b-icon-search class="text-info"></b-icon-search> Please hover over the images to zoom!</div>
-      </div>
-      <div class="d-flex w-100 justify-content-center gap-1 py-4 px-3">
-        <template v-for="(enlarged_activity_file, enlargedActivityFileIndex) in enlarged_activity_files">
-          <zoom-on-hover :img-normal="`${storage_url}${enlarged_activity_file.url}`" :img-zoom="`${storage_url}${enlarged_activity_file.url}`" :key="`enlarged_activity_file_${enlargedActivityFileIndex}`" :scale="1.5"></zoom-on-hover>
-        </template>
-        <!--        <a :href="this.front_preview" target="_blank" :download="`${order.order_no}-front-preview`"> front image </a>-->
-        <!--        <a :href="this.back_preview" target="_blank" :download="`${order.order_no}-back-preview`"> back image </a>-->
-      </div>
-
-      <div class="px-3 pb-3 d-flex justify-content-center">
-        <button class="btn btn-dark text-white">Download Preview Images</button>
-      </div>
-    </modal>
-
-    <modal :adaptive="true"
-           height="auto"
-           :minWidth="1300"
-           :scrollable="true"
            name="product-preview" ref="product-preview" :hide-footer="true">
 
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
@@ -337,7 +305,7 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           name="order-detail" ref="order-detail" id="order-detail" size="xl" :hide-footer="true">
+           name="order-detail" ref="order-detail" id="order-detail" size="xl" :hide-footer="true" @closed="activity_item_info = getOrderItemStatusActivityInfoDefaultObject()">
 
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
@@ -565,24 +533,16 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   /*
   * data props starts
   * */
-  public activity_sample_files = []
+
   public activity_navigation_index = 0
   public activity_items :Record<any, any> = {
     order_item_id:null,
     order_item_index:null,
     activity_item_data: []
   }
-
   public ref = this.$refs as Record<any, any>;
-  public activity_data:Record<any,any>={
-    order_item_id: null,
-    status:null,
-    message:null
-  }
   public markerActive = false
-
   public auth_customer = this.$store.getters.getCustomer
-  public enlarged_activity_files: Record<any, any>[] = []
   // this data prop is being initialized in mounted method
   public activity_item_info: Record<any, any> = {}
   public front_preview = ''
@@ -606,7 +566,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     return this.$store.getters.isCustomerAuthenticated
   }
 
-  async getOrderItemStatusActivityInfoDefaultObject(values = {}) {
+  getOrderItemStatusActivityInfoDefaultObject(values = {}) {
     const default_obj =  {
       item_index: null, status_activity_index: null, status_activity_item_index: null, factory_product: null
     }
@@ -844,7 +804,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }, 2000)
   }
 
-  showPreview(activity_item,factory_id){
+  showPreview(activity_item){
     this.front_preview = `${activity_item.activity_files[0].url}`
     this.back_preview = `${activity_item.activity_files[1].url}`
     this.$modal.show('product-preview')
