@@ -113,7 +113,7 @@
                                   </div>
                                 </div>
                               </b-tab>
-                              <b-tab>
+                              <b-tab v-if="logoColorsInfo && logoColorsInfo.length">
                                 <template #title>
                                   Team logo colors
                                 </template>
@@ -127,7 +127,7 @@
                                   </div>
                                 </div>
                               </b-tab>
-                              <b-tab>
+                              <b-tab v-if="selectedProduct.is_custom_color_allowed">
                                 <template #title>
                                   Other
                                 </template>
@@ -263,7 +263,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     return this.$store.getters.getSelectedProductId
   }
   get logoColorsInfo() {
-    return this.$store.getters.getLogoColorsInfo('extracted_colors')
+    return filter(this.$store.getters.getLogoColorsInfo('extracted_colors'), 'hex')
   }
 
   get lockerColors() {

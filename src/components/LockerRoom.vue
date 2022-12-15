@@ -31,7 +31,7 @@
                            :data-room-index="i"
                            :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                            :data-product-index="ind">
-                        <div class="fs-2" v-if="product.roster_count">Total Products: <strong class="font-weight-bolder">{{product.roster_count}}</strong></div>
+                        <div class="fs-2" v-if="product.roster_count">Total products: <strong class="font-weight-bolder">{{product.roster_count}}</strong></div>
                         <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                              @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                           <div class="image-holder">

@@ -1,13 +1,13 @@
 <template>
   <div class="accordion mt-1" role="tablist">
     <b-card-body style="padding: 0 !important;">
-      <b-tabs content-class="mt-3" class="logo-placement-tabs">
+      <b-tabs content-class="mt-1" class="logo-placement-tabs">
         <b-tab v-for="(productColor, productColorIndex) in productColors" :key="`color-tab-${productColorIndex}`">
           <template #title>
             {{ productColor.name | capitalize }}
           </template>
           <template>
-           <div class="color-holder">
+           <div class="color-holder pt-2">
              <div class="color-container">
                <template v-for="(colorObject, colorObjectIndex) in productColor.color_text">
                  <div v-if="colorObject.value" class="color-box" @click="updateLogoActiveColor(colorObject)"
@@ -120,7 +120,9 @@ export default class LogoColorTabsNew extends Vue {
     return this.$store.getters.getSetting('color_type');
   }
 
-
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo();
+  }
   /*
   * computed props ends
   * */
@@ -129,6 +131,7 @@ export default class LogoColorTabsNew extends Vue {
   * methods starts
   * */
   public updateLogoActiveColor(selected_color: Record<any, any>, emitter=null) {
+    let self: Record<any, any> = this;
     const selectProductPantonesList = getSelectedProductPantones()
     const color_value = emitter == 'color-picker' ? selected_color.hex : selected_color.value
     let pantone_color = getClosestColor(color_value, selectProductPantonesList,this.getColorType);
@@ -142,6 +145,9 @@ export default class LogoColorTabsNew extends Vue {
       this.activeLogoColor.name = selected_color.name
     }
     setDefaultColors()
+    if(this.logoColorsInfo.using_logo_colors){
+      self.$eventBus.$emit('changeDefaultColors')
+    }
   }
 
   /*
