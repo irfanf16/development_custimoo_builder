@@ -810,12 +810,12 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.$modal.show('product-preview')
   }
 
-  async downloadStatusActivityImages(activity_files = []) {
+  async downloadStatusActivityImages(activity_files: Record<any, any>[] = []) {
     const {item_index, status_activity_index, status_activity_item_index} = this.activity_item_info
     if(activity_files.length == 0) {
       activity_files = this.order.items[item_index].status_activities[status_activity_index].activity_items[status_activity_item_index].activity_files
     }
-    const activity_files_paths = activity_files.map(activity_file => {
+    const activity_files_paths = activity_files.map((activity_file: Record<any, any>) => {
       return activity_file.url
     })
     this.showLoader = true

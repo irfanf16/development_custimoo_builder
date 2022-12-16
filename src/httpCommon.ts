@@ -42,10 +42,12 @@ http.interceptors.response.use(function (response) {
 }, function (error) {
   if(500 === error.response.status && error.response.data.message == 'Expired token') {
     localStorage.setItem('jwtToken', '');
+    localStorage.setItem('adminToken', '');
     location.reload()
   }
   else if (401 === error.response.status) {
     localStorage.setItem('jwtToken', '');
+    localStorage.setItem('adminToken', '');
    // location.reload()
   }
   else if (error.response.status === 420 ) {
