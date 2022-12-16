@@ -26,17 +26,19 @@ export class LockerProducts extends Mixins(FetchCategories) {
     const categories_promise = this.fetchCategories(null, product_id);
     categories_promise.then((response) => {
       if(response){
+        let selected_category = this.$store.getters.getSelectedCategory;
         let is_private:Boolean =  this.$store.getters.getPrivateProduct
         let is_customized = this.$store.getters.getCustomized
         let is_personalized = this.$store.getters.getPersonalized
         let locker_product_name = room_product.product_name
+
         self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
           editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: '', private_product: is_private },
-          locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
+          locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name },
           cart_product_info: null, order_product_info: null
         })
 
-        let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+        let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&category_id=${selected_category.category_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
         if(share_url) {
           url += `?share_url=${share_url}`;
         }
@@ -913,6 +915,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
               });
             }
             else{
+              self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
               resolve(false);
             }
             break;

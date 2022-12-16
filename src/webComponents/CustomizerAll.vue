@@ -101,6 +101,9 @@ Vue.use(VueSweetalert2);
 import SantaModal from "@/plugins/santaModal/SantaModal.js";
 Vue.use(SantaModal)
 
+import ZoomOnHover from "vue-zoom-on-hover";
+Vue.use(ZoomOnHover);
+
 // import Echo from "laravel-echo";
 // window.io = require('socket.io-client');
 // window.Echo = new Echo({

@@ -1,9 +1,9 @@
 <template>
   <div class="accordion color-accordion" role="tablist">
-    <b-card no-body v-for="(svgElement, index) in svgGroups" :key="index">
+    <b-card no-body v-for="(svgElement, index) in svgGroups" :key="'color-accordion'+index">
       <b-card-header header-tag="header" class="p-0" role="tab">
         <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index)">
-          <span class="text">{{ svgElement.id | capitalize }}</span>
+          <span class="text">{{ svgElement.id | capitalize }} </span>
           <span class="color">
             <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
             <span class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
@@ -14,8 +14,9 @@
       <b-collapse :id="'accordion-'+(index+1)" accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center" style="display: none">
-            <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="index" @click="selectType(index)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)">Others</b-nav-item>
+            <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
+            <b-nav-item v-if="productColors" v-bind:class="{ 'active' : selectTypeIndex == (productColors.length) && !othersActive}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
+            <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder" style="padding-top: 5px;" ref="ColorAccordion">
             <div class="color-container">
@@ -38,7 +39,15 @@
                 </b-form>
                 <color-picker @changeColor="changeColor" theme="light" :key="svgElement.color" :color="svgElement.color" :sucker-hide="true" />
               </div>
-              <template v-else v-for="(color, index) in productColor">
+              <template v-else-if="selectTypeIndex == productColors.length && !showOther" v-for="(ext_color, ext_index) in logoColorsInfo">
+                <div v-if="ext_color.hex"  class="color-box"  @click="setColor({value: ext_color.hex, ...ext_color})"
+                     :title="ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
+                  <span v-if="ext_color.hex == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
+                </div>
+              </template>
+              <template v-else-if="!showOther" v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index">
                   <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
@@ -134,6 +143,10 @@ export default class ColorAccordion extends Vue {
       return 'xx-xxxx';
     }
     return '';
+  }
+
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo('extracted_colors');
   }
 
   get svgGroups() {

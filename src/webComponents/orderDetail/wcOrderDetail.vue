@@ -17,6 +17,9 @@ Vue.use(IconsPlugin)
 import router from './router'
 import {getCompany} from "@/helpers/Helpers";
 
+import ZoomOnHover from "vue-zoom-on-hover";
+Vue.use(ZoomOnHover);
+
 export default {
   store, router,
   name: "WcOrderDetail",

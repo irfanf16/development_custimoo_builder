@@ -406,7 +406,12 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject, getUrlParameter, setDefaultColors
+  getRandom,
+  resetLastActiveProductData,
+  lastActiveProductDefaultObject,
+  getUrlParameter,
+  routerPush,
+  setDefaultColors, isShadowDom, getDomDocument
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -499,6 +504,9 @@ Vue.filter('formatDate', function(value:string) {
     categories_promise.then(async (response) => {
       let query_params = await this.setQueryParams()
       await this.retrieveProducts(query_params)
+      if (shared_url?.includes('share')) {
+        routerPush(this.$router,'Home');
+      }
       this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
       this.jwtToken = localStorage.getItem('jwtToken') as string
       // await this.$store.dispatch('setJwtToken')
@@ -538,6 +546,7 @@ Vue.filter('formatDate', function(value:string) {
       await this.$eventBus.$on('updateOrder', async (resolve: any) => {
         await this.UpdateOrderProducts(false,false,resolve);
       });
+
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {
@@ -1261,7 +1270,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showLoader = true
       await http.post('updatelockerproduct', locker).then(async (successResponse) => {
         let response_data = successResponse.data;
-        let toast_type = "error"
+        let toast_type = "success"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         this.hideLockerProductUpdateButton(true)
@@ -1453,11 +1462,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async resetStore() {
     const self: Record<any, any> = this;
-
     const editConfirmation = this.editModeConfirmation();
     editConfirmation.then(async (response) => {
       const ok = await this.ref['reset-changes'].showConfirm()
       if (ok) {
+        this.search_products = '';
+        (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
         const categories_promise = this.fetchCategories();
         categories_promise.then(async (response) => {

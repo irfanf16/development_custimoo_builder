@@ -113,7 +113,7 @@
                                   </div>
                                 </div>
                               </b-tab>
-                              <b-tab>
+                              <b-tab v-if="logoColorsInfo && logoColorsInfo.length">
                                 <template #title>
                                   Team logo colors
                                 </template>
@@ -127,7 +127,7 @@
                                   </div>
                                 </div>
                               </b-tab>
-                              <b-tab>
+                              <b-tab v-if="selectedProduct.is_custom_color_allowed">
                                 <template #title>
                                   Other
                                 </template>
@@ -263,7 +263,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     return this.$store.getters.getSelectedProductId
   }
   get logoColorsInfo() {
-    return this.$store.getters.getLogoColorsInfo('extracted_colors')
+    return filter(this.$store.getters.getLogoColorsInfo('extracted_colors'), 'hex')
   }
 
   get lockerColors() {
@@ -513,8 +513,8 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
       custom_text.is_first_number = false
     }
     custom_text.items[0] = Object.assign(custom_text.items[0], {
-      color: 'WHITE', color_pantone: '#F4F5F0', font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
-      is_locked: false, label: 'Fixed Text ' + (custom_text_names_count + 1), outline_color: 'WHITE', outline_color_pantone: '#F4F5F0',
+      color: this.productColors[0]?.color_text[0]?.value, color_pantone: this.productColors[0]?.color_text[0]?.name, font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
+      is_locked: false, label: 'Fixed Text ' + (custom_text_names_count + 1), outline_color: this.productColors[0]?.color_text[1]?.value, outline_color_pantone: this.productColors[0]?.color_text[1]?.name,
       outline_enabled: 1, outline_width: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300, scaleX: 0, scaleY: 0
     })
     return custom_text;
