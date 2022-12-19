@@ -1584,16 +1584,18 @@ const setVueVersion = async () => {
   if(is_loggedIn) {
     const customer = Store.getters.getCustomer;
     customer_id = customer.id;
-  }
-  await http.get('get-reset-store?customer_id='+customer_id).then((res) => {
-    if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
-      if(is_loggedIn && res.data.isCustomerStoreReset == 0){
-        http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).then(() => {
-          restore();
-        })
-      }
+    if(customer_id) {
+      await http.get('get-reset-store?customer_id='+customer_id).then((res) => {
+        if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
+          if(is_loggedIn && res.data.isCustomerStoreReset == 0){
+            http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).then(() => {
+              restore();
+            })
+          }
+        }
+      })
     }
-  })
+  }
 }
 
 async function restore(){
