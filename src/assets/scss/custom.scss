@@ -2581,12 +2581,6 @@ button {
             border: none;
 
             .assets-file {
-                display: flex;
-                flex-wrap: wrap;
-                flex-direction: row;
-                max-height: 50vh;
-                overflow-y: auto;
-
                 .assets-logo-block {
                     border: 1px solid rgba(0, 0, 0, 0.1);
                     display: flex;
@@ -2598,10 +2592,6 @@ button {
                 div {
                     margin-bottom: 20px;
                     align-items: center;
-
-                    @media only screen and (min-width: 768px) {
-                        flex-basis: 20%;
-                    }
 
                     img {
                         display: block;
@@ -3584,6 +3574,13 @@ $fontSize: 0.5;
         position: absolute;
         right: -10px;
         top: -14px;
+    }
+
+    &.small{
+        height: 16px;
+        width: 16px;
+        right: -8px;
+        top: -10px;
     }
 }
 

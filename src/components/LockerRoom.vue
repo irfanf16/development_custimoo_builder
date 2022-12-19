@@ -123,16 +123,18 @@
 
                 </b-tab>
                 <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
-                  <div class="grid grid-mobile-3 gap-1">
-                    <template v-for="(logo, inda) in room.logos">
-                      <div :key="inda" class="assets-logo-block">
-                        <span class="d-block p-2">
-                          <img :src="storageUrl+logo.logo_url+'?nocache=1'" />
+                  <div class="grid w-100 gap-2" style="grid-template-columns: repeat(auto-fill, 140px)">
+                    <div :key="'asset'+inda" v-for="(logo, inda) in room.logos" class="position-relative align-self-stretch d-flex flex-column">
+                      <div class="assets-logo-block h-100 w-100" style="background: rgba(0,0,0,0.12)">
+                        <span class="d-flex h-100 w-100 align-items-center justify-content-center p-2" >
+                          <img :src="storageUrl+logo.logo_url+'?nocache=1'" class="w-auto" />
                         </span>
                         <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
                       </div>
-                      <a :key="`delete_logo${inda}`" @click="deleteLogo(i, logo.id, inda, room.id)"><font-awesome-icon :icon="['fas', 'trash-alt']"/></a>
-                    </template>
+                      <a :key="`delete_logo${inda}`" class="absolute btn small p-0 remove" @click="deleteLogo(i, logo.id, inda, room.id)">
+                        <b-icon-x class="fs-2" />
+                      </a>
+                    </div>
                   </div>
                 </b-tab>
                 <b-tab lazy v-if="!getSelectionMode.readonly" title="Colors">
@@ -1360,6 +1362,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   font-size: 1rem;
   width: 100%;
   border: none;
+
+  &:hover{
+    background: #121212;
+    color: #fff;
+  }
 }
 .sortable-selected {
   background: #eee;
