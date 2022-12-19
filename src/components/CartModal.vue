@@ -202,9 +202,17 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
         });
 
         if(cart_items[cart_item_index]){
+
           let factory_item_index = cart_items[cart_item_index].factory_products.findIndex((factory_item)=>{
-            return factory_item.ecommerce_cart_id == ecommerce_update_id
+            if(this.company.platform === 'wordpress'){
+              return factory_item.ecommerce_cart_id == ecommerce_update_id
+            }else if(this.company.platform === 'shopify'){
+              return factory_item.id == ecommerce_update_id
+            }
+
           } );
+
+          console.log('this.$route.query.roster',this.$route.query.roster)
 
           if(cart_items[cart_item_index].factory_products[factory_item_index]){
             if(this.$route.query.roster){
@@ -350,15 +358,16 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       let is_personalized = this.$store.getters.getPersonalized;
 
       //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
-
+      console.log('edit1', edit)
       let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
+      let shopify_line_item = (self.$route.query.line)?self.$route.query.line:null;
       if(ecommerce_cart_id){
         this.$router.push({ name: 'Home' });
       }
 
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
         editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
-          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id
+          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item
         },
         order_product_info: null
       })
@@ -377,6 +386,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       // }else{
       //   this.$store.dispatch('setPrivateProduct', is_private);
       // }
+      console.log('edit2', edit)
       this.hideVModal('cart-modal')
       if (!edit) {
         await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})

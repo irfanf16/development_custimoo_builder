@@ -296,7 +296,11 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
       let platform = this.company.platform
       let ecommerce_cart_id = null
-      let ecom_url = company_domain + '/wp-admin/admin-ajax.php'
+      let ecom_url = '';
+      if (platform === 'wordpress'){
+        ecom_url = company_domain + '/wp-admin/admin-ajax.php'
+      }
+
 
       if (platform === 'wordpress') {
         if (cart_product.sync_id === '' || cart_product.ecommerce_post_id === '') {

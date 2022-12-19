@@ -416,7 +416,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {Component, Mixins} from 'vue-property-decorator'
+import {Component, Mixins, Prop} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import $ from 'jquery'
 import {
@@ -447,7 +447,10 @@ import {getCompany} from "@/helpers/Helpers";
 
      if(this.company.platform == "wordpress") {
       this.order_id = this.$route.query.order_id;
-    } else {
+    } else if(this.company.platform == "shopify"){
+       this.order_id = this.ecommerce_order_id;
+     }
+     else {
       this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
@@ -497,6 +500,7 @@ import {getCompany} from "@/helpers/Helpers";
 })
 
 export default class OrderDetail extends Mixins(ErrorMessages) {
+  @Prop({required: false}) ecommerce_order_id!: number
   public storage_url = process.env.VUE_APP_STORAGE_URL
   private order_id = null;
   private order:Record<any,any> = {};

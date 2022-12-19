@@ -519,9 +519,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         if(collection_view){
           this.$root.$emit('closeCollectionView');
         }
-        if(this.company.platform != 'wordpress'){
+
+        let no_cart_modal_platforms = ['wordpress','shopify'];
+        if(!no_cart_modal_platforms.includes(this.company.platform))
           this.showVModal('cart-modal')
-        }
 
 
       }else{
