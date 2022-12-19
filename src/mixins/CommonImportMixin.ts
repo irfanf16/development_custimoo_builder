@@ -1,13 +1,33 @@
 import { Component, Vue } from 'vue-property-decorator'
 import Gleap from 'gleap'
-import { getCompany } from '@/helpers/Helpers'
+import { authenticateUser, getCompany, getUrlParameter, routerPush } from '@/helpers/Helpers'
 import { i18n } from '@/i18n'
 import store from '@/store'
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
+import 'sweetalert2/dist/sweetalert2.min.css';
 
 @Component
 export default class CommonImportMixin extends Vue{
   async mounted () {
+    await getCompany();
+
+    const token = getUrlParameter('token')
+    if (token){
+      localStorage.setItem('jwtToken', token)
+      localStorage.setItem('adminToken', token)
+      await authenticateUser(token)
+      await this.$store.dispatch('resetStore')
+      routerPush(this.$router, 'Home')
+    } else{
+      const storageInterval = setInterval(()=>{
+        const jwtToken = localStorage.getItem('jwtToken');
+        if(jwtToken && jwtToken !=''){
+          authenticateUser(jwtToken)
+          clearInterval(storageInterval);
+        }
+      }, 500)
+    }
+
     const elem = document.createElement('link');
     elem.rel = ' stylesheet'
     elem.type = 'text/css';

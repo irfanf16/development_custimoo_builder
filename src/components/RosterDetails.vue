@@ -131,7 +131,7 @@
                 <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
-              <div class="tooltip guide">Press enter to view the options</div>
+              <div v-if="false" class="tooltip guide">Press enter to view the options</div>
             </div>
           </div>
           <div class="align-right">
@@ -172,14 +172,20 @@
             Add to Cart
           </button>
         </template>
+        <span v-else-if="notVectorLogosCount > 0">
+          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+            Finalize Design
+          </b-button>
+        </span>
       </template>
       <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-else-if="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
         <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
       </span>
-      <span v-b-tooltip="`Please upload the all vector logos to add to cart the products`" v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
-        <b-button @click="addToCart" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+
+      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+        <b-button @click="showVModal('replace-logo')" aria-label="Finalize Order" class="mx-2 px-5" variant="secondary">Finalize Design</b-button>
       </span>
-      <template v-else-if="!isLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
+      <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
                   :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
@@ -267,6 +273,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public show_roster_change_warning = false
   public show_undo_roster_btn = false
   public is_admin_token = localStorage.getItem('adminToken')
+  public handle_text_change_timer!: number
 
   /*
   *  component data properties ends
@@ -559,6 +566,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       }
       this.$store.commit('UPDATE_ROSTER', updated_roster)
     })
+    this.syncRosterWithCustomText('name', this.rosterDetails[this.active_roster_index].text)
   }
 
   public async handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
@@ -579,7 +587,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
     //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.
     if(['name', 'number'].includes(type)) {
-      await self.syncRosterWithCustomText(type, updated_val)
+      clearTimeout (this.handle_text_change_timer);
+      this.handle_text_change_timer = setTimeout(() => {
+        self.syncRosterWithCustomText(type, updated_val)
+      }, 300)
     }
   }
 
@@ -596,7 +607,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         emitter: "input", custom_text_index: custom_name_number_index, value: custom_text_synced_with_roster
       });
     }
-
   }
 
   public handleLockerUpdate(updated_val: Record<any, any>[]) {
@@ -701,44 +711,44 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 }
 
 .shirt-size{
-  .tooltip.guide{
-    display: none;
-    background: #333;
-    color: white;
-    padding: 7px 10px;
-    border-radius: 7px;
-    white-space: nowrap;
-    margin-top: 10px;
-    animation: fadeInUp 0.2s ease;
+  //.tooltip.guide{
+  //  display: none;
+  //  background: #333;
+  //  color: white;
+  //  padding: 7px 10px;
+  //  border-radius: 7px;
+  //  white-space: nowrap;
+  //  margin-top: 10px;
+  //  animation: fadeInUp 0.2s ease;
+  //
+  //  &:before{
+  //    display: block;
+  //    position: absolute;
+  //    content: "";
+  //    height: 0;
+  //    width: 0;
+  //    border-color: transparent transparent #333;
+  //    border-style: solid;
+  //    border-width: 7px;
+  //    top: -14px;
+  //    left: 30%;
+  //  }
+  //}
 
-    &:before{
-      display: block;
-      position: absolute;
-      content: "";
-      height: 0;
-      width: 0;
-      border-color: transparent transparent #333;
-      border-style: solid;
-      border-width: 7px;
-      top: -14px;
-      left: 30%;
-    }
-  }
-
-  select {
-    &:focus{
-      &+.tooltip.guide{
-        display: block;
-        opacity: 1;
-      }
-    }
-
-    &:hover{
-      &+.tooltip.guide{
-        display: none;
-        opacity: 0;
-      }
-    }
-  }
+  //select {
+  //  &:focus{
+  //    &+.tooltip.guide{
+  //      display: block;
+  //      opacity: 1;
+  //    }
+  //  }
+  //
+  //  &:hover{
+  //    &+.tooltip.guide{
+  //      display: none;
+  //      opacity: 0;
+  //    }
+  //  }
+  //}
 }
 </style>

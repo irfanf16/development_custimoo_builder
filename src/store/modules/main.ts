@@ -4,7 +4,7 @@ import { Module } from "vuex";
 const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 const Main:Module<any, any> = {
   state: {
-    isSafari: /^((?!chrome|android).)*safari/i.test(navigator.userAgent),
+    isSafari: process.env.NODE_ENV === 'staging' ? /^((?!chrome|android).)*safari/i.test(navigator.userAgent) : false,
     manageComponents: {
       mobileScreen: mobileScreen,
       CustomizationPreview: !mobileScreen,
@@ -29,7 +29,10 @@ const Main:Module<any, any> = {
       state.manageComponents[payload.index] = payload.value
     },
     setPopper(state: Record<any, any>, payload: string) {
-      state.popperID = payload
+      if(state.popperID != payload)
+      {
+        state.popperID = payload
+      }
     },
     SET_HIDE_TAB(state: Record<any, any>, payload: Record<any, any>) {
       state.hideTab = {

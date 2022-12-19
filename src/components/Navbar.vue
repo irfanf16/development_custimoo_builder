@@ -83,12 +83,12 @@ export default {
 <style lang="scss" scoped>
   .main-nav{
     justify-content: center;
-    background: rgba(17, 17, 17, 0.25);
+    background: #C2C2C2;
     padding: 15px 20px;
     transition: 0.3s ease all;
 
     &:hover{
-      background: rgba(17, 17, 17, 1);
+      background: #111111
     }
 
     @media (min-width: 991px) {

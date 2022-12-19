@@ -5,14 +5,15 @@ import {findIndex} from 'lodash';
 import {
   getActiveProductData, getRandom, handleResponseException, processColorsCustom,
   setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
-  initCustomLogosNew,fetchCategories
+  initCustomLogosNew, exitFromEditMode, getUrlParameter
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
+import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 @Component
-export class LockerProducts extends Vue {
+export class LockerProducts extends Mixins(FetchCategories) {
 
   public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="") {
     let self: Record<any, any> = this;
@@ -22,20 +23,22 @@ export class LockerProducts extends Vue {
     // await this.$store.dispatch('setProductType', {prd_type: room_product.product_type, value: true});
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
-    const categories_promise = fetchCategories(null, product_id);
+    const categories_promise = this.fetchCategories(null, product_id);
     categories_promise.then((response) => {
       if(response){
+        let selected_category = this.$store.getters.getSelectedCategory;
         let is_private:Boolean =  this.$store.getters.getPrivateProduct
         let is_customized = this.$store.getters.getCustomized
         let is_personalized = this.$store.getters.getPersonalized
         let locker_product_name = room_product.product_name
+
         self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
           editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: '', private_product: is_private },
-          locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name},
+          locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name },
           cart_product_info: null, order_product_info: null
         })
 
-        let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+        let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&category_id=${selected_category.category_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
         if(share_url) {
           url += `?share_url=${share_url}`;
         }
@@ -99,7 +102,6 @@ export class LockerProducts extends Vue {
         colors =  res.data.colors
       }).catch((e) => {
         console.log('Unable to fetch logo colors',e.response.data.message)
-        //this.showError('Unable to fetch logo colors')
       })
     return colors
   }
@@ -109,11 +111,11 @@ export class LockerProducts extends Vue {
     let room_product_id = room_product.id;
     let product_id = room_product.product_id;
 
-    const categories_promise = fetchCategories(null,  room_product.product_id);
-    categories_promise.then((response) => {
+    return new Promise((resolve, reject) => {
+      const categories_promise = this.fetchCategories(null,  room_product.product_id);
+      categories_promise.then((response) => {
       let is_private:Boolean = this.$store.getters.getPrivateProduct;
       let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
-      return new Promise((resolve, reject) => {
         const handle_product = new Promise((resolve, reject) => {
           http.get(url).then(async (response: Record<any, any>) => {
             let active_product_detail = response.data.editing_product_detail;
@@ -142,7 +144,7 @@ export class LockerProducts extends Vue {
 }
 
 @Component
-export class handleMainProducts extends Vue {
+export class handleMainProducts extends Mixins(FetchCategories) {
 
   public async handleMainProducts(response: Record<any, any>){
     let self: Record<any, any> = this;
@@ -219,7 +221,6 @@ export class handleMainProducts extends Vue {
               product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
             })
             this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
-            await this.$store.dispatch('setProductsRosters')
           }
           else {
             let {sync_id, customizer_preview, update_cart} = self.$route.query
@@ -287,7 +288,7 @@ export class handleMainProducts extends Vue {
           self.$eventBus.$emit("changeColors")
         } else {
           self.exitFromEditMode();
-          const categories_promise = fetchCategories();
+          const categories_promise = this.fetchCategories();
           categories_promise.then(  async(response) => {
             if(response){
               let query_params = await self.setQueryParams()
@@ -314,9 +315,8 @@ export class handleMainProducts extends Vue {
       let selected_product = this.$store.getters.getSelectedProduct;
      // initCustomLogos(retrieved_products)
       await initCustomLogosNew(retrieved_products)
-      if(!set_last_active_data) {
-        this.$store.dispatch("setProductsRosters");
-      }
+      this.$store.dispatch("setProductsRosters");
+
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {products_rosters: this.$store.getters.getProductRosters('all')})
       let customLogos = this.$store.getters.getCustomLogoObject
       for (const product of retrieved_products) {
@@ -397,9 +397,6 @@ export class handleMainProducts extends Vue {
         self.show_roster = true;
         await self.setProductSizes();
         await self.show();
-        await http.post(`/get-factory-settings`, {factory_id:selected_product.factory_id, keys: ['vector_image_constraint']}).then((res) => {
-          this.$store.commit('SET_SETTING', res.data.result.settings)
-        });
         resolve(true);
       })
     })
@@ -685,29 +682,8 @@ export class handleMainProducts extends Vue {
       }
     });
 
-    //set logo colors
-    // let logo_colors:Record<any, any> = []
-    // if(!active_product_detail.colors && active_product_detail.custom_logos) {
-    //   //fetch from server
-    //   let logos = JSON.parse(active_product_detail.custom_logos)
-    //   if(logos.length > 0) {
-    //     let color_str:any = await this.fetchLogoColors(logos[0].id);
-    //     let image_colors:Record<any, any> = processColorsCustom(JSON.parse(color_str))
-    //     let image_color_count = image_colors.length;
-    //     while(image_color_count < 4 ) {
-    //       image_colors.push({hex: null, pantone: null, name: null});
-    //       ++image_color_count;
-    //     }
-    //     logo_colors = image_colors
-    //   }
-    // }
-    // else {
-    //   logo_colors = JSON.parse(active_product_detail.colors)
-    // }
-
     this.$store.commit('RESET_UNDO');
     this.$store.commit('RESET_REDO');
-    // await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     if(!collection_view){
       this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
       this.$emit('hideLockerRoomModal')
@@ -788,26 +764,6 @@ export class handleMainProducts extends Vue {
     this.$store.commit('SET_LOGO_COLORS_INFO', {
       data: { using_logo_colors: false,  is_shuffled: false,  colors: cart_item_product.logo_colors,  extracted_colors: cart_item_product.logo_colors }
     })
-    //set logo colors
-    // let logo_colors:Record<any, any> = []
-    // if (!cart_item_product.colors && cart_item_product.custom_logos) {
-    //   //fetch from server
-    //   let logos = cart_item_product.custom_logos
-    //   if (logos.length > 0) {
-    //     let color_str: any = await this.fetchLogoColors(logos[0].id);
-    //     let image_colors = processColorsCustom(JSON.parse(color_str))
-    //     let image_color_count = image_colors.length;
-    //     while (image_color_count < 4) {
-    //       image_colors.push({ hex: null, pantone: null, name: null });
-    //       ++image_color_count;
-    //     }
-    //     logo_colors = image_colors
-    //   }
-    // }
-    // else {
-    //   logo_colors = cart_item_product.colors
-    // }
-    // await this.$store.dispatch("SET_LOGO_COLORS", logo_colors);
     this.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
   }
 
@@ -827,14 +783,13 @@ export class ProductsQueryParamsMixin extends Vue {
       }
     }
     else {
-      if (self.$route.params.name) {
-        let shared_url = self.$route.path
-        if (shared_url.charAt(0) === '/'){
-          shared_url = shared_url.substring(1)
-        }
+      const shared_url = getUrlParameter()
+      if (shared_url?.includes('share')) {
         query_params = [
           `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
         ];
+        resetLastActiveProductData()
+        exitFromEditMode()
       }
       else {
         //if route have update_order_product query parameter then it means the order edit product changed so we need to exit from existing edit mode and re set order edit mode
@@ -856,7 +811,9 @@ export class ProductsQueryParamsMixin extends Vue {
               `private=${self.getProductEditInfoObject.filters.private_product?true:false}`,
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
               `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
-              `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
+              `active_product_type=${self.getProductEditInfoObject.type}`,
+              `category_id=${self.getProductEditInfoObject.category_id}`,
+              'paginate=false'
             ];
           }
           else if(self.getProductEditInfoObject.type == "cart_product") {
@@ -913,149 +870,108 @@ export class ProductsQueryParamsMixin extends Vue {
         }
       }
     }
-    // await this.$store.dispatch('setProductType', { prd_type: "customized", value: self.getLastActiveProductData.customized });
-    // await this.$store.dispatch('setProductType', { prd_type: "personalized", value: self.getLastActiveProductData.personalized });
-    // await this.$store.dispatch('setPrivateProduct', self.getLastActiveProductData.personalized);
     return query_params
   }
 }
 
 @Component
-export class exitEditMode extends Vue {
+export class exitEditMode extends Mixins(ErrorMessages) {
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }
   public async exitFromEditMode() {
-    this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
-    })
+    exitFromEditMode()
   }
   public editModeConfirmation() {
     let self: Record<any, any> = this;
-    const swalWithDefaults = this.$swal.mixin({
-      title: 'Changes Detected',
-      text: "Do you want save the product before exiting!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
-    });
+    // const santaConfirmModal = self.$santaModal.show({
+    //     icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+    // });
     return new Promise((resolve,reject) => {
       if (self.$store.getters.getProductEditInfoObject.editing) {
         switch (self.$store.getters.getProductEditInfoObject.type) {
           case 'locker_product':
             if (self.$store.getters.getHideSaveLockerButton === false) {
-              swalWithDefaults.fire().then((result) => {
-                if (result.isConfirmed) {
-                  this.$swal.fire(
-                    'Saving!',
-                    'Please wait your setting are being saved',
-                    'warning',
-                  )
-                  const prms = new Promise((resolve) => {
-                    self.$eventBus.$emit('saveToLockerProduct', resolve)
-                  })
-                  prms.then(() => {
-                    this.$swal.fire(
-                      'Saved!',
-                      'Changes Successfully saved',
-                      'success',
-                    )
+              self.$santaModal.show({
+                icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+              },self).then((confirmation) => {
+                  if(confirmation){
+                    self.$santaModal.hide();
+                    self.showToast('Your settings are being saved please wait...', 'info');
+                    const prms = new Promise((resolve) => {
+                      self.$eventBus.$emit('saveToLockerProduct', resolve)
+                    })
+                    prms.then(() => {
+                      self.showToast('Your settings saved successfully', 'success');
+                      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                      resolve(true);
+                    });
+                  }
+                  else{
+                    self.showToast('Changes Discarded, Exiting from Editing State', 'error');
                     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
-                    resolve(true)
-                  });
-                } else if (
-                  /* Read more about handling dismissals below */
-                  result.dismiss === self.$swal.DismissReason.cancel
-                ) {
-                  this.$swal.fire(
-                    'Discarded',
-                    'Changes Discarded, Exiting from Editing State',
-                    'error'
-                  )
-                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
-                  resolve(false)
-                }
+                    resolve(false)
+                  }
               });
             }
             else{
+              self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
               resolve(false);
             }
             break;
           case 'cart_product':
-            swalWithDefaults.fire().then((result) => {
-              if (result.isConfirmed) {
-                this.$swal.fire(
-                  'Saving!',
-                  'Please wait your setting are being saved',
-                  'warning',
-                )
+            self.$santaModal.show({
+              icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+            },self).then((confirmation) => {
+              if(confirmation){
+                self.$santaModal.hide();
+                self.showToast('Your settings are being saved please wait...', 'info');
                 const prms = new Promise((resolve) => {
                   self.$eventBus.$emit('updateCart', resolve)
                 })
                 prms.then(() => {
-                  this.$swal.fire(
-                    'Saved!',
-                    'Changes Successfully saved',
-                    'success',
-                  )
+                  self.showToast('Your settings saved successfully', 'success');
                   self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                   resolve(true)
                 });
-              } else if (
-                /* Read more about handling dismissals below */
-                result.dismiss === self.$swal.DismissReason.cancel
-              ) {
-                this.$swal.fire(
-                  'Discarded',
-                  'Changes Discarded, Exiting from Editing State',
-                  'error'
-                )
+              }
+              else{
+                self.showToast('Changes Discarded, Exiting from Editing State', 'error');
                 self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                 resolve(false)
               }
             });
             break;
           case 'order_product':
-            swalWithDefaults.fire().then((result) => {
-              if (result.isConfirmed) {
-                this.$swal.fire(
-                  'Saving!',
-                  'Please wait your setting are being saved',
-                  'warning',
-                )
+            self.$santaModal.show({
+              icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+            },self).then((confirmation) => {
+              if(confirmation){
+                self.$santaModal.hide();
+                self.showToast('Your settings are being saved please wait...', 'info');
                 const prms = new Promise((resolve) => {
                   self.$eventBus.$emit('updateOrder', resolve)
                 })
                 prms.then(() => {
-                  this.$swal.fire(
-                    'Saved!',
-                    'Changes Successfully saved',
-                    'success',
-                  )
+                  self.showToast('Your settings saved successfully', 'success');
                   self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                   resolve(true)
                 });
-              } else if (
-                /* Read more about handling dismissals below */
-                result.dismiss === swalWithDefaults.DismissReason.cancel
-              ) {
-                this.$swal.fire(
-                  'Discarded',
-                  'Changes Discarded, Exiting from Editing State',
-                  'error'
-                )
+              }
+              else{
+                self.showToast('Changes Discarded, Exiting from Editing State', 'error');
                 self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
                 resolve(false)
               }
             });
             break;
           default:
-            resolve(false);
+            resolve(null);
             break;
         }
       }
       else{
-        resolve(false);
+        resolve(null);
       }
     });
   }
@@ -1111,7 +1027,7 @@ export class RosterDetailsGlobal extends Mixins(){
 }
 
 @Component
-export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode,ModalAction) {
+export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitEditMode,ModalAction,ProductsQueryParamsMixin) {
   get total(): number {
     let sum = 0;
     let roster_details = this.$store.getters.getRosterDetails()
@@ -1144,17 +1060,24 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     return true;
   }
 
-  public async addToCartMixin(product_fonts: Record<any, any>[]) {
-    if(!this.checkMinimumOrderQtyBYDesign())
+  public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null) {
+    if(!this.checkMinimumOrderQtyBYDesign()) {
+      if(resolve){
+        resolve(false);
+      }
       return;
+    }
     this.hideVModal('rostermodal');
     let self: Record<any, any> = this;
-    try {
+
       let company = self.$store.getters.getCompany;
       let platform = company.platform;
       if(platform === 'wordpress') {
         const adminToken = localStorage.getItem('adminToken');
           if(adminToken) {
+            if(resolve){
+              resolve(false);
+            }
             return false;
           }
       }
@@ -1185,12 +1108,15 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
       if(platform === 'wordpress'){
         if((cart_product as Record<any, any>).sync_id === "" || (cart_product as Record<any, any>).ecommerce_post_id === ""){
+          if(resolve){
+            resolve(false);
+          }
           return false;
         }
 
         let ecom_form_data = new FormData();
 
-        let ecommerce_update_id = self.$route.query.update_item;
+        let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
         if(ecommerce_update_id){
           ecom_form_data.append('action', 'custimoo_update_cart');
           ecom_form_data.append('update_item', ecommerce_update_id);
@@ -1228,7 +1154,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       }
       if(santacart){
         self.$store.dispatch('setCartLoading',true);
-        http.post(url, post_data).then(async (res: any) => {
+        await http.post(url, post_data).then(async (res: any) => {
           if (res.data.success == true){
             let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
             let api_res:Record<any, any> = res.data.result
@@ -1248,7 +1174,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               }
               http.post(ecom_url, update_cart_id_data).then((res: any) => {
                 if(!collection_view) {
-                  window.location.href = company_domain + '/cart'
+                  window.location.replace(company_domain + '/cart');
                 }
               }).catch(err => {
                 self.showErrorArr(err.response.data.errors)
@@ -1258,10 +1184,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             else {
               if(cart_edit_mode) {
                 await self.exitFromEditMode()
-                const categories_promise = fetchCategories();
+                const categories_promise = this.fetchCategories();
                 categories_promise.then(async (response) => {
                   if(response){
-                    let query_params = await self.setQueryParams
+                    let query_params = await self.setQueryParams()
                     self.retrieveProducts(query_params);
                   }
                 })
@@ -1276,10 +1202,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             }
             if(cart_edit_mode) {
               await self.exitFromEditMode()
-              const categories_promise = fetchCategories();
+              const categories_promise = this.fetchCategories();
               categories_promise.then(async (response) => {
                 if(response){
-                  let query_params = await self.setQueryParams
+                  let query_params = await self.setQueryParams()
                   self.retrieveProducts(query_params);
                 };
               })
@@ -1287,31 +1213,30 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           }
           self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
           self.$store.dispatch('setCartLoading',false);
-
+          if(resolve){
+            resolve(true);
+          }
           if(collection_view){
             self.$root.$emit('getNextProduct');
           }
-          // self.hideVModal('rostermodal');
-          // self.$root.$emit('showCartModal');
         }).catch(async errorResponse => {
           self.$store.dispatch('setCartLoading',false);
           handleResponseException(errorResponse)
           if(cart_edit_mode) {
             await self.exitFromEditMode()
-            const categories_promise = fetchCategories();
+            const categories_promise = this.fetchCategories();
             categories_promise.then(async (response) => {
-              let query_params = await self.setQueryParams
+              let query_params = await self.setQueryParams()
               self.retrieveProducts(query_params);
               self.hideVModal('rostermodal');
             });
+            if(resolve){
+              resolve(false);
+            }
           }
         })
       }
-    }
-    catch (e) {
-      console.error('error in add to cart',e)
-      self.$store.dispatch('setCartLoading',false);
-    }
+
   }
 
   public async retrieveProducts() {

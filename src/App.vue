@@ -16,8 +16,6 @@ import {LockerProducts} from "@/mixins/LockerProduct";
 // window.io = require('socket.io-client');
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import store from "@/store";
-import { authenticateUser, getCompany, getPermissions } from '@/helpers/Helpers'
 import CommonImportMixin from '@/mixins/CommonImportMixin'
 
 // console.log(localStorage.getItem('access_tokens'))
@@ -47,16 +45,6 @@ navigator.serviceWorker.getRegistrations().then(function(registrations) {
   },
   mixins: [CommonImportMixin],
   async mounted() {
-    // const token = this.$router.currentRoute.query.token as string
-    const token = this.getParameterByName('token');
-    console.log('token from build', token, window.location.href)
-    if (token){
-      localStorage.setItem('jwtToken', token)
-      localStorage.setItem('adminToken', token)
-      await authenticateUser(token)
-      await this.$store.dispatch('resetStore')
-      await this.$router.push({name: 'Home'})
-    }
 
     // const customer =  this.$store.getters.getCustomer;
 
@@ -105,15 +93,6 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
     })
   }
 
-  public getParameterByName(name:string, url = window.location.href) {
-    name = name.replace(/[[\]]/g, '\\$&');
-    let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url);
-    if (!results) return null;
-    if (!results[2]) return '';
-    return decodeURIComponent(results[2].replace(/\+/g, ' '));
-  }
-
 }
 </script>
 
@@ -129,6 +108,7 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+  background: #fff;
 }
 
 [v-cloak] {display: none}

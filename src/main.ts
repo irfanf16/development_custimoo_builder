@@ -103,7 +103,13 @@ Vue.prototype.$logData = logData;
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
+import SantaModal from "@/plugins/santaModal/SantaModal.js";
+Vue.use(SantaModal)
+
 Vue.use(VueSweetalert2);
+
+import ZoomOnHover from "vue-zoom-on-hover";
+Vue.use(ZoomOnHover);
 new Vue({
   router,
   store,

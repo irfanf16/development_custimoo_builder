@@ -325,7 +325,6 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     uniqueColors.forEach((color: string) => {
 
       let pantoneColor = getClosestColor(color, selectProductPantonesList,this.getColorType)
-      //console.log(JSON.parse(JSON.stringify(pantoneColor)))
       this.imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
     })
     let add_extra_colors = 4 - uniqueColors.length;

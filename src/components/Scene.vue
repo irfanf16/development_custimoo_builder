@@ -53,9 +53,6 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         fontFamily: 'Ubuntu'
       })
     }
-    if(this.mainPreview) {
-      console.log(this.front)
-    }
     let frontPromise = this.loadScene(this.front, 'front')
     frontPromise.then(() => {
       if (this.back) {
@@ -179,28 +176,29 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         updated_custom_text.value = "";
         self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
       }
-    })
 
-    if(!this.mainPreview && this.selectedProductId == this.product_id) {
-      self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
-        const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
-        if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
-          const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
-          const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
-          this.eventAction(text, textObject, otherSideObject)
-        }
-      })
-    }
-    if(!this.mainPreview && this.selectedProductId == this.product_id) {
-      self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
-        const logo = this.custom_logos[logo_index]
-        if(logo && this.custom_logo_objects[logo_index]) {
-          const logoObject = this.custom_logo_objects[logo_index]
-          const otherSideObject = this.other_side_logos[logo_index]
-          this.eventAction(logo, logoObject, otherSideObject)
-        }
-      })
-    }
+      if(!this.mainPreview && this.selectedProductId == this.product_id) {
+        self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
+          const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
+          if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
+            const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
+            const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
+            this.eventAction(text, textObject, otherSideObject)
+          }
+        })
+      }
+
+      if(!this.mainPreview && this.selectedProductId == this.product_id) {
+        self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
+          const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
+          if(logo && this.custom_logo_objects[logo_index]) {
+            const logoObject = this.custom_logo_objects[logo_index]
+            const otherSideObject = this.other_side_logos[logo_index]
+            this.eventAction(logo, logoObject, otherSideObject)
+          }
+        })
+      }
+    })
   }
 })
 
@@ -266,8 +264,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public svg_groups_ready = false
   public other_side_logos: any[] = []
   public otherSideTexts: any[] = []
-  public logoIndex = 0
-  public textIndex = 0
   public ctx: any = {}
   public verticalLines: Record<any, any>[] = []
   public horizontalLines: Record<any, any>[] = []
@@ -303,14 +299,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
-  }
-
-  get productEditInfoObject(): Record<any, any> {
-    return this.$store.getters.getProductEditInfoObject
-  }
-
-  get mainSvgGroups(): [Record<any, any>] {
-    return this.$store.getters.getSvgGroups
   }
 
   get selectedProductId(): number {
@@ -384,6 +372,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 if (this.mainPreview) {
                   this.$store.dispatch('updateSvgGroups', {
                     index: index,
+                    id:item.id,
                     color: groupColors[item.id].color,
                     pantone: groupColors[item.id].pantone,
                     name: groupColors[item.id].name
@@ -417,6 +406,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   if (svgGroup.id == item.id) {
                     this.$store.dispatch('updateSvgGroups', {
                       index: index,
+                      id:item.id,
                       color: groupColors[item.id].color,
                       pantone: groupColors[item.id].pantone,
                       name: groupColors[item.id].name
@@ -454,6 +444,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             this.$store.dispatch('updateSvgGroups',
               {
                 index: index,
+                id:svgGroup.id,
                 color: defaultColors[useColorIndex].color,
                 pantone: defaultColors[useColorIndex].pantone,
                 name: defaultColors[useColorIndex].name
@@ -501,19 +492,22 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     let appliedDefaultColors: string[] = []
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
-      if (this.mainPreview) {
-        this.$store.dispatch('updateSvgGroups',
-          {
-            index: index,
-            color: defaultSvgGroups[svgGroup.id].color,
-            pantone: defaultSvgGroups[svgGroup.id].pantone,
-            name: defaultSvgGroups[svgGroup.id].name
-          })
+      if(Object.keys(defaultSvgGroups).length && defaultSvgGroups[svgGroup.id]) {
+        appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
+        if (this.mainPreview) {
+          this.$store.dispatch('updateSvgGroups',
+            {
+              index: index,
+              id:svgGroup.id,
+              color: defaultSvgGroups[svgGroup.id].color,
+              pantone: defaultSvgGroups[svgGroup.id].pantone,
+              name: defaultSvgGroups[svgGroup.id].name
+            })
+        }
+        svgGroup.color = defaultSvgGroups[svgGroup.id].color
+        svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
+        svgGroup.name = defaultSvgGroups[svgGroup.id].name
       }
-      svgGroup.color = defaultSvgGroups[svgGroup.id].color
-      svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
-      svgGroup.name = defaultSvgGroups[svgGroup.id].name
     })
 
     let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
@@ -585,9 +579,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               this.backCanvas.renderAll()
             }
             let svgIndex = 0
+            let svgGroupId = null;
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
               if (svgGroup.id == key.toLowerCase()) {
                 svgIndex = index
+                svgGroupId = svgGroup.id
                 svgGroup.color = changeColor.value
                 svgGroup.name = changeColor.name
                 svgGroup.pantone = changeColor.pantone
@@ -596,6 +592,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if (this.mainPreview) {
               this.$store.dispatch('updateSvgGroups', {
                 index: svgIndex,
+                id:svgGroupId,
                 color: changeColor.value,
                 name: changeColor.name,
                 pantone: changeColor.pantone
@@ -741,6 +738,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           this.addClipPath(ImageData.safe_zone_url, side)
         }
         if (!this.back || (this.back && side == 'back')) {
+          if(this.mainPreview) {
+            self.$eventBus.$emit('setTotalTabs')
+          }
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
             this.getSvgGroups()
           } else {
@@ -853,12 +853,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       let relativeCanvasHeight = self.canvasHeight / 2 - 20
 
       canvas.on('object:moving', (e: Record<any, any>) => {
-        self.objectScaling(e, side)
+        this.objectScaling(e, side)
         let customObj: Record<any, any> = this.getCustomObjectsLength(canvas)
-        if (customObj.logoLength + customObj.textLength == 1)
+        if (customObj.logoLength + customObj.textLength >= 1) {
           this.addGuideLine(e, canvas, vertical_line, horizontal_line, relativeCanvasWidth, relativeCanvasHeight)
-
-        self.addGuideForMultipleObjects(canvas, e.target)
+          this.addGuideForMultipleObjects(canvas, e.target)
+        }
       })
 
       canvas.on('object:scaling', (e: Record<any, any>) => {
@@ -908,7 +908,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let logoLength = 0
     let textLength = 0
     canvas.getObjects().forEach((obj: Record<any, any>) => {
-      if ('logoIndex' in obj) {
+      if ('logo_index' in obj) {
         logoLength++
       }
       if ('custom_text_index' in obj) {
@@ -918,7 +918,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return { logoLength, textLength }
   }
   public addGuideLine(e: Record<any, any>, canvas: Record<any, any>, vertical_line: Record<any, any>, horizontal_line: Record<any, any>, relativeCanvasWidth: number, relativeCanvasHeight: number) {
-
     if (!this.drawLines) {
       canvas.add(vertical_line);
       canvas.add(horizontal_line);
@@ -973,7 +972,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public addGuideForMultipleObjects(canvas: Record<any, any>, selectedObject: Record<any, any>) {
-    var activeObject = selectedObject,
+    let activeObject = selectedObject,
       canvasObjects = canvas.getObjects(),
       activeObjectCenter = activeObject.getCenterPoint(),
       activeObjectLeft = activeObjectCenter.x,
@@ -990,10 +989,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     // It should be trivial to DRY this up by encapsulating (repeating) creation of x1, x2, y1, and y2 into functions,
     // but we're not doing it here for perf. reasons -- as this a function that's invoked on every mouse move
 
-    for (var i = canvasObjects.length; i--;) {
+    for (let i = canvasObjects.length; i--;) {
       if (canvasObjects[i] === activeObject) continue;
 
-      if ('logoIndex' in canvasObjects[i] || 'textIndex' in canvasObjects[i]) {
+      if ('logo_index' in canvasObjects[i] || 'custom_text_index' in canvasObjects[i]) {
 
         var objectCenter = canvasObjects[i].getCenterPoint(),
           objectLeft = objectCenter.x,
@@ -1372,12 +1371,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             otherSideObjects[add_index] = objectAdd
           }
           if (side == 'back') {
+            objectAdd.clipPath = this.clip_path_front
             this.frontCanvas.add(objectAdd)
             if (this.productType == 'customized') {
               this.frontModel.bringToFront()
             }
           } else {
             if (this.back) {
+              objectAdd.clipPath = this.clip_path_back
               this.backCanvas.add(objectAdd)
               if (this.productType == 'customized') {
                 this.backModel.bringToFront()
@@ -1398,28 +1399,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
     }
-  }
-
-  public updateLogoObject(obj: Record<any, any>, update_obj: Record<any, any>) {
-
-    Object.keys(obj).map(function (key, index) {
-      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
-        let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = { ...logo_obj, ...update_obj }
-      })
-    });
-    return obj;
-  }
-
-  public updateTextObject(obj: Record<any, any>, update_obj: Record<any, any>) {
-
-    Object.keys(obj).map(function (key, index) {
-      obj[key].forEach((logo: Record<any, any>, logo_index: number) => {
-        let logo_obj = obj[key][logo_index]
-        obj[key][logo_index] = { ...logo_obj, ...update_obj }
-      })
-    });
-    return obj;
   }
 
   public async addModel(modelUrl: string, side: string) {
@@ -1685,8 +1664,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           canvas.renderAll()
 
-          this.addToOtherSide(img, logo.side)
-
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
             const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
@@ -1696,9 +1673,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 actualWidth: img.width,
                 actualHeight: img.height,
                 originalWidth: converted_width.value,
-                originalHeight: converted_height.value,
-                scaleX: img.scaleX,
-                scaleY: img.scaleY,
+                originalHeight: converted_height.value
               }
             })
           }
@@ -1720,6 +1695,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               visible: false
             })
           })
+
+          this.addToOtherSide(img, logo.side)
         }, { crossOrigin: 'Anonymous' })
       }
     }
@@ -1873,7 +1850,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (self.product_custom_text_objects[custom_text_index]) {
           await this.deleteExistingTextsFromCanvas(custom_text_index, false)
         }
-        if (custom_text.value) {
+        if (Object.keys(custom_text).length && custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
             let fabric_text: fabric.Text | fabric.Group | Record<any, any>
             if (this.mainPreview) {
@@ -1915,6 +1892,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     text_index: custom_text_index,
                     manually_added: custom_text.manually_added
                   })
+                  if(custom_text_item.placement == 'Back' && self.backCanvas) {
+                    fabric_text.clipPath = this.clip_path_back
+                  } else {
+                    fabric_text.clipPath = this.clip_path_front
+                  }
 
                   if (custom_text_item.scaleX && custom_text_item.scaleY) {
                     fabric_text.scaleX = custom_text_item.scaleX
@@ -2010,6 +1992,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
               self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
+              if(custom_text_item.placement == 'Back' && self.backCanvas) {
+                fabric_text.clipPath = this.clip_path_back
+              } else {
+                fabric_text.clipPath = this.clip_path_front
+              }
+
               if (custom_text_item.placement == 'Front') {
                 self.frontCanvas.add(fabric_text)
                 render_front_canvas = true
@@ -2065,23 +2053,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
 
-  public handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
+  public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
     let self: Record<any, any> = this;
     const logo_index =  fabric_object.get("logo_index");
     if(this.custom_logos[logo_index]) {
-      this.custom_logos[logo_index].x_axis = fabric_object.get("left");
-      this.custom_logos[logo_index].y_axis = fabric_object.get("top");
-      this.custom_logos[logo_index].rotation = fabric_object.get("angle");
-      this.custom_logos[logo_index].scaleX = fabric_object.get("scaleX");
-      this.custom_logos[logo_index].scaleY = fabric_object.get("scaleY");
       const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
       const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
       const converted_width = unitConversion(width)
       const converted_height = unitConversion(height)
-      this.custom_logos[logo_index].originalWidth = converted_width.value;
-      this.custom_logos[logo_index].originalHeight = converted_height.value;
 
-      this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+      await this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
         custom_logo_index: fabric_object.get("logo_index"),
         data: {
           x_axis: fabric_object.get("left"),

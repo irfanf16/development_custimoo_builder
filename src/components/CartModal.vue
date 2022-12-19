@@ -32,7 +32,7 @@
           <template v-for="(cart_item, cart_item_index) in cartItems">
             <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
               <td>
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
                   <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
                 </template>
                 <template v-else="">
@@ -49,7 +49,7 @@
                 </div>
               </td>
               <td>
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
                   <span title="Editing This Product" style="cursor:pointer;">
                     {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
                   </span>
@@ -62,7 +62,7 @@
 
               </td>
               <td class="cursor-pointer">
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_id == cart_item.id">
+                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
                   Editing
                 </template>
                 <template v-else="">
@@ -151,7 +151,7 @@
         </div>
       </div>
       <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
-        <b-button class="mt-4" @click="createOrder">Finalize Order</b-button>
+        <b-button class="mt-4" @click="createOrder">Confirm Order</b-button>
       </div>
     </div>
   </modal>
@@ -164,7 +164,6 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
-  fetchCategories,
   getActiveProductData,
   getReminderOptions,
   getSelectedProductData,
@@ -174,6 +173,7 @@ import {
 import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import { findIndex } from "lodash";
 import ModalAction from "@/mixins/ModalAction";
+import { FetchCategories } from '@/mixins/SelectedProductMixin'
 @Component<CartModal>({
   components: {},
   filters: {
@@ -219,7 +219,7 @@ import ModalAction from "@/mixins/ModalAction";
 
   }
 })
-export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,exitEditMode) {
+export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, FetchCategories) {
   @Prop({ default: 3, required: true }) mainTotalTabs!: number
 
   public viewLoader = false;
@@ -343,7 +343,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index]
-    const categories_promise = fetchCategories(null, cart_item_product.product_id);
+    const categories_promise = this.fetchCategories(null, cart_item_product.product_id);
     categories_promise.then( async (response) => {
       let is_private = this.$store.getters.getPrivateProduct;
       let is_customized = this.$store.getters.getCustomized;
@@ -351,9 +351,14 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
       //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
 
+      let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
+      if(ecommerce_cart_id){
+        this.$router.push({ name: 'Home' });
+      }
+
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
         editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
-          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product
+          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id
         },
         order_product_info: null
       })

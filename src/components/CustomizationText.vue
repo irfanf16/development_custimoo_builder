@@ -101,31 +101,33 @@
                             </div>
 
                             <b-tabs>
-                              <b-tab v-for="(product_color, productColorIndex) in product_colors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
+                              <b-tab v-for="(product_color, productColorIndex) in productColors" :key="`product_color_${productColorIndex}_${product_color.type}_type`">
                                 <template #title>
-                                  {{product_color.name | capitalize}}
+                                  {{product_color.name | capitalize | removeExt}}
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
-                                    <div class="color-box" v-for="(color, colorIndex) in product_color.colors" :style="{background: color.value}"
+                                    <div class="color-box" v-for="(color, colorIndex) in product_color.color_text" :style="{background: color.value}"
                                         :key="`product_color_${productColorIndex}_${product_color.type}_type_color_${colorIndex}`" :title="color.name"
                                           @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)"></div>
                                   </div>
                                 </div>
                               </b-tab>
-                              <b-tab>
+                              <b-tab v-if="logoColorsInfo && logoColorsInfo.length">
                                 <template #title>
                                   Team logo colors
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">
-                                    <div class="color-box" v-for="(color, colorIndex) in logoColors" :style="{background: color.hex}"
-                                        :key="`text_color_${colorIndex}${color.pantone}`" :title="color.name"
-                                          @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {name: color.name, value: color.hex, position: '1'}, select_color_type)"></div>
+                                    <template v-for="(color, colorIndex) in logoColorsInfo">
+                                      <div class="color-box" :style="{background: color.hex}" v-if="color.hex"
+                                           :key="`text_color_${colorIndex}${color.name}`" :title="color.name"
+                                           @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {name: color.name, value: color.hex, position: '1'}, select_color_type)"></div>
+                                    </template>
                                   </div>
                                 </div>
                               </b-tab>
-                              <b-tab>
+                              <b-tab v-if="selectedProduct.is_custom_color_allowed">
                                 <template #title>
                                   Other
                                 </template>
@@ -136,26 +138,24 @@
                                         <div class="mt-3">
                                           Pantone (xxx c):
                                         </div>
-                                        <div class="p-2">
+                                        <div class="p-2" v-if="getColorType !== 'product_color'">
                                           <div v-if="selectColorTypeIndex==0">
                                             <b-form-input
                                               @focusin="($event)=>$event.target.select()"
-                                              :value="product_custom_text_item.color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.color_pantone"
+                                              :value="product_custom_text_item.color_pantone"
                                               class="mb-2 mr-sm-2 mb-sm-0"
-                                              placeholder="XX-XXXX"
+                                              :placeholder="place_holder"
                                               @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Fill Color')"
-                                              :disabled="getColorType === 'cmyk'"
                                             ></b-form-input>
                                           </div>
 
                                           <div v-else>
                                             <b-form-input
                                               @focusin="($event)=>$event.target.select()"
-                                              :value="product_custom_text_item.outline_color_pantone == 'pantone' ? product_custom_text_item.name : product_custom_text_item.outline_color_pantone"
+                                              :value="product_custom_text_item.outline_color_pantone"
                                               class="mb-2 mr-sm-2 mb-sm-0"
-                                              placeholder="XX-XXXX"
+                                              :placeholder="place_holder"
                                               @input="changePantoneColor($event, customTextIndex, productCustomTextItemIndex, 'Outline Color')"
-                                              :disabled="getColorType === 'cmyk'"
                                             ></b-form-input>
                                           </div>
                                           <div v-if="pantoneMessage" class="pantone-message p-2 text-danger">
@@ -207,7 +207,7 @@
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorTabs from '@/components/ColorTabs.vue'
 import TextColorTabs from "@/components/TextColorTabs.vue";
-import {HideUpdateLockerButton, ProductColors, ProductFonts} from "@/mixins/SelectedProductMixin";
+import {HideUpdateLockerButton, ProductFonts} from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
 import colorPicker from '@caohenghu/vue-colorpicker';
 import {getSelectedProductPantones} from "@/helpers/Helpers";
@@ -224,22 +224,26 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
     let self: Record<any, any> = this;
 
     await this.productFonts()
-    self.product_colors = await this.productColors('file_colors');
   },
   filters: {
     capitalize: (value: string) => {
       if (!value) return ''
       value = value.toString()
       return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+    },
+    removeExt: (value: string) => {
+      if (!value) return ''
+      value = value.toString()
+      return value.replace(/\.[^/.]+$/, "")
     }
   }
 })
 
-export default class CustomizationText extends Mixins(ProductColors, ProductFonts, HideUpdateLockerButton) {
+export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLockerButton) {
   @Prop({required: true}) customTextIndex!: number
+  @Prop({required: true}) productColors!: Record<any, any>[]
   /* component data properties goes here */
   public product_fonts: Record<any, any>[] = []
-  public product_colors: Record<any, any>[] = []
   public default_font_obj = ''
   public pantoneMessage = ''
   public customTextColorIndex: Record<any, any>[] = []
@@ -258,8 +262,8 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   get selectedProductId(): Record<any, any> {
     return this.$store.getters.getSelectedProductId
   }
-  get logoColors(): [] {
-    return this.$store.getters.getLogosColors
+  get logoColorsInfo() {
+    return filter(this.$store.getters.getLogoColorsInfo('extracted_colors'), 'hex')
   }
 
   get lockerColors() {
@@ -267,7 +271,7 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
   }
 
   get getColorType(): string {
-    return this.$store.getters.getColorType;
+    return this.$store.getters.getSetting('color_type');
   }
 
   get product_custom_texts(): Record<any, any>[] {
@@ -276,6 +280,17 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   get all_products_custom_texts() {
     return this.$store.getters.productCustomTexts()
+  }
+
+  get place_holder() {
+    if(this.getColorType === 'cmyk') {
+      return 'x,x,x,x';
+    } else if(this.getColorType === 'pantone-coated') {
+      return 'xxx c';
+    } else if(this.getColorType === 'pantone-tcx') {
+      return 'xx-xxxx';
+    }
+    return '';
   }
 
   /*
@@ -304,11 +319,11 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
 
   public changePantoneColor($event: string, customTextIndex: number, productCustomTextItemIndex: number, select_color_type: string) {
     let fill_type = select_color_type=='Fill Color' ? 0 : 1;
-    let color_code = this.extractExactCode($event)?this.extractExactCode($event):(fill_type==0 ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
-    let pantoneColor = getColorEncoding(color_code,this.getColorType);
+    let color_code = this.extractExactCode($event)? this.extractExactCode($event) : (fill_type==0 ? this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].color : this.product_custom_texts[customTextIndex].items[productCustomTextItemIndex].outline_color);
+    let pantoneColor = getColorEncoding(color_code, this.getColorType);
     const color_picker = this.$refs[`text-color-picker${customTextIndex}${productCustomTextItemIndex}`] as Record<any, any>;
     if (pantoneColor) {
-      let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name}
+      let color = {value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.pantone}
       this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type);
       console.log(color_picker[fill_type].$forceUpdate());
       this.pantoneMessage = ''
@@ -498,8 +513,8 @@ export default class CustomizationText extends Mixins(ProductColors, ProductFont
       custom_text.is_first_number = false
     }
     custom_text.items[0] = Object.assign(custom_text.items[0], {
-      color: 'WHITE', color_pantone: '#F4F5F0', font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
-      is_locked: false, label: 'Fixed Text ' + (custom_text_names_count + 1), outline_color: 'WHITE', outline_color_pantone: '#F4F5F0',
+      color: this.productColors[0]?.color_text[0]?.value, color_pantone: this.productColors[0]?.color_text[0]?.name, font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
+      is_locked: false, label: 'Fixed Text ' + (custom_text_names_count + 1), outline_color: this.productColors[0]?.color_text[1]?.value, outline_color_pantone: this.productColors[0]?.color_text[1]?.name,
       outline_enabled: 1, outline_width: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300, scaleX: 0, scaleY: 0
     })
     return custom_text;

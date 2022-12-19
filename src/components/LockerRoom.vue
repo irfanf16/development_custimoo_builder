@@ -31,23 +31,23 @@
                            :data-room-index="i"
                            :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                            :data-product-index="ind">
-                      <label :key="ind" class="w-100" :class="product.class ? 'selected': ''"
+                        <div class="fs-2" v-if="product.roster_count">Total products: <strong class="font-weight-bolder">{{product.roster_count}}</strong></div>
+                        <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                              @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
-                        <div class="image-holder">
-                          <div>
+                          <div class="image-holder">
+                            <div>
+                              <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
+                              <template v-if="room.active_tab">
+                                <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                                <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
+                              </template>
 
-                            <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
-                            <template v-if="room.active_tab">
-                              <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                              <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
-                            </template>
-
+                            </div>
                           </div>
-                        </div>
-                        <div class="d-none d-lg-block product-description text-center">
-                          <p>{{ product.product_name }}</p>
-                        </div>
-                      </label>
+                          <div class="d-none d-lg-block product-description text-center">
+                            <p>{{ product.product_name }}</p>
+                          </div>
+                        </label>
 
                       <ul class="product-icons">
                         <li v-if="!getSelectionMode.readonly">
@@ -93,6 +93,12 @@
                         <li v-if="!getSelectionMode.readonly">
                           <a style="font-size: 12px;"  @click="showDesignModal(product)">
                             <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy" class="svg-inline--fa fa-copy" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path></svg>
+                          </a>
+                        </li>
+                        <li>
+                          <a style="font-size: 12px;" data-title="Edit Roster" @click="editRoster"
+                             @mouseleave="hideTooltip" @mouseenter="showTooltip">
+                            <b-icon-list class="fs-3" />
                           </a>
                         </li>
                         <li v-if="mobileScreen" class="swap">
@@ -363,18 +369,15 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''
   public yearly_planner_template_id = null;
+  @Prop({required: true}) mainTotalTabs:number;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
 
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
       if (mutation.addedNodes.length) {
-        console.log('A child node has been added or removed.', mutation);
-        console.log('Nodes added', mutation.addedNodes.length);
-
         mutation.target.classList.add('dropping')
       }else if(mutation.removedNodes.length){
-        console.log('Nodes removed', mutation.removedNodes.length);
         mutation.target.classList.remove('dropping')
       }
       else if (mutation.type === 'attributes') {
@@ -401,6 +404,14 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       const config = { attributes: true, childList: true, subtree: true };
       this.observer.observe(elem, config);
     })
+  }
+
+
+
+  private editRoster = () =>{
+    this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1})
+    this.hideVModal('locker-modal')
+    this.showVModal('rostermodal')
   }
 
   private dragStart = () =>{
@@ -634,11 +645,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
     try {
       if(product){
-          let payload = {
+        let payload = {
             type: 'locker',
             id: product.id,
             customer_id: this.customer ? this.customer.id : '',
-            product_id: this.selectedProduct.product_id
+            product_id: product.product_id
           }
           let shared_url = "";
           if (product.shared_url) {
@@ -649,7 +660,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
             Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
           }
 
-          this.showPopper('share'+lockerIndex+''+ind);
+        this.showPopper('share'+lockerIndex+''+ind);
       }
     } catch (error) {
       console.log(error)
@@ -670,7 +681,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           let res = await http.post('collection/link', collections)
           shared_url += res.data.url;
           Vue.set(this.getCollections[index], 'shared_url', shared_url)
-          console.log("url", this.getCollections[index].shared_url)
         }
         this.showPopper('share-collection'+index)
       }

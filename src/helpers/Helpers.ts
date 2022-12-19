@@ -10,12 +10,13 @@ import {http} from "@/httpCommon";
 import {parseInt, findIndex} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
 import {eventBus} from "@/event/eventBus"
+import VueRouter from 'vue-router'
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
     originalWidth: 57, originalHeight: 57, width: 57, height: 57, name_of_placement: "chest", side: "front", x_axis: 300,
     y_axis: 300, is_locked: false, logo_name: null, original_logo: null, transparent_logo: null, smart_transparent_logo: null,
-    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_recent_logo: false,
+    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_replace_success: false,
     logo_index: 0, is_vector: false
   }
   return {...default_obj, ...default_values}
@@ -471,7 +472,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       if(roster_details){
         for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
           const roster_detail = roster_details[roster_index]
-          // console.log('roster_detail', roster_detail)
           const text_object = {
             size: roster_detail.size,
             quantity: roster_detail.quantity,
@@ -587,12 +587,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                         if (minus_height)
                           transform_height -= 15;
                       }
-                      // console.log('transform_height',transform_height ,' ', height, ' ', text_for_test_char)
                       dom_svg.setAttribute('transform', 'translate(0 ' + transform_height + ')')
                       dom_svg.setAttribute('paint-order', 'stroke')
+                      dom_svg.setAttribute('stroke-location', 'outside')
 
                       const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                        '<svg stroke-location="outside" style="width:100%; height: auto" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
+                        '<svg stroke-location="outside" paint-order="outside" style="width:100%; height: auto;" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                         'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
 
@@ -871,25 +871,6 @@ const activityStatus = {
   },
 }
 
-const urlToBase64 =  (url:string) => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.onload = function() {
-      if(xhr.status == 200) {
-        const reader = new FileReader();
-        reader.onloadend = function() {
-          resolve(reader.result);
-        }
-        reader.readAsDataURL(xhr.response);
-      } else {
-        reject(`Error (status = ${xhr.status}, status text = ${xhr.statusText}) while getting file from url ${xhr.responseURL}`);
-      }
-    };
-    xhr.open('GET', url);
-    xhr.responseType = 'blob';
-    xhr.send();
-  });
-}
 
 const getFileExtensionType = (type: string, file_extension:string) => {
   const extensions: Record<any, any> = {
@@ -1149,10 +1130,6 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     svg_string += `${svg_common_payload.svg_string}`;
 
     svg_string += `\n</g>\n</svg>`;
-
-    // console.log( getSVGNumbers(numbers_array));
-
-    // const factory_product:Record<any,any> = await parseFactoryProduct(factory_product_content);
 
     const svg_doc = await getDocFromString(svg_string);
     const production_file_info:Record<any, any> = {
@@ -1555,6 +1532,10 @@ const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
 }
 
+const exitFromEditMode = () => {
+  Store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null })
+}
+
 const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
   let jwtToken = localStorage.getItem('jwtToken')
   if(to.query && to.query.token && jwtToken){
@@ -1598,43 +1579,27 @@ const fetchCustomer = async (jwtToken:string) => {
 
 const setVueVersion = async () => {
   const is_loggedIn = await localStorage.getItem('jwtToken');
-  const is_restored = await localStorage.getItem('is_restored');
   let customer_id = 0;
   if(is_loggedIn) {
     const customer = Store.getters.getCustomer;
     customer_id = customer.id;
   }
-  await http.get('get-reset-store?customer_id='+customer_id)
-    .then(async (res) =>{
-      if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
-        if(is_loggedIn && res.data.isCustomerStoreReset <= 0){
-          console.log('logged in');
-          await http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).catch(error => {
-            handleResponseException(error)
-            console.info("error while setting reset store", error)
-          });
-          if(is_restored != 'yes')
-            await restore();
-        }else if(is_loggedIn == null && is_restored != 'yes') {
-          console.log('not logged in and not restored');
-          await restore();
-        }else{
-          console.log('none')
-        }
+  await http.get('get-reset-store?customer_id='+customer_id).then((res) => {
+    if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
+      if(is_loggedIn && res.data.isCustomerStoreReset == 0){
+        http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).then(() => {
+          restore();
+        })
       }
-    })
-    .catch(error => {
-      handleResponseException(error)
-      console.info("error while getting company", error)
-    });
+    }
+  })
 }
 
 async function restore(){
-  await localStorage.setItem('is_restored', 'yes');
   await Store.dispatch('resetStore');
-  console.log('restored');
-  //location.reload()
-  return
+  setTimeout(() => {
+    location.reload()
+  }, 2500)
 }
 
 const getProductColors = (product_id = null, append_locker_colors = true ) => {
@@ -1718,8 +1683,8 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
   let category_id = null
   let category_index = 0
   if(categories.length > 0) {
-    const selected_categories = Store.getters.getSelectedCategories
-    category_id = selected_categories[0] ? selected_categories[0] : null
+    const selected_category = Store.getters.getSelectedCategory
+    category_id = selected_category.category_id ? selected_category.category_id : null
     if(category_id) {
       category_index = findIndex(categories, ['id', category_id])
       if(category_index == -1) {
@@ -1798,8 +1763,22 @@ const setDefaultColors = () => {
   Store.commit('SET_DEFAULT_COLORS', default_colors_object)
 }
 
-const getVectorExtensions = () => {
-  return ['svg', 'pdf', 'ai', 'eps', 'tiff']
+const getExtensionsFor = (type = '') => {
+  const type_extensions = {
+    raster: ['jpg','gif','png','jpeg'],
+    vector: ['svg', 'pdf', 'ai', 'eps', 'tiff']
+  }
+  if(type) {
+    return type_extensions[type]
+  } else {
+    return [...type_extensions['raster'], ...type_extensions['vector']]
+  }
+}
+
+const validateLogoType = (type: string, file_name:string) => {
+  const type_extensions = getExtensionsFor(type)
+  const file_extension = getExtensionFromString(file_name)
+  return type_extensions.includes(file_extension)
 }
 
 const getExtensionFromString = (string: string) => {
@@ -1810,96 +1789,95 @@ const getExtensionFromString = (string: string) => {
   return extension
 }
 
-const getUrlParameterByName = (name, url = '') => {
-  if(!url) {
-    const iframes_count = window.frames.length
-    if(iframes_count > 0) {
-      url = window.frames[0].parent.window.location.href
-    } else {
-      url = window.location.href
-    }
+const getUrlParameter = (name = '') => {
+  if(name) {
+    const url = window.parent.window.location.href
+    name = name.replace(/[[\]]/g, '\\$&');
+    const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
+    const results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
-  console.log('inside getUrlParameterByName', {
-    url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
-  })
-  setTimeout(() => {
-    console.log('settimeout inside getUrlParameterByName', {
-      url: url,  frames_length: window.frames.length, frames: window.frames.length > 0 ? window.frames[0] : window.frames
-    }, 10000)
-  })
-  name = name.replace(/[[\]]/g, '\\$&');
-  const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
-  const results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return '';
-  console.log('getUrlParameterByName', url, decodeURIComponent(results[2].replace(/\+/g, ' ')))
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  const hash_url = window.parent.window.location.hash
+  return hash_url.replace('#/', '')
 }
 
-//Functions related to SVG parsing end
-const fetchCategories = async (product_filter: null | string = null, product_id = null) => {
-  return new Promise((resolve,reject) => {
-    let categories_promise;
-    if(!product_filter){
-      const getProductEditInfoObject = Store.getters.getProductEditInfoObject;
-      const last_active_product_obj = Store.getters.getLastActiveProductData;
-      if(getProductEditInfoObject.editing && !product_id){
-        switch(getProductEditInfoObject.type)
-        {
-          case "locker_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.locker_product_info.product_id}`
-            });
+const routerPush = (router, route_name) => {
+  const router_url = router.resolve({name: route_name})
+  if(router_url) {
+    window.parent.window.location.hash = router_url.href;
+  }
+}
 
-            break;
-          case "cart_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`
-            });
-            break;
-          case "order_product":
-            categories_promise = Store.dispatch('setCategories',{
-              query_params:`product_id=${getProductEditInfoObject.order_product_info.order_products.factory_products[0].product_id}`
-            });
-        }
-      }else{
-        if(product_id){
-          categories_promise = Store.dispatch('setCategories',{
-            query_params:`product_id=${product_id}`
-          });
-        }
-        else if(last_active_product_obj.product_id){
-          categories_promise = Store.dispatch('setCategories',{
-            query_params:`product_id=${last_active_product_obj.product_id}`
-          });
-        }
-        else{
-          categories_promise = Store.dispatch('setCategories',{
-            query_params: `customized=true`
-          });
-        }
-      }
-    }
-    else{
-      let params = `customized=true`;
-      if(product_filter === 'customized'){
-        params = `customized=true`;
-      }
-      else if(product_filter === 'personalized'){
-        params = `personalized=true`;
-      }
-      else if(product_filter === 'private_product'){
-        params = `private=true`;
-      }
-      categories_promise = Store.dispatch('setCategories',{
-        query_params: params
+const showError = (err) => {
+  if (typeof err === 'string') {
+    VsToast.show({
+      title: err,
+      variant: 'error',
+      timeout: 5000,
+      position: "bottom-left"
+    });
+  } else {
+    const errors = err.response.data.errors;
+    const errArr: string[] = [];
+    Object.keys(errors).map((field) => {
+      errArr.push(errors[field][0]);
+    });
+    errArr.forEach(element => {
+      VsToast.show({
+        title: element,
+        variant: 'error',
+        duration: 5000,
+        position: 'bottom-left'
       });
-    }
-    categories_promise.then((response) => {
-      resolve(true);
     })
-  })
+  }
 }
+
+const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
+  return {
+    id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
+    transparent_logo: updated_logo.transparent_logo_url, smart_transparent_logo: updated_logo.smart_transparent_logo_url,
+    is_smart_transparent: updated_logo.is_smart_transparent ? true : false, is_vector: updated_logo.is_vector ? true : false,
+    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success ? true : false
+  }
+}
+
+const getSantaModalConfig = () => {
+  /*
+  * icon = {success, error, info}
+  * */
+  return {
+    name: 'santa-confirm-modal', icon: 'success', title: '', text: 'This is default text', confirm_text: 'Ok', cancel_text: null,
+    click_to_close: false
+  }
+}
+
+const getDomDocument = () => {
+  const dom_document = document.querySelector(getWebComponentNames())
+  return dom_document ? dom_document?.shadowRoot : document
+}
+
+const urlToBase64 = async (urls) => {
+  const response = await http.post('url_to_base64', {file_urls: urls}).catch((errorResponse) => {
+    console.error('Error while converting url to base64', errorResponse)
+  })
+  return response ? response.data.result.base64_files : []
+}
+
+const getWebComponentNames = (return_string = true): any => {
+  if(return_string) {
+    return "v-customizer, v-order-detail"
+  } else {
+    return ["v-customizer, v-order-detail"]
+  }
+}
+
+const isShadowDom = () => {
+  return document.querySelector(getWebComponentNames()) ? true : false
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -1909,8 +1887,8 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameterByName,
+  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
-  getDefaultColorsObject, setDefaultColors, getVectorExtensions, getExtensionFromString,fetchCategories
-
+  getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
+  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom
 };

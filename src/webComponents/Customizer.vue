@@ -95,6 +95,12 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.use(VueSweetalert2);
 
+import SantaModal from "@/plugins/santaModal/SantaModal.js";
+Vue.use(SantaModal)
+
+import ZoomOnHover from "vue-zoom-on-hover";
+Vue.use(ZoomOnHover);
+
 // import Echo from "laravel-echo";
 // window.io = require('socket.io-client');
 // window.Echo = new Echo({
@@ -108,7 +114,6 @@ Vue.use(VueSweetalert2);
 //   },
 // });
 
-import {getCompany, authenticateUser, getUrlParameterByName} from "@/helpers/Helpers";
 import CommonImportMixin from '../mixins/CommonImportMixin'
 
 export default {
@@ -128,7 +133,6 @@ export default {
     }
   },
   mounted: async function() {
-    await getCompany();
     // This will only work on your root Vue component since it's using $parent
     const { shadowRoot } = this.$parent.$options
 
@@ -148,47 +152,10 @@ export default {
       shadowRoot.appendChild(faStyles)
     }
 
-    // const token = this.$router.currentRoute.query.token
-    const token = getUrlParameterByName('token')
-    console.log('from customizers', token, window.location.href)
-    if (token){
-      localStorage.setItem('jwtToken', token)
-      localStorage.setItem('adminToken', token)
-      await authenticateUser(token)
-      await this.$store.dispatch('resetStore')
-      await this.$router.push({name: 'Home'})
-    } else{
-      let storageInterval = setInterval(()=>{
-        let jwtToken = localStorage.getItem('jwtToken');
-        if(jwtToken && jwtToken !=''){
-          authenticateUser(jwtToken)
-          clearInterval(storageInterval);
-        }
-      }, 500)
-    }
-
     // const customer =  this.$store.getters.getCustomer;
     // window.Echo.channel(`notification.${customer.id}`).listen('RoasterUpdatedEvent',  (e) => {
     //   this.$store.commit('UPDATE_NOTIFICATIONS', e.notification)
     // })
-  },
-  methods:{
-    getParameterByName(name, url = null) {
-      if(!url) {
-        const iframes_count = window.frames.length
-        if(iframes_count > 0) {
-          url = window.frames[0].window.location.href
-        } else {
-          url = window.location.href
-        }
-      }
-      name = name.replace(/[[\]]/g, '\\$&');
-      let regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-        results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, ' '));
-    }
   }
 }
 
