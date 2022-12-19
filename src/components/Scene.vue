@@ -848,7 +848,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
           let zoom = canvas.getZoom();
           zoom *= 0.999 ** delta;
-          if (zoom > 10) zoom = 10;
+          if (zoom > 4) zoom = 4;
           if (zoom < 1) {
             zoom = 1;
             canvas.viewportTransform = default_view_port as number[];
@@ -857,6 +857,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             x: pointer.x,
             y: pointer.y
           }, zoom);
+          console.log(pointer)
           opt.e.preventDefault();
           opt.e.stopPropagation()
         })
@@ -1182,18 +1183,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       bottom: modelBoundingRect.top + modelBoundingRect.height,
     }
 
-    if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
-      e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
-    }
-    else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
-      e.target.left = boundingRect.left - (e.target.width * e.target.scaleX / 4)
-    }
-    if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
-      e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
-    }
-    else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
-      e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
-    }
+    // if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
+    //   e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
+    // }
+    // else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
+    //   e.target.left = boundingRect.left - (e.target.width * e.target.scaleX / 4)
+    // }
+    // if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
+    //   e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
+    // }
+    // else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
+    //   e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
+    // }
 
     let centerPoint = e.target.getCenterPoint()
     if (canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
@@ -1213,9 +1214,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         pointXCompare = e.target.left - (e.target.width * e.target.scaleX / 4)
       }
 
-      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
-
-      e.target.left = direction.left
+      // let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
+      //
+      // e.target.left = direction.left
     }
 
     let dimText = this.dimTextFront
@@ -1246,7 +1247,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       console.log('mac call exceded', max_call)
       const viewportMatrix = canvas.viewportTransform as Record<any, any>;
       pointX = pointX + viewportMatrix[4] * canvas.getZoom()
-      pointY = pointX + viewportMatrix[5] * canvas.getZoom()
+      pointY = pointY + viewportMatrix[5] * canvas.getZoom()
       return {left: pointX, top: pointY}
     }
   }
@@ -1368,8 +1369,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
 
         const viewportMatrix = canvas.viewportTransform as Record<any, any>
-        addLeft = addLeft + Math.abs(viewportMatrix[4])
-        addTop = addTop + viewportMatrix[5]
+        console.log(Math.abs(viewportMatrix))
+        addLeft = addLeft + Math.abs(viewportMatrix[4]) * canvas.getZoom()
+        // addTop = addTop + viewportMatrix[5]
 
         if(clone_again) {
           if (otherSideObjects[add_index]) {
