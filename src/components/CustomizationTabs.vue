@@ -6,7 +6,7 @@
           <b-tab v-if="selectedProduct.is_logo_allowed == 1" :key="selectedProduct.product_type">
             <template #title>
               <a @click="setHideTab('logoHide', true)" >
-                <span :class="{'no-vector-logos': vectorImageConstraint? non_vector_logos_count > 0 : false }">
+                <span :class="{'no-vector-logos': vectorImageConstraint? non_vector_logos_count > 0  : false }">
                   <span v-if="vectorImageConstraint? non_vector_logos_count > 0 : false" v-b-tooltip="`Logo uploaded are not in vector format`" class="logos-error">
                     <b-icon-exclamation-circle-fill />
                   </span>
@@ -416,7 +416,7 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     if(custom_logos && custom_logos.length > 0) {
       const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
         // return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
-        return custom_logo.is_vector == false
+        return custom_logo.is_vector == false && custom_logo.url
       })
       non_vector_logos_count = non_vector_logos.length
     }

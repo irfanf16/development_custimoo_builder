@@ -90,12 +90,11 @@
 
         <div class="text-right">
           <div class="d-inline-flex align-items-center justify-content-center mt-3 gap-2">
-            <b-button @click="cancelEditing" variant="secondary" class="use-btn light flex-shrink-1"
-                      style="white-space: nowrap; max-width: 200px">
+            <b-button @click="cancelEditing" variant="secondary" size="sm" class="light">
               <template>Cancel</template>
             </b-button>
-            <b-button @click="useLogo()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px">
-              <template> Save and use this Logo</template>
+            <b-button @click="useLogo()" variant="secondary" size="sm" style="white-space: nowrap">
+              <template>Save and use this Logo</template>
             </b-button>
           </div>
         </div>
@@ -348,33 +347,33 @@ export default class LogoEditor extends Mixins(ErrorMessages, ModalAction, Custo
     background: #fff;
   }
 
-  .btn {
-    background: none;
-    color: #808895;
-    border: none;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 0;
-    font-size: 10px;
-    max-width: 100%;
-    @media only screen and (min-width: 768px){
-      max-width: 300px;
-      margin: 0 auto;
-    }
-
-    &.btn-secondary {
-      &:active {
-        background-color: transparent;
-        border-color: transparent;
-        color: #808895;
-      }
-
-      &:focus {
-        box-shadow: none;
-      }
-    }
-  }
+  //.btn {
+  //  background: none;
+  //  color: #808895;
+  //  border: none;
+  //  display: flex;
+  //  flex-wrap: wrap;
+  //  align-items: center;
+  //  padding: 0;
+  //  font-size: 10px;
+  //  max-width: 100%;
+  //  @media only screen and (min-width: 768px){
+  //    max-width: 300px;
+  //    margin: 0 auto;
+  //  }
+  //
+  //  &.btn-secondary {
+  //    &:active {
+  //      background-color: transparent;
+  //      border-color: transparent;
+  //      color: #808895;
+  //    }
+  //
+  //    &:focus {
+  //      box-shadow: none;
+  //    }
+  //  }
+  //}
 
   .upload-box {
     text-align: center;
