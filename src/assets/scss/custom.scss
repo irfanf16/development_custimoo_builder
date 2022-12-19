@@ -2441,6 +2441,23 @@ button {
 }
 
 .lockerroom-modal {
+    .main-locker-tabs{
+        &>div{
+            &>ul{
+                padding-top: 0;
+                li{
+                    a.nav-link:not(.active){
+                        .btn{
+                            background: white;
+                            border-color: lightgray;
+
+                            color: #333;
+                        }
+                    }
+                }
+            }
+        }
+    }
     .nav-tabs {
         white-space: nowrap;
         flex-wrap: nowrap;
