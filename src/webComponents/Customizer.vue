@@ -116,6 +116,14 @@ Vue.use(ZoomOnHover);
 
 import CommonImportMixin from '../mixins/CommonImportMixin'
 
+import VueGtag from "vue-gtag";
+Vue.use(VueGtag, {
+  config: { id: "GTM-N2985NF" },
+  params: {
+    send_page_view: true
+  }
+});
+
 export default {
   store, router,
   name: "Customizer",
