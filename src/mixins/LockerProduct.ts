@@ -13,9 +13,9 @@ import ModalAction from "@/mixins/ModalAction";
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 @Component
-export class LockerProducts extends Mixins(FetchCategories) {
+export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
 
-  public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="") {
+  public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="", editRoster=false) {
     let self: Record<any, any> = this;
     self.search_products = ''
     const response:Boolean = await self.editModeConfirmation();
@@ -56,6 +56,9 @@ export class LockerProducts extends Mixins(FetchCategories) {
 
           await self.handleMainProducts(response, active_product_detail);
           this.$emit('hideLockerRoomModal')
+          if(editRoster){
+            this.showVModal('rostermodal')
+          }
         }, (error:Record<any, any>) => {
           console.error("Error while retrieving products",error)
         })

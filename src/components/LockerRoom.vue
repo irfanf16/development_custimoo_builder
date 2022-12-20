@@ -101,7 +101,7 @@
                               </a>
                             </li>
                             <li>
-                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editRoster"
+                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editRoster(room.id, product, ind, '',true)"
                                  @mouseleave="hideTooltip" @mouseenter="showTooltip">
                                 <b-icon-list class="fs-3" />
                               </a>
@@ -417,11 +417,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
 
-
-  private editRoster = () =>{
-    this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1})
-    this.hideVModal('locker-modal')
-    this.showVModal('rostermodal')
+  private editRoster = (room_id: number, room_product: Record<any, any>, ind: number, share_url="", editRoster=false) =>{
+    this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1});
+    console.log(room_id,room_product,ind,"",editRoster)
+    // this.editProduct(room_id,room_product,ind,"",editRoster)
   }
 
   private dragStart = () =>{
