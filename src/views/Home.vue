@@ -406,7 +406,12 @@ import {
   handleResponseException,
   parseSvgStringFile,
   fetchUrlContent,
-  getRandom, resetLastActiveProductData, lastActiveProductDefaultObject, getUrlParameter, setDefaultColors
+  getRandom,
+  resetLastActiveProductData,
+  lastActiveProductDefaultObject,
+  getUrlParameter,
+  routerPush,
+  setDefaultColors, isShadowDom, getDomDocument
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -499,6 +504,9 @@ Vue.filter('formatDate', function(value:string) {
     categories_promise.then(async (response) => {
       let query_params = await this.setQueryParams()
       await this.retrieveProducts(query_params)
+      if (shared_url?.includes('share')) {
+        routerPush(this.$router,'Home');
+      }
       this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
       this.jwtToken = localStorage.getItem('jwtToken') as string
       // await this.$store.dispatch('setJwtToken')
@@ -538,6 +546,7 @@ Vue.filter('formatDate', function(value:string) {
       await this.$eventBus.$on('updateOrder', async (resolve: any) => {
         await this.UpdateOrderProducts(false,false,resolve);
       });
+
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {

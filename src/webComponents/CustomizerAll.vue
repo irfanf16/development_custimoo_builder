@@ -101,6 +101,9 @@ Vue.use(VueSweetalert2);
 import SantaModal from "@/plugins/santaModal/SantaModal.js";
 Vue.use(SantaModal)
 
+import ZoomOnHover from "vue-zoom-on-hover";
+Vue.use(ZoomOnHover);
+
 // import Echo from "laravel-echo";
 // window.io = require('socket.io-client');
 // window.Echo = new Echo({
@@ -138,11 +141,11 @@ export default {
   mounted: async function() {
 
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
-    let ele = window.parent.document.getElementById('e88d412d-dfc3-4628-910b-8c0d7237a371')?.querySelector('[data-ux="Container"]')
-    if(!ele) {
-      // run time adding css for totalteamsales.com as it is not accept any direct css
-      ele = window.parent.document.getElementById('8031c129-170b-4c6e-8387-bce977db3c36')?.querySelector('[data-ux="Container"]')
-    }
+    let ele = window.parent.document.querySelector('[data-ux="Container"]')
+    // if(!ele) {
+    //   // run time adding css for totalteamsales.com as it is not accept any direct css
+    //   ele = window.parent.document.getElementById('8031c129-170b-4c6e-8387-bce977db3c36')?.querySelector('[data-ux="Container"]')
+    // }
     if(ele) {
       ele.style.width = '100%'
     }

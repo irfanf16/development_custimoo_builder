@@ -107,6 +107,9 @@ import SantaModal from "@/plugins/santaModal/SantaModal.js";
 Vue.use(SantaModal)
 
 Vue.use(VueSweetalert2);
+
+import ZoomOnHover from "vue-zoom-on-hover";
+Vue.use(ZoomOnHover);
 new Vue({
   router,
   store,

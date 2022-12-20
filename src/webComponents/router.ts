@@ -42,9 +42,9 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-  await setVueVersion();
   const jwtToken:string|null = persistToken(to,from);
   await fetchCustomer(jwtToken as string);
+  await setVueVersion();
 
   // remove ! sign from url that cause to customizer not load on page refresh mainly on evolution
   let lastUrl = location.href;

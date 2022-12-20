@@ -1,12 +1,12 @@
 import SantaModalComponent from "@/plugins/santaModal/SantaModalComponent.vue";
-import {getDomDocument, getSantaModalConfig} from "@/helpers/Helpers";
+import {getSantaModalConfig} from "@/helpers/Helpers";
 
 const SantaModal = {};
 
 SantaModal.install = (Vue) => {
   const santaModalConstructor = Vue.extend(SantaModalComponent);
   const instance = new santaModalConstructor();
-  const dom_document = getDomDocument(instance)
+  const dom_document = instance.$root.$options.shadowRoot ? instance.$root.$options.shadowRoot : document
   instance.$mount(dom_document.createElement("div"));
   Vue.prototype.$santaModal = {
     /*
