@@ -386,10 +386,11 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       // }else{
       //   this.$store.dispatch('setPrivateProduct', is_private);
       // }
-      console.log('edit2', edit)
+
       this.hideVModal('cart-modal')
       if (!edit) {
-        await this.$store.dispatch('setTabMain', {value: (this.mainTotalTabs + 1)})
+        let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
+        await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
         this.showVModal('rostermodal');
       }
     })
