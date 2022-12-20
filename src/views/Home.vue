@@ -1093,7 +1093,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
-    if (this.prevRoute!.name == 'OrderDetail') {
+
+    if (this.prevRoute && this.prevRoute!.name == 'OrderDetail') {
       this.$router.push(this.prevRoute.fullPath)
     }
     if (this.actionBeforeLogin == 'lockerRoom') {
