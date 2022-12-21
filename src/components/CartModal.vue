@@ -391,7 +391,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       if (!edit) {
         let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
         console.log('total_tabs',total_tabs);
-        setTimeout(()=>{
+        setTimeout(async () => {
           await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
           this.showVModal('rostermodal');
         },500)
