@@ -3,13 +3,16 @@
     <router-view/>
   </div>
 </template>
-
 <script>
 import Vue from 'vue'
 import {LockerProducts} from "@/mixins/LockerProduct";
 import router from './router'
 import store from '../store'
 import Vue2TouchEvents from 'vue2-touch-events';
+import vSelect from "vue-select";
+import 'vue-select/dist/vue-select.css';
+
+Vue.component("v-select", vSelect);
 Vue.use(Vue2TouchEvents);
 Vue.filter("TitleCase", (value) => {
   return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x) => x.toUpperCase());
@@ -115,6 +118,14 @@ Vue.use(ZoomOnHover);
 // });
 
 import CommonImportMixin from '../mixins/CommonImportMixin'
+
+import VueGtag from "vue-gtag";
+Vue.use(VueGtag, {
+  config: { id: "GTM-N2985NF" },
+  params: {
+    send_page_view: true
+  }
+});
 
 export default {
   store, router,
