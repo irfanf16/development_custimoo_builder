@@ -390,8 +390,11 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       this.hideVModal('cart-modal')
       if (!edit) {
         let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
-        await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
-        this.showVModal('rostermodal');
+        console.log('total_tabs',total_tabs);
+        setTimeout(()=>{
+          await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
+          this.showVModal('rostermodal');
+        },500)
       }
     })
   }
