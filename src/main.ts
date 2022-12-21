@@ -110,6 +110,14 @@ Vue.use(VueSweetalert2);
 
 import ZoomOnHover from "vue-zoom-on-hover";
 Vue.use(ZoomOnHover);
+
+import VueGtag from "vue-gtag";
+Vue.use(VueGtag, {
+  config: { id: "GTM-N2985NF" },
+  params: {
+    send_page_view: true
+  }
+});
 new Vue({
   router,
   store,
