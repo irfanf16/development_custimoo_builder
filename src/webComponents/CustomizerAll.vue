@@ -14,6 +14,11 @@ import store from '../store'
 import Navbar from '@/components/Navbar.vue';
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
+import vSelect from "vue-select";
+import 'vue-select/dist/vue-select.css';
+
+Vue.component("v-select", vSelect);
+
 Vue.filter("TitleCase", (value) => {
   return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x) => x.toUpperCase());
 });
