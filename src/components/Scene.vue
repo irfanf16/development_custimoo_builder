@@ -857,7 +857,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             x: pointer.x,
             y: pointer.y
           }, zoom);
-          console.log(pointer)
           opt.e.preventDefault();
           opt.e.stopPropagation()
         })
@@ -1244,7 +1243,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
       return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, max_call)
     } else {
-      console.log('mac call exceded', max_call)
       const viewportMatrix = canvas.viewportTransform as Record<any, any>;
       pointX = pointX + viewportMatrix[4] * canvas.getZoom()
       pointY = pointY + viewportMatrix[5] * canvas.getZoom()
@@ -1369,8 +1367,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
 
         const viewportMatrix = canvas.viewportTransform as Record<any, any>
-        console.log(Math.abs(viewportMatrix))
-        addLeft = addLeft + Math.abs(viewportMatrix[4]) * canvas.getZoom()
+        console.log(this.frontTexture)
+        console.log(viewportMatrix)
+        // addLeft = addLeft + Math.abs(viewportMatrix[4]) * canvas.getZoom()
         // addTop = addTop + viewportMatrix[5]
 
         if(clone_again) {
