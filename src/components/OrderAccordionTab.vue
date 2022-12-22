@@ -80,7 +80,7 @@
       </b-card>
     </template>
 
-    <b-card no-body v-if="customLogos.length > 0">
+    <b-card no-body v-if="customLogos && customLogos.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-4 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Logos</span> <span
           class="accordion-icon"></span></b-button>
@@ -98,9 +98,9 @@
                   <span class="text-uppercase">{{ logo.side }}</span>
                   <div class="d-flex mt-1 badge badge-light">
                     Size:
-                    <span class="ml-1">{{ unit_conversion(logo.originalWidth) }}</span>
+                    <span class="ml-1">{{ logo.originalWidth + settings.unit }}</span>
                     <span class="ml-1">x</span>
-                    <span class="ml-1">{{ unit_conversion(logo.originalHeight) }}</span>
+                    <span class="ml-1">{{ logo.originalHeight + settings.unit }}</span>
                   </div>
                 </div>
 
@@ -172,13 +172,12 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
     return this.$store.getters.getSelectedProduct
   }
 
-  get customLogos(): Record<any, any>[] {
-    let custom_logos = this.$store.getters.getCustomLogos()
-    if(custom_logos) {
-      return this.$store.getters.getCustomLogos().filter((custom_logo:any) => (custom_logo && custom_logo.url != ""))
-    } else {
-      return []
-    }
+  get customLogos(): Record<any, any> [] {
+    return this.$store.getters.getCustomLogos();
+  }
+
+  get settings(){
+    return this.$store.getters.getSetting('measurement_unit');
   }
 
   get customTexts(): [Record<any, any>] {
