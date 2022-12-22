@@ -452,7 +452,9 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
-    console.log('return iframe', getDomDocument(true))
+   setTimeout(() => {
+     console.log('return iframe', getDomDocument(true))
+   }, 2000)
     this.$gtag.pageview({ page_path: '/home' })
     this.$gtag.pageview('/about')
     this.$gtag.pageview(this.$route)
