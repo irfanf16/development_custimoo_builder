@@ -976,6 +976,15 @@ button {
         }
     }
 
+    .logos-error{
+        position: absolute;
+        top: -7px;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        color: #D53943;
+    }
+
     .accordion {
         &.color-accordion{
             .card{
@@ -2149,7 +2158,7 @@ button {
 }
 
 .customization-tabs {
-    overflow-y: visible;
+    overflow-y: visible !important;
 
     .logos-error{
         position: absolute;

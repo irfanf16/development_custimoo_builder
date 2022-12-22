@@ -452,6 +452,9 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    this.$gtag.pageview({ page_path: '/home' })
+    this.$gtag.pageview('/about')
+    this.$gtag.pageview(this.$route)
     let self: Record<any, any> = this;
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
@@ -1093,7 +1096,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
-    if (this.prevRoute!.name == 'OrderDetail') {
+
+    if (this.prevRoute && this.prevRoute!.name == 'OrderDetail') {
       this.$router.push(this.prevRoute.fullPath)
     }
     if (this.actionBeforeLogin == 'lockerRoom') {
@@ -1118,7 +1122,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private async addToCart(resolve:any=null) {
     await this.addToCartMixin(this.products_fonts,resolve);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
-      this.showVModal('cart-modal')
+      let no_cart_modal_platforms = ['wordpress','shopify'];
+
+      if(!no_cart_modal_platforms.includes(this.company.platform))
+        this.showVModal('cart-modal')
     }
   }
 

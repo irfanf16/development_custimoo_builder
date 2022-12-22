@@ -164,7 +164,7 @@
     </div>
 
     <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false || (getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
-<!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
+      <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
       <template v-if="!isCustomerAuthenticated" >
         <template v-if="company.platform !== 'self'">
           <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
@@ -188,7 +188,7 @@
       <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
         <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
-            :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+                  :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
           </button>
         </template>
@@ -346,6 +346,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   get allowNameAndNumbers() {
     return this.selectedProduct.allow_name_number
+  }
+
+  get vector_logos() {
+    return this.$store.getters.getVectorLogos
   }
 
   get rosterDetails(): [Record<any, any>] {
@@ -515,9 +519,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         if(collection_view){
           this.$root.$emit('closeCollectionView');
         }
-        if(this.company.platform != 'wordpress'){
+
+        let no_cart_modal_platforms = ['wordpress','shopify'];
+        if(!no_cart_modal_platforms.includes(this.company.platform))
           this.showVModal('cart-modal')
-        }
 
 
       }else{
