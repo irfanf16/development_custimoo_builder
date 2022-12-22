@@ -14,6 +14,11 @@ import store from '../store'
 import Navbar from '@/components/Navbar.vue';
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
+import vSelect from "vue-select";
+import 'vue-select/dist/vue-select.css';
+
+Vue.component("v-select", vSelect);
+
 Vue.filter("TitleCase", (value) => {
   return value.toLowerCase().replace(/(?:^|\s|-)\S/g, (x) => x.toUpperCase());
 });
@@ -119,6 +124,14 @@ Vue.use(ZoomOnHover);
 
 import CommonImportMixin from '../mixins/CommonImportMixin'
 
+import VueGtag from "vue-gtag";
+Vue.use(VueGtag, {
+  config: { id: "GTM-N2985NF" },
+  params: {
+    send_page_view: true
+  }
+});
+
 export default {
   store, router,
   name: "Customizer",
@@ -139,13 +152,12 @@ export default {
     }
   },
   mounted: async function() {
-
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
-    let ele = window.parent.document.querySelector('[data-ux="Container"]')
-    // if(!ele) {
-    //   // run time adding css for totalteamsales.com as it is not accept any direct css
-    //   ele = window.parent.document.getElementById('8031c129-170b-4c6e-8387-bce977db3c36')?.querySelector('[data-ux="Container"]')
-    // }
+    let ele = window.parent.document.getElementById('e88d412d-dfc3-4628-910b-8c0d7237a371')?.querySelector('[data-ux="Container"]')
+    if(!ele) {
+      // run time adding css for totalteamsales.com as it is not accept any direct css
+      ele = window.parent.document.getElementById('8031c129-170b-4c6e-8387-bce977db3c36')?.querySelector('[data-ux="Container"]')
+    }
     if(ele) {
       ele.style.width = '100%'
     }
