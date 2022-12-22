@@ -452,9 +452,11 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    console.log('return iframe', getDomDocument(true))
     this.$gtag.pageview({ page_path: '/home' })
     this.$gtag.pageview('/about')
     this.$gtag.pageview(this.$route)
+    this.$gtag.event(this.$route)
     let self: Record<any, any> = this;
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
