@@ -1,5 +1,5 @@
 <template>
-  <order-detail></order-detail>
+  <order-detail :ecommerce_order_id="ecommerce_order_id" ></order-detail>
 </template>
 
 <script lang="ts">
@@ -25,7 +25,13 @@ export default {
   name: "WcOrderDetail",
   components: {
     OrderDetail
-  }
+  },
+  props: {
+    ecommerce_order_id: {
+      type: String,
+      default:null
+    }
+  },
 }
 </script>
 

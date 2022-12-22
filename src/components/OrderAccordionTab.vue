@@ -87,9 +87,9 @@
       </b-card-header>
       <b-collapse id="accordion-4" accordion="my-accordion" role="tabpanel">
         <b-card-body class="border-top">
-          <div class="order-logo-holder d-flex flex-wrap justify-content-between align-items-center">
+          <div class="order-logo-holder gap-1 d-flex flex-wrap justify-content-between align-items-center">
             <template v-for="(logo, index) in customLogos">
-              <div class="logo-area d-flex flex-wrap align-items-center border p-3" :key="index" v-if="logo && logo.url">
+              <div class="logo-area d-flex flex-wrap align-items-center border position-relative p-3 mb-4" :key="index" v-if="logo && logo.url">
                 <div class="image-holder border mr-3">
                   <img :src="storageUrl+logo.url" alt="logo" width="80px" />
                 </div>
@@ -104,6 +104,7 @@
                   </div>
                 </div>
 
+                <div class="vector-logo-error">Logo is not vector</div>
               </div>
             </template>
 
@@ -213,6 +214,17 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
 </script>
 
 <style lang="scss" scoped>
+.vector-logo-error{
+  position: absolute;
+  bottom: -24px;
+  border-radius: 0 0 4px 4px;
+  left: 0;
+  right: 0;
+  padding: 5px;
+  background: rgba(255,0,0,0.1);
+  color: #D53943;
+  font-size: 11px;
+}
 .order-selected-colors {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

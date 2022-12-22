@@ -144,6 +144,7 @@ import {filter} from "lodash"
     this.fontsList()
     const self: Record<any, any> = this;
     self.$eventBus.$on("setTotalTabs", this.setTotalTabs)
+    this.setTotalTabs();
   },
 })
 export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
