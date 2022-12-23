@@ -1,11 +1,11 @@
 <template>
   <span>
-    <b-tabs class="main-locker-tabs">
+    <b-tabs class="main-locker-tabs" ref="main-locker-tabs" v-model="main_locker_tabs">
       <b-tab>
         <template #title>
           <span class="btn btn-secondary btn-sm">Locker Rooms</span>
         </template>
-        <b-tabs lazy content-class="mt-3"   @changed="lockerChanged">
+        <b-tabs lazy content-class="mt-3" @changed="lockerChanged">
         <template v-for="(room, i) in getLockerProducts">
           <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
             <template #title>
@@ -376,6 +376,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public copiedProductLockerId = 0
   public url = ''
   public group = ''
+  public main_locker_tabs = 0
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''

@@ -139,7 +139,7 @@
                 </div>
                 <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
-                <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
+                <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
                 <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!getProductEditInfoObject.editing" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -706,6 +706,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     } else {
       this.isFront = false
     }
+  }
+
+  private showLockerRoomModal() {
+    this.showVModal('locker-modal');
+    setTimeout(()=>{
+      console.log('locker', this.ref['lockerModal'].$refs['lockerRoom'].main_locker_tabs = 1)
+    }, 500)
   }
 
   private setCustomTextIndex(customTextIndex: number) {
