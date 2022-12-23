@@ -8,7 +8,7 @@
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
-                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" @adjustTotalTabs="adjustTotalTabs"
+                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                         @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
@@ -137,10 +137,10 @@
                   <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
                   <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
-                <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
-                <LockerRoomModal  :mainTotalTabs="mainTotalTabs" @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+                <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
+                <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                 <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
-                <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
+                <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!getProductEditInfoObject.editing" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                   <div>
@@ -314,7 +314,7 @@
                      </template>
                   </template>
 
-                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="editProductStatus">Cancel</b-button>
+                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing">Cancel</b-button>
                 </div>
               </div>
             </div>
@@ -544,6 +544,15 @@ Vue.filter('formatDate', function(value:string) {
       await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
         await this.getLockers(false,false,resolve);
       })
+      await this.$eventBus.$on('saveRosterToLocker', ()=>{
+        this.getLockers(false,false,null,true)
+      })
+      await this.$eventBus.$on('cancelLocker', ()=>{
+        this.cancelEdit()
+      })
+      await this.$eventBus.$on('cancelCart', ()=>{
+        this.cancelCart()
+      })
       await this.$eventBus.$on('updateCart', async (resolve: any) => {
         await this.addToCart(resolve);
       })
@@ -596,7 +605,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public updated_order_products: Record<any, any>[] = []
   public updateOrderItemProducts: Record<any, any> | null = null;
   private sideTabIndex = 0
-  private mainTotalTabs = 0
   private maximized = true
   private isRosterOpened = false
   private isColorShuffled = true
@@ -670,6 +678,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get settings(){
     return this.$store.getters.getSetting;
   }
+  get mainTotalTabs(){
+    return this.$store.getters.getMainTotalTabs;
+  }
 
 
   private get lockerIndex() {
@@ -686,10 +697,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private updateOtherTab(value: boolean) {
     this.showOtherTab = value
-  }
-
-  public adjustTotalTabs(totalTabs: number) {
-    this.mainTotalTabs = totalTabs
   }
 
   private swapSide(textIndex: number) {
@@ -879,10 +886,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getCustomLogos()
   }
 
-  get editProductStatus(): boolean {
-    return this.$store.getters.getEditStatus
-  }
-
   get mainProductType(): string {
     let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
     return selected_product.back_design ? "front_back" : "front";
@@ -902,7 +905,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       if(non_vector_logos.length == 0){
         setTimeout(()=>{
           this.hideVModal('replace-logo');
-          this.hideVModal('rostermodal');
+          // this.hideVModal('rostermodal');
         }, 3000)
       }
     }
@@ -1221,7 +1224,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     });
   }
 
-  public async getLockers(share_url = false, show_add_to_locker_modal = false,resolve:any = null){
+  public async getLockers(share_url = false, show_add_to_locker_modal = false,resolve:any = null,back_to_locker = false){
     let self: Record<any, any> = this;
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
@@ -1239,8 +1242,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return item.design_show
     })
     let main_scene = this.ref.mainScene[0];
-    main_scene.frontCanvas.discardActiveObject().renderAll();
-    main_scene.backCanvas.discardActiveObject().renderAll();
+    main_scene && main_scene.frontCanvas.discardActiveObject().renderAll();
+    main_scene && main_scene.backCanvas.discardActiveObject().renderAll();
     let locker_front_png = main_scene.frontCanvas.toDataURL("image/png").split(',')[1];
     let locker_back_png = null;
     if (this.mainProductType == "front_back") {
@@ -1278,7 +1281,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         let toast_type = "success"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
-        this.hideLockerProductUpdateButton(true)
+        this.hideLockerProductUpdateButton(true);
+        if(back_to_locker){
+          await this.getLockerRoomProducts(null)
+          await self.hideVModal('rostermodal')
+          await self.showVModal('locker-modal')
+        }
         // this.exitFromEditMode();
         // let query_params = await self.setQueryParams()
         // self.retrieveProducts(query_params)
