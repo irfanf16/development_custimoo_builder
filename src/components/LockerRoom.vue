@@ -36,7 +36,7 @@
                                :data-room-index="i"
                                :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                                :data-product-index="ind">
-                            <div class="fs-2" v-if="product.roster_count">Total products: <strong class="font-weight-bolder">{{product.roster_count}}</strong></div>
+                            <div class="fs-2" v-if="product.roster_count" @click="logDom">Total products: <strong class="font-weight-bolder">{{product.roster_count}}</strong></div>
                             <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                                    @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                               <div class="image-holder">
@@ -338,6 +338,7 @@ import ContactModal from "@/components/ContactModal.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import ModalAction from "@/mixins/ModalAction";
+import {getDomDocument} from '@/helpers/Helpers';
 
 @Component<LockerRoom>({
   components: {
@@ -1078,6 +1079,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public showContactPopup(room_id:number, room_index:number){
     this.ref['contactmodal'].showContactPopup(room_id, room_index)
+  }
+  public logDom() {
+    getDomDocument(true)
   }
 }
 </script>

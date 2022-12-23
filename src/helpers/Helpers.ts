@@ -1864,9 +1864,11 @@ const getDomDocument_back = () => {
 
 const getDomDocument = (return_iframe = false) => {
   let dom_document = document.querySelector(getWebComponentNames())
+  console.log('dom_document', dom_document ? dom_document : 'not found')
+  console.log('dom_document1', dom_document)
   dom_document = dom_document ? dom_document?.shadowRoot : document
   const dom_document_iframe = dom_document.querySelector('iframe')
-  console.log('getting iframe', dom_document_iframe)
+  console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
   if(return_iframe) {
     return dom_document_iframe
   }
