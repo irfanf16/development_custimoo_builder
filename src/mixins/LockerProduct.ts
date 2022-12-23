@@ -60,10 +60,11 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
           await self.handleMainProducts(response, active_product_detail);
           this.$emit('hideLockerRoomModal')
           if(editRoster){
-            await this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1});
-            setTimeout(()=>{
-              // this.showVModal('rostermodal')
-            }, 1000)
+            let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
+            setTimeout(async () => {
+              await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
+              this.showVModal('rostermodal');
+            },500)
           }
         }, (error:Record<any, any>) => {
           console.error("Error while retrieving products",error)

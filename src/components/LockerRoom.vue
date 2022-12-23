@@ -101,7 +101,7 @@
                               </a>
                             </li>
                             <li>
-                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editProduct(room.id, product, ind, '',true)"
+                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editProduct(room.id, product, ind, '', true)"
                                  @mouseleave="hideTooltip" @mouseenter="showTooltip">
                                 <b-icon-list class="fs-3" />
                               </a>
