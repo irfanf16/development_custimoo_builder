@@ -1,5 +1,5 @@
 import { Component, Vue } from 'vue-property-decorator'
-import {getLogoSettingsObject, getLogoUpdatedProps} from '@/helpers/Helpers'
+import {getLogoSettingsObject, getLogoUpdatedProps, hideLockerProductSaveBtn} from '@/helpers/Helpers'
 
 @Component
 export default class CustomLogosMixin extends Vue{
@@ -35,5 +35,6 @@ export default class CustomLogosMixin extends Vue{
     }
     await self.$eventBus.$emit("customLogoRemoved", logo_index)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
+    hideLockerProductSaveBtn()
   }
 }

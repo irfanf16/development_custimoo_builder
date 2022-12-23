@@ -21,6 +21,7 @@ const Main:Module<any, any> = {
       teamHide: !mobileScreen
     },
     tabIndexMain: 0,
+    mainTotalTabs: 3,
     popperID: ''
 
   },
@@ -46,6 +47,9 @@ const Main:Module<any, any> = {
     },
     SET_TAB_MAIN(state: Record<any, any>, payload: Record<any, any>) {
       state.tabIndexMain = payload.value
+    },
+    SET_MAIN_TOTAL_TABS(state: Record<any, any>, payload: number) {
+      state.mainTotalTabs = payload
     }
   },
   getters: {
@@ -63,6 +67,9 @@ const Main:Module<any, any> = {
     },
     getIsSafari: state => {
       return state.isSafari
+    },
+    getMainTotalTabs: state => {
+      return state.mainTotalTabs
     }
   },
   actions: {
@@ -74,6 +81,9 @@ const Main:Module<any, any> = {
     },
     setTabMain({ commit }, payload) {
       commit('SET_TAB_MAIN', payload)
+    },
+    setMainTotalTabs({ commit }, payload) {
+      commit('SET_MAIN_TOTAL_TABS', payload)
     },
     setJwtToken() {
       if(!localStorage.getItem('jwtToken')) {

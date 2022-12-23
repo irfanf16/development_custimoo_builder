@@ -228,8 +228,6 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
   }
 })
 export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, FetchCategories) {
-  @Prop({ default: 3, required: true }) mainTotalTabs!: number
-
   public viewLoader = false;
   private userData = this.$store.getters.getCustomer;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
@@ -281,6 +279,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
   get editingCartProductInfo() {
     return this.$store.getters.getProductEditInfoObject['cart_product_info']
+  }
+  get mainTotalTabs(){
+    return this.$store.getters.getMainTotalTabs;
   }
 
   public filterCartItemsForMOQSummary(cartItems:Record<any, any>){
@@ -390,7 +391,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       this.hideVModal('cart-modal')
       if (!edit) {
         let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
-        console.log('total_tabs',total_tabs);
         setTimeout(async () => {
           await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
           this.showVModal('rostermodal');

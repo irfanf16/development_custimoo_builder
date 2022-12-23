@@ -1857,9 +1857,25 @@ const getSantaModalConfig = () => {
   }
 }
 
-const getDomDocument = () => {
+const getDomDocument_back = () => {
   const dom_document = document.querySelector(getWebComponentNames())
   return dom_document ? dom_document?.shadowRoot : document
+}
+
+const getDomDocument = (return_iframe = false) => {
+  let dom_document = document.querySelector(getWebComponentNames())
+  console.log('window', window, )
+  console.log('window_parent', window.parent, window.parent.document)
+  dom_document = dom_document ? dom_document?.shadowRoot : document
+  const dom_document_iframe = dom_document.querySelector('iframe')
+  console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
+  if(return_iframe) {
+    return dom_document_iframe
+  }
+  if(dom_document_iframe) {
+    dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
+  }
+  return dom_document
 }
 
 const urlToBase64 = async (urls) => {
@@ -1881,6 +1897,14 @@ const isShadowDom = () => {
   return document.querySelector(getWebComponentNames()) ? true : false
 }
 
+const hideLockerProductSaveBtn = (hide_save_button = false) => {
+  const product_edit_info_obj = Store.getters.getProductEditInfoObject
+  const hide_locker_update_btn = Store.getters.getHideSaveLockerButton
+  if(product_edit_info_obj.type == 'locker_product' && hide_locker_update_btn == true) {
+    Store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', hide_save_button);
+  }
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -1893,5 +1917,5 @@ export {
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
-  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom
+  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn
 };

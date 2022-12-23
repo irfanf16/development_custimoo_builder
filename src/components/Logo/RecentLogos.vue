@@ -31,7 +31,7 @@ import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {processColorsCustom, setCustomLogo} from "@/helpers/Helpers"
+import {hideLockerProductSaveBtn, processColorsCustom, setCustomLogo} from "@/helpers/Helpers"
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 
 @Component<RecentLogos>({
@@ -140,6 +140,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
     if(this.customLogoIndex == 0) {
       await this.addRemoveTeamLogoOnAllProducts('add', recent_logo)
     }
+    hideLockerProductSaveBtn()
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }

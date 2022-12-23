@@ -820,6 +820,7 @@ button {
         & > .tabs {
             & >.tab-content {
                 max-height: calc(100vh - 250px);
+                font-size: 16px;
                 // max-height: calc(100vh - 230px);
                 //overflow-y: auto;
                 //&::-webkit-scrollbar{
@@ -6145,11 +6146,13 @@ $fontSize: 0.5;
                     display: inline-flex;
                     align-items: center;
                     column-gap: 5px;
+                    font-size: 14px;
 
                     &:before{
                         content: "Select Color";
                         display: inline-block;
                         font-weight: bold;
+                        font-size: 14px;
                     }
                 }
                 a{

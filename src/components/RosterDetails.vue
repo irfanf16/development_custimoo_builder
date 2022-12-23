@@ -154,12 +154,20 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
-      <button v-if="!isLoading" class="btn btn-secondary w-auto fw-bold" @click="close">
-        <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">Update Item</template>
-        <template v-else>Close Roster</template>
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker')">
+        Save & close
       </button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $root.$children[0].$children[2].cancelCart()">
+      <button v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto fw-bold" @click="close">
+        Update Item
+      </button>
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelCart'), showVModal('cart-modal')">
         Cancel
+      </button>
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelLocker'), showVModal('locker-modal')">
+        Cancel
+      </button>
+      <button v-else-if="getProductEditInfoObject.type != 'locker_product' && getProductEditInfoObject.type != 'cart_product'" class="btn btn-secondary w-auto fw-bold" @click="hideVModal('rostermodal')">
+        Close
       </button>
     </div>
 
