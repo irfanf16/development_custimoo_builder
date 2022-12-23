@@ -1857,9 +1857,23 @@ const getSantaModalConfig = () => {
   }
 }
 
-const getDomDocument = () => {
+const getDomDocument_back = () => {
   const dom_document = document.querySelector(getWebComponentNames())
   return dom_document ? dom_document?.shadowRoot : document
+}
+
+const getDomDocument = (return_iframe = false) => {
+  let dom_document = document.querySelector(getWebComponentNames())
+  dom_document = dom_document ? dom_document?.shadowRoot : document
+  const dom_document_iframe = dom_document.querySelector('iframe')
+  console.log('getting iframe', dom_document_iframe)
+  if(return_iframe) {
+    return dom_document_iframe
+  }
+  if(dom_document_iframe) {
+    dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
+  }
+  return dom_document
 }
 
 const urlToBase64 = async (urls) => {
