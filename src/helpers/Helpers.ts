@@ -1866,7 +1866,6 @@ const getDomDocument = (return_iframe = false) => {
   let dom_document = document.querySelector(getWebComponentNames())
   console.log('window', window, )
   console.log('window_parent', window.parent, window.parent.document)
-  console.log(' window.parent.document?.shadowRoot',  window.parent.document?.shadowRoot)
   dom_document = dom_document ? dom_document?.shadowRoot : document
   const dom_document_iframe = dom_document.querySelector('iframe')
   console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
