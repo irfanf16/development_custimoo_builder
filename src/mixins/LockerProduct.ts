@@ -778,6 +778,8 @@ export class ProductsQueryParamsMixin extends Vue {
     let query_params: string[] = [];
     if(sync_id) {
       query_params.push(`sync_id=${sync_id}`, 'paginate=false')
+      let selected_category = self.$store.getters.getSelectedCategory;
+      query_params.push(`category_id=${selected_category.category_id}`)
       if(update_cart) {
         query_params.push(`active_product_type=cart_product`, 'paginate=false')
       }
