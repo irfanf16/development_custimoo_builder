@@ -14,6 +14,9 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
+  get mainTotalTabs(){
+    return this.$store.getters.getMainTotalTabs;
+  }
 
   public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="", editRoster=false) {
     let self: Record<any, any> = this;
@@ -57,7 +60,10 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
           await self.handleMainProducts(response, active_product_detail);
           this.$emit('hideLockerRoomModal')
           if(editRoster){
-            this.showVModal('rostermodal')
+            await this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1});
+            setTimeout(()=>{
+              // this.showVModal('rostermodal')
+            }, 1000)
           }
         }, (error:Record<any, any>) => {
           console.error("Error while retrieving products",error)

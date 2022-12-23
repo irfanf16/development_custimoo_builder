@@ -8,7 +8,7 @@
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
-                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab" @adjustTotalTabs="adjustTotalTabs"
+                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                         @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
@@ -137,8 +137,8 @@
                   <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
                   <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
-                <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
-                <LockerRoomModal  :mainTotalTabs="mainTotalTabs" @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+                <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
+                <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                 <DesignCollectionModal @showLockerRoomModal="showVModal('locker-modal')" ref="collectionModal"  />
                 <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!editProductStatus" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
@@ -595,7 +595,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public updated_order_products: Record<any, any>[] = []
   public updateOrderItemProducts: Record<any, any> | null = null;
   private sideTabIndex = 0
-  private mainTotalTabs = 0
   private maximized = true
   private isRosterOpened = false
   private isColorShuffled = true
@@ -669,6 +668,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get settings(){
     return this.$store.getters.getSetting;
   }
+  get mainTotalTabs(){
+    return this.$store.getters.getMainTotalTabs;
+  }
 
 
   private get lockerIndex() {
@@ -685,10 +687,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private updateOtherTab(value: boolean) {
     this.showOtherTab = value
-  }
-
-  public adjustTotalTabs(totalTabs: number) {
-    this.mainTotalTabs = totalTabs
   }
 
   private swapSide(textIndex: number) {

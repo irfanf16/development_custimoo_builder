@@ -16,7 +16,6 @@
           <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideVModal('locker-modal')"
                       @showCollectionModal="showCollectionModal"
                       @editCollectionModal="editCollectionModal"
-                      :mainTotalTabs="mainTotalTabs"
                       />
         </div>
       </div>
@@ -44,7 +43,6 @@ import ModalAction from '@/mixins/ModalAction'
   }
 })
 export default class LockerRoomModal extends Mixins(ModalAction){
-  @Prop({required: true}) mainTotalTabs:number
   public ref = this.$refs as Record<any, any>
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 

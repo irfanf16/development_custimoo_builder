@@ -124,7 +124,7 @@
         </div>
       </modal>
     </template>
-    <CartModal ref="cartModal" :mainTotalTabs="mainTotalTabs" @deleteCartItem="deleteCartItem" v-if="customer"/>
+    <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
     <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-cart-item" ref="delete-cart-item"></confirm-modal>
   </div>
 
@@ -204,7 +204,6 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   public storageUrl = process.env.VUE_APP_STORAGE_URL
   public collection:Record<any, any> = [];
   public ref = this.$refs as Record<any, any>
-  private mainTotalTabs = 0
   public products_roster: Record<any, any>[] = []
   public sizeOptions: Record<any, any>[] = []
   private screenWidth = (window.screen.availWidth - 100);

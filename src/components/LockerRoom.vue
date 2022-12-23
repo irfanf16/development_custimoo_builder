@@ -101,7 +101,7 @@
                               </a>
                             </li>
                             <li>
-                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editRoster(room.id, product, ind, '',true)"
+                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editProduct(room.id, product, ind, '',true)"
                                  @mouseleave="hideTooltip" @mouseenter="showTooltip">
                                 <b-icon-list class="fs-3" />
                               </a>
@@ -379,7 +379,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''
   public yearly_planner_template_id = null;
-  @Prop({required: true}) mainTotalTabs:number;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
 
   private observerCallback = (mutationsList:any, observer:any) => {
@@ -414,13 +413,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       const config = { attributes: true, childList: true, subtree: true };
       this.observer.observe(elem, config);
     })
-  }
-
-
-  private editRoster = (room_id: number, room_product: Record<any, any>, ind: number, share_url="", editRoster=false) =>{
-    this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1});
-    console.log(room_id,room_product,ind,"",editRoster)
-    // this.editProduct(room_id,room_product,ind,"",editRoster)
   }
 
   private dragStart = () =>{
@@ -530,6 +522,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   get lockers(): Record<any, any> {
     return this.$store.getters.getLockers;
+  }
+
+  get mainTotalTabs(){
+    return this.$store.getters.getMainTotalTabs;
   }
 
   get getYearlyPlannerTemplateOptions() {
