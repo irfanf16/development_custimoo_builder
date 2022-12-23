@@ -233,6 +233,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
+  private front_zoom_point: fabric.Point
+  private back_zoom_point: fabric.Point
   private frontTexture !: any
   private backTexture !: any
   private texture_default_position = {front: {top: 0, left: 0}, back: {top: 0, left: 0}}
@@ -844,15 +846,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         canvas.on('mouse:wheel', (opt) => {
           let delta = opt.e.deltaY;
-          let pointer = canvas.getPointer(opt.e);
+          let pointer = canvas.getPointer(opt.e) as fabric.Point;
+
+          if(side == 'back') {
+            this.back_zoom_point = pointer
+          } else {
+            this.front_zoom_point = pointer
+          }
 
           let zoom = canvas.getZoom();
           zoom *= 0.999 ** delta;
           if (zoom > 4) zoom = 4;
           if (zoom < 1) {
             zoom = 1;
-            canvas.viewportTransform = default_view_port as number[];
           }
+          canvas.viewportTransform = default_view_port as number[];
           canvas.zoomToPoint({
             x: pointer.x,
             y: pointer.y
@@ -1182,18 +1190,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       bottom: modelBoundingRect.top + modelBoundingRect.height,
     }
 
-    // if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
-    //   e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
-    // }
-    // else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
-    //   e.target.left = boundingRect.left - (e.target.width * e.target.scaleX / 4)
-    // }
-    // if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
-    //   e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
-    // }
-    // else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
-    //   e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
-    // }
+    if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
+      e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
+    }
+    else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
+      e.target.left = boundingRect.left - (e.target.width * e.target.scaleX / 4)
+    }
+    if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
+      e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
+    }
+    else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
+      e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
+    }
 
     let centerPoint = e.target.getCenterPoint()
     if (canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
@@ -1208,14 +1216,34 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           moveTo = key
         }
       })
-      let pointXCompare = e.target.left + (e.target.width * e.target.scaleX / 4)
-      if(moveTo == 'left') {
-        pointXCompare = e.target.left - (e.target.width * e.target.scaleX / 4)
+      // let pointXCompare = e.target.left + (e.target.width * e.target.scaleX / 4)
+      // if(moveTo == 'left') {
+      //   pointXCompare = e.target.left - (e.target.width * e.target.scaleX / 4)
+      // }
+
+      let zoom_point = this.front_zoom_point
+      if(side == 'back') {
+        zoom_point = this.back_zoom_point
+      }
+      let zoom = canvas.getZoom();
+
+      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+        canvas.zoomToPoint({
+          x: zoom_point.x,
+          y: zoom_point.y
+        }, 1);
       }
 
-      // let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
-      //
-      // e.target.left = direction.left
+      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
+
+      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+        canvas.zoomToPoint({
+          x: zoom_point.x,
+          y: zoom_point.y
+        }, zoom);
+      }
+
+      e.target.left = direction.left
     }
 
     let dimText = this.dimTextFront
@@ -1225,7 +1253,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.showDimensions(e, dimText)
   }
 
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Group, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
+  public targetNonTransparent(canvas: fabric.Canvas, model: any, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
     let pointXCompare = pointX + (width * scaleX / 4)
     if(moveTo == 'left') {
       pointXCompare = pointX - (width * scaleX / 4)
@@ -1244,8 +1272,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, max_call)
     } else {
       const viewportMatrix = canvas.viewportTransform as Record<any, any>;
-      pointX = pointX + viewportMatrix[4] * canvas.getZoom()
-      pointY = pointY + viewportMatrix[5] * canvas.getZoom()
+      pointX = pointX + viewportMatrix[4] * (canvas.getZoom() + model.zoomX)
+      pointY = pointY + viewportMatrix[5] * (canvas.getZoom() + model.zoomY)
       return {left: pointX, top: pointY}
     }
   }
@@ -1272,9 +1300,19 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if(side == 'back' || (this.back && side == 'front')) {
       let texture = this.frontTexture
       let canvas = this.frontCanvas
+      let zoom_point = this.front_zoom_point
       if (side == 'back' && this.back) {
         texture = this.backTexture
         canvas = this.backCanvas
+        zoom_point = this.back_zoom_point
+      }
+
+      let zoom = canvas.getZoom();
+      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+        canvas.zoomToPoint({
+          x: zoom_point.x,
+          y: zoom_point.y
+        }, 1);
       }
 
       let add_index
@@ -1366,11 +1404,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           addTop = target.top
         }
 
-        const viewportMatrix = canvas.viewportTransform as Record<any, any>
-        console.log(this.frontTexture)
-        console.log(viewportMatrix)
-        // addLeft = addLeft + Math.abs(viewportMatrix[4]) * canvas.getZoom()
-        // addTop = addTop + viewportMatrix[5]
+        if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+          canvas.zoomToPoint({
+            x: zoom_point.x,
+            y: zoom_point.y
+          }, zoom);
+        }
 
         if(clone_again) {
           if (otherSideObjects[add_index]) {
@@ -1437,6 +1476,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       } else {
+        if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+          canvas.zoomToPoint({
+            x: zoom_point.x,
+            y: zoom_point.y
+          }, zoom);
+        }
         if (otherSideObjects[add_index]) {
           if (side == 'back') {
             this.frontCanvas.remove(otherSideObjects[add_index])
