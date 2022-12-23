@@ -455,6 +455,7 @@ Vue.filter('formatDate', function(value:string) {
     this.$gtag.pageview({ page_path: '/home' })
     this.$gtag.pageview('/about')
     this.$gtag.pageview(this.$route)
+    this.$gtag.event(this.$route)
     let self: Record<any, any> = this;
     const last_active_product_default_obj = lastActiveProductDefaultObject()
     let last_active_product_obj = this.$store.getters.getLastActiveProductData
@@ -1527,14 +1528,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self: Record<any, any> = this;
     // await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
     // await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
+    this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null })
     const categories_promise = this.fetchCategories();
     categories_promise.then(async (response) => {
       if(response){
         let query_params = await this.setQueryParams()
         await this.retrieveProducts(query_params);
-        if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress') {
+        if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && this.company.platform != 'shopify') {
           await this.showVModal('cart-modal')
-        } else if (this.company.platform === 'wordpress' && !this.isCollectionView) {
+        } else if ((this.company.platform === 'wordpress' || this.company.platform === 'shopify') && !this.isCollectionView) {
           window.location.href = this.company.company_domain + '/cart'
         }
       }
