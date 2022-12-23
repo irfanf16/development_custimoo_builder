@@ -6145,11 +6145,13 @@ $fontSize: 0.5;
                     display: inline-flex;
                     align-items: center;
                     column-gap: 5px;
+                    font-size: 14px;
 
                     &:before{
                         content: "Select Color";
                         display: inline-block;
                         font-weight: bold;
+                        font-size: 14px;
                     }
                 }
                 a{
