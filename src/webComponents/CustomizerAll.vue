@@ -152,11 +152,17 @@ export default {
     }
   },
   mounted: async function() {
+    const isGodaddyBuilder = window.parent.document.body.querySelector('[id^=layout-]')
+    console.log('isGoDaddy', isGodaddyBuilder ? true : false)
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
     let ele = window.parent.document.getElementById('e88d412d-dfc3-4628-910b-8c0d7237a371')?.querySelector('[data-ux="Container"]')
     if(!ele) {
       // run time adding css for totalteamsales.com as it is not accept any direct css
       ele = window.parent.document.getElementById('8031c129-170b-4c6e-8387-bce977db3c36')?.querySelector('[data-ux="Container"]')
+    }
+    if(!ele) {
+      // run time adding css for mooressports.com as it is not accept any direct css
+      ele = window.parent.document.getElementById('2afb678d-9823-4fba-a546-506062145325')?.querySelector('[data-ux="Container"]')
     }
     if(ele) {
       ele.style.width = '100%'
