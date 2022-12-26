@@ -1857,26 +1857,30 @@ const getSantaModalConfig = () => {
   }
 }
 
-const getDomDocument_back = () => {
+const getDomDocument = (parent_doc= false) => {
+  if(parent_doc) {
+    console.log('window.parent.document', window.parent, window.parent.document)
+    return window.parent.document
+  }
   const dom_document = document.querySelector(getWebComponentNames())
   return dom_document ? dom_document?.shadowRoot : document
 }
 
-const getDomDocument = (return_iframe = false) => {
-  let dom_document = document.querySelector(getWebComponentNames())
-  console.log('window', window, )
-  console.log('window_parent', window.parent, window.parent.document)
-  dom_document = dom_document ? dom_document?.shadowRoot : document
-  const dom_document_iframe = dom_document.querySelector('iframe')
-  console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
-  if(return_iframe) {
-    return dom_document_iframe
-  }
-  if(dom_document_iframe) {
-    dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
-  }
-  return dom_document
-}
+// const getDomDocument = (return_iframe = false) => {
+//   let dom_document = document.querySelector(getWebComponentNames())
+//   console.log('window', window, )
+//   console.log('window_parent', window.parent, window.parent.document)
+//   dom_document = dom_document ? dom_document?.shadowRoot : document
+//   const dom_document_iframe = dom_document.querySelector('iframe')
+//   console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
+//   if(return_iframe) {
+//     return dom_document_iframe
+//   }
+//   if(dom_document_iframe) {
+//     dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
+//   }
+//   return dom_document
+// }
 
 const urlToBase64 = async (urls) => {
   const response = await http.post('url_to_base64', {file_urls: urls}).catch((errorResponse) => {
