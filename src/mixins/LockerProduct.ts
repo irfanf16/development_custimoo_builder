@@ -13,9 +13,12 @@ import ModalAction from "@/mixins/ModalAction";
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 @Component
-export class LockerProducts extends Mixins(FetchCategories) {
+export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
+  get mainTotalTabs(){
+    return this.$store.getters.getMainTotalTabs;
+  }
 
-  public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="") {
+  public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="", editRoster=false) {
     let self: Record<any, any> = this;
     self.search_products = ''
     const response:Boolean = await self.editModeConfirmation();
@@ -56,6 +59,13 @@ export class LockerProducts extends Mixins(FetchCategories) {
 
           await self.handleMainProducts(response, active_product_detail);
           this.$emit('hideLockerRoomModal')
+          if(editRoster){
+            let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
+            setTimeout(async () => {
+              await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
+              this.showVModal('rostermodal');
+            },500)
+          }
         }, (error:Record<any, any>) => {
           console.error("Error while retrieving products",error)
         })
@@ -778,6 +788,8 @@ export class ProductsQueryParamsMixin extends Vue {
     let query_params: string[] = [];
     if(sync_id) {
       query_params.push(`sync_id=${sync_id}`, 'paginate=false')
+      let selected_category = self.$store.getters.getSelectedCategory;
+      query_params.push(`category_id=${selected_category.category_id}`)
       if(update_cart) {
         query_params.push(`active_product_type=cart_product`, 'paginate=false')
       }

@@ -1,11 +1,11 @@
 <template>
   <span>
-    <b-tabs class="main-locker-tabs">
+    <b-tabs class="main-locker-tabs" ref="main-locker-tabs" v-model="main_locker_tabs">
       <b-tab>
         <template #title>
           <span class="btn btn-secondary btn-sm">Locker Rooms</span>
         </template>
-        <b-tabs lazy content-class="mt-3"   @changed="lockerChanged">
+        <b-tabs lazy content-class="mt-3" @changed="lockerChanged">
         <template v-for="(room, i) in getLockerProducts">
           <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
             <template #title>
@@ -101,7 +101,7 @@
                               </a>
                             </li>
                             <li>
-                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editRoster"
+                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editProduct(room.id, product, ind, '', true)"
                                  @mouseleave="hideTooltip" @mouseenter="showTooltip">
                                 <b-icon-list class="fs-3" />
                               </a>
@@ -376,11 +376,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public copiedProductLockerId = 0
   public url = ''
   public group = ''
+  public main_locker_tabs = 0
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''
   public yearly_planner_template_id = null;
-  @Prop({required: true}) mainTotalTabs:number;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
 
   private observerCallback = (mutationsList:any, observer:any) => {
@@ -415,14 +415,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       const config = { attributes: true, childList: true, subtree: true };
       this.observer.observe(elem, config);
     })
-  }
-
-
-
-  private editRoster = () =>{
-    this.$store.dispatch('setTabMain', {value: this.mainTotalTabs + 1})
-    this.hideVModal('locker-modal')
-    this.showVModal('rostermodal')
   }
 
   private dragStart = () =>{
@@ -532,6 +524,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   get lockers(): Record<any, any> {
     return this.$store.getters.getLockers;
+  }
+
+  get mainTotalTabs(){
+    return this.$store.getters.getMainTotalTabs;
   }
 
   get getYearlyPlannerTemplateOptions() {

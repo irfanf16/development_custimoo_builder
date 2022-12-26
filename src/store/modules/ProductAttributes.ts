@@ -169,6 +169,7 @@ const ProductAttributes:Module<any, any> = {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
       if (payload.status == true || payload.status == false){
         state.editProduct.editStatus = payload.status
+        state.product_edit_info_object.editing = payload.status
       }
       if (payload.id) {
         state.editProduct.editProductId = payload.id
