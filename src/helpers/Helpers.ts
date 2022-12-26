@@ -1863,6 +1863,8 @@ const getDomDocument = (parent_doc= false) => {
     return window.parent.document
   }
   const dom_document = document.querySelector(getWebComponentNames())
+  console.log('dom_document', dom_document)
+  console.log('is shadow', dom_document ? dom_document?.shadowRoot : document)
   return dom_document ? dom_document?.shadowRoot : document
 }
 
