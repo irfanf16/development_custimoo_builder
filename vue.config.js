@@ -33,10 +33,6 @@ module.exports = {
 
 
 
-
-        
-
-
         return options
       })
   }

@@ -527,17 +527,17 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       unit: '',
                       svg: '',
                       color: [] as Record<any, any>[],
-                      svg_height:'',
-                      outline_color:'',
-                      outline_color_pantone:'',
-                      original_height:0,
-                      original_width:0,
-                      outline_width:0,
-                      rotation:0,
-                      scaleX:0,
-                      scaleY:0,
-                      width_px:0,
-                      height_px:0,
+                      svg_height: '',
+                      outline_color: '',
+                      outline_color_pantone: '',
+                      original_height: 0,
+                      original_width: 0,
+                      outline_width: '',
+                      rotation: 0,
+                      scaleX: 0,
+                      scaleY: 0,
+                      width_px: 0,
+                      height_px: 0,
                     }
 
                     if (Object.keys(path).length) {
@@ -598,7 +598,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
                       const converted_width = unitConversion((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
                       const converted_height = unitConversion((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
-
+                      const outline_width = unitConversion((custom_text_item.outline_width * custom_text_item.scaleX ) * selected_product.measurement_ratio)
                       text_item_object.width = converted_width.value;
                       text_item_object.height = converted_height.value;
                       text_item_object.unit = converted_height.unit;
@@ -606,7 +606,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       text_item_object.color.push(text_color_info);
                       text_item_object.outline_color = custom_text_item.outline_color;
                       text_item_object.outline_color_pantone = custom_text_item.outline_color_pantone;
-                      text_item_object.outline_width = parseInt(custom_text_item.outline_width);
+                      text_item_object.outline_width = outline_width.value;
                       text_item_object.original_height = (height * custom_text_item.scaleY) / selected_product.measurement_ratio;
                       text_item_object.original_width = (width * custom_text_item.scaleX) / selected_product.measurement_ratio;
                       text_item_object.rotation = custom_text_item.rotation;
