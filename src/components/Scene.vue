@@ -1,6 +1,6 @@
 <template>
   <div class="loading-holder">
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader || true"><img src="../../src/assets/images/loading.gif" /></div>
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }"
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
@@ -2148,7 +2148,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   justify-content: center;
   align-items: center;
   background: rgba(255, 255, 255, 0.99);
-  z-index: 1030;
+  z-index: 998;
 
   img {
     max-width: 15%;
