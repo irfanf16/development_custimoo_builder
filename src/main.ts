@@ -110,6 +110,7 @@ Vue.use(VueSweetalert2);
 
 import ZoomOnHover from "vue-zoom-on-hover";
 Vue.use(ZoomOnHover);
+Vue.config.devtools = true
 
 import VueGtag from "vue-gtag";
 Vue.use(VueGtag, {
