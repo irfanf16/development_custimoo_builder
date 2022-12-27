@@ -359,7 +359,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   }
 
   public setLeft($event:Record<any, any>){
-    $event.target.children[0].style.top = $event.pageY+"px"
+    $event.target.children[0].style.top = ($event.pageY + 30)+"px"
     $event.target.children[0].style.left = $event.pageX+"px"
   }
 
