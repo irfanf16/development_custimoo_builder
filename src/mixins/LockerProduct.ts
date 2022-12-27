@@ -64,7 +64,10 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
             setTimeout(async () => {
               await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
               this.showVModal('rostermodal');
+              await this.$store.dispatch('setEditRosterFromLocker', true)
             },500)
+          }else {
+            await this.$store.dispatch('setEditRosterFromLocker', false)
           }
         }, (error:Record<any, any>) => {
           console.error("Error while retrieving products",error)
