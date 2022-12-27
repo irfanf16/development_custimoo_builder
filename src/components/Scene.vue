@@ -1,6 +1,6 @@
 <template>
   <div class="loading-holder">
-    <div class="loader" v-if="showLoader || true"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }"
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
