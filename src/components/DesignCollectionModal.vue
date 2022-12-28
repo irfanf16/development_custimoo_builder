@@ -218,6 +218,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
           item.product_locker_room.front_url = `${item.product_locker_room.front_url}?${random}`
           item.product_locker_room.back_url = `${item.product_locker_room.back_url}?${random}`
         }
+        
+        item.allow_title = false;
+        item.allow_description = false;
         return item
       })
     items.collection_products = collections
