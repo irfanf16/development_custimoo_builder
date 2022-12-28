@@ -527,17 +527,17 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       unit: '',
                       svg: '',
                       color: [] as Record<any, any>[],
-                      svg_height:'',
-                      outline_color:'',
-                      outline_color_pantone:'',
-                      original_height:0,
-                      original_width:0,
-                      outline_width:0,
-                      rotation:0,
-                      scaleX:0,
-                      scaleY:0,
-                      width_px:0,
-                      height_px:0,
+                      svg_height: '',
+                      outline_color: '',
+                      outline_color_pantone: '',
+                      original_height: 0,
+                      original_width: 0,
+                      outline_width: '',
+                      rotation: 0,
+                      scaleX: 0,
+                      scaleY: 0,
+                      width_px: 0,
+                      height_px: 0,
                     }
 
                     if (Object.keys(path).length) {
@@ -598,7 +598,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
                       const converted_width = unitConversion((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
                       const converted_height = unitConversion((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
-
+                      const outline_width = unitConversion((custom_text_item.outline_width * custom_text_item.scaleX ) * selected_product.measurement_ratio)
                       text_item_object.width = converted_width.value;
                       text_item_object.height = converted_height.value;
                       text_item_object.unit = converted_height.unit;
@@ -606,7 +606,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       text_item_object.color.push(text_color_info);
                       text_item_object.outline_color = custom_text_item.outline_color;
                       text_item_object.outline_color_pantone = custom_text_item.outline_color_pantone;
-                      text_item_object.outline_width = parseInt(custom_text_item.outline_width);
+                      text_item_object.outline_width = outline_width.value;
                       text_item_object.original_height = (height * custom_text_item.scaleY) / selected_product.measurement_ratio;
                       text_item_object.original_width = (width * custom_text_item.scaleX) / selected_product.measurement_ratio;
                       text_item_object.rotation = custom_text_item.rotation;
@@ -772,6 +772,13 @@ const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
       * and continue to next iteration
       * */
       if(product_existing_custom_logos && product_existing_custom_logos.length > 0) {
+        const dirty_custom_logos = product_existing_custom_logos.filter(custom_logo => custom_logo.product_id != product.id)
+        if(dirty_custom_logos.length > 0) {
+          product_existing_custom_logos.forEach((product_existing_custom_logo, customLogoIndex) => {
+            product_existing_custom_logos[customLogoIndex].product_id = product.id
+          })
+          Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { product_id: product.id, data: product_existing_custom_logos})
+        }
         return false
       }
       let first_logo_setting = getLogoSettingsObject();
@@ -1857,26 +1864,32 @@ const getSantaModalConfig = () => {
   }
 }
 
-const getDomDocument_back = () => {
+const getDomDocument = (parent_doc= false) => {
+  if(parent_doc) {
+    console.log('window.parent.document', window.parent, window.parent.document)
+    return window.parent.document
+  }
   const dom_document = document.querySelector(getWebComponentNames())
+  console.log('dom_document', dom_document)
+  console.log('is shadow', dom_document ? dom_document?.shadowRoot : document)
   return dom_document ? dom_document?.shadowRoot : document
 }
 
-const getDomDocument = (return_iframe = false) => {
-  let dom_document = document.querySelector(getWebComponentNames())
-  console.log('dom_document', dom_document ? dom_document : 'not found')
-  console.log('dom_document1', dom_document)
-  dom_document = dom_document ? dom_document?.shadowRoot : document
-  const dom_document_iframe = dom_document.querySelector('iframe')
-  console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
-  if(return_iframe) {
-    return dom_document_iframe
-  }
-  if(dom_document_iframe) {
-    dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
-  }
-  return dom_document
-}
+// const getDomDocument = (return_iframe = false) => {
+//   let dom_document = document.querySelector(getWebComponentNames())
+//   console.log('window', window, )
+//   console.log('window_parent', window.parent, window.parent.document)
+//   dom_document = dom_document ? dom_document?.shadowRoot : document
+//   const dom_document_iframe = dom_document.querySelector('iframe')
+//   console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
+//   if(return_iframe) {
+//     return dom_document_iframe
+//   }
+//   if(dom_document_iframe) {
+//     dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
+//   }
+//   return dom_document
+// }
 
 const urlToBase64 = async (urls) => {
   const response = await http.post('url_to_base64', {file_urls: urls}).catch((errorResponse) => {
@@ -1897,6 +1910,14 @@ const isShadowDom = () => {
   return document.querySelector(getWebComponentNames()) ? true : false
 }
 
+const hideLockerProductSaveBtn = (hide_save_button = false) => {
+  const product_edit_info_obj = Store.getters.getProductEditInfoObject
+  const hide_locker_update_btn = Store.getters.getHideSaveLockerButton
+  if(product_edit_info_obj.type == 'locker_product' && hide_locker_update_btn == true) {
+    Store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', hide_save_button);
+  }
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -1909,5 +1930,5 @@ export {
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
-  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom
+  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn
 };

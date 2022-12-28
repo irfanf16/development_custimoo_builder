@@ -121,6 +121,7 @@ const ProductAttributes:Module<any, any> = {
     products_next_page_no: null, //null value mean has no more pages,
     products_rosters:{},
     active_roster_index:0,
+    edit_roster_from_locker:false,
     selectedCategory: {
       category_index: 0,
       category_id: null
@@ -169,6 +170,7 @@ const ProductAttributes:Module<any, any> = {
     CHANGE_EDIT_STATUS(state:Record<any, any>, payload){
       if (payload.status == true || payload.status == false){
         state.editProduct.editStatus = payload.status
+        state.product_edit_info_object.editing = payload.status
       }
       if (payload.id) {
         state.editProduct.editProductId = payload.id
@@ -191,6 +193,9 @@ const ProductAttributes:Module<any, any> = {
       const exist = state.editLockerProduct.find((x:number) => x == payload.prd_id)
       if(!exist)
         state.editLockerProduct.push(payload.prd_id)
+    },
+    SET_EDIT_ROSTER_FROM_LOCKER(state: Record<any, any>, payload: boolean){
+      state.edit_roster_from_locker = payload
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
@@ -1123,6 +1128,9 @@ const ProductAttributes:Module<any, any> = {
         return state.product_custom_texts[product_id];
       }
     },
+    getEditRosterFromLocker: state => {
+      return state.edit_roster_from_locker;
+    },
     getSearchLoader: state => {
       return state.searchLoader
     },
@@ -1387,6 +1395,9 @@ const ProductAttributes:Module<any, any> = {
   actions: {
     setSearchLoader({commit}, payload){
       commit('SET_SEARCH_LOADER', payload)
+    },
+    setEditRosterFromLocker({commit}, payload) {
+      commit('SET_EDIT_ROSTER_FROM_LOCKER', payload);
     },
     setVectorLogos({commit}, payload){
       commit('SET_VECTOR_LOGOS', payload)
