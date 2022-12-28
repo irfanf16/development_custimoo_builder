@@ -1365,7 +1365,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 .use-logo-btn {
   background: rgba(0, 0, 0, 0.15);
   z-index: 1;
-  color: #666;
+  color: #333;
   text-transform: uppercase;
   font-size: 1rem;
   width: 100%;
