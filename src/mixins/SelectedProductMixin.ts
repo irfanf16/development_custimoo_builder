@@ -94,7 +94,7 @@ export class FetchCategories extends Vue {
       if(!product_filter){
         const getProductEditInfoObject = this.$store.getters.getProductEditInfoObject;
         const last_active_product_obj = this.$store.getters.getLastActiveProductData;
-
+        let {sync_id} = self.$route.query
         const shared_url = getUrlParameter()
         if (shared_url?.includes('share')) {
           categories_promise = this.$store.dispatch('setCategories',{
@@ -120,20 +120,25 @@ export class FetchCategories extends Vue {
               });
           }
         } else{
-          if(product_id){
+          if(sync_id) {
+            categories_promise = this.$store.dispatch('setCategories',{
+              query_params: `sync_id=${sync_id}`
+            });
+          }
+          else if(product_id) {
             categories_promise = this.$store.dispatch('setCategories',{
               query_params:`product_id=${product_id}`
             });
-          } else if(last_active_product_obj.product_id){
+          } else if(last_active_product_obj.product_id) {
             categories_promise = this.$store.dispatch('setCategories',{
               query_params:`product_id=${last_active_product_obj.product_id}`
             });
           }
-          else{
-            categories_promise = this.$store.dispatch('setCategories',{
-              query_params: `customized=true`
-            });
-          }
+          else {
+              categories_promise = this.$store.dispatch('setCategories',{
+                query_params: `customized=true`
+              });
+           }
         }
       }
       else{

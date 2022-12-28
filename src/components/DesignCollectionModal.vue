@@ -10,7 +10,8 @@
          name="collection-modal" ref="collection-modal">
     <div class="modal-header">
       <div class="d-flex justify-content-sm-between flex-wrap align-items-center justify-content-center gap-1 w-100">
-        <div>
+        <div class="d-flex align-items-center gap-1">
+          <span class="fw-bold">Name: </span>
           <b-form-input @input="updateCollectionItemAttribute('name','',$event)" v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
@@ -228,6 +229,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
 
   public hideCollectionModal() {
     this.hideVModal('collection-modal')
+    this.$emit('showLockerRoomModal')
   }
 
   public showCollectionModal() {

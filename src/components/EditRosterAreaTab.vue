@@ -18,7 +18,9 @@
         >
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bolder">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span>
-        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="close"><BIconX /></span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" v-if="getProductEditInfoObject.type == 'cart_product'" @click="cancelCart"><BIconX /></span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" v-else-if="getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" @click="cancelLocker"><BIconX /></span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" v-else @click="close"><BIconX /></span>
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
@@ -155,6 +157,10 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     return this.$store.getters.getSelectedProduct
   }
 
+  get isEditingFromRoster():boolean{
+    return this.$store.getters.getEditRosterFromLocker;
+  }
+
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
   }
@@ -225,9 +231,29 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   public close(){
-    const self = this;
+    const self = this as Record<any, any>;
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
-    self.$modal.hide('rostermodal')
+
+    self.$modal.hide('rostermodal');
+
+    if(self.isEditingFromRoster){
+      self.$eventBus.$emit('cancelLocker');
+      self.$modal.show('locker-modal')
+    }
+  }
+
+  public cancelLocker(){
+    const self = this as Record<any, any>;
+    self.$eventBus.$emit('cancelLocker');
+    self.close()
+    self.$modal.show('locker-modal')
+  }
+
+  public cancelCart(){
+    const self = this as Record<any, any>;
+    self.$eventBus.$emit('cancelCart');
+    self.close()
+    self.$modal.show('cart-modal')
   }
 
   public rosterDetailsInit(index = 0, product = this.selectedProduct) {

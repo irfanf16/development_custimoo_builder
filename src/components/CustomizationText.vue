@@ -28,14 +28,16 @@
       <b-collapse accordion="my-accordion" :visible="false" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`text-accordion-${customTextIndex}`" :ref="`text-accordion-${customTextIndex}`" role="tabpanel">
           <div class="font-type-area">
             <div class="fade-right w-100 py-2">
-              <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 gap-2 fontList ">
+              <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 fontList ">
                 <div v-for="(product_font, product_font_index) in product_fonts" :key="`product_font_${product_font_index}`"
                      @click="handleCustomTextFontChange(customTextIndex,  product_font.value)"
                      :style="{ fontSize: '20px',  fontFamily: product_font.value}"
                      style="white-space: nowrap" @mouseenter="setLeft"
                      :class="{ 'pr-3': product_font_index + 1 == product_fonts.length }" role="button">
                   <div class="font_tooltip">{{product_custom_text.value ? product_font.label : ''}}</div>
-                  <span :key="`product_custom_text_${customTextIndex}_font-${product_font_index}`">
+                  <span :key="`product_custom_text_${customTextIndex}_font-${selected_font&&selected_font}`"
+                        :style="{background: product_font.value == product_custom_text.font_family && 'rgba(24, 144, 118, 0.1)'}"
+                        class="d-flex px-2 py-1 rounded-lg">
                     {{product_custom_text.value ? product_custom_text.value : product_font.value}}
                   </span>
               </div>
@@ -246,7 +248,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   public product_fonts: Record<any, any>[] = []
   public default_font_obj = ''
   public pantoneMessage = ''
-  public customTextColorIndex: Record<any, any>[] = []
+  public selected_font = '';
 
   /* component props ends here */
 
@@ -359,7 +361,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   }
 
   public setLeft($event:Record<any, any>){
-    $event.target.children[0].style.top = $event.pageY+"px"
+    $event.target.children[0].style.top = ($event.pageY + 30)+"px"
     $event.target.children[0].style.left = $event.pageX+"px"
   }
 
@@ -466,7 +468,9 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   }
   handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
     let self:Record<any, any> = this;
-   this.hideLockerProductUpdateButton()
+    this.hideLockerProductUpdateButton()
+    self.selected_font = selected_font;
+
     self.product_custom_texts[custom_text_index].font_family = selected_font;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {

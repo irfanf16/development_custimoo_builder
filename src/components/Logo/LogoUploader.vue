@@ -49,7 +49,7 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
-  getExtensionsFor, getLogoUpdatedProps, processColorsCustom, recentLogoDefaultObject
+  getExtensionsFor, getLogoUpdatedProps, hideLockerProductSaveBtn, processColorsCustom, recentLogoDefaultObject
 } from '@/helpers/Helpers'
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
@@ -249,6 +249,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
       }
       const inputRef = this.$refs.logoUploadInput as Record<any, any>
       inputRef.value = null;
+      hideLockerProductSaveBtn()
       this.showLoader = false;
     })
       .catch((error: any) => {

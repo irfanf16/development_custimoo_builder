@@ -2148,7 +2148,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   justify-content: center;
   align-items: center;
   background: rgba(255, 255, 255, 0.99);
-  z-index: 1030;
+  z-index: 998;
 
   img {
     max-width: 15%;
