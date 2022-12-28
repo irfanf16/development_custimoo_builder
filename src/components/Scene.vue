@@ -1190,60 +1190,69 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       bottom: modelBoundingRect.top + modelBoundingRect.height,
     }
 
-    if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
+    if(e.target.left >= boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
       e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
+      console.log('1111111111111')
     }
     else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
       e.target.left = boundingRect.left - (e.target.width * e.target.scaleX / 4)
+      console.log('222222222222')
     }
     if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
       e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
+      console.log('33333333333333333333')
     }
-    else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
+    else if(e.target.top >= boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
       e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
+      console.log('4444444444444444444')
     }
 
     let centerPoint = e.target.getCenterPoint()
+    const quarter_width = texture.width * texture.scaleX / 3
     if (canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
       const boundingDistance = {
-        left: Math.abs(boundingRect.left - centerPoint.x),
-        right: Math.abs(boundingRect.right - centerPoint.x)
+        left: Math.abs(boundingRect.left - centerPoint.x) + quarter_width,
+        top: Math.abs(boundingRect.top - centerPoint.y),
+        right: Math.abs(boundingRect.right - centerPoint.x) + quarter_width,
+        bottom: Math.abs(boundingRect.bottom - centerPoint.y)
       } as Record<any, any>
 
-      let moveTo = 'left'
+      let other_move_to = 'left'
       Object.keys(boundingDistance).forEach((key: string) => {
         if (boundingDistance[key] > boundingDistance[moveTo]) {
-          moveTo = key
+          other_move_to = key
         }
       })
-      // let pointXCompare = e.target.left + (e.target.width * e.target.scaleX / 4)
-      // if(moveTo == 'left') {
-      //   pointXCompare = e.target.left - (e.target.width * e.target.scaleX / 4)
-      // }
-
-      let zoom_point = this.front_zoom_point
-      if(side == 'back') {
-        zoom_point = this.back_zoom_point
-      }
-      let zoom = canvas.getZoom();
-
-      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
-        canvas.zoomToPoint({
-          x: zoom_point.x,
-          y: zoom_point.y
-        }, 1);
+      let moveTo = 'left'
+      if(boundingDistance.right > boundingDistance.left) {
+        moveTo = 'right'
       }
 
-      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
+      if(moveTo == 'left' || moveTo == 'right') {
+        let zoom_point = this.front_zoom_point
+        if (side == 'back') {
+          zoom_point = this.back_zoom_point
+        }
+        let zoom = canvas.getZoom();
 
-      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
-        canvas.zoomToPoint({
-          x: zoom_point.x,
-          y: zoom_point.y
-        }, zoom);
+        if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
+          canvas.zoomToPoint({
+            x: zoom_point.x,
+            y: zoom_point.y
+          }, 1);
+        }
+
+        let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo, other_move_to)
+
+        if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
+          canvas.zoomToPoint({
+            x: zoom_point.x,
+            y: zoom_point.y
+          }, zoom);
+        }
+
+        e.target.left = direction.left
       }
-
-      e.target.left = direction.left
     }
 
     let dimText = this.dimTextFront
@@ -1253,7 +1262,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.showDimensions(e, dimText)
   }
 
-  public targetNonTransparent(canvas: fabric.Canvas, model: any, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
+  public targetNonTransparent(canvas: fabric.Canvas, model: any, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, other_move_to = '', max_call = 600): Record<any, any> {
     let pointXCompare = pointX + (width * scaleX / 4)
     if(moveTo == 'left') {
       pointXCompare = pointX - (width * scaleX / 4)
@@ -1269,7 +1278,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       } else {
         pointY = pointY + 1
       }
-      return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, max_call)
+      return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, other_move_to, max_call)
+
     } else {
       const viewportMatrix = canvas.viewportTransform as Record<any, any>;
       pointX = pointX + viewportMatrix[4] * (canvas.getZoom() + model.zoomX)
