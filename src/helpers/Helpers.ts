@@ -772,6 +772,13 @@ const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
       * and continue to next iteration
       * */
       if(product_existing_custom_logos && product_existing_custom_logos.length > 0) {
+        const dirty_custom_logos = product_existing_custom_logos.filter(custom_logo => custom_logo.product_id != product.id)
+        if(dirty_custom_logos.length > 0) {
+          product_existing_custom_logos.forEach((product_existing_custom_logo, customLogoIndex) => {
+            product_existing_custom_logos[customLogoIndex].product_id = product.id
+          })
+          Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { product_id: product.id, data: product_existing_custom_logos})
+        }
         return false
       }
       let first_logo_setting = getLogoSettingsObject();
