@@ -29,9 +29,8 @@ module.exports = {
       .use('vue-loader')
       .tap(options => {
         // modify the options...
-
-
         
+
 
         return options
       })
