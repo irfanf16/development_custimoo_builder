@@ -89,22 +89,24 @@
         <b-card-body class="border-top">
           <div class="order-logo-holder gap-1 d-flex flex-wrap justify-content-between align-items-center">
             <template v-for="(logo, index) in customLogos">
-              <div class="logo-area d-flex flex-wrap align-items-center border position-relative p-3 mb-4" :key="index" v-if="logo && logo.url">
-                <div class="image-holder border mr-3">
-                  <img :src="storageUrl+logo.url" alt="logo" width="80px" />
+              <div class="logo-area d-flex bg-light flex-wrap align-items-center border position-relative p-3 mb-4" :key="index" v-if="logo && logo.url">
+                <div class="image-holder text-center w-100">
+                  <img :src="storageUrl+logo.url" alt="logo" style="max-width: 80px" />
                 </div>
                 <div class="text-left">
-                  <span class="d-block mb-1">Logo Placement</span>
-                  <span class="text-uppercase">{{ logo.side }}</span>
-                  <div class="d-flex mt-1 badge badge-light">
+                  <div class="d-flex mt-1 badge badge-light align-items-center w-100 fs-1">
+                    <span class="d-block">Logo Placement:</span>
+                    <span class="d-block text-uppercase ml-1">{{ logo.side }}</span>
+                  </div>
+                  <div class="d-flex badge badge-light">
                     Size:
-                    <span class="ml-1">{{ logo.originalWidth + settings.unit }}</span>
+                    <span class="ml-1">{{ logo.originalWidth + (settings && settings.unit) }}</span>
                     <span class="ml-1">x</span>
-                    <span class="ml-1">{{ logo.originalHeight + settings.unit }}</span>
+                    <span class="ml-1">{{ logo.originalHeight + (settings && settings.unit) }}</span>
                   </div>
                 </div>
 
-                <div class="vector-logo-error">Logo is not vector</div>
+                <div class="vector-logo-error d-flex justify-content-between" v-if="vectorImageConstraint? non_vector_logos_count > 0 : false">Logo is not vector <span @click="()=>showVModal('replace-logo')" class="text-info cursor-pointer fw-bold">Replace</span></div>
               </div>
             </template>
 
@@ -144,14 +146,21 @@
 
 <script lang="ts">
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
-import { findIndex } from 'lodash'
+import {filter, findIndex} from 'lodash'
 import { unitConversion } from '@/helpers/Helpers'
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import ModalAction from "@/mixins/ModalAction";
 
-@Component<OrderAccordionTab>({})
-export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
+@Component<OrderAccordionTab>({
+  mounted(){
+    this.$eventBus.$on('handleNonVectorCustomLogosCount',this.notVectorLogosCount);
+    console.log('vectorImageConstraint', this.vectorImageConstraint)
+  }
+})
+export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal, ModalAction) {
   private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
+  private non_vector_logos_count = 0
 
   public customLogosExists = false;
 
@@ -201,6 +210,10 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
     return this.$store.getters.getSelectedModelIndex;
   }
 
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
+  }
+
 
   public checkIndex(text_type: string) {
     return findIndex(this.customTexts, { type: text_type })
@@ -208,7 +221,20 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
 
   public unit_conversion(value: number): string {
     const converted = unitConversion(value)
-    return converted.value + converted.unit
+    return converted!.value + converted!.unit
+  }
+
+  public notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        // return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+        return custom_logo.is_vector == false && custom_logo.url
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    this.non_vector_logos_count =  non_vector_logos_count
   }
 }
 </script>

@@ -1672,8 +1672,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               data: {
                 actualWidth: img.width,
                 actualHeight: img.height,
-                originalWidth: converted_width.value,
-                originalHeight: converted_height.value
+                originalWidth: converted_width!.value,
+                originalHeight: converted_height!.value
               }
             })
           }
@@ -1755,7 +1755,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-        text: 'Size ' + converted_width.value + converted_width.unit + ' x ' + converted_height.value + converted_height.unit,
+        text: 'Size ' + converted_width!.value + converted_width!.unit + ' x ' + converted_height!.value + converted_height!.unit,
         visible: true
       }).bringToFront()
     }
@@ -2047,8 +2047,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
     const converted_width = unitConversion(width)
     const converted_height = unitConversion(height)
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width.value;
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height.value;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width!.value;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height!.value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
@@ -2072,8 +2072,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           scaleY: fabric_object.get("scaleY"),
           actualWidth: fabric_object.get('width'),
           actualHeight: fabric_object.get('height'),
-          originalWidth: converted_width.value,
-          originalHeight: converted_height.value,
+          originalWidth: converted_width!.value,
+          originalHeight: converted_height!.value,
         }
       })
     }
