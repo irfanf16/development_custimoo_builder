@@ -113,7 +113,7 @@
       </b-collapse>
     </b-card>
 
-    <b-card no-body v-if="customLogos.length > 0">
+    <b-card no-body v-if="customLogos && customLogos.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
         <b-button block v-b-toggle.accordion-5 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Text & Number Sizes</span> <span
           class="accordion-icon"></span></b-button>

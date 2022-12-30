@@ -29,9 +29,9 @@
         <b-form inline>
           <b-container fluid>
             <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"
-                       v-model='collectionItems.collection_products'>
+                       v-model='collectionItems.collection_products' handle=".dragger">
       <b-col cols="12" md="6" lg="4" xl="3" v-for="(collectionItem, index) in collectionItems.collection_products"
-             :key="index">
+             :key="index" class="dragger">
         <b-card>
           <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -43,7 +43,8 @@
           </div>
           <div class="mt-2 d-block gap-1">
             <div>
-              <b-form-input @input="updateCollectionItemAttribute('product_nickname',index, $event)"  class="w-100" v-model="collectionItem.product_nickname"
+              <b-form-input draggable="true" @dragstart="($event)=>{$event.preventDefault(); $event.stopPropagation();}"
+                            @input="updateCollectionItemAttribute('product_nickname',index, $event)"  class="w-100" v-model="collectionItem.product_nickname"
                             placeholder="Product Nick Name"></b-form-input>
             </div>
           </div>
@@ -67,13 +68,15 @@
           </div>
 
           <div class="mt-3">
-            <b-form-textarea @input="updateCollectionItemAttribute('product_note',index, $event)" v-model="collectionItem.product_note" placeholder="Description"
-                             class="w-100"></b-form-textarea>
+            <b-form-textarea  draggable="true" @dragstart="($event)=>{$event.preventDefault(); $event.stopPropagation();}"
+                              @input="updateCollectionItemAttribute('product_note',index, $event)" v-model="collectionItem.product_note" placeholder="Description"
+                              class="w-100"></b-form-textarea>
           </div>
 
           <div class="mt-3 product-price">
             <a class="btn btn-secondary light toggle_icon" v-b-tooltip.hover.bottom="(collectionItem.allow_price ? 'Hide price' : 'Show price') + ' on pdf'" @click="clickEyeIcon('price',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_price"  :icon="['fas', collectionItem.allow_price === true ? 'eye' : 'eye-slash' ]"/></a>
-            <b-form-input @input="updateCollectionItemAttribute('product_price',index, $event)"  class="w-100" v-model="collectionItem.product_price"
+            <b-form-input draggable="true" @dragstart="($event)=>{$event.preventDefault(); $event.stopPropagation();}"
+                          @input="updateCollectionItemAttribute('product_price',index, $event)"  class="w-100" v-model="collectionItem.product_price"
                           placeholder="Product Price"></b-form-input>
           </div>
         </b-card>
@@ -218,6 +221,9 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
           item.product_locker_room.front_url = `${item.product_locker_room.front_url}?${random}`
           item.product_locker_room.back_url = `${item.product_locker_room.back_url}?${random}`
         }
+
+        item.allow_title = false;
+        item.allow_description = false;
         return item
       })
     items.collection_products = collections
