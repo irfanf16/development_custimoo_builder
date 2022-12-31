@@ -49,10 +49,13 @@
 
                                 </div>
                               </div>
-                              <div class="d-none d-lg-block product-description text-center">
-                                <p>{{ product.product_name }}</p>
-                              </div>
                             </label>
+
+                            <div @click="($event)=>$event.stopPropagation()" class="d-flex align-items-center justify-content-center product-description gap-1 text-center">
+                              <span class="cursor-pointer" @mouseenter="showTooltip" @mouseleave="hideTooltip"
+                                    data-title="Rename" @click="setRenameLockerProductID(`${i + ind}${ind}`, product)"><b-icon-pencil-square /></span>
+                              <p>{{ product.product_name }}</p>
+                            </div>
 
                           <ul class="product-icons">
                             <li v-if="!getSelectionMode.readonly">
@@ -122,6 +125,15 @@
                               </a>
                             </li>
                           </ul>
+
+                          <div v-if="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}`" v-click-outside="()=>{renameID != '' ? renameID = '' : false}"
+                               class="d-flex rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
+                            <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
+                            <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
+                              <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
+                              <b-icon-check v-else />
+                            </b-button>
+                          </div>
                         </div>
                         </template>
                       </draggable>
@@ -371,12 +383,15 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public ref = this.$refs as Record<any, any>
   public colors: [] = []
   public viewLoader = false
+  public renameLoader = false
   public copiedProductId = 0
   public copiedProductName = ''
   public copiedProductLockerId = 0
   public url = ''
   public group = ''
+  public current_product_name = ''
   public main_locker_tabs = 0
+  public renameID = '';
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''
@@ -401,6 +416,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     $event.target.select()
   }
 
+  private get lockerProductInfo() {
+    return this.$store.getters.getProductEditInfoObject
+  }
   private get tabIndex() {
     return this.$store.getters.getLockerTabsIndex
   }
@@ -871,6 +889,38 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('Change_Locker_Tabs_Index', i)
     this.lockerActiveTabIndex = 0
     this.viewLoader = false;
+  }
+  public setRenameLockerProductID(id: string, product: Record<any, any>){
+    if(product){
+      this.renameID = id;
+      this.current_product_name = product.product_name;
+      this.lockerProductInfo.locker_product_info = {id: product.id}
+    }
+  }
+  public renameLockerProduct(product: Record<any, any>){
+    const self = this as Record<any, any>
+    let data = {id: product.id, product_name: this.current_product_name}
+    self.renameLoader = true;
+
+    if(data.id && data.product_name && data.product_name !=''){
+      http.put(`locker/product-name/changed`, data).then((res) => {
+        self.$eventBus.$emit('saveRosterToLocker')
+        product.product_name = self.current_product_name
+        self.renameID = '';
+        self.showToast(res.data.message, 'success')
+        self.renameLoader = false;
+      }).catch(err => {
+        console.log("error", err)
+        if (err.response.status) {
+          self.renameLoader = false;
+          //resp = {status:false,message:err.response.data.errors};
+          self.showToast('Product is not renamed, try again', 'error')
+        }
+      })
+    }else{
+      self.showToast('Please write some name', 'error')
+      self.renameLoader = false;
+    }
   }
   public handleLockerRoomChanged(){
     this.lockerActiveTabIndex = 0
@@ -1406,8 +1456,17 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 }
 
+.rename-locker-product{
+  bottom: -40px;
+  background: white;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  box-shadow: 0 0 5px rgba(0,0,0,0.15);
 
-
-
-
+  input{
+    border-radius: 0;
+    border: none;
+    background: none;
+  }
+}
 </style>
