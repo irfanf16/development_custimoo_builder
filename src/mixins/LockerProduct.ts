@@ -1227,7 +1227,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 '_custimoo_cart_url': `${company_domain}/pages/customizer/#/?sync_id=${(cart_product as Record<any, any>).sync_id}&update_item=${api_res.cart_item_key}&update_cart=${api_res.new_created_id}`,
                 '_custimoo_delete_cart_url': delete_cart_item_url,
                 '_custimoo_product_name': (cart_product as Record<any, any>).product_name,
-                'PRODUCT NAME': (cart_product as Record<any, any>).product_name,
+                'DESIGN NAME': (cart_product as Record<any, any>).product_name,
                 'YOUR DESIGN': 'Below are the links of your customized designs.',
                 'FRONT IMAGE': api_res.front_image_short,
                 'BACK IMAGE': api_res.back_image_short
