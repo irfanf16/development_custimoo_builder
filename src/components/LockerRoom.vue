@@ -11,7 +11,7 @@
             <template #title>
               <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
                           @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
-                <span @click="changeColor">{{ room.room_name }}</span>
+                <span @click="changeColor" :data-title="`Move to ${room.room_name}`" @dragleave="hideTooltip" @drop="hideTooltip" @dragenter="showTooltip">{{ room.room_name }}</span>
               </draggable>
               <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom(room.id, i)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']"/>
@@ -36,7 +36,9 @@
                                :data-room-index="i"
                                :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                                :data-product-index="ind">
-                            <div class="fs-2" v-if="product.roster_count" @click="logDom">Total products: <strong class="font-weight-bolder">{{product.roster_count}}</strong></div>
+                            <div class="fs-2" @click="logDom">
+                              Total products: <strong class="font-weight-bolder">{{product.roster_count ? product.roster_count : '0'}}</strong>
+                            </div>
                             <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                                    @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                               <div class="image-holder">
