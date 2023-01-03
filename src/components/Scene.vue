@@ -5,13 +5,13 @@
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-        <div>
+        <div class="d-flex gap-2 align-items-center justify-content-center">
           <h2>Front</h2>
-          <div v-if="mainPreview">
-            <a @click="zoomInOut('front', 'in')">
+          <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1">
+            <a class="zoom_in_out" @click="zoomInOut('front', 'in')">
               <BIconPlus class="plus" />
             </a>
-            <a @click="zoomInOut('front', 'out')">
+            <a class="zoom_in_out" @click="zoomInOut('front', 'out')">
               <BIconDash class="minus" />
             </a>
           </div>
@@ -21,13 +21,13 @@
       <a @click="setShowSmall('front')" :class="{ 'show-small': showSmall.back }" v-if="back">
         <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth"
           :height="canvasHeight"></canvas>
-        <div>
+        <div class="d-flex gap-2 align-items-center justify-content-center">
           <h2>Back</h2>
-          <div v-if="mainPreview">
-            <a @click="zoomInOut('back', 'in')">
+          <div style="margin-top: 20px" class="d-flex align-items-center gap-1" v-if="mainPreview">
+            <a class="zoom_in_out" @click="zoomInOut('back', 'in')">
               <BIconPlus class="plus" />
             </a>
-            <a @click="zoomInOut('back', 'out')">
+            <a class="zoom_in_out" @click="zoomInOut('back', 'out')">
               <BIconDash class="minus" />
             </a>
           </div>
@@ -2303,6 +2303,27 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     display: block;
     margin: 0 auto;
     height: auto;
+  }
+}
+.zoom_in_out {
+  font-size: 25px;
+  display: flex;
+  width: 30px;
+  height: 28px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--theme-color);
+  color: white !important;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+
+  &:active{
+    color: var(--theme-color) !important;
+    background: var(--theme-color-light);
   }
 }
 </style>
