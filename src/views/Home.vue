@@ -411,7 +411,7 @@ import {
   lastActiveProductDefaultObject,
   getUrlParameter,
   routerPush,
-  setDefaultColors, isShadowDom, getDomDocument
+  setDefaultColors, isShadowDom, getDomDocument, getImageFromCanvas
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 // import LogoUploader from "@/components/mobile/LogoUploader.vue";
@@ -650,16 +650,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private genImages(isClose = false) {
-    const canvasFront = this.ref['mainScene'][0].$refs['front']
-    const canvasBack = this.ref['mainScene'][0].$refs['back']
-    const imgFront = canvasFront.toDataURL('image/png')
-    const imgBack = canvasBack.toDataURL('image/png')
     if (isClose) {
       this.frontPreview = ''
       this.backPreview = ''
     } else {
-      this.frontPreview = imgFront
-      this.backPreview = imgBack
+      this.frontPreview = getImageFromCanvas('front') as string
+      this.backPreview = getImageFromCanvas('back') as string
     }
   }
 
@@ -1251,10 +1247,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let main_scene = this.ref.mainScene[0];
     main_scene && main_scene.frontCanvas.discardActiveObject().renderAll();
     main_scene && main_scene.backCanvas.discardActiveObject().renderAll();
-    let locker_front_png = main_scene.frontCanvas.toDataURL("image/png").split(',')[1];
-    let locker_back_png = null;
+    let locker_front_png = (getImageFromCanvas('front') as string ).split(',')[1]
+    let locker_back_png: string|null = null;
     if (this.mainProductType == "front_back") {
-      locker_back_png = main_scene.backCanvas.toDataURL("image/png").split(',')[1];
+      locker_back_png = (getImageFromCanvas('back') as string ).split(',')[1] as string
     }
     let distinct: Record<any, any> = []
     let svgGroups = this.$store.getters.getSvgGroups

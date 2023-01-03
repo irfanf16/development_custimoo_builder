@@ -5,12 +5,33 @@
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-        <h2>Front</h2>
+        <div>
+          <h2>Front</h2>
+          <div v-if="mainPreview">
+            <a @click="zoomInOut('front', 'in')">
+              <BIconPlus class="plus" />
+            </a>
+            <a @click="zoomInOut('front', 'out')">
+              <BIconDash class="minus" />
+            </a>
+          </div>
+        </div>
       </a>
+
       <a @click="setShowSmall('front')" :class="{ 'show-small': showSmall.back }" v-if="back">
         <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth"
           :height="canvasHeight"></canvas>
-        <h2>Back</h2>
+        <div>
+          <h2>Back</h2>
+          <div v-if="mainPreview">
+            <a @click="zoomInOut('back', 'in')">
+              <BIconPlus class="plus" />
+            </a>
+            <a @click="zoomInOut('back', 'out')">
+              <BIconDash class="minus" />
+            </a>
+          </div>
+        </div>
       </a>
     </div>
   </div>
@@ -840,13 +861,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         this.default_view_port = canvas.viewportTransform as number[]
 
         canvas.on('mouse:wheel', (opt) => {
-          this.zoomCanvas(opt, canvas, side)
+          this.zoomCanvasEvent(opt, canvas, side)
         })
-
-        canvas.on('touch:drag', (opt) => {
-          console.log(opt)
-        })
-
 
         let vertical_line = new fabric.Line([self.canvasWidth / 2, 0, self.canvasWidth / 2, self.canvasHeight], {
           stroke: '#6EF3CC',
@@ -883,46 +899,58 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         });
 
         canvas.on('selection:created', (e: Record<any, any>) => {
-          if(!this.fromRosterModal){
-            if(e.target.type == 'logo'){
-              this.$store.dispatch('setTabMain',{value:0})
-            }else if(e.target.type == 'text'){
-              this.$store.dispatch('setTabMain',{value:2})
-              this.$emit('setCustomTextIndex', e.target.text_index)
-            }
-
-            if(e.target.side == 'back' || e.target.side == 'Back'){
-              this.frontCanvas.discardActiveObject().renderAll();
-            }else{
-              this.backCanvas.discardActiveObject().renderAll();
-            }
-          }
-        });
+          this.setActiveTab(e.selected[0])
+        })
 
         canvas.on('selection:updated', (e: Record<any, any>) => {
-          if(!this.fromRosterModal) {
-            if(e.target.type == 'logo'){
-              this.$store.dispatch('setTabMain',{value:0})
-            }else if(e.target.type == 'text'){
-              this.$store.dispatch('setTabMain',{value:2})
-              this.$emit('setCustomTextIndex', e.target.text_index)
-            }
-
-            if(e.target.side == 'Back'){
-              this.frontCanvas.discardActiveObject().renderAll();
-            }else{
-              this.backCanvas.discardActiveObject().renderAll();
-            }
-          }
-        });
+          this.setActiveTab(e.selected[0])
+        })
       }
     })
   }
 
-  public zoomCanvas(opt: fabric.IEvent<WheelEvent>, canvas: fabric.Canvas, side: string) {
+  public setActiveTab(selected: Record<any, any>) {
+    if(!this.fromRosterModal){
+      if(selected.type == 'logo') {
+        this.$store.dispatch('setTabMain',{value:0})
+      }else if(selected.type == 'text'){
+        this.$store.dispatch('setTabMain',{value:2})
+        this.$emit('setCustomTextIndex', selected.text_index)
+      }
+
+      if(selected.side == 'back' || selected.side == 'Back'){
+        this.frontCanvas.discardActiveObject().renderAll()
+      }else{
+        this.backCanvas.discardActiveObject().renderAll()
+      }
+    }
+  }
+
+  public zoomInOut(side: string, in_out: string) {
+    let canvas = this.frontCanvas
+    if(side == 'back') {
+      canvas = this.backCanvas
+      if(this.back_zoom_point == undefined) {
+        this.back_zoom_point = {x: 300, y: 300} as fabric.Point
+      }
+    } else {
+      if(this.front_zoom_point == undefined) {
+        this.front_zoom_point = {x: 300, y: 300} as fabric.Point
+      }
+    }
+
+    let zoom = canvas.getZoom() + .2
+    if(in_out == 'out') {
+      zoom = canvas.getZoom() - .2
+    }
+    this.zoomCanvas(side, zoom)
+  }
+
+  public zoomCanvasEvent(opt: fabric.IEvent<WheelEvent>, canvas: fabric.Canvas, side: string) {
     let delta = opt.e.deltaY;
     let pointer = canvas.getPointer(opt.e) as fabric.Point;
-
+    console.log(pointer)
+    console.log(canvas.getCenter())
     if(side == 'back') {
       this.back_zoom_point = pointer
     } else {
@@ -931,6 +959,23 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     let zoom = canvas.getZoom();
     zoom *= 0.999 ** delta;
+
+    this.zoomCanvas(side, zoom)
+
+    opt.e.preventDefault();
+    opt.e.stopPropagation()
+  }
+
+  public zoomCanvas(side: string, zoom) {
+    let dim_text = this.dimTextFront
+    let canvas = this.frontCanvas
+    let pointer = this.front_zoom_point
+    if(side == 'back') {
+      dim_text = this.dimTextBack
+      canvas = this.backCanvas
+      pointer = this.back_zoom_point
+    }
+
     if (zoom > 4) zoom = 4;
     if (zoom < 1) {
       zoom = 1;
@@ -939,9 +984,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     canvas.zoomToPoint({
       x: pointer.x,
       y: pointer.y
-    }, zoom);
-    opt.e.preventDefault();
-    opt.e.stopPropagation()
+    }, zoom)
+
+    dim_text.scaleX = 1 / zoom;
+    dim_text.scaleY = 1 / zoom;
   }
 
   public getCustomObjectsLength(canvas: Record<any, any>) {
@@ -1447,7 +1493,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
         } else {
-          let objectAdd = fabric.util.object.clone(target)
+          let objectAdd
+          if(target.type == "text") {
+            target.clone((cloned) => {
+              objectAdd = cloned;
+            })
+          } else {
+            objectAdd = fabric.util.object.clone(target)
+          }
+
           if(actualNearTo == 'top') {
             objectAdd.flipX = true
             objectAdd.flipY = true
@@ -1962,7 +2016,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
                 fabric.loadSVGFromString(textSvg, (objects: any) => {
                   fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group | Record<any, any>
-                  fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
+                  fabric_text.scaleToHeight(custom_text_item.height as number)
                   fabric_text.set({
                     left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
                     top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,

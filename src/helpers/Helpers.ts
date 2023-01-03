@@ -668,8 +668,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       scene_ref.backCanvas.discardActiveObject().renderAll()
       // const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
       // const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
-      const back_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
-      const front_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
+      const back_image = getImageFromCanvas('back')
+      const front_image = getImageFromCanvas('front')
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: Store.getters.getCustomLogos(),
@@ -1701,8 +1701,8 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
     }
   }
   return {
-    back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
-    front_image: getCanvasImage.ref_front.toDataURL("image/png"),
+    back_image: getImageFromCanvas('back'),
+    front_image: getImageFromCanvas('front'),
     custom_logos: Store.getters.getCustomLogos(),
     measurement_ratio: selected_product.measurement_ratio,
     custom_logo_svgs: [],
@@ -1735,17 +1735,19 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
   }
 }
 
-const getImageFromCanvas = (canvas:Canvas, options={}) => {
+const getImageFromCanvas = (side: string, options={}) => {
   const canvas_options = {...{original_width: 600, original_height: 600, image_type: 'image/png', width: 1200, height: 1200, zoom: 2}, ...options}
-  console.log('getImageFromCanvas call')
+  let canvas = Store.getters.getCanvasImage.scene.frontCanvas
+  if(side == 'back') {
+    canvas = Store.getters.getCanvasImage.scene.backCanvas
+  }
   if(canvas) {
-    const original_transform = Store.getters.getCanvasImage.scene.viewportTransform
-    const original_zoom = Store.getters.getCanvasImage.scene.getZoom()
+    const original_transform = canvas.viewportTransform
+    const original_zoom = canvas.getZoom()
     canvas.setHeight(canvas_options.height)
     canvas.setWidth(canvas_options.width)
     canvas.viewportTransform = Store.getters.getCanvasImage.scene.default_view_port
     canvas.setZoom(canvas_options.zoom)
-    // @ts-ignore
     const base64_image = canvas.toDataURL(canvas_options.image_type)
     canvas.setHeight(canvas_options.original_height)
     canvas.setWidth(canvas_options.original_width)

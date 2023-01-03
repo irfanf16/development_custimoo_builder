@@ -92,7 +92,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
 import {
-  getActiveProductData,
+  getActiveProductData, getImageFromCanvas,
   handleResponseException,
   unitConversion
 } from '@/helpers/Helpers'
@@ -125,8 +125,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>
-  public pdf_front_image = null;
-  public pdf_back_image = null;
+  public pdf_front_image: string|null = null;
+  public pdf_back_image: string|null = null;
   public showModal = false
   public shared_url = ""
   public production_file_obj = {
@@ -477,8 +477,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
     form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
-      this.pdf_front_image = this.canvasImage.ref_front.toDataURL("image/png")
-      this.pdf_back_image = this.canvasImage.ref_back.toDataURL("image/png")
+      this.pdf_front_image = getImageFromCanvas('front') as string
+      this.pdf_back_image = getImageFromCanvas('back') as string
       resolve(1);
     });
 
