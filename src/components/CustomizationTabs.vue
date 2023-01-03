@@ -411,7 +411,7 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     this.$store.commit('REMOVE_CUSTOMIZATION_TEXT_ELEMENT', payload)
   }
 
-  notVectorLogosCount(){
+  public notVectorLogosCount(){
     const custom_logos = this.$store.getters.koivna
     let non_vector_logos_count = 0
     if(custom_logos && custom_logos.length > 0) {

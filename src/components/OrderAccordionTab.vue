@@ -2,19 +2,19 @@
   <div class="accordion my-3" role="tablist">
     <b-card no-body v-if="selectedProduct.product_type != 'personalized' ">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-1 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Colors</span> <span
+        <b-button block v-b-toggle.accordion-1 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Colors</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">
-        <b-card-body>
+        <b-card-body class="p-0">
           <div class="order-selected-colors">
-            <button v-for="(svgColor, index) in svgGroups" :key="index">
+            <button class="px-4" v-for="(svgColor, index) in svgGroups" :key="index">
               <span class="text-uppercase color-title">{{ svgColor.id }}</span>
-              <span class="color-circle" :style="{background: svgColor.color}"></span>
-              <span class="text-left">
-                <span class="text-uppercase d-block">{{ svgColor.pantone }}</span>
-                <span class="text-uppercase d-block">{{ svgColor.name }}</span>
-              </span>
+              <span class="color-circle" :style="{background: svgColor.color}" style="box-shadow: 0 0 0 1px #000 inset"></span>
+              <div class="text-left ml-1" style="font-size: 12px">
+                <span class="text-uppercase d-block" v-if="svgColor.pantone">{{ svgColor.pantone +" "+ svgColor.name }}</span>
+                <span class="text-uppercase d-block" v-else>{{ svgColor.name }}</span>
+              </div>
             </button>
           </div>
         </b-card-body>
@@ -23,7 +23,7 @@
 
     <b-card no-body v-if="product_roster_detail && product_roster_detail.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="text">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span> <span
+        <b-button block v-b-toggle.accordion-2 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-2" accordion="my-accordion" role="tabpanel">
@@ -52,7 +52,7 @@
     <template>
       <b-card no-body>
         <b-card-header header-tag="header" class="p-1" role="tab">
-          <b-button block v-b-toggle.accordion-3 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Style</span> <span
+          <b-button block v-b-toggle.accordion-3 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Style</span> <span
             class="accordion-icon"></span></b-button>
         </b-card-header>
         <b-collapse id="accordion-3" accordion="my-accordion" role="tabpanel">
@@ -82,29 +82,31 @@
 
     <b-card no-body v-if="customLogos && customLogos.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-4 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Logos</span> <span
+        <b-button block v-b-toggle.accordion-4 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Logos</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-4" accordion="my-accordion" role="tabpanel">
         <b-card-body class="border-top">
           <div class="order-logo-holder gap-1 d-flex flex-wrap justify-content-between align-items-center">
             <template v-for="(logo, index) in customLogos">
-              <div class="logo-area d-flex flex-wrap align-items-center border position-relative p-3 mb-4" :key="index" v-if="logo && logo.url">
-                <div class="image-holder border mr-3">
-                  <img :src="storageUrl+logo.url" alt="logo" width="80px" />
+              <div class="logo-area d-flex bg-light flex-wrap align-items-center border position-relative p-3 mb-4" :key="index" v-if="logo && logo.url">
+                <div class="image-holder text-center w-100">
+                  <img :src="storageUrl+logo.url" alt="logo" style="max-width: 80px" />
                 </div>
                 <div class="text-left">
-                  <span class="d-block mb-1">Logo Placement</span>
-                  <span class="text-uppercase">{{ logo.side }}</span>
-                  <div class="d-flex mt-1 badge badge-light">
+                  <div class="d-flex mt-1 badge badge-light align-items-center w-100 fs-1">
+                    <span class="d-block">Logo Placement:</span>
+                    <span class="d-block text-uppercase ml-1">{{ logo.side }}</span>
+                  </div>
+                  <div class="d-flex badge badge-light">
                     Size:
-                    <span class="ml-1">{{ logo.originalWidth + settings.unit }}</span>
+                    <span class="ml-1">{{ logo.originalWidth + (settings && settings.unit) }}</span>
                     <span class="ml-1">x</span>
-                    <span class="ml-1">{{ logo.originalHeight + settings.unit }}</span>
+                    <span class="ml-1">{{ logo.originalHeight + (settings && settings.unit) }}</span>
                   </div>
                 </div>
 
-                <div class="vector-logo-error">Logo is not vector</div>
+                <div class="vector-logo-error d-flex justify-content-between" v-if="vectorImageConstraint? non_vector_logos_count > 0 : false">Logo is not vector <span @click="()=>showVModal('replace-logo')" class="text-info cursor-pointer fw-bold">Replace</span></div>
               </div>
             </template>
 
@@ -115,7 +117,7 @@
 
     <b-card no-body v-if="customLogos && customLogos.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-5 class="p-3 d-flex align-items-center justify-content-between"><span class="text">Text & Number Sizes</span> <span
+        <b-button block v-b-toggle.accordion-5 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Text & Number Sizes</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-5" accordion="my-accordion" role="tabpanel">
@@ -144,14 +146,21 @@
 
 <script lang="ts">
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
-import { findIndex } from 'lodash'
+import {filter, findIndex} from 'lodash'
 import { unitConversion } from '@/helpers/Helpers'
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import ModalAction from "@/mixins/ModalAction";
 
-@Component<OrderAccordionTab>({})
-export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
+@Component<OrderAccordionTab>({
+  mounted(){
+    this.$eventBus.$on('handleNonVectorCustomLogosCount',this.notVectorLogosCount);
+    console.log('vectorImageConstraint', this.vectorImageConstraint)
+  }
+})
+export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal, ModalAction) {
   private activeRow = 0
   private storageUrl = process.env.VUE_APP_STORAGE_URL
+  private non_vector_logos_count = 0
 
   public customLogosExists = false;
 
@@ -196,8 +205,13 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
   get productModels(): Record<any, any> {
     return this.$store.getters.getProductModels
   }
+
   get modelIndex(): Record<any,any>{
     return this.$store.getters.getSelectedModelIndex;
+  }
+
+  get vectorImageConstraint():boolean{
+    return this.$store.getters.getSetting('vector_image_constraint')
   }
 
 
@@ -207,7 +221,20 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
 
   public unit_conversion(value: number): string {
     const converted = unitConversion(value)
-    return converted.value + converted.unit
+    return converted!.value + converted!.unit
+  }
+
+  public notVectorLogosCount(){
+    const custom_logos = this.$store.getters.koivna
+    let non_vector_logos_count = 0
+    if(custom_logos && custom_logos.length > 0) {
+      const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
+        // return (custom_logo.original_logo_url && custom_logo.is_vector == false) ? true : false
+        return custom_logo.is_vector == false && custom_logo.url
+      })
+      non_vector_logos_count = non_vector_logos.length
+    }
+    this.non_vector_logos_count =  non_vector_logos_count
   }
 }
 </script>
@@ -226,42 +253,26 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
 }
 .order-selected-colors {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-
-  @media only screen and (min-width: 768px) {
-    justify-content: flex-start;
-  }
+  grid-template-columns: repeat(1, 1fr);
+  align-items: center;
+  width: 100%;
 
   button {
-    background: none;
-    border: 1px solid #E1E6EA;
-    padding: 18px 10px 5px;
     display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    justify-content: flex-start;
-    gap: 3px;
-    font-size: 12px;
-    margin-top: 15px;
-    border-radius: 5px;
-    position: relative;
-
-    @media only screen and (min-width: 768px) {
-      font-size: 14px;
-    }
+    border: none;
+    background: none;
+    width: 100%;
+    align-items: center;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-top: 1px solid lightgray;
 
     .color-title{
-      position: absolute;
-      padding: 5px 10px;
-      background: #E1E6EA;
-      color: #333;
-      z-index: 10;
-      top: -15px;
-      left: 10px;
-      border-radius: 3px;
-      font-weight: 500;
-      font-size: 0.73vw;
+      width: 100%;
+      max-width: 100px;
+      text-align: left;
+      font-weight: bold;
+      font-size: 14px;
     }
 
     .color-circle {
@@ -271,6 +282,7 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal) {
       background: #FFC658;
       position: relative;
       margin-top: 1px;
+      flex-shrink: 0;
 
       &:before {
         position: absolute;

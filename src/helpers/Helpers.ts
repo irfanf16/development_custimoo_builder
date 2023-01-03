@@ -597,14 +597,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       const converted_width = unitConversion((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
                       const converted_height = unitConversion((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
                       const outline_width = unitConversion((custom_text_item.outline_width * custom_text_item.scaleX ) * selected_product.measurement_ratio)
-                      text_item_object.width = converted_width.value;
-                      text_item_object.height = converted_height.value;
-                      text_item_object.unit = converted_height.unit;
+                      text_item_object.width = converted_width!.value;
+                      text_item_object.height = converted_height!.value;
+                      text_item_object.unit = converted_height!.unit;
                       text_item_object.svg = svg_with_tag
                       text_item_object.color.push(text_color_info);
                       text_item_object.outline_color = custom_text_item.outline_color;
                       text_item_object.outline_color_pantone = custom_text_item.outline_color_pantone;
-                      text_item_object.outline_width = outline_width.value;
+                      text_item_object.outline_width = outline_width!.value;
                       text_item_object.original_height = (height * custom_text_item.scaleY) / selected_product.measurement_ratio;
                       text_item_object.original_width = (width * custom_text_item.scaleX) / selected_product.measurement_ratio;
                       text_item_object.rotation = custom_text_item.rotation;
@@ -1447,16 +1447,18 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
 
 const unitConversion = (value:number) => {
   const setting = Store.getters.getSetting('measurement_unit')
-  switch( setting.conversion_operator ) {
-    case 'multiply':
-      return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
-      break;
-    case 'divide':
-      return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
-      break;
-    default: {
-      const value_string = value ? value.toString() : '';
-      return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
+  if(setting){
+    switch( setting.conversion_operator ) {
+      case 'multiply':
+        return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
+        break;
+      case 'divide':
+        return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
+        break;
+      default: {
+        const value_string = value ? value.toString() : '';
+        return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
+      }
     }
   }
 }
@@ -1466,24 +1468,26 @@ const transformUnit = (dimension_px:number,unit_value:string) => {
     const PIXEL_IN_INCH = 72;
     const CM_IN_INCH = 2.54;
     const dimension_unit = parseFloat(unit_value);
-  switch( setting.conversion_operator ) {
-    case 'multiply':
-    {
-      const conversion_from_px = dimension_px/PIXEL_IN_INCH;
-      const conversion_from_cm = dimension_unit/CM_IN_INCH;
-      return (conversion_from_cm / conversion_from_px).toFixed(2);
-      break;
+    if(setting){
+      switch( setting.conversion_operator ) {
+        case 'multiply':
+        {
+          const conversion_from_px = dimension_px/PIXEL_IN_INCH;
+          const conversion_from_cm = dimension_unit/CM_IN_INCH;
+          return (conversion_from_cm / conversion_from_px).toFixed(2);
+          break;
+        }
+        case 'divide':
+        {
+          const conversion_from_px = dimension_px/PIXEL_IN_INCH;
+          return (dimension_unit / conversion_from_px).toFixed(2);
+          break;
+        }
+        default: {
+          return null
+        }
+      }
     }
-    case 'divide':
-    {
-      const conversion_from_px = dimension_px/PIXEL_IN_INCH;
-      return (dimension_unit / conversion_from_px).toFixed(2);
-      break;
-    }
-    default: {
-      return null
-    }
-  }
 }
 
 const rosterDefaultItem = () => {
