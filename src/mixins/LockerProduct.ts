@@ -789,9 +789,9 @@ export class ProductsQueryParamsMixin extends Vue {
     let self: Record<any, any> = this;
     let {sync_id, customizer_preview, update_cart} = self.$route.query
     let query_params: string[] = [];
+    const selected_category = self.$store.getters.getSelectedCategory;
     if(sync_id) {
       query_params.push(`sync_id=${sync_id}`, 'paginate=false')
-      let selected_category = self.$store.getters.getSelectedCategory;
       query_params.push(`category_id=${selected_category.category_id}`)
       if(update_cart) {
         query_params.push(`active_product_type=cart_product`, 'paginate=false')
@@ -827,7 +827,7 @@ export class ProductsQueryParamsMixin extends Vue {
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
               `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
               `active_product_type=${self.getProductEditInfoObject.type}`,
-              `category_id=${self.getProductEditInfoObject.category_id}`,
+              `category_id=${selected_category.category_id}`,
               'paginate=false'
             ];
           }
