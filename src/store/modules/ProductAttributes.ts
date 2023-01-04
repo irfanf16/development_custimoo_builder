@@ -1449,7 +1449,12 @@ const ProductAttributes:Module<any, any> = {
             await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
             await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
             await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
-            await commit("SET_SELECTED_CATEGORY",{ category_id : response.data.product_category_id, category_index : category_index});
+            if(categories && categories.length) {
+              await commit("SET_SELECTED_CATEGORY", {
+                category_id: response.data.product_category_id,
+                category_index: category_index
+              });
+            }
             resolve(response.data.no_product_found);
           }
         }).catch((e: any) => {

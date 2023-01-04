@@ -800,9 +800,13 @@ export class ProductsQueryParamsMixin extends Vue {
     else {
       const shared_url = getUrlParameter()
       if (shared_url?.includes('share')) {
+        let selected_category = self.$store.getters.getSelectedCategory;
         query_params = [
           `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
         ];
+        if(selected_category.category_id){
+          query_params.push(`category_id=${selected_category.category_id}`)
+        }
         resetLastActiveProductData()
         exitFromEditMode()
       }
