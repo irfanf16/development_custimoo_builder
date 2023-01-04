@@ -58,6 +58,11 @@
     --vs-transition-duration: 0.15s
 }
 
+:host, :root{
+    max-width: 100%;
+    display: block;
+}
+
 @-webkit-keyframes vSelectSpinner {
     0% {
         transform: rotate(0deg)
