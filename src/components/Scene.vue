@@ -949,8 +949,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public zoomCanvasEvent(opt: fabric.IEvent<WheelEvent>, canvas: fabric.Canvas, side: string) {
     let delta = opt.e.deltaY;
     let pointer = canvas.getPointer(opt.e) as fabric.Point;
-    console.log(pointer)
-    console.log(canvas.getCenter())
     if(side == 'back') {
       this.back_zoom_point = pointer
     } else {
