@@ -36,17 +36,17 @@
                                :data-room-index="i"
                                :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                                :data-product-index="ind">
-                            <div draggable="true" @dragstart="preventDrag" @drag="preventDrag" class="fs-2" @click="logDom">
+                            <div class="fs-2" @click="logDom">
                               Total products: <strong class="font-weight-bolder">{{product.roster_count ? product.roster_count : '0'}}</strong>
                             </div>
-                            <label draggable="true" @dragstart="preventDrag" @drag="preventDrag" :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
+                            <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                                    @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
-                              <div draggable="true" @dragstart="preventDrag" @drag="preventDrag" class="image-holder">
-                                <div draggable="true" @dragstart="preventDrag" @drag="preventDrag">
+                              <div class="image-holder">
+                                <div>
                                   <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
                                   <template v-if="room.active_tab">
-                                    <img draggable="true" @dragstart="preventDrag" @drag="preventDrag" @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                                    <img draggable="true" @dragstart="preventDrag" @drag="preventDrag" v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
+                                    <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                                    <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
                                   </template>
 
                                 </div>
