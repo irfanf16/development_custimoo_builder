@@ -155,6 +155,7 @@ export default {
   mounted: async function() {
     const isGodaddyBuilder = window.parent.document.body.querySelector('[id^=layout-]')
     console.log('isGoDaddy', isGodaddyBuilder ? true : false)
+    window.parent.document.querySelector('v-customizer')
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
     let ele = window.parent.document.getElementById('e88d412d-dfc3-4628-910b-8c0d7237a371')?.querySelector('[data-ux="Container"]')
     if(!ele) {
@@ -167,6 +168,8 @@ export default {
     }
     if(ele) {
       ele.style.width = '100%'
+      ele.style.paddingLeft = '0'
+      ele.style.paddingRight = '0'
     }
 
     if(this.$root.$options.shadowRoot) {
