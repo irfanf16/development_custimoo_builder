@@ -9,10 +9,10 @@
           <h2>Front</h2>
           <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1">
             <a class="zoom_in_out" @click="zoomInOut('front', 'in')">
-              <BIconPlus class="plus" />
+              <b-icon-zoom-in />
             </a>
             <a class="zoom_in_out" @click="zoomInOut('front', 'out')">
-              <BIconDash class="minus" />
+              <b-icon-zoom-out />
             </a>
           </div>
         </div>
@@ -25,10 +25,10 @@
           <h2>Back</h2>
           <div style="margin-top: 20px" class="d-flex align-items-center gap-1" v-if="mainPreview">
             <a class="zoom_in_out" @click="zoomInOut('back', 'in')">
-              <BIconPlus class="plus" />
+              <b-icon-zoom-in />
             </a>
             <a class="zoom_in_out" @click="zoomInOut('back', 'out')">
-              <BIconDash class="minus" />
+              <b-icon-zoom-out />
             </a>
           </div>
         </div>
@@ -2339,7 +2339,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 }
 .zoom_in_out {
-  font-size: 25px;
+  font-size: 20px;
   display: flex;
   width: 30px;
   height: 28px;
