@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" :data="undoRedoArrays" >
+  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" >
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
     <b-container fluid>
@@ -133,8 +133,10 @@
                   </div>
                 </header>
                 <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
-                  <b-button variant="outline-secondary  mr-2" :disabled="undoItems.length < 1" @click="undoAction">Undo</b-button>
-                  <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1">Redo</b-button>
+                  <b-button variant="outline-secondary  mr-2" @click="handleUndoRedoAction()"
+                            :disabled="undoItems && undoItems.length == 0">Undo</b-button>
+                  <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction('redo')"
+                            :disabled="redoItems && redoItems.length == 0">Redo</b-button>
                   <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                 </div>
                 <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
@@ -144,9 +146,16 @@
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                   <div>
-                    <b-button variant="outline-secondary mr-2" :disabled="undoItems.length < 1" @click="undoAction"><span class="d-sm-block d-none">Undo</span><span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span></b-button>
-                    <b-button variant="outline-secondary mr-2" @click="redoAction" :disabled="redoitems.length < 1"><span class="d-sm-block d-none">Redo</span><span class="d-sm-none d-block"><BIconReplyFill /></span></b-button>
-
+                    <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction()"
+                              :disabled="undoItems && undoItems.length == 0">
+                      <span class="d-sm-block d-none">Undo</span>
+                      <span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span>
+                    </b-button>
+                    <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction('redo')"
+                              :disabled="redoItems && redoItems.length == 0">
+                      <span class="d-sm-block d-none">Redo</span>
+                      <span class="d-sm-none d-block"><BIconReplyFill /></span>
+                    </b-button>
                     <template v-if="isCustomerAuthenticated">
                       <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                         <button v-if="!($root.$refs.Order_Details && $root.$refs.Order_Details.isLoading)" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
@@ -354,7 +363,7 @@
               </ul>
             </div>
           </b-col>
-          <div class="mobile-reset" v-if="mobileScreen && (undoItems.length > 0 || redoitems.length > 0)">
+          <div class="mobile-reset" v-if="mobileScreen && (undoItems.length > 0 || redoItems.length > 0)">
             <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
           </div>
 
@@ -396,6 +405,7 @@ import CustomTabs from "@/components/CustomTabs.vue";
 import ReplaceLogos from "@/components/ReplaceLogos.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
+import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 
@@ -411,17 +421,17 @@ import {
   lastActiveProductDefaultObject,
   getUrlParameter,
   routerPush,
-  setDefaultColors, isShadowDom, getDomDocument
+  setDefaultColors,
+  isShadowDom,
+  getDomDocument,
+  setUndoRedoItems
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
-// import LogoUploader from "@/components/mobile/LogoUploader.vue";
-// import LogoUploader from "@/components/Logo/LogoUploader";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
-import {filter, findIndex} from 'lodash'
+import {filter, findIndex, isEmpty} from 'lodash'
 import opentype from 'opentype.js'
 import { FetchCategories, HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
-import Store from "@/store";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -572,7 +582,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
-  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories) {
+  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories, CustomLogosMixin) {
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
@@ -959,13 +969,21 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  get undoItems(): Record<any, any> {
+  get undoItems() {
     return this.$store.getters.getUndoItems
   }
 
-  get redoitems(): Record<any, any> {
+  get redoItems() {
     return this.$store.getters.getRedoItems
   }
+
+  // get undoItems(): Record<any, any> {
+  //   return this.$store.getters.getUndoItems
+  // }
+  //
+  // get redoitems(): Record<any, any> {
+  //   return this.$store.getters.getRedoItems
+  // }
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -979,18 +997,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getHideSaveLockerButton;
   }
 
-  get undoRedoArrays(): boolean {
-    let undo = this.$store.getters.getUndoItems;
-    let redo = this.$store.getters.getRedoItems;
-    let hidebtn = this.$store.getters.getHideSaveLockerButton;
-    let editProductInfo = this.getProductEditInfoObject;
-    if (hidebtn && editProductInfo.editing && editProductInfo.type == 'locker_product') {
-      if (undo.length > 0 || redo.length > 0) {
-        this.hideLockerProductUpdateButton()
-      }
-    }
-    return hidebtn
-  }
+  // get undoRedoArrays(): boolean {
+  //   let undo = this.$store.getters.getUndoItems;
+  //   let redo = this.$store.getters.getRedoItems;
+  //   let hidebtn = this.$store.getters.getHideSaveLockerButton;
+  //   let editProductInfo = this.getProductEditInfoObject;
+  //   if (hidebtn && editProductInfo.editing && editProductInfo.type == 'locker_product') {
+  //     if (undo.length > 0 || redo.length > 0) {
+  //       this.hideLockerProductUpdateButton()
+  //     }
+  //   }
+  //   return hidebtn
+  // }
 
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
@@ -1316,12 +1334,94 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  public undoAction() {
-    this.$store.dispatch('undoAction')
+  public async handleUndoRedoAction(user_action = 'undo') {
+    const undo_redo_item = this.$store.getters.getUndoRedoItem(user_action)
+    const undo_redo_item_key = undo_redo_item.key
+    switch (undo_redo_item_key) {
+      case 'customLogos':
+        await this.handleCustomLogosUndoRedoActions(user_action, undo_redo_item)
+        break;
+      case 'groupColors':
+        await this.handleGroupColorsUndoRedoActions(user_action, undo_redo_item)
+        break;
+      case 'customTexts':
+        await this.handleCustomTextsUndoRedoActions(user_action, undo_redo_item)
+        break;
+      case 'defaultColors':
+        await this.handleDefaultColorsUndoRedoActions(user_action, undo_redo_item)
+        break;
+      default:
+        console.info(`for undo redo action the key (${undo_redo_item_key}) no handled`)
+    }
+  }
+  public async handleCustomLogosUndoRedoActions(user_action: string, undo_redo_item: Record<any, any>) {
+    let self: Record<any, any> = this
+    const { action_on_items, customLogos } = undo_redo_item
+    if(user_action == 'undo') {
+      await setUndoRedoItems('customLogos', action_on_items, 'redo')
+    }
+    await this.$store.commit('SET_CUSTOM_LOGOS', {
+      custom_logos: customLogos
+    })
+    for (const customLogo of customLogos) {
+      const { logo_index } = customLogo.logo_index
+      await self.$eventBus.$emit("customLogoRemoved", logo_index)
+      if(logo_index == 0) {
+        await this.addRemoveTeamLogoOnAllProducts('remove')
+        await this.addRemoveTeamLogoOnAllProducts('add', customLogo)
+      }
+      self.$eventBus.$emit('handleCustomLogoUpdatedEvent', customLogo)
+    }
   }
 
-  public redoAction() {
-    this.$store.dispatch('redoAction');
+  public async handleGroupColorsUndoRedoActions(user_action: string, undo_redo_item: Record<any, any>) {
+    let self: Record<any, any> = this
+    const { action_on_items, groupColors: group_colors } = undo_redo_item
+    if(user_action == 'undo') {
+      await setUndoRedoItems('groupColors', action_on_items, 'redo')
+    }
+    await this.$store.commit('SET_GROUP_COLORS', group_colors)
+    if(isEmpty(group_colors)) {
+      await self.$eventBus.$emit("useProductOriginalColors")
+    }
+    self.$eventBus.$emit("changeGroupColors")
+  }
+
+  public async handleCustomTextsUndoRedoActions(user_action: string, undo_redo_item: Record<any, any>) {
+    let self: Record<any, any> = this
+    const { action_on_items, customTexts: custom_texts } = undo_redo_item
+    if(user_action == 'undo') {
+      await setUndoRedoItems('customTexts', action_on_items, 'redo')
+    }
+    custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+      let custom_text_product_id = custom_text.product_id
+      let product_ids = [custom_text_product_id, ...custom_text.following_product_ids]
+      product_ids.forEach(async (product_id) => {
+        await this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: customTextIndex, index_type: 'product_text', product_id: product_id, value: custom_text})
+      })
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "undo_redo", custom_text_index: customTextIndex, custom_text_item_index: null, value: custom_text
+      });
+      if(custom_text.is_first_name || custom_text.is_first_number) {
+        const roster_key = custom_text.type == 'name' ? 'text' : 'number';
+        self.$store.dispatch('setProductsRosters', {product_id: custom_text_product_id, roster_index: 0, roster_data: { [roster_key] : custom_text.value } })
+      }
+    })
+  }
+
+  public async handleDefaultColorsUndoRedoActions(user_action: string, undo_redo_item: Record<any, any>) {
+    let self: Record<any, any> = this
+    const { action_on_items, defaultColors: default_colors, meta: { logo_colors_info } } = undo_redo_item
+    if(user_action == 'undo') {
+      await setUndoRedoItems('defaultColors', action_on_items, 'redo')
+    }
+    this.$store.commit('SET_LOGO_COLORS_INFO', { data: logo_colors_info})
+    const is_empty_default_colors = default_colors.filter(default_color => default_color != null).length == 0
+    await this.$store.commit('SET_DEFAULT_COLORS', default_colors)
+    if(is_empty_default_colors) {
+      await self.$eventBus.$emit("useProductOriginalColors")
+    }
+    self.$eventBus.$emit("changeDefaultColors")
   }
 
   public showBasicCustomization() {
@@ -1444,9 +1544,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  shuffleLogoColors() {
+  async shuffleLogoColors() {
     let self: Record<any, any> = this
     this.pulse_info.shuffle = false
+    await setUndoRedoItems('defaultColors', 'logo_colors_shuffled')
     const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
     this.logoColorsInfo.colors = shuffled
     this.logoColorsInfo.is_shuffled = true
@@ -1798,7 +1899,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async shareDesign() {
-    if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoitems.length > 0)) {
+    if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoItems.length > 0)) {
       await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
       this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)

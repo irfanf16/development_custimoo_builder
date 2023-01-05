@@ -58,7 +58,7 @@ import { Component, Prop, Vue } from 'vue-property-decorator'
 import LogoUploader from "@/components/Logo/LogoUploader.vue"
 import RecentLogos from "@/components/Logo/RecentLogos.vue";
 import LogoExtractedColors from "@/components/Logo/LogoExtractedColors.vue";
-import { getLogoSettingsObject } from "@/helpers/Helpers"
+import {getLogoSettingsObject, setUndoRedoItems} from "@/helpers/Helpers"
 
 
 @Component<LogoPlacementTab>({
@@ -176,8 +176,9 @@ export default class LogoPlacementTab extends Vue {
     this.custom_logo_tab_index = new_logo_index
   }
 
-  public removeLogoTab(logo_index: number) {
+  public async removeLogoTab(logo_index: number) {
     const self: Record<any, any> = this;
+    await setUndoRedoItems('customLogos', 'logo_tab_removed')
     this.customLogos.splice(logo_index, 1)
     this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
       custom_logo.logo_index = customLogoIndex
@@ -187,8 +188,9 @@ export default class LogoPlacementTab extends Vue {
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
 
-  public handleLogoPlacementChange(updated_value: string, custom_logo_index: number) {
+  public async handleLogoPlacementChange(updated_value: string, custom_logo_index: number) {
     let self: Record<any, any> = this;
+    await setUndoRedoItems('customLogos', 'placement_updated')
     this.customLogos[custom_logo_index].side = updated_value
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
   }

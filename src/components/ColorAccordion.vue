@@ -68,7 +68,7 @@ import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
 import {getClosestColor, pantonesTcx, getColorEncoding} from '@/pantoneColor'
-import {getSelectedProductPantones} from "@/helpers/Helpers";
+import {getSelectedProductPantones, setUndoRedoItems} from "@/helpers/Helpers";
 
 @Component<ColorAccordion>({
   components: {
@@ -186,9 +186,9 @@ export default class ColorAccordion extends Vue {
     }
   }
 
-  public setColor(color: Record<any, any>) {
+  public async setColor(color: Record<any, any>) {
     let self: Record<any, any> = this
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
+    await setUndoRedoItems('groupColors','updated')
     if (color.value){
       this.$store.dispatch('updateGroupColors',
         {

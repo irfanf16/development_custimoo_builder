@@ -54,7 +54,7 @@
 
 import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {getProductColors, setDefaultColors} from '@/helpers/Helpers'
+import {getProductColors, setDefaultColors, setUndoRedoItems} from '@/helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
@@ -141,11 +141,12 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     self.$eventBus.$emit('useProductOriginalColors')
   }
 
-  public useLogoColors() {
+  public async useLogoColors() {
     let self: Record<any, any> = this
     this.pulse_info.use_logo_colors = false
+    await setUndoRedoItems('defaultColors', 'use_logo_colors')
     setDefaultColors()
-    this.logoColorsInfo.using_logo_colors = true
+    this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
     self.$eventBus.$emit('changeDefaultColors')
   }
 
@@ -153,12 +154,12 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     console.log('useLogoColors')
   }
 
-  public shuffleLogoColors() {
+  public async shuffleLogoColors() {
     let self: Record<any, any> = this
     this.pulse_info.shuffle = false
+    await setUndoRedoItems('defaultColors', 'logo_colors_shuffled')
     const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
-    this.logoColorsInfo.colors = shuffled
-    this.logoColorsInfo.is_shuffled = true
+    this.$store.commit('SET_LOGO_COLORS_INFO', {data: {colors: shuffled, is_shuffled: true}})
     setDefaultColors()
     self.$eventBus.$emit('changeDefaultColors')
   }

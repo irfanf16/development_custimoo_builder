@@ -49,7 +49,12 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
-  getExtensionsFor, getLogoUpdatedProps, hideLockerProductSaveBtn, processColorsCustom, recentLogoDefaultObject
+  getExtensionsFor,
+  getLogoUpdatedProps,
+  hideLockerProductSaveBtn,
+  processColorsCustom,
+  recentLogoDefaultObject,
+  setUndoRedoItems
 } from '@/helpers/Helpers'
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
@@ -225,6 +230,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
       if(response_data.success) {
         let logo_data = response_data.result.customer_logo
         logo_data.is_replace_success =  this.replaceLogo ? true : false
+        await setUndoRedoItems('customLogos', 'added')
         if(this.customLogoIndex == 0) {
           let logo_colors = processColorsCustom(logo_data.logo_colors)
           this.$store.commit('SET_LOGO_COLORS_INFO', {

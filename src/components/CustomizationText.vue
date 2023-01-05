@@ -210,7 +210,7 @@ import TextColorTabs from "@/components/TextColorTabs.vue";
 import {HideUpdateLockerButton, ProductFonts} from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
 import colorPicker from '@caohenghu/vue-colorpicker';
-import {getSelectedProductPantones} from "@/helpers/Helpers";
+import {getSelectedProductPantones, santaClone, setUndoRedoItems} from "@/helpers/Helpers";
 import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
 
@@ -363,7 +363,7 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     $event.target.children[0].style.left = $event.pageX+"px"
   }
 
-  public handle_text_change_timer!: number
+  public handle_text_change_timer = 0 // this will hold the id returned by the setTimeout()
 
   private expandTextCustomizer(custom_text_index: number){
     (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = true;
@@ -383,23 +383,17 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   handleCustomTextInputChange(updatedVal: string, custom_text_index: number) {
     this.hideLockerProductUpdateButton()
     clearTimeout (this.handle_text_change_timer);
-    this.handle_text_change_timer = setTimeout(() => {
+    this.handle_text_change_timer = setTimeout(async () => {
+      await setUndoRedoItems('customTexts', 'input_changed')
       let self:Record<any, any> = this;
       let updated_custom_text = this.product_custom_texts[custom_text_index]
       updated_custom_text.value = updatedVal;
       let product_ids = [updated_custom_text.product_id, ...updated_custom_text.following_product_ids]
       product_ids.forEach((product_id) => {
         self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, product_id: product_id, value: {value: updatedVal}})
-        /*
-        * For commit {SET_LAST_ACTIVE_PRODUCT_CUSTOM_TEXTS} the custom text is being passed by reference so any change in custom text will also be reflected in
-        * state.last_active_product_data
-        * */
-        // this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-        //   product_custom_texts: {[product_id]: this.all_products_custom_texts[product_id]}
-        // });
       })
       self.$eventBus.$emit("customTextUpdated", {
-        emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: updated_custom_text
+        emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: santaClone(updated_custom_text)
       });
       if(updated_custom_text.is_first_name || updated_custom_text.is_first_number) {
         const roster_key = self.product_custom_texts[custom_text_index].type == 'name' ? 'text' : 'number';
@@ -408,9 +402,10 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     }, 300)
   }
 
-  handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number, custom_text_item_index: number) {
+  async handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
-   this.hideLockerProductUpdateButton()
+    await this.hideLockerProductUpdateButton()
+    await setUndoRedoItems('customTexts', 'check_box_updated')
     let updated_custom_text = this.product_custom_texts[custom_text_index]
     let updated_custom_text_product_id = updated_custom_text.product_id
     let product_ids = [updated_custom_text_product_id, ...updated_custom_text.following_product_ids]
@@ -428,9 +423,10 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     });
   }
 
-  customTextColorUpdated( custom_text_index: number, custom_text_item_index: number, color: Record<any, any>, type: string) {
+  async customTextColorUpdated( custom_text_index: number, custom_text_item_index: number, color: Record<any, any>, type: string) {
     let self:Record<any, any> = this;
-   this.hideLockerProductUpdateButton()
+    await this.hideLockerProductUpdateButton()
+    await setUndoRedoItems('customTexts', 'color_updated')
     if(type == "Fill Color") {
       self.product_custom_texts[custom_text_index].items[custom_text_item_index].color = color.value;
       self.product_custom_texts[custom_text_index].items[custom_text_item_index].color_pantone = color.name;
@@ -445,9 +441,10 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     });
   }
 
-  handleCustomTextOutlineUpdate( outline_value: number, custom_text_index: number, custom_text_item_index: number) {
-   let self:Record<any, any> = this;
-   this.hideLockerProductUpdateButton()
+  async handleCustomTextOutlineUpdate( outline_value: number, custom_text_index: number, custom_text_item_index: number) {
+    let self:Record<any, any> = this;
+    await this.hideLockerProductUpdateButton()
+    await setUndoRedoItems('customTexts', 'outline_updated')
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width = outline_value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
@@ -455,18 +452,20 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     });
   }
 
-  handleCustomTextPlacementUpdate( placement: number, custom_text_index: number, custom_text_item_index: number) {
+  async handleCustomTextPlacementUpdate( placement: number, custom_text_index: number, custom_text_item_index: number) {
     let self:Record<any, any> = this;
-   this.hideLockerProductUpdateButton()
+    await this.hideLockerProductUpdateButton()
+    await setUndoRedoItems('customTexts', 'placement_updated')
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].placement = placement;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
       emitter: "placement", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index, value: self.product_custom_texts[custom_text_index]
     });
   }
-  handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
+  async handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
     let self:Record<any, any> = this;
-   this.hideLockerProductUpdateButton()
+    await this.hideLockerProductUpdateButton()
+    await setUndoRedoItems('customTexts', 'font_updated')
     self.product_custom_texts[custom_text_index].font_family = selected_font;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
@@ -474,14 +473,15 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     });
   }
 
-  addCustomText() {
+  async addCustomText() {
     let self: Record<any, any> = this;
-   this.hideLockerProductUpdateButton()
+    await this.hideLockerProductUpdateButton()
     let custom_text = find(self.product_custom_texts, ['is_first_name', true]);
     if(custom_text == undefined) {
       custom_text = find(self.product_custom_texts, ['is_first_number', true]);
     }
     custom_text = self.resetCustomTextObject(custom_text);
+    await setUndoRedoItems('customTexts', 'text_added')
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: self.product_custom_texts.length, value: custom_text })
     self.$eventBus.$emit("customTextUpdated", { emitter: "add_button" });
   }
