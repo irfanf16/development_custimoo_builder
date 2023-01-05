@@ -294,6 +294,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public aligningLineColor = 'rgb(110, 243, 204)'
   public viewportTransform: any
   public drawLines = false
+  public is_dragging = false
+  public lastPosX = 0
+  public lastPosY = 0
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] | null[] = []
 
@@ -838,11 +841,43 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         let ctx = canvas.getSelectionContext()
 
-        canvas.on('mouse:up', function () {
-          self.verticalLines.length = self.horizontalLines.length = 0;
+        canvas.on('mouse:up', () => {
+          this.is_dragging = false
+          this.verticalLines.length = 0
+          this.horizontalLines.length = 0
           canvas.renderAll();
-        });
-        canvas.on('before:render', function () {
+        })
+
+        canvas.on('mouse:out', (opt) => {
+          this.is_dragging = false
+        })
+
+        canvas.on('mouse:down', (opt) => {
+          if(opt.target == null) {
+            this.is_dragging = true
+            this.lastPosX = opt.e.clientX;
+            this.lastPosY = opt.e.clientY;
+          }
+        })
+
+        canvas.on('mouse:move', (opt) => {
+          if(this.is_dragging) {
+            const e = opt.e;
+            const vpt = canvas.viewportTransform as number[];
+            vpt[4] += e.clientX - this.lastPosX;
+            vpt[5] += e.clientY - this.lastPosY;
+            canvas.forEachObject((object) => {
+              object.setCoords();
+            })
+            canvas.requestRenderAll();
+            this.lastPosX = e.clientX;
+            this.lastPosY = e.clientY;
+            e.preventDefault()
+            e.stopPropagation()
+          }
+        })
+
+        canvas.on('before:render', () => {
           if ((canvas as Record<any, any>).contextTop) {
             canvas.clearContext((canvas as Record<any, any>).contextTop);
           }
@@ -960,7 +995,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     this.zoomCanvas(side, zoom)
 
-    opt.e.preventDefault();
+    opt.e.preventDefault()
     opt.e.stopPropagation()
   }
 
@@ -978,7 +1013,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (zoom < 1) {
       zoom = 1;
     }
-    canvas.viewportTransform = this.default_view_port;
+    canvas.viewportTransform = JSON.parse(JSON.stringify(this.default_view_port));
     canvas.zoomToPoint({
       x: pointer.x,
       y: pointer.y
