@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
-
+//zoom on hover start
+.zoom-on-hover[data-v-0ff054f9]{position:relative;overflow:hidden}.zoom-on-hover .normal[data-v-0ff054f9]{width:100%}.zoom-on-hover .zoom[data-v-0ff054f9]{position:absolute;opacity:0;transform-origin:top left}.zoom-on-hover.zoomed .zoom[data-v-0ff054f9]{opacity:1}.zoom-on-hover.zoomed .normal[data-v-0ff054f9]{opacity:0}
+//zoom on hover end
 :host {
     --vs-colors--lightest: rgba(60, 60, 60, 0.26);
     --vs-colors--light: rgba(60, 60, 60, 0.5);
@@ -56,6 +58,11 @@
 :host {
     --vs-transition-timing-function: cubic-bezier(1, 0.5, 0.8, 1);
     --vs-transition-duration: 0.15s
+}
+
+:host, :root{
+    max-width: 100%;
+    display: block;
 }
 
 @-webkit-keyframes vSelectSpinner {

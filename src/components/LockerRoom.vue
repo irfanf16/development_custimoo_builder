@@ -1027,6 +1027,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.getLockerProducts[lockerIndex].product[productIndex] = product;
   }
 
+  public preventDrag($event:Record<any, any>) {
+    $event.preventDefault();
+  }
+
 
   public async createYearlyPlanner(locker_room_id:number, index:number){
     let payload = {locker_id: locker_room_id, index};
