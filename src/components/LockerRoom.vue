@@ -24,7 +24,7 @@
                 <b-card no-body>
                   <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
                   <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="handleLockerRoomChanged" @input="handleTabChanged" :no-fade="true">
-                    <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
+                    <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" draggable="false">
                       <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                                  :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
                                  :multiDrag="true" @remove="designMoved"
@@ -142,7 +142,7 @@
                       </draggable>
 
                     </b-tab>
-                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file">
+                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file" draggable="false">
                       <div class="grid w-100 gap-2" style="grid-template-columns: repeat(auto-fill, 140px)">
                         <div :key="'asset'+inda" v-for="(logo, inda) in room.logos" class="position-relative align-self-stretch d-flex flex-column">
                           <div class="assets-logo-block h-100 w-100" style="background: rgba(0,0,0,0.12)">
@@ -157,7 +157,7 @@
                         </div>
                       </div>
                     </b-tab>
-                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Colors">
+                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Colors" draggable="false">
                       <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
                         <div class="pt-lg-2 folder-wrapper">
                           <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
@@ -184,7 +184,7 @@
                         </div>
                       </div>
                     </b-tab>
-                    <b-tab lazy :ref="`yearlyTab${room.id}`" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
+                    <b-tab lazy :ref="`yearlyTab${room.id}`" draggable="false" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
                       <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                         <template>
                           <div v-if="!room.have_yearly_planner">
