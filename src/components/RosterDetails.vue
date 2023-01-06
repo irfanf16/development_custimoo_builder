@@ -154,7 +154,7 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker')">
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker')">
         Save & close
       </button>
       <button v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto fw-bold" @click="close">
@@ -163,10 +163,10 @@
       <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelCart'), showVModal('cart-modal')">
         Cancel
       </button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelLocker'), showVModal('locker-modal')">
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelLocker'), showVModal('locker-modal')">
         Cancel
       </button>
-      <button v-else-if="getProductEditInfoObject.type != 'locker_product' && getProductEditInfoObject.type != 'cart_product'" class="btn btn-secondary w-auto fw-bold" @click="hideVModal('rostermodal')">
+      <button v-else-if="(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') || getProductEditInfoObject.type != 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal')">
         Close
       </button>
     </div>
@@ -315,6 +315,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   get vectorImageConstraint():boolean{
     return this.$store.getters.getSetting('vector_image_constraint')
+  }
+
+  get isEditingFromRoster():boolean{
+    return this.$store.getters.getEditRosterFromLocker;
   }
 
   get notVectorLogosCount(){

@@ -64,7 +64,10 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
             setTimeout(async () => {
               await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
               this.showVModal('rostermodal');
+              await this.$store.dispatch('setEditRosterFromLocker', true)
             },500)
+          }else {
+            await this.$store.dispatch('setEditRosterFromLocker', false)
           }
         }, (error:Record<any, any>) => {
           console.error("Error while retrieving products",error)
@@ -786,9 +789,9 @@ export class ProductsQueryParamsMixin extends Vue {
     let self: Record<any, any> = this;
     let {sync_id, customizer_preview, update_cart} = self.$route.query
     let query_params: string[] = [];
+    const selected_category = self.$store.getters.getSelectedCategory;
     if(sync_id) {
       query_params.push(`sync_id=${sync_id}`, 'paginate=false')
-      let selected_category = self.$store.getters.getSelectedCategory;
       query_params.push(`category_id=${selected_category.category_id}`)
       if(update_cart) {
         query_params.push(`active_product_type=cart_product`, 'paginate=false')
@@ -797,9 +800,13 @@ export class ProductsQueryParamsMixin extends Vue {
     else {
       const shared_url = getUrlParameter()
       if (shared_url?.includes('share')) {
+        let selected_category = self.$store.getters.getSelectedCategory;
         query_params = [
           `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
         ];
+        if(selected_category.category_id){
+          query_params.push(`category_id=${selected_category.category_id}`)
+        }
         resetLastActiveProductData()
         exitFromEditMode()
       }
@@ -824,7 +831,7 @@ export class ProductsQueryParamsMixin extends Vue {
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
               `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
               `active_product_type=${self.getProductEditInfoObject.type}`,
-              `category_id=${self.getProductEditInfoObject.category_id}`,
+              `category_id=${selected_category.category_id}`,
               'paginate=false'
             ];
           }
@@ -1224,8 +1231,17 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 '_custimoo_cart_url': `${company_domain}/pages/customizer/#/?sync_id=${(cart_product as Record<any, any>).sync_id}&update_item=${api_res.cart_item_key}&update_cart=${api_res.new_created_id}`,
                 '_custimoo_delete_cart_url': delete_cart_item_url,
                 '_custimoo_product_name': (cart_product as Record<any, any>).product_name,
-                'Custimoo Product Name': (cart_product as Record<any, any>).product_name
-              };
+                '_custimoo_product_id': (cart_product as Record<any, any>).product_id,
+                '_custimoo_minimum_order_quantity': 0,
+                'DESIGN NAME': (cart_product as Record<any, any>).product_name,
+                'YOUR DESIGN': 'Below are the links of your customized designs.',
+                'FRONT IMAGE': api_res.front_image_short,
+                'BACK IMAGE': api_res.back_image_short
+               };
+
+               if((cart_product as Record<any, any>).minimum_order_quantity_type == 'by_cart' && (cart_product as Record<any, any>).minimum_order_quantity > 0 ) {
+                 shopify_cart_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
+               }
 
               // console.log(shopify_cart_data);
               self.$store.dispatch('setCartLoading',true);

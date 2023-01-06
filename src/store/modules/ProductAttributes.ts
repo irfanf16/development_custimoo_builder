@@ -121,6 +121,7 @@ const ProductAttributes:Module<any, any> = {
     products_next_page_no: null, //null value mean has no more pages,
     products_rosters:{},
     active_roster_index:0,
+    edit_roster_from_locker:false,
     selectedCategory: {
       category_index: 0,
       category_id: null
@@ -192,6 +193,9 @@ const ProductAttributes:Module<any, any> = {
       const exist = state.editLockerProduct.find((x:number) => x == payload.prd_id)
       if(!exist)
         state.editLockerProduct.push(payload.prd_id)
+    },
+    SET_EDIT_ROSTER_FROM_LOCKER(state: Record<any, any>, payload: boolean){
+      state.edit_roster_from_locker = payload
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
@@ -1131,6 +1135,9 @@ const ProductAttributes:Module<any, any> = {
         return state.product_custom_texts[product_id];
       }
     },
+    getEditRosterFromLocker: state => {
+      return state.edit_roster_from_locker;
+    },
     getSearchLoader: state => {
       return state.searchLoader
     },
@@ -1404,6 +1411,9 @@ const ProductAttributes:Module<any, any> = {
     setSearchLoader({commit}, payload){
       commit('SET_SEARCH_LOADER', payload)
     },
+    setEditRosterFromLocker({commit}, payload) {
+      commit('SET_EDIT_ROSTER_FROM_LOCKER', payload);
+    },
     setVectorLogos({commit}, payload){
       commit('SET_VECTOR_LOGOS', payload)
     },
@@ -1454,7 +1464,12 @@ const ProductAttributes:Module<any, any> = {
             await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
             await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
             await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
-            await commit("SET_SELECTED_CATEGORY",{ category_id : response.data.product_category_id, category_index : category_index});
+            if(categories && categories.length) {
+              await commit("SET_SELECTED_CATEGORY", {
+                category_id: response.data.product_category_id,
+                category_index: category_index
+              });
+            }
             resolve(response.data.no_product_found);
           }
         }).catch((e: any) => {

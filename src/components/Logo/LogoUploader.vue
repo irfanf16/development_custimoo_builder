@@ -251,6 +251,7 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
         this.$emit('logo-uploaded', this.customLogo)
       } else {
         self.showError(response_data.message);
+        self.showLoader = false;
         return false
       }
       const inputRef = this.$refs.logoUploadInput as Record<any, any>
