@@ -806,7 +806,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
         const fabric_object = e.target;
-        console.log('object:modified1', e.target)
         if(fabric_object.get("type") == "text") {
           this.handleCustomTextModifiedEvent(e.target)
         } else {
@@ -2045,8 +2044,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
+  public async handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
     let self: Record<any, any> = this;
+    if(this.mainPreview) {
+      await setUndoRedoItems('customTexts', 'modified')
+    }
     const custom_text_index =  fabric_object.get("custom_text_index");
     const custom_text_item_index =  fabric_object.get("custom_text_item_index");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
