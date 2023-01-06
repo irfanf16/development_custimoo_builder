@@ -7,7 +7,7 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import {parseInt, findIndex} from "lodash";
+import {parseInt, findIndex, isEmpty} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
 import {eventBus} from "@/event/eventBus"
 import VueRouter from 'vue-router'
@@ -1874,8 +1874,6 @@ const getDomDocument = (parent_doc= false) => {
     return window.parent.document
   }
   const dom_document = document.querySelector(getWebComponentNames())
-  console.log('dom_document', dom_document)
-  console.log('is shadow', dom_document ? dom_document?.shadowRoot : document)
   return dom_document ? dom_document?.shadowRoot : document
 }
 
@@ -1922,6 +1920,39 @@ const hideLockerProductSaveBtn = (hide_save_button = false) => {
   }
 }
 
+const santaClone = (object: any) => {
+  return JSON.parse(JSON.stringify(object))
+}
+
+const setUndoRedoItems = async (items_type: string, action_on_items: string, user_action = 'undo') => {
+  switch (items_type) {
+    case 'customLogos':
+      Store.commit('SET_UNDO_REDO_ITEMS', {action: user_action, data: {
+          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getCustomLogos())
+        }})
+      break;
+    case 'groupColors':
+      Store.commit('SET_UNDO_REDO_ITEMS', {action: user_action, data: {
+          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getGroupColors)
+        }})
+      break;
+    case 'customTexts':
+      Store.commit('SET_UNDO_REDO_ITEMS', {action: user_action, data: {
+        key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getCustomTexts())
+      }})
+      break;
+    case 'defaultColors':
+      Store.commit('SET_UNDO_REDO_ITEMS', {action: user_action, data: {
+          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getDefaultColors),
+          meta: {
+            logo_colors_info: santaClone(await Store.getters.getLogoColorsInfo())
+          }
+        }})
+      break;
+    default:
+      console.info(`In setUndoRedoItems the items type (${items_type}) is not handled`)
+  }
+}
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -1934,5 +1965,5 @@ export {
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
-  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn
+  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems
 };

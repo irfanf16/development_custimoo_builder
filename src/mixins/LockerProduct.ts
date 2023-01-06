@@ -903,9 +903,6 @@ export class exitEditMode extends Mixins(ErrorMessages) {
   }
   public editModeConfirmation() {
     let self: Record<any, any> = this;
-    // const santaConfirmModal = self.$santaModal.show({
-    //     icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
-    // });
     return new Promise((resolve,reject) => {
       if (self.$store.getters.getProductEditInfoObject.editing) {
         switch (self.$store.getters.getProductEditInfoObject.type) {
@@ -992,6 +989,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
       else{
         resolve(null);
       }
+      this.$store.commit('RESET_UNDO_REDO_ITEMS')
     });
   }
 }

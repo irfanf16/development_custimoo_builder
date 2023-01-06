@@ -72,6 +72,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
 
   public async productDesigns(index: number) {
     let self: Record<any, any> = this;
+    this.$store.commit('RESET_UNDO_REDO_ITEMS')
     let style_index = 0;
     const response = await this.editModeConfirmation();
     this.$store.commit('Change_Locker_Tabs_Index', undefined)

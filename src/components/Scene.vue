@@ -21,7 +21,14 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getRandom, getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
+import {
+  getRandom,
+  getSelectedProductPantones,
+  santaClone,
+  setUndoRedoItems,
+  setLogoSettings,
+  unitConversion
+} from '@/helpers/Helpers'
 import {find} from "lodash";
 import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
@@ -799,6 +806,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       })
       canvas.on('object:modified', (e: Record<any, any>) => {
         const fabric_object = e.target;
+        console.log('object:modified1', e.target)
         if(fabric_object.get("type") == "text") {
           this.handleCustomTextModifiedEvent(e.target)
         } else {
@@ -862,6 +870,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       })
 
       canvas.on('object:scaling', (e: Record<any, any>) => {
+        console.log('object:scaling', e.target)
         let dimText = this.dimTextFront
         if (e.target.side == 'back' || e.target.side == 'Back') {
           dimText = this.dimTextBack
@@ -870,6 +879,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       });
 
       canvas.on('selection:created', (e: Record<any, any>) => {
+        console.log('object:created', e.target)
         if(!this.fromRosterModal){
           if(e.target.type == 'logo'){
             this.$store.dispatch('setTabMain',{value:0})
@@ -886,6 +896,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       });
       canvas.on('selection:updated', (e: Record<any, any>) => {
+        console.log('object:created', e.target)
         if(!this.fromRosterModal) {
           if(e.target.type == 'logo'){
             this.$store.dispatch('setTabMain',{value:0})
@@ -2054,6 +2065,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
+    if(this.mainPreview) {
+      await setUndoRedoItems('customLogos', 'modified')
+    }
     let self: Record<any, any> = this;
     const logo_index =  fabric_object.get("logo_index");
     if(this.custom_logos[logo_index]) {
