@@ -2846,7 +2846,7 @@ button {
             white-space: normal;
             flex-wrap: wrap;
             overflow-x: hidden;
-            overflow-y: auto;
+            overflow-y: visible;
             max-height: 100px;
         }
 
@@ -3823,31 +3823,6 @@ button {
 }
 
 .products-block {
-    //block child drag
-    label{
-        & > div {
-            position: relative;
-
-            &:after {
-                content: "";
-                display: block;
-                height: 100%;
-                width: 100%;
-                top: 0;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                position: absolute;
-                z-index: 1000;
-                background: rgba(0, 0, 0, 0);
-            }
-
-            img{
-                -webkit-user-drag: none;
-            }
-        }
-    }
-
     .image-holder {
         & > div {
             width: 100%;
@@ -5835,6 +5810,32 @@ $fontSize: 0.5;
         }
     }
 }
+
+//.lockerroom-modal{
+//    .locker-tabs{
+//        .nav-tabs{
+//            .nav-item:not(:last-child){
+//                .nav-link{
+//                    span{
+//                        position: relative;
+//
+//                        &:after{
+//                            content: attr(data-title);
+//                            display: block;
+//                            position: absolute;
+//                            z-index: 10;
+//                            top: -40px;
+//                            white-space: nowrap;
+//                            border-radius: 10px;
+//                            padding: 5px 7px;
+//                            background: red;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 //.dropping{
 //    position: relative;

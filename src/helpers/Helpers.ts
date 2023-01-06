@@ -1758,6 +1758,20 @@ const getImageFromCanvas = (canvas:Canvas, options={}) => {
   }
 }
 
+const classObserver = (elems:Record<any, any>, callMethod:any, disconnect = false) => {
+  const attrObserver = new MutationObserver((mutations) => {
+    mutations.forEach(mu => {
+      if (mu.type !== "attributes" && mu.attributeName !== "class") return;
+      callMethod(mu)
+    });
+  });
+
+  elems.forEach(el => attrObserver.observe(el, {attributes: true}));
+  if(disconnect){
+    elems.forEach(el => attrObserver.disconnect());
+  }
+}
+
 const getDefaultColorsObject = () => {
   return [
     {title: 'Color One', color: null, pantone: null, name: null},
@@ -1934,5 +1948,5 @@ export {
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
-  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn
+  routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, classObserver
 };

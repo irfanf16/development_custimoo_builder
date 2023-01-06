@@ -5,19 +5,19 @@
         <template #title>
           <span class="btn btn-secondary btn-sm">Locker Rooms</span>
         </template>
-        <b-tabs lazy content-class="mt-3" @changed="lockerChanged">
+        <b-tabs nav-class="lockerroom_titles" class="locker-tabs" lazy content-class="mt-3" @changed="lockerChanged">
         <template v-for="(room, i) in getLockerProducts">
           <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
             <template #title>
-              <draggable  ghostClass="locker-tab-ghost" :group="{name: `locker-${i}`, pull: false, put: true}" :data-room-id="room.id" :data-room-index="i"
-                          @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
-                <span @click="changeColor" :data-title="`Move to ${room.room_name}`" @dragleave="hideTooltip" @drop="hideTooltip" @dragenter="showTooltip">{{ room.room_name }}</span>
+              <draggable ghostClass="locker-tab-ghost" :data-title="`${room.room_name}`" :group="{name: `locker-${i}`, pull: false, put: true}"
+                         :data-room-id="room.id" :data-room-index="i"
+                         @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+                <span @click="changeColor">{{ room.room_name }}</span>
               </draggable>
               <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom(room.id, i)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']"/>
               </a>
             </template>
-
 
             <div class="lockerroom-tabs">
               <div>
@@ -27,14 +27,14 @@
                     <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" >
                       <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
                                  :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
-                                 :multiDrag="true"
+                                 :multiDrag="true" @remove="designMoved"
                                  :forceFallback="true"
                                  handle=".image-holder"
                                  v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
                                  @update="lockerProductsChanged($event)">
                         <template v-for="(product, ind) in room.product">
                           <div :key="`${ind}-${product.id}`" class="products-block" :class=" product.disable_style ? 'notactive' : ''" :data-room-id="room.id"
-                               :data-room-index="i"
+                               :data-room-index="i" :data-design-title="product.product_name"
                                :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                                :data-product-index="ind">
                             <div class="fs-2" @click="logDom">
@@ -346,7 +346,7 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {getRandom, setCustomLogo} from "@/helpers/Helpers";
+import {getRandom, setCustomLogo, classObserver} from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
@@ -374,8 +374,38 @@ import {getDomDocument} from '@/helpers/Helpers';
     let href: any = location.href;
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
+
     if (this.lockers.length >0 ){
       this.copiedProductLockerId = this.lockers[0].id
+    }
+
+    const lockerTabs = this.$el.querySelector('.locker-tabs .lockerroom_titles') as Record<any, any>;
+
+    if(lockerTabs){
+      setTimeout(()=>{
+        const allElems:Record<any, any> = [];
+        lockerTabs.querySelectorAll('.nav-item').forEach((el:Record<any, any>, ind:number) => {
+          if(lockerTabs.querySelectorAll('.nav-item').length !== ind+1){
+            allElems.push(el.querySelector('div'))
+          }
+        });
+        classObserver(allElems, this.triggerDropping)
+      }, 500)
+    }
+  },
+  destroyed() {
+    const lockerTabs = this.$el.querySelector('.locker-tabs .lockerroom_titles') as Record<any, any>;
+
+    if(lockerTabs){
+      setTimeout(()=>{
+        const allElems:Record<any, any> = [];
+        lockerTabs.querySelectorAll('.nav-item').forEach((el:Record<any, any>, ind:number) => {
+          if(lockerTabs.querySelectorAll('.nav-item').length !== ind+1){
+            allElems.push(el.querySelector('div'))
+          }
+        });
+        classObserver(allElems, this.triggerDropping, true)
+      }, 500)
     }
   }
 })
@@ -398,6 +428,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public collection_base_url = ''
+  public design_moved_to_locker = ''
   public yearly_planner_template_id = null;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
 
@@ -412,6 +443,28 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       else if (mutation.type === 'attributes') {
         // console.log('The ' + mutation.attributeName + ' attribute was modified.');
       }
+    }
+  }
+
+  aslert(){
+    alert()
+  }
+
+  private designMoved = (evt) =>{
+    let design_name = evt.item.getAttribute('data-design-title');
+    let locker_name = evt.originalEvent.target.textContent;
+    console.log()
+    this.showToast(`"${design_name} " is moved to "${locker_name}"`, 'success')
+  }
+
+  private triggerDropping = (target: Record<any, any>, $event) =>{
+    if(target.target.classList.contains('dropping')){
+      this.design_moved_to_locker = target.target.getAttribute('data-title')
+      const pos = target.target.getBoundingClientRect()
+      let targetEl = {getAttribute: (title)=>`Move to ${target.target.getAttribute(title)}`}
+      this.showTooltip({clientX: (pos.left + 130), clientY: (pos.top - 135), target: targetEl})
+    }else{
+      this.hideTooltip()
     }
   }
 
@@ -442,12 +495,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     let elements = document.querySelectorAll('ul.nav-tabs [data-room-index]') as Record<any, any>
     this.setObserver(elements);
   }
-  private dragEnd = () =>{
-    console.log('started')
-  }
-  private setSelected(e: Record<any, any>) {
-    console.log('ev', e.target)
-  }
+
   public getCollectionData() {
 
     if(this.getCollections.length === 0){
@@ -458,13 +506,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   }
 
-  private showTooltip(e: Record<any, any>) {
-    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
+  private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>;
     element.style.opacity = '1'
     element.style.zIndex = '100'
-    element.style.left = (e.clientX + 10) + 'px'
-    element.style.top = (e.clientY + 17) + 'px'
-    element.innerHTML = e.target.getAttribute('data-title')
+    element.style.left = ($event.clientX + (10 + leftOffset)) + 'px'
+    element.style.top = ($event.clientY + (17 + topOffset)) + 'px'
+    element.innerHTML = $event.target.getAttribute('data-title')
   }
 
   private hideTooltip() {
@@ -1245,11 +1293,37 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   .products-block {
     position: relative;
+
     @media only screen and (min-width: 992px) {
 
     }
     @media only screen and (min-width: 1199px) {
 
+    }
+
+    //block child drag
+    label{
+      & > div {
+        position: relative;
+
+        &:after {
+          content: "";
+          display: block;
+          height: 100%;
+          width: 100%;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          position: absolute;
+          z-index: 2;
+          background: rgba(0, 0, 0, 0);
+        }
+
+        img{
+          -webkit-user-drag: none;
+        }
+      }
     }
 
     .image-holder {
@@ -1279,7 +1353,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       position: absolute;
       right: -5px;
       top: -5px;
-      z-index: 2;
+      z-index: 3;
       height: 100%;
       font-size: 16px;
       display: flex;
