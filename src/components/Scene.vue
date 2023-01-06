@@ -861,7 +861,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       let relativeCanvasHeight = self.canvasHeight / 2 - 20
 
       canvas.on('object:moving', (e: Record<any, any>) => {
-        console.log('object:moving', e.target)
         this.objectScaling(e, side)
         let customObj: Record<any, any> = this.getCustomObjectsLength(canvas)
         if (customObj.logoLength + customObj.textLength >= 1) {

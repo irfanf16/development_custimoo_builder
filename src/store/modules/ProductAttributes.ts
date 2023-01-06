@@ -1116,6 +1116,19 @@ const ProductAttributes:Module<any, any> = {
     SET_UNDO_REDO_ITEMS(state: Record<any, any>, payload: Record<any, any>) {
       const action = payload.action == 'undo' ? 'undoItems' : 'redoItems'
       state[action].push(payload.data)
+    },
+    RESET_UNDO_REDO_ITEMS(state: Record<any, any>, payload: string) {
+      /*
+      * @param payload can have string { both, undoItems, redoItems }
+      * */
+      const reset_items  = payload ? payload : 'both'
+      console.log('reset_items', reset_items)
+      if(reset_items == 'both') {
+        state['undoItems'] = []
+        state['redoItems'] = []
+      } else {
+       state[reset_items] = []
+      }
     }
   },
   getters: {

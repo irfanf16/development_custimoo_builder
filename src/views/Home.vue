@@ -424,7 +424,7 @@ import {
   setDefaultColors,
   isShadowDom,
   getDomDocument,
-  setUndoRedoItems
+  setUndoRedoItems, santaClone
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1361,7 +1361,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await setUndoRedoItems('customLogos', action_on_items, 'redo')
     }
     await this.$store.commit('SET_CUSTOM_LOGOS', {
-      custom_logos: customLogos
+      custom_logos: santaClone(customLogos)
     })
     for (const customLogo of customLogos) {
       const { logo_index } = customLogo.logo_index
