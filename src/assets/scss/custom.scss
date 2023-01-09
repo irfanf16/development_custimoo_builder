@@ -2851,7 +2851,7 @@ button {
             white-space: normal;
             flex-wrap: wrap;
             overflow-x: hidden;
-            overflow-y: auto;
+            overflow-y: visible;
             max-height: 100px;
         }
 
@@ -5815,6 +5815,32 @@ $fontSize: 0.5;
         }
     }
 }
+
+//.lockerroom-modal{
+//    .locker-tabs{
+//        .nav-tabs{
+//            .nav-item:not(:last-child){
+//                .nav-link{
+//                    span{
+//                        position: relative;
+//
+//                        &:after{
+//                            content: attr(data-title);
+//                            display: block;
+//                            position: absolute;
+//                            z-index: 10;
+//                            top: -40px;
+//                            white-space: nowrap;
+//                            border-radius: 10px;
+//                            padding: 5px 7px;
+//                            background: red;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+//}
 
 //.dropping{
 //    position: relative;

@@ -31,7 +31,12 @@ import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {hideLockerProductSaveBtn, processColorsCustom, setCustomLogo} from "@/helpers/Helpers"
+import {
+  hideLockerProductSaveBtn,
+  processColorsCustom,
+  setCustomLogo,
+  setUndoRedoItems
+} from "@/helpers/Helpers"
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 
 @Component<RecentLogos>({
@@ -119,6 +124,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
 
   public async setRecentLogo(recent_logo: Record<any, any>) {
     let self: Record<any, any> = this;
+    await setUndoRedoItems('customLogos', 'recent_added')
     if(this.customLogoIndex == 0) {
       let logo_colors = processColorsCustom(recent_logo.logo_colors)
       this.customLogo.logo_colors = logo_colors

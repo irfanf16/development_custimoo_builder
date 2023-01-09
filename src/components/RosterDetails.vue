@@ -160,7 +160,7 @@
       <button v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto fw-bold" @click="close">
         Update Item
       </button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelCart'), showVModal('cart-modal')">
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="cancelCart">
         Cancel
       </button>
       <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelLocker'), showVModal('locker-modal')">
@@ -423,6 +423,15 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   public addRosterItemOnTab($event:Record<any, any>) {
     (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem();
+  }
+
+  public cancelCart(){
+    const self = this as Record<any, any>;
+    self.hideVModal('rostermodal');
+    if(self.company.platform != 'wordpress' && self.company.platform != 'shopify' ) {
+      self.showVModal('cart-modal');
+    }
+    self.$eventBus.$emit('cancelCart');
   }
 
   public handleLockerProductChange(locker_product_id: any) {

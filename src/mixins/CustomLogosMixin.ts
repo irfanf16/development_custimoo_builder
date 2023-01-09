@@ -1,5 +1,10 @@
 import { Component, Vue } from 'vue-property-decorator'
-import {getLogoSettingsObject, getLogoUpdatedProps, hideLockerProductSaveBtn} from '@/helpers/Helpers'
+import {
+  getLogoSettingsObject,
+  getLogoUpdatedProps,
+  hideLockerProductSaveBtn,
+  setUndoRedoItems
+} from '@/helpers/Helpers'
 
 @Component
 export default class CustomLogosMixin extends Vue{
@@ -24,6 +29,7 @@ export default class CustomLogosMixin extends Vue{
 
   public async removeLogo(logo_index) {
     const self: Record<any, any> = this;
+    await setUndoRedoItems('customLogos','removed')
     if(logo_index == 0) {
       await this.addRemoveTeamLogoOnAllProducts('remove')
     } else {

@@ -251,9 +251,11 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   public cancelCart(){
     const self = this as Record<any, any>;
-    self.$eventBus.$emit('cancelCart');
     self.close()
-    self.$modal.show('cart-modal')
+    if(self.company.platform != 'wordpress' && self.company.platform != 'shopify' ) {
+      self.$modal.show('cart-modal')
+    }
+    self.$eventBus.$emit('cancelCart');
   }
 
   public rosterDetailsInit(index = 0, product = this.selectedProduct) {
