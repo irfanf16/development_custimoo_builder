@@ -418,7 +418,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             })
           }
         })
-        this.frontCanvas.renderAll()
+        this.frontCanvas.requestRenderAll()
         if (this.back) {
           texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
           texture.forEach((item: Record<any, any>) => {
@@ -449,7 +449,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               })
             }
           })
-          this.backCanvas.renderAll()
+          this.backCanvas.requestRenderAll()
         }
         this.unHideColorGrouping()
       }
@@ -491,7 +491,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             item.set('fill', appliedDefaultColors[item.id]);
           }
         })
-        this.frontCanvas.renderAll()
+        this.frontCanvas.requestRenderAll()
 
         if (this.back) {
           texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
@@ -501,7 +501,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               item.set('fill', appliedDefaultColors[item.id]);
             }
           })
-          this.backCanvas.renderAll()
+          this.backCanvas.requestRenderAll()
         }
         this.unHideColorGrouping()
       }
@@ -541,7 +541,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         item.set('fill', appliedDefaultColors[item.id]);
       }
     })
-    this.frontCanvas.renderAll()
+    this.frontCanvas.requestRenderAll()
 
     if (this.back) {
       texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
@@ -551,7 +551,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           item.set('fill', appliedDefaultColors[item.id]);
         }
       })
-      this.backCanvas.renderAll()
+      this.backCanvas.requestRenderAll()
     }
   }
 
@@ -591,7 +591,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 item.set('fill', changeColor.value);
               }
             })
-            this.frontCanvas.renderAll()
+            this.frontCanvas.requestRenderAll()
             if (this.back) {
               texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
               texture.forEach((item: Record<any, any>) => {
@@ -600,7 +600,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   item.set('fill', changeColor.value);
                 }
               })
-              this.backCanvas.renderAll()
+              this.backCanvas.requestRenderAll()
             }
             let svgIndex = 0
             let svgGroupId = null;
@@ -756,7 +756,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         } else {
           canvas.add(self.dimTextFront)
         }
-        canvas.renderAll()
+        canvas.requestRenderAll()
 
         if(side == 'front') {
           this.addClipPath(ImageData.safe_zone_url, side)
@@ -821,6 +821,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         resolve('done')
       })
+      canvas.renderOnAddRemove = false
 
       if(this.mainPreview) {
         canvas.on('object:modified', (e: Record<any, any>) => {
@@ -845,7 +846,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           this.is_dragging = false
           this.verticalLines.length = 0
           this.horizontalLines.length = 0
-          canvas.renderAll();
+          canvas.requestRenderAll();
         })
 
         canvas.on('mouse:out', (opt) => {
@@ -863,17 +864,25 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         canvas.on('mouse:move', (opt) => {
           if(this.is_dragging) {
             const e = opt.e;
-            const vpt = canvas.viewportTransform as number[];
-            vpt[4] += e.clientX - this.lastPosX;
-            vpt[5] += e.clientY - this.lastPosY;
-            canvas.forEachObject((object) => {
-              object.setCoords();
-            })
+
+            let currentX = e.x
+            let currentY = e.y
+            let xChange = currentX - this.lastPosX
+            let yChange = currentY - this.lastPosY
+            let delta = new fabric.Point(xChange, yChange)
+
+            canvas.relativePan(delta)
             canvas.requestRenderAll();
+
             this.lastPosX = e.clientX;
             this.lastPosY = e.clientY;
             e.preventDefault()
             e.stopPropagation()
+
+            canvas.forEachObject((object) => {
+              object.setCoords()
+            })
+            canvas.calcOffset()
           }
         })
 
@@ -954,9 +963,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
 
       if(selected.side == 'back' || selected.side == 'Back'){
-        this.frontCanvas.discardActiveObject().renderAll()
+        this.frontCanvas.discardActiveObject().requestRenderAll()
       }else{
-        this.backCanvas.discardActiveObject().renderAll()
+        this.backCanvas.discardActiveObject().requestRenderAll()
       }
     }
   }
@@ -1019,6 +1028,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       y: pointer.y
     }, zoom)
 
+    canvas.requestRenderAll()
+
     dim_text.scaleX = 1 / zoom;
     dim_text.scaleY = 1 / zoom;
   }
@@ -1054,7 +1065,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: []
       })
-      canvas.renderAll()
+      canvas.requestRenderAll()
     }
     else {
       vertical_line.set({
@@ -1062,7 +1073,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [5, 5]
       })
-      canvas.renderAll()
+      canvas.requestRenderAll()
     }
 
     if (parseInt(top) >= relativeHeight - 2 && parseInt(top) <= relativeHeight + 2) {
@@ -1071,7 +1082,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [],
       })
-      canvas.renderAll();
+      canvas.requestRenderAll();
     }
     else {
       horizontal_line.set({
@@ -1079,7 +1090,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [5, 5],
       })
-      canvas.renderAll();
+      canvas.requestRenderAll();
     }
   }
 
@@ -1517,14 +1528,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           otherSideObjects[add_index].scaleX = target.scaleX
           otherSideObjects[add_index].scaleY = target.scaleY
           otherSideObjects[add_index].angle = -target.angle
-
-          if (side == 'back') {
-            this.frontCanvas.renderAll()
-          } else {
-            if (this.back) {
-              this.backCanvas.renderAll()
-            }
-          }
         } else {
           let objectAdd
           if(target.type == "text") {
@@ -1580,6 +1583,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
           delete otherSideObjects[add_index]
+        }
+      }
+      if (side == 'back') {
+        this.frontCanvas.requestRenderAll()
+      } else {
+        if (this.back) {
+          this.backCanvas.requestRenderAll()
         }
       }
     }
@@ -1746,7 +1756,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (this.productType == 'customized') {
           model.bringToFront()
         }
-        canvas.renderAll()
+        canvas.requestRenderAll()
         this.addToOtherSide(img, logo.side)
       })
     }
@@ -1846,7 +1856,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (this.productType == 'customized') {
             model.bringToFront()
           }
-          canvas.renderAll()
+          canvas.requestRenderAll()
 
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
@@ -2193,13 +2203,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (this.productType == 'customized') {
             this.frontModel.bringToFront()
           }
-          this.frontCanvas.renderAll()
+          this.frontCanvas.requestRenderAll()
         }
         if (render_back_canvas) {
           if (this.productType == 'customized') {
             this.backModel.bringToFront()
           }
-          this.backCanvas.renderAll()
+          this.backCanvas.requestRenderAll()
         }
       }
     }
