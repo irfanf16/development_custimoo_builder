@@ -163,7 +163,7 @@
                           <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
                           <div class="d-flex flex-wrap color-folder-holder">
                             <template v-for="(folder, inde) in room.folders">
-                              <a href="#" class="text-center d-block" @click="fetchColors(inde, i)" :key="inde">
+                              <a href="#" class="text-center d-block" @click="fetchColors($event, inde, i)" :key="inde">
                                 <font-awesome-icon :icon="['fas', 'folder']"/>
                                 <span class="folder-name d-block">{{ folder.folder_name }}</span>
                               </a>
@@ -832,8 +832,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public fetchColors(i: number, ind: number) {
+  public fetchColors($event: Record<any, any>, i: number, ind: number) {
+    $event.preventDefault();
     this.colors = JSON.parse(this.getLockerProducts[ind].folders[i].color);
+    return false;
   }
 
   public changeColor() {
