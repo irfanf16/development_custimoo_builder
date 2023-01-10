@@ -1466,7 +1466,7 @@ const unitConversion = (value:number) => {
 }
 
 const transformUnit = (dimension_px:number,unit_value:string) => {
-    const setting = Store.getters.getSetting
+    const setting = Store.getters.getSetting('measurement_unit');
     const PIXEL_IN_INCH = 72;
     const CM_IN_INCH = 2.54;
     const dimension_unit = parseFloat(unit_value);
