@@ -295,8 +295,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public viewportTransform: any
   public drawLines = false
   public is_dragging = false
-  public lastPosX = 0
-  public lastPosY = 0
+  public last_pan_position: fabric.Point
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] | null[] = []
 
@@ -842,22 +841,26 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         let ctx = canvas.getSelectionContext()
 
-        canvas.on('mouse:up', () => {
+        canvas.on('mouse:up', (opt) => {
           this.is_dragging = false
           this.verticalLines.length = 0
           this.horizontalLines.length = 0
-          canvas.requestRenderAll();
         })
 
-        canvas.on('mouse:out', (opt) => {
-          this.is_dragging = false
-        })
+        // canvas.on('mouse:out', (opt) => {
+        //   this.is_dragging = false
+        // })
 
         canvas.on('mouse:down', (opt) => {
           if(opt.target == null) {
+            const pointer = canvas.getPointer(opt.e, false) as fabric.Point
+            if(side == 'back') {
+              this.back_zoom_point = pointer
+            } else {
+              this.front_zoom_point = pointer
+            }
+
             this.is_dragging = true
-            this.lastPosX = opt.e.clientX;
-            this.lastPosY = opt.e.clientY;
           }
         })
 
@@ -865,24 +868,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if(this.is_dragging) {
             const e = opt.e;
 
-            let currentX = e.x
-            let currentY = e.y
-            let xChange = currentX - this.lastPosX
-            let yChange = currentY - this.lastPosY
-            let delta = new fabric.Point(xChange, yChange)
+            let movement = new fabric.Point(e.movementX, e.movementY)
+            let scale_by = -5 / canvas.getZoom()
+            if(side == 'back') {
+              this.back_zoom_point.x = this.back_zoom_point.x + (movement.x * scale_by) / canvas.getZoom()
+              this.back_zoom_point.y = this.back_zoom_point.y + (movement.y * scale_by) / canvas.getZoom()
+            } else {
+              this.front_zoom_point.x = this.front_zoom_point.x + (movement.x * scale_by) / canvas.getZoom()
+              this.front_zoom_point.y = this.front_zoom_point.y + (movement.y * scale_by) / canvas.getZoom()
+            }
 
-            canvas.relativePan(delta)
-            canvas.requestRenderAll();
+            const zoom = canvas.getZoom()
+            this.zoomCanvas(side, zoom) // manage paning with zoom move to point
 
-            this.lastPosX = e.clientX;
-            this.lastPosY = e.clientY;
             e.preventDefault()
             e.stopPropagation()
-
-            canvas.forEachObject((object) => {
-              object.setCoords()
-            })
-            canvas.calcOffset()
           }
         })
 
@@ -993,6 +993,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public zoomCanvasEvent(opt: fabric.IEvent<WheelEvent>, canvas: fabric.Canvas, side: string) {
     let delta = opt.e.deltaY;
     let pointer = canvas.getPointer(opt.e) as fabric.Point;
+    // let pointer = {x: opt.e.clientX, y: opt.e.clientY} as fabric.Point;
     if(side == 'back') {
       this.back_zoom_point = pointer
     } else {
@@ -1274,6 +1275,19 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       canvas = this.backCanvas
     }
 
+    let zoom_point = this.front_zoom_point
+    if (side == 'back') {
+      zoom_point = this.back_zoom_point
+    }
+    let zoom = canvas.getZoom();
+
+    if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
+      canvas.zoomToPoint({
+        x: zoom_point.x,
+        y: zoom_point.y
+      }, 1);
+    }
+
     const modelBoundingRect = texture.getBoundingRect()
     let boundingRect = {
       left: modelBoundingRect.left,
@@ -1315,30 +1329,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         moveTo = 'right'
       }
 
-
-      let zoom_point = this.front_zoom_point
-      if (side == 'back') {
-        zoom_point = this.back_zoom_point
-      }
-      let zoom = canvas.getZoom();
-
-      if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
-        canvas.zoomToPoint({
-          x: zoom_point.x,
-          y: zoom_point.y
-        }, 1);
-      }
-
       let direction = this.targetNonTransparentVH(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo, other_move_to)
 
-      if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
-        canvas.zoomToPoint({
-          x: zoom_point.x,
-          y: zoom_point.y
-        }, zoom);
-      }
-
       e.target.left = direction.left
+    }
+
+    if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
+      canvas.zoomToPoint({
+        x: zoom_point.x,
+        y: zoom_point.y
+      }, zoom);
     }
 
     let dimText = this.dimTextFront
