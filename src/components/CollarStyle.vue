@@ -165,7 +165,7 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 
       &>ul{
         display: flex;
-        justify-content: start;
+        justify-content: flex-start;
         gap: 10px;
         margin-bottom: 0;
 
@@ -225,7 +225,7 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 
         &>ul{
           display: flex;
-          justify-content: start;
+          justify-content: flex-start;
           gap: 10px;
           flex-wrap: nowrap;
           margin-bottom: 0;

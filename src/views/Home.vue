@@ -302,13 +302,14 @@
                       </template>
                     </template>
 
-                    <span v-else-if="notVectorLogosCount > 0 && isRosterOpened">
+                    <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false && isRosterOpened">
                       <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                         Finalize Design
                       </b-button>
                     </span>
 
                     <template v-else>
+                      <div>{{vectorImageConstraint}}</div>
                       <template v-if="company.platform !== 'self'">
                         <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
                           <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
@@ -319,7 +320,7 @@
                           <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                             Finalize Design
                           </b-button>
-                        </span>
+                      </span>
                      </template>
                   </template>
 

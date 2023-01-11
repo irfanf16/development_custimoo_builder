@@ -1058,7 +1058,7 @@ const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) =>
 
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-    $(svg_doc).find(`[id][fill]`).each  (function(doc_item) {
+    $(svg_doc).find(`[id]`).each  (function(doc_item) {
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
@@ -1464,7 +1464,7 @@ const unitConversion = (value:number) => {
 }
 
 const transformUnit = (dimension_px:number,unit_value:string) => {
-    const setting = Store.getters.getSetting
+    const setting = Store.getters.getSetting('measurement_unit');
     const PIXEL_IN_INCH = 72;
     const CM_IN_INCH = 2.54;
     const dimension_unit = parseFloat(unit_value);
