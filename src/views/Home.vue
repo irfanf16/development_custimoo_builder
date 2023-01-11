@@ -249,10 +249,10 @@
                         </div>
                       </template>
                     </template>
-
                     <div class="swap-mobile fs-4" v-if="mobileScreen" @click="isFront = !isFront"><BIconArrowRepeat /></div>
                   </div>
                 </div>
+
                 <div class="d-none d-lg-block continue-btn-holder pt-5 text-center">
                   <b-button :class="{'invisible': !tabIndex > 0}" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                   <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'">
@@ -908,7 +908,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return selected_product.back_design ? "front_back" : "front";
   }
   get vectorImageConstraint():boolean{
-    return this.$store.getters.getSetting('vector_image_constraint')
+    return this.$store.getters.getFactorySettings(this.selectedProduct.factory_id)?.vector_image_constraint
   }
 
   get notVectorLogosCount(){

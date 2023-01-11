@@ -211,7 +211,7 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal, Modal
   }
 
   get vectorImageConstraint():boolean{
-    return this.$store.getters.getSetting('vector_image_constraint')
+    return this.$store.getters.getFactorySettings(this.selectedProduct.factory_id)?.vector_image_constraint
   }
 
 
