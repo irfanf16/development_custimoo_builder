@@ -1060,7 +1060,7 @@ const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) =>
 
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-    $(svg_doc).find(`[id][fill]`).each  (function(doc_item) {
+    $(svg_doc).find(`[id]`).each  (function(doc_item) {
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
