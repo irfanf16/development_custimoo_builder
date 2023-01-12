@@ -369,6 +369,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
 
     object.setCoords()
+    this.frontCanvas.requestRenderAll()
   }
 
   public async changeColors() {
@@ -873,12 +874,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               let scale_by = -5 / this.backCanvas.getZoom()
               this.back_zoom_point.x = this.back_zoom_point.x + (movement.x * scale_by) / this.backCanvas.getZoom()
               this.back_zoom_point.y = this.back_zoom_point.y + (movement.y * scale_by) / this.backCanvas.getZoom()
-              this.zoomCanvas('back', this.backCanvas.getZoom()) // manage paning with zoom move to point
+              this.zoomCanvas('back', this.backCanvas.getZoom()) // manage panning with zoom move to point
             } else if(this.is_front_dragging) {
               let scale_by = -5 / this.frontCanvas.getZoom()
               this.front_zoom_point.x = this.front_zoom_point.x + (movement.x * scale_by) / this.frontCanvas.getZoom()
               this.front_zoom_point.y = this.front_zoom_point.y + (movement.y * scale_by) / this.frontCanvas.getZoom()
-              this.zoomCanvas('front', this.frontCanvas.getZoom()) // manage paning with zoom move to point
+              this.zoomCanvas('front', this.frontCanvas.getZoom()) // manage panning with zoom move to point
             }
 
             e.preventDefault()
@@ -2235,6 +2236,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
+    this.frontCanvas.requestRenderAll()
     const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
     const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
     const converted_width = unitConversion(width)
