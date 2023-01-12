@@ -446,10 +446,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  aslert(){
-    alert()
-  }
-
   private designMoved = (evt) =>{
     let design_name = evt.item.getAttribute('data-design-title');
     let locker_name = evt.originalEvent.target.textContent;

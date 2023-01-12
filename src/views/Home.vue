@@ -1491,26 +1491,27 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       eventCollectionMode: false
     })
     if (this.isCustomerAuthenticated) {
-      let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
-      if (res == true) {
-
+      // let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+      // if (res == true) {
+      //
+      //
+      //
+      // }
+      if (locker_index) {
+        let payload = {index: locker_index, attribute: 'active_tab', value: true}
+        this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+      } else {
+        locker_index = this.$store.getters.getLockerTabsIndex;
         if (locker_index) {
           let payload = {index: locker_index, attribute: 'active_tab', value: true}
           this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
-        } else {
-          locker_index = this.$store.getters.getLockerTabsIndex;
-          if (locker_index) {
-            let payload = {index: locker_index, attribute: 'active_tab', value: true}
-            this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
-          }
         }
-        this.showVModal('locker-modal')
+      }
+      this.showVModal('locker-modal')
 
-        if (this.ref.saveToLockerModal) {
-          this.hideVModal('add-to-lockerroom')
-          this.ref.saveToLockerModal.showLoader = false;
-        }
-
+      if (this.ref.saveToLockerModal) {
+        this.hideVModal('add-to-lockerroom')
+        this.ref.saveToLockerModal.showLoader = false;
       }
     }
   }
