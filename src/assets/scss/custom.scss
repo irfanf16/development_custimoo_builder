@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
+$theme-color: #219F84;
+$theme-color-light: #E7F4F1;
+
 //zoom on hover start
 .zoom-on-hover[data-v-0ff054f9]{position:relative;overflow:hidden}.zoom-on-hover .normal[data-v-0ff054f9]{width:100%}.zoom-on-hover .zoom[data-v-0ff054f9]{position:absolute;opacity:0;transform-origin:top left}.zoom-on-hover.zoomed .zoom[data-v-0ff054f9]{opacity:1}.zoom-on-hover.zoomed .normal[data-v-0ff054f9]{opacity:0}
 //zoom on hover end
@@ -63,6 +66,8 @@
 :host, :root{
     max-width: 100%;
     display: block;
+    --theme-color: $theme-color;
+    --theme-color-light: $theme-color-light;
 }
 
 @-webkit-keyframes vSelectSpinner {
@@ -356,14 +361,6 @@
 .vs--loading .vs__spinner {
     opacity: 1
 }
-
-:root{
-    --theme-color: #219F84;
-    --theme-color-light: #E7F4F1;
-}
-
-$theme-color: #219F84;
-$theme-color-light: #E7F4F1;
 
 .theme-color{
     color: $theme-color !important;
