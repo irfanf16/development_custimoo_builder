@@ -11,15 +11,15 @@ export default class CommonImportMixin extends Vue{
   async mounted () {
     await getCompany();
     const iframe = getCustomizerIframe()
+    /*
+    * this condition checks if customizer is loaded in iframe. If it's loaded inside iframe then vue router won't work
+    * so here we get the url and pass it to customizer to navigate to that route.
+    * */
     if(iframe) {
       const url_params = getUrlParameter()
       if(url_params) {
-        this.$router.push(url_params)
+        await this.$router.push(url_params)
       }
-      console.log('iframe from mounted', iframe.contentWindow.parent.location, iframe.contentDocument.querySelector('v-customizer'))
-      console.log('document from mounted', document.location.href, url_params)
-    } else {
-      console.log('iframe not found from mounted')
     }
 
     const token = getUrlParameter('token')
