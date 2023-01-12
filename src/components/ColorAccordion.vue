@@ -187,20 +187,18 @@ export default class ColorAccordion extends Vue {
   }
 
   public async setColor(color: Record<any, any>) {
-    setTimeout(async ()=>{
-      let self: Record<any, any> = this
-      await setUndoRedoItems('groupColors','updated')
-      if (color.value){
-        this.$store.dispatch('updateGroupColors',
-          {
-            index: this.svgGroups[this.selectAccordionIndex].id,
-            color: color.value,
-            pantone: color.pantone,
-            name: color.name
-          })
-        self.$eventBus.$emit("changeGroupColors")
-      }
-    }, 100)
+    let self: Record<any, any> = this
+    await setUndoRedoItems('groupColors','updated')
+    if (color.value){
+      this.$store.dispatch('updateGroupColors',
+        {
+          index: this.svgGroups[this.selectAccordionIndex].id,
+          color: color.value,
+          pantone: color.pantone,
+          name: color.name
+        })
+      self.$eventBus.$emit("changeGroupColors")
+    }
   }
 
   public changeColor(color: Record<any, any>) {

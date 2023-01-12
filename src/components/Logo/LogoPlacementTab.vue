@@ -163,7 +163,7 @@ export default class LogoPlacementTab extends Vue {
   }
 
   get vectorImageConstraint():boolean{
-    return this.$store.getters.getSetting('vector_image_constraint')
+    return this.$store.getters.getFactorySettings(this.selectedProduct.factory_id)?.vector_image_constraint
   }
 
   public addLogoTab() {

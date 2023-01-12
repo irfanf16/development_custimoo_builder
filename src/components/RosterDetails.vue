@@ -314,7 +314,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   get vectorImageConstraint():boolean{
-    return this.$store.getters.getSetting('vector_image_constraint')
+    return this.$store.getters.getFactorySettings(this.selectedProduct.factory_id)?.vector_image_constraint
   }
 
   get isEditingFromRoster():boolean{
