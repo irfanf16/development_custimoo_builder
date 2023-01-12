@@ -36,11 +36,6 @@ module.exports = {
 
 
 
-
-
-
-
-
         return options
       })
   }

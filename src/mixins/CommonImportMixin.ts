@@ -1,6 +1,6 @@
 import { Component, Vue } from 'vue-property-decorator'
 import Gleap from 'gleap'
-import { authenticateUser, getCompany, getUrlParameter, routerPush } from '@/helpers/Helpers'
+import {authenticateUser, getCompany, getCustomizerIframe, getUrlParameter, routerPush} from '@/helpers/Helpers'
 import { i18n } from '@/i18n'
 import store from '@/store'
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
@@ -10,6 +10,17 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 export default class CommonImportMixin extends Vue{
   async mounted () {
     await getCompany();
+    const iframe = getCustomizerIframe()
+    /*
+    * this condition checks if customizer is loaded in iframe. If it's loaded inside iframe then vue router won't work
+    * so here we get the url and pass it to customizer to navigate to that route.
+    * */
+    if(iframe) {
+      const url_params = getUrlParameter()
+      if(url_params) {
+        await this.$router.push(url_params)
+      }
+    }
 
     const token = getUrlParameter('token')
     if (token){
