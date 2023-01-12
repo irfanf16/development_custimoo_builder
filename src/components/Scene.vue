@@ -294,8 +294,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public aligningLineColor = 'rgb(110, 243, 204)'
   public viewportTransform: any
   public drawLines = false
-  public is_dragging = false
-  public last_pan_position: fabric.Point
+  public is_front_dragging = false
+  public is_back_dragging = false
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] | null[] = []
 
@@ -842,44 +842,44 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         let ctx = canvas.getSelectionContext()
 
         canvas.on('mouse:up', (opt) => {
-          this.is_dragging = false
+          this.is_back_dragging = false
+          this.is_front_dragging = false
           this.verticalLines.length = 0
           this.horizontalLines.length = 0
         })
 
-        // canvas.on('mouse:out', (opt) => {
-        //   this.is_dragging = false
-        // })
-
         canvas.on('mouse:down', (opt) => {
           if(opt.target == null) {
             const pointer = canvas.getPointer(opt.e, false) as fabric.Point
+            this.is_back_dragging = false
+            this.is_front_dragging = false
             if(side == 'back') {
               this.back_zoom_point = pointer
+              this.is_back_dragging = true
             } else {
               this.front_zoom_point = pointer
+              this.is_front_dragging = true
             }
-
-            this.is_dragging = true
           }
         })
 
         canvas.on('mouse:move', (opt) => {
-          if(this.is_dragging) {
+          if(this.is_back_dragging || this.is_front_dragging) {
             const e = opt.e;
 
             let movement = new fabric.Point(e.movementX, e.movementY)
-            let scale_by = -5 / canvas.getZoom()
-            if(side == 'back') {
-              this.back_zoom_point.x = this.back_zoom_point.x + (movement.x * scale_by) / canvas.getZoom()
-              this.back_zoom_point.y = this.back_zoom_point.y + (movement.y * scale_by) / canvas.getZoom()
-            } else {
-              this.front_zoom_point.x = this.front_zoom_point.x + (movement.x * scale_by) / canvas.getZoom()
-              this.front_zoom_point.y = this.front_zoom_point.y + (movement.y * scale_by) / canvas.getZoom()
-            }
 
-            const zoom = canvas.getZoom()
-            this.zoomCanvas(side, zoom) // manage paning with zoom move to point
+            if(this.is_back_dragging) { // while dragging canvas side change so that's why it put in if else
+              let scale_by = -5 / this.backCanvas.getZoom()
+              this.back_zoom_point.x = this.back_zoom_point.x + (movement.x * scale_by) / this.backCanvas.getZoom()
+              this.back_zoom_point.y = this.back_zoom_point.y + (movement.y * scale_by) / this.backCanvas.getZoom()
+              this.zoomCanvas('back', this.backCanvas.getZoom()) // manage paning with zoom move to point
+            } else if(this.is_front_dragging) {
+              let scale_by = -5 / this.frontCanvas.getZoom()
+              this.front_zoom_point.x = this.front_zoom_point.x + (movement.x * scale_by) / this.frontCanvas.getZoom()
+              this.front_zoom_point.y = this.front_zoom_point.y + (movement.y * scale_by) / this.frontCanvas.getZoom()
+              this.zoomCanvas('front', this.frontCanvas.getZoom()) // manage paning with zoom move to point
+            }
 
             e.preventDefault()
             e.stopPropagation()
@@ -1018,6 +1018,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       canvas = this.backCanvas
       pointer = this.back_zoom_point
     }
+    console.log(pointer)
 
     if (zoom > 4) zoom = 4;
     if (zoom < 1) {
