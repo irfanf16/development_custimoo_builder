@@ -1968,6 +1968,18 @@ const setUndoRedoItems = async (items_type: string, action_on_items: string, use
   }
 }
 
+const getCustomizerIframe = () => {
+  const iframes =  window.parent.document.querySelectorAll('iframe')
+  let customizer_iframe: any = null
+  Array.from(iframes, (iframe) => {
+    const get_customizer = iframe?.contentDocument?.querySelector('v-customizer')
+    if(get_customizer) {
+      customizer_iframe = iframe
+    }
+  })
+  return customizer_iframe
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
@@ -1980,5 +1992,5 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver
+  classObserver, getCustomizerIframe
 };

@@ -1,6 +1,6 @@
 import { Component, Vue } from 'vue-property-decorator'
 import Gleap from 'gleap'
-import { authenticateUser, getCompany, getUrlParameter, routerPush } from '@/helpers/Helpers'
+import {authenticateUser, getCompany, getCustomizerIframe, getUrlParameter, routerPush} from '@/helpers/Helpers'
 import { i18n } from '@/i18n'
 import store from '@/store'
 Gleap.initialize("jmnVe5UF34mxObuFCzxan9LvtNeNXVkc");
@@ -10,6 +10,17 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 export default class CommonImportMixin extends Vue{
   async mounted () {
     await getCompany();
+    const iframe = getCustomizerIframe()
+    if(iframe) {
+      const url_params = getUrlParameter()
+      if(url_params) {
+        this.$router.push(url_params)
+      }
+      console.log('iframe from mounted', iframe.contentWindow.parent.location, iframe.contentDocument.querySelector('v-customizer'))
+      console.log('document from mounted', document.location.href, url_params)
+    } else {
+      console.log('iframe not found from mounted')
+    }
 
     const token = getUrlParameter('token')
     if (token){
