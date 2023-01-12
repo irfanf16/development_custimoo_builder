@@ -1019,7 +1019,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       canvas = this.backCanvas
       pointer = this.back_zoom_point
     }
-    console.log(pointer)
 
     if (zoom > 4) zoom = 4;
     if (zoom < 1) {
