@@ -91,6 +91,8 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
 import ModalAction from "@/mixins/ModalAction";
+import { getImageFromCanvas } from '@/helpers/Helpers'
+import { Canvas } from 'fabric/fabric-impl'
     @Component<AddLockerRoomModal>({
         components: {
           ConfirmModal,
@@ -201,8 +203,8 @@ import ModalAction from "@/mixins/ModalAction";
             this.showLoader = false
             return false
           }
-          this.canvasImage.front = this.canvasImage.ref_front.toDataURL("image/png").split(',')[1]
-          this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
+          this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
+          this.canvasImage.back = (getImageFromCanvas('back') as string ).split(',')[1]
           let locker_front_png = this.canvasImage.front
           let locker_back_png = this.canvasImage.back
           let distinct:Record<any, any> = []
@@ -284,8 +286,8 @@ import ModalAction from "@/mixins/ModalAction";
             return item.design_show
         })
         this.product_name = this.selectedProduct.product_name;
-        this.canvasImage.front = this.canvasImage.ref_front.toDataURL("image/png").split(',')[1]
-        this.canvasImage.back = this.canvasImage.ref_back.toDataURL("image/png").split(',')[1]
+        this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
+        this.canvasImage.back = (getImageFromCanvas('back') as string ).split(',')[1]
         let locker_front_png = this.canvasImage.front
         let locker_back_png = this.canvasImage.back
         let distinct:Record<any, any> = []

@@ -5,12 +5,33 @@
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-        <h2>Front</h2>
+        <div class="d-flex gap-2 align-items-center justify-content-center">
+          <h2>Front</h2>
+          <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1">
+            <a class="zoom_in_out" @click="zoomInOut('front', 'in')">
+              <b-icon-zoom-in />
+            </a>
+            <a class="zoom_in_out" @click="zoomInOut('front', 'out')">
+              <b-icon-zoom-out />
+            </a>
+          </div>
+        </div>
       </a>
+
       <a @click="setShowSmall('front')" :class="{ 'show-small': showSmall.back }" v-if="back">
         <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth"
           :height="canvasHeight"></canvas>
-        <h2>Back</h2>
+        <div class="d-flex gap-2 align-items-center justify-content-center">
+          <h2>Back</h2>
+          <div style="margin-top: 20px" class="d-flex align-items-center gap-1" v-if="mainPreview">
+            <a class="zoom_in_out" @click="zoomInOut('back', 'in')">
+              <b-icon-zoom-in />
+            </a>
+            <a class="zoom_in_out" @click="zoomInOut('back', 'out')">
+              <b-icon-zoom-out />
+            </a>
+          </div>
+        </div>
       </a>
     </div>
   </div>
@@ -21,14 +42,7 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import {
-  getRandom,
-  getSelectedProductPantones,
-  santaClone,
-  setUndoRedoItems,
-  setLogoSettings,
-  unitConversion
-} from '@/helpers/Helpers'
+import { getRandom, getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
 import {find} from "lodash";
 import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
@@ -240,18 +254,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
+  private front_zoom_point: fabric.Point
+  private back_zoom_point: fabric.Point
   private frontTexture !: any
   private backTexture !: any
-  private texture_default_position = {front: {top: 0, left: 0}, back: {top: 0, left: 0}}
-  private clip_path_front !: any
-  private clip_path_back !: any
+  private default_view_port: number[]
+  private clip_path_front !: fabric.Group
+  private clip_path_back !: fabric.Group
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  private logoObjects: any[] = []
   private custom_logo_objects: any[] = []
-  private customTextObjects: any[] = []
   private mounted = false
-  private frontModel: any
-  private backModel: any
+  private frontModel: fabric.Image
+  private backModel: fabric.Image
   private showSmall = { front: false, back: this.manageComponents.mobileScreen }
   private svgGroups: any[] = []
   private initialSvgGroups: any[] = []
@@ -280,6 +294,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public aligningLineColor = 'rgb(110, 243, 204)'
   public viewportTransform: any
   public drawLines = false
+  public is_front_dragging = false
+  public is_back_dragging = false
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] | null[] = []
 
@@ -353,6 +369,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
 
     object.setCoords()
+    this.frontCanvas.requestRenderAll()
   }
 
   public async changeColors() {
@@ -401,7 +418,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             })
           }
         })
-        this.frontCanvas.renderAll()
+        this.frontCanvas.requestRenderAll()
         if (this.back) {
           texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
           texture.forEach((item: Record<any, any>) => {
@@ -432,7 +449,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               })
             }
           })
-          this.backCanvas.renderAll()
+          this.backCanvas.requestRenderAll()
         }
         this.unHideColorGrouping()
       }
@@ -474,7 +491,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             item.set('fill', appliedDefaultColors[item.id]);
           }
         })
-        this.frontCanvas.renderAll()
+        this.frontCanvas.requestRenderAll()
 
         if (this.back) {
           texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
@@ -484,7 +501,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               item.set('fill', appliedDefaultColors[item.id]);
             }
           })
-          this.backCanvas.renderAll()
+          this.backCanvas.requestRenderAll()
         }
         this.unHideColorGrouping()
       }
@@ -524,7 +541,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         item.set('fill', appliedDefaultColors[item.id]);
       }
     })
-    this.frontCanvas.renderAll()
+    this.frontCanvas.requestRenderAll()
 
     if (this.back) {
       texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
@@ -534,7 +551,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           item.set('fill', appliedDefaultColors[item.id]);
         }
       })
-      this.backCanvas.renderAll()
+      this.backCanvas.requestRenderAll()
     }
   }
 
@@ -574,7 +591,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 item.set('fill', changeColor.value);
               }
             })
-            this.frontCanvas.renderAll()
+            this.frontCanvas.requestRenderAll()
             if (this.back) {
               texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
               texture.forEach((item: Record<any, any>) => {
@@ -583,7 +600,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   item.set('fill', changeColor.value);
                 }
               })
-              this.backCanvas.renderAll()
+              this.backCanvas.requestRenderAll()
             }
             let svgIndex = 0
             let svgGroupId = null;
@@ -739,7 +756,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         } else {
           canvas.add(self.dimTextFront)
         }
-        canvas.renderAll()
+        canvas.requestRenderAll()
 
         if(side == 'front') {
           this.addClipPath(ImageData.safe_zone_url, side)
@@ -804,114 +821,220 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         resolve('done')
       })
-      canvas.on('object:modified', (e: Record<any, any>) => {
-        const fabric_object = e.target;
-        if(fabric_object.get("type") == "text") {
-          this.handleCustomTextModifiedEvent(e.target)
-        } else {
-          this.handleCustomLogoModifiedEvent(e.target)
-        }
-        let objects = canvas.getObjects('line');
-        for (let i in objects) {
-          canvas.remove(objects[i]);
-        }
-        this.drawLines = false
-        this.addToOtherSide(e.target, side)
-        this.hideLockerProductUpdateButton()
-      })
+      canvas.renderOnAddRemove = false
 
-      let ctx = canvas.getSelectionContext()
-
-      canvas.on('mouse:up', function () {
-        self.verticalLines.length = self.horizontalLines.length = 0;
-        canvas.renderAll();
-      });
-      canvas.on('before:render', function () {
-        if ((canvas as Record<any, any>).contextTop) {
-          canvas.clearContext((canvas as Record<any, any>).contextTop);
-        }
-      });
-
-      canvas.on('after:render', function () {
-        for (let i = self.verticalLines.length; i--;) {
-          self.drawVerticalLine(self.verticalLines[i], ctx);
-        }
-        for (let i = self.horizontalLines.length; i--;) {
-          self.drawHorizontalLine(self.horizontalLines[i], ctx);
-        }
-        self.verticalLines.length = self.horizontalLines.length = 0;
-      });
-
-      canvas.on('mouse:down', () => {
-        this.viewportTransform = canvas.viewportTransform;
-      });
-
-      let vertical_line = new fabric.Line([self.canvasWidth / 2, 0, self.canvasWidth / 2, self.canvasHeight], {
-        stroke: '#6EF3CC',
-        strokeWidth: 4,
-        strokeDashArray: [5, 5],
-      })
-      let horizontal_line = new fabric.Line([0, (self.canvasHeight / 2), self.canvasWidth, (self.canvasHeight / 2)], {
-        stroke: '#6EF3CC',
-        strokeWidth: 4,
-        strokeDashArray: [5, 5],
-      })
-      let relativeCanvasWidth = self.canvasWidth / 2 - 20
-      let relativeCanvasHeight = self.canvasHeight / 2 - 20
-
-      canvas.on('object:moving', (e: Record<any, any>) => {
-        this.objectScaling(e, side)
-        let customObj: Record<any, any> = this.getCustomObjectsLength(canvas)
-        if (customObj.logoLength + customObj.textLength >= 1) {
-          this.addGuideLine(e, canvas, vertical_line, horizontal_line, relativeCanvasWidth, relativeCanvasHeight)
-          this.addGuideForMultipleObjects(canvas, e.target)
-        }
-      })
-
-      canvas.on('object:scaling', (e: Record<any, any>) => {
-        console.log('object:scaling', e.target)
-        let dimText = this.dimTextFront
-        if (e.target.side == 'back' || e.target.side == 'Back') {
-          dimText = this.dimTextBack
-        }
-        this.showDimensions(e, dimText)
-      });
-
-      canvas.on('selection:created', (e: Record<any, any>) => {
-        console.log('object:created', e.target)
-        if(!this.fromRosterModal){
-          if(e.target.type == 'logo'){
-            this.$store.dispatch('setTabMain',{value:0})
-          }else if(e.target.type == 'text'){
-            this.$store.dispatch('setTabMain',{value:2})
-            this.$emit('setCustomTextIndex', e.target.text_index)
+      if(this.mainPreview) {
+        canvas.on('object:modified', (e: Record<any, any>) => {
+          const fabric_object = e.target;
+          if(fabric_object.get("type") == "text") {
+            this.handleCustomTextModifiedEvent(e.target)
+          } else {
+            this.handleCustomLogoModifiedEvent(e.target)
           }
+          let objects = canvas.getObjects('line');
+          for (let i in objects) {
+            canvas.remove(objects[i]);
+          }
+          this.drawLines = false
+          this.addToOtherSide(e.target, side)
+          this.hideLockerProductUpdateButton()
+        })
 
-          if(e.target.side == 'back' || e.target.side == 'Back'){
-            this.frontCanvas.discardActiveObject().renderAll();
-          }else{
-            this.backCanvas.discardActiveObject().renderAll();
-          }
-        }
-      });
-      canvas.on('selection:updated', (e: Record<any, any>) => {
-        console.log('object:created', e.target)
-        if(!this.fromRosterModal) {
-          if(e.target.type == 'logo'){
-            this.$store.dispatch('setTabMain',{value:0})
-          }else if(e.target.type == 'text'){
-            this.$store.dispatch('setTabMain',{value:2})
-            this.$emit('setCustomTextIndex', e.target.text_index)
-          }
+        let ctx = canvas.getSelectionContext()
 
-          if(e.target.side == 'Back'){
-            this.frontCanvas.discardActiveObject().renderAll();
-          }else{
-            this.backCanvas.discardActiveObject().renderAll();
+        canvas.on('mouse:up', (opt) => {
+          this.is_back_dragging = false
+          this.is_front_dragging = false
+          this.verticalLines.length = 0
+          this.horizontalLines.length = 0
+        })
+
+        canvas.on('mouse:down', (opt) => {
+          if(opt.target == null) {
+            const pointer = canvas.getPointer(opt.e, false) as fabric.Point
+            this.is_back_dragging = false
+            this.is_front_dragging = false
+            if(side == 'back') {
+              this.back_zoom_point = pointer
+              this.is_back_dragging = true
+            } else {
+              this.front_zoom_point = pointer
+              this.is_front_dragging = true
+            }
           }
-        }
-      });
+        })
+
+        canvas.on('mouse:move', (opt) => {
+          if(this.is_back_dragging || this.is_front_dragging) {
+            const e = opt.e;
+
+            let movement = new fabric.Point(e.movementX, e.movementY)
+
+            if(this.is_back_dragging) { // while dragging canvas side change so that's why it put in if else
+              let scale_by = -5 / this.backCanvas.getZoom()
+              this.back_zoom_point.x = this.back_zoom_point.x + (movement.x * scale_by) / this.backCanvas.getZoom()
+              this.back_zoom_point.y = this.back_zoom_point.y + (movement.y * scale_by) / this.backCanvas.getZoom()
+              this.zoomCanvas('back', this.backCanvas.getZoom()) // manage panning with zoom move to point
+            } else if(this.is_front_dragging) {
+              let scale_by = -5 / this.frontCanvas.getZoom()
+              this.front_zoom_point.x = this.front_zoom_point.x + (movement.x * scale_by) / this.frontCanvas.getZoom()
+              this.front_zoom_point.y = this.front_zoom_point.y + (movement.y * scale_by) / this.frontCanvas.getZoom()
+              this.zoomCanvas('front', this.frontCanvas.getZoom()) // manage panning with zoom move to point
+            }
+
+            e.preventDefault()
+            e.stopPropagation()
+          }
+        })
+
+        canvas.on('before:render', () => {
+          if ((canvas as Record<any, any>).contextTop) {
+            canvas.clearContext((canvas as Record<any, any>).contextTop);
+          }
+        });
+
+        canvas.on('after:render', () => {
+          for (let i = self.verticalLines.length; i--;) {
+            this.drawVerticalLine(self.verticalLines[i], ctx)
+          }
+          for (let i = self.horizontalLines.length; i--;) {
+            this.drawHorizontalLine(self.horizontalLines[i], ctx)
+          }
+          self.verticalLines.length = self.horizontalLines.length = 0;
+        })
+
+        this.default_view_port = canvas.viewportTransform as number[]
+
+        canvas.on('mouse:wheel', (opt) => {
+          this.zoomCanvasEvent(opt, canvas, side)
+        })
+
+        let vertical_line = new fabric.Line([self.canvasWidth / 2, 0, self.canvasWidth / 2, self.canvasHeight], {
+          stroke: '#6EF3CC',
+          strokeWidth: 4,
+          strokeDashArray: [5, 5],
+        })
+        let horizontal_line = new fabric.Line([0, (self.canvasHeight / 2), self.canvasWidth, (self.canvasHeight / 2)], {
+          stroke: '#6EF3CC',
+          strokeWidth: 4,
+          strokeDashArray: [5, 5],
+        })
+
+        canvas.on('object:moving', (e: Record<any, any>) => {
+          let center = this.frontTexture.getCenterPoint()
+          if(side == 'back') {
+            center = this.backTexture.getCenterPoint()
+          }
+          const relativeWidth = center.x
+          const relativeHeight = center.y
+          this.objectScaling(e, side)
+          let customObj: Record<any, any> = this.getCustomObjectsLength(canvas)
+          if (customObj.logoLength + customObj.textLength >= 1) {
+            this.addGuideLine(e, canvas, vertical_line, horizontal_line, relativeWidth, relativeHeight)
+            this.addGuideForMultipleObjects(canvas, e.target)
+          }
+        })
+
+        canvas.on('object:scaling', (e: Record<any, any>) => {
+          let dimText = this.dimTextFront
+          if (e.target.side == 'back' || e.target.side == 'Back') {
+            dimText = this.dimTextBack
+          }
+          this.showDimensions(e, dimText)
+        });
+
+        canvas.on('selection:created', (e: Record<any, any>) => {
+          this.setActiveTab(e.selected[0])
+        })
+
+        canvas.on('selection:updated', (e: Record<any, any>) => {
+          this.setActiveTab(e.selected[0])
+        })
+      }
     })
+  }
+
+  public setActiveTab(selected: Record<any, any>) {
+    if(!this.fromRosterModal){
+      if(selected.type == 'logo') {
+        this.$store.dispatch('setTabMain',{value:0})
+      }else if(selected.type == 'text'){
+        this.$store.dispatch('setTabMain',{value:2})
+        this.$emit('setCustomTextIndex', selected.text_index)
+      }
+
+      if(selected.side == 'back' || selected.side == 'Back'){
+        this.frontCanvas.discardActiveObject().requestRenderAll()
+      }else{
+        this.backCanvas.discardActiveObject().requestRenderAll()
+      }
+    }
+  }
+
+  public zoomInOut(side: string, in_out: string) {
+    let canvas = this.frontCanvas
+    if(side == 'back') {
+      canvas = this.backCanvas
+      if(this.back_zoom_point == undefined) {
+        this.back_zoom_point = {x: 300, y: 300} as fabric.Point
+      }
+    } else {
+      if(this.front_zoom_point == undefined) {
+        this.front_zoom_point = {x: 300, y: 300} as fabric.Point
+      }
+    }
+
+    let zoom = canvas.getZoom() + .2
+    if(in_out == 'out') {
+      zoom = canvas.getZoom() - .2
+    }
+    this.zoomCanvas(side, zoom)
+  }
+
+  public zoomCanvasEvent(opt: fabric.IEvent<WheelEvent>, canvas: fabric.Canvas, side: string) {
+    let delta = opt.e.deltaY;
+    let pointer = canvas.getPointer(opt.e) as fabric.Point;
+    // let pointer = {x: opt.e.clientX, y: opt.e.clientY} as fabric.Point;
+    if(side == 'back') {
+      this.back_zoom_point = pointer
+    } else {
+      this.front_zoom_point = pointer
+    }
+
+    let zoom = canvas.getZoom();
+    zoom *= 0.999 ** delta;
+
+    this.zoomCanvas(side, zoom)
+
+    opt.e.preventDefault()
+    opt.e.stopPropagation()
+  }
+
+  public zoomCanvas(side: string, zoom) {
+    let dim_text = this.dimTextFront
+    let canvas = this.frontCanvas
+    let pointer = this.front_zoom_point
+    if(side == 'back') {
+      dim_text = this.dimTextBack
+      canvas = this.backCanvas
+      pointer = this.back_zoom_point
+    }
+    console.log(pointer)
+
+    if (zoom > 4) zoom = 4;
+    if (zoom < 1) {
+      zoom = 1;
+    }
+    canvas.viewportTransform = JSON.parse(JSON.stringify(this.default_view_port));
+    canvas.zoomToPoint({
+      x: pointer.x,
+      y: pointer.y
+    }, zoom)
+
+    canvas.requestRenderAll()
+
+    dim_text.scaleX = 1 / zoom;
+    dim_text.scaleY = 1 / zoom;
   }
 
   public getCustomObjectsLength(canvas: Record<any, any>) {
@@ -927,7 +1050,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     })
     return { logoLength, textLength }
   }
-  public addGuideLine(e: Record<any, any>, canvas: Record<any, any>, vertical_line: Record<any, any>, horizontal_line: Record<any, any>, relativeCanvasWidth: number, relativeCanvasHeight: number) {
+  public addGuideLine(e: Record<any, any>, canvas: Record<any, any>, vertical_line: Record<any, any>, horizontal_line: Record<any, any>, relativeWidth: number, relativeHeight: number) {
     if (!this.drawLines) {
       canvas.add(vertical_line);
       canvas.add(horizontal_line);
@@ -935,24 +1058,17 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
 
     let actObj = e.target;
-    let coords = actObj.calcCoords();
+    let coords = actObj.getCenterPoint()
+    let left = coords.x;
+    let top = coords.y;
 
-    let left = coords.tl.x;
-    let top = coords.tl.y;
-
-
-    let height = e.target.height * e.target.scaleY
-    let width = e.target.width * e.target.scaleX
-    width = Math.trunc(width / 2)
-    height = Math.trunc(height / 2)
-
-    if (parseInt(left) >= relativeCanvasWidth - width && parseInt(left) <= (relativeCanvasWidth - width) + 5) {
+    if (parseInt(left) >= relativeWidth - 2 && parseInt(left) <= relativeWidth + 2) {
       vertical_line.set({
         stroke: '#6EF3CC',
         strokeWidth: 4,
         strokeDashArray: []
       })
-      canvas.renderAll()
+      canvas.requestRenderAll()
     }
     else {
       vertical_line.set({
@@ -960,16 +1076,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [5, 5]
       })
-      canvas.renderAll()
+      canvas.requestRenderAll()
     }
 
-    if (parseInt(top) >= relativeCanvasHeight - height && parseInt(top) <= (relativeCanvasHeight - height) + 5) {
+    if (parseInt(top) >= relativeHeight - 2 && parseInt(top) <= relativeHeight + 2) {
       horizontal_line.set({
         stroke: '#6EF3CC',
         strokeWidth: 4,
         strokeDashArray: [],
       })
-      canvas.renderAll();
+      canvas.requestRenderAll();
     }
     else {
       horizontal_line.set({
@@ -977,34 +1093,32 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [5, 5],
       })
-      canvas.renderAll();
+      canvas.requestRenderAll();
     }
   }
 
-  public addGuideForMultipleObjects(canvas: Record<any, any>, selectedObject: Record<any, any>) {
-    let activeObject = selectedObject,
-      canvasObjects = canvas.getObjects(),
-      activeObjectCenter = activeObject.getCenterPoint(),
-      activeObjectLeft = activeObjectCenter.x,
-      activeObjectTop = activeObjectCenter.y,
-      activeObjectBoundingRect = activeObject.getBoundingRect(),
-      activeObjectHeight = activeObjectBoundingRect.height / this.viewportTransform[3],
-      activeObjectWidth = activeObjectBoundingRect.width / this.viewportTransform[0],
-      horizontalInTheRange = false,
-      verticalInTheRange = false,
-      transform = canvas._currentTransform;
+  public addGuideForMultipleObjects(canvas: fabric.Canvas, selectedObject: Record<any, any>) {
+    this.viewportTransform = canvas.viewportTransform
+    let canvasObjects = canvas.getObjects()
+    let activeObjectCenter = selectedObject.getCenterPoint()
+    let activeObjectLeft = activeObjectCenter.x
+    let activeObjectTop = activeObjectCenter.y
+    let activeObjectBoundingRect = selectedObject.getBoundingRect()
+    let activeObjectHeight = activeObjectBoundingRect.height / this.viewportTransform[3]
+    let activeObjectWidth = activeObjectBoundingRect.width / this.viewportTransform[0]
+    let horizontalInTheRange = false
+    let verticalInTheRange = false
 
-    if (!transform) return;
+    if (!this.viewportTransform) return;
 
     // It should be trivial to DRY this up by encapsulating (repeating) creation of x1, x2, y1, and y2 into functions,
     // but we're not doing it here for perf. reasons -- as this a function that's invoked on every mouse move
 
     for (let i = canvasObjects.length; i--;) {
-      if (canvasObjects[i] === activeObject) continue;
+      if (canvasObjects[i] === selectedObject) continue;
 
       if ('logo_index' in canvasObjects[i] || 'custom_text_index' in canvasObjects[i]) {
-
-        var objectCenter = canvasObjects[i].getCenterPoint(),
+        let objectCenter = canvasObjects[i].getCenterPoint(),
           objectLeft = objectCenter.x,
           objectTop = objectCenter.y,
           objectBoundingRect = canvasObjects[i].getBoundingRect(),
@@ -1023,7 +1137,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               ? (activeObjectTop + activeObjectHeight / 2 + this.aligningLineOffset)
               : (activeObjectTop - activeObjectHeight / 2 - this.aligningLineOffset)
           });
-          activeObject.setPositionByOrigin(new fabric.Point(objectLeft, activeObjectTop), 'center', 'center');
+          selectedObject.setPositionByOrigin(new fabric.Point(objectLeft, activeObjectTop), 'center', 'center');
         }
 
         // snap by the left edge
@@ -1038,7 +1152,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               ? (activeObjectTop + activeObjectHeight / 2 + this.aligningLineOffset)
               : (activeObjectTop - activeObjectHeight / 2 - this.aligningLineOffset)
           });
-          activeObject.setPositionByOrigin(new fabric.Point(objectLeft - objectWidth / 2 + activeObjectWidth / 2, activeObjectTop), 'center', 'center');
+          selectedObject.setPositionByOrigin(new fabric.Point(objectLeft - objectWidth / 2 + activeObjectWidth / 2, activeObjectTop), 'center', 'center');
         }
 
         // snap by the right edge
@@ -1053,7 +1167,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               ? (activeObjectTop + activeObjectHeight / 2 + this.aligningLineOffset)
               : (activeObjectTop - activeObjectHeight / 2 - this.aligningLineOffset)
           });
-          activeObject.setPositionByOrigin(new fabric.Point(objectLeft + objectWidth / 2 - activeObjectWidth / 2, activeObjectTop), 'center', 'center');
+          selectedObject.setPositionByOrigin(new fabric.Point(objectLeft + objectWidth / 2 - activeObjectWidth / 2, activeObjectTop), 'center', 'center');
         }
 
         // snap by the vertical center line
@@ -1068,7 +1182,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               ? (activeObjectLeft + activeObjectWidth / 2 + this.aligningLineOffset)
               : (activeObjectLeft - activeObjectWidth / 2 - this.aligningLineOffset)
           });
-          activeObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop), 'center', 'center');
+          selectedObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop), 'center', 'center');
         }
 
         // snap by the top edge
@@ -1083,7 +1197,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               ? (activeObjectLeft + activeObjectWidth / 2 + this.aligningLineOffset)
               : (activeObjectLeft - activeObjectWidth / 2 - this.aligningLineOffset)
           });
-          activeObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop - objectHeight / 2 + activeObjectHeight / 2), 'center', 'center');
+          selectedObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop - objectHeight / 2 + activeObjectHeight / 2), 'center', 'center');
         }
 
         // snap by the bottom edge
@@ -1098,7 +1212,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               ? (activeObjectLeft + activeObjectWidth / 2 + this.aligningLineOffset)
               : (activeObjectLeft - activeObjectWidth / 2 - this.aligningLineOffset)
           });
-          activeObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop + objectHeight / 2 - activeObjectHeight / 2), 'center', 'center');
+          selectedObject.setPositionByOrigin(new fabric.Point(activeObjectLeft, objectTop + objectHeight / 2 - activeObjectHeight / 2), 'center', 'center');
         }
       }
     }
@@ -1124,26 +1238,29 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       coords.x1 > coords.x2 ? coords.x2 : coords.x1,
       coords.y + 0.5,
       coords.x2 > coords.x1 ? coords.x2 : coords.x1,
-      coords.y + 0.5, ctx);
+      coords.y + 0.5, ctx)
   }
 
   public drawLine(x1: number, y1: number, x2: number, y2: number, ctx: CanvasRenderingContext2D) {
-    ctx.save();
+    let originXY = fabric.util.transformPoint(new fabric.Point(x1, y1), this.viewportTransform as any[])
+    let dimensions = fabric.util.transformPoint(new fabric.Point(x2, y2), this.viewportTransform as any[])
+    ctx.save()
     ctx.lineWidth = this.aligningLineWidth;
     ctx.strokeStyle = this.aligningLineColor;
     ctx.setLineDash([5, 5]);
+    ctx.beginPath()
 
-    ctx.beginPath();
-    ctx.moveTo(((x1 + this.viewportTransform[4])), ((y1 + this.viewportTransform[5])));
-    ctx.lineTo(((x2 + this.viewportTransform[4])), ((y2 + this.viewportTransform[5])));
-    ctx.stroke();
-    ctx.restore();
+    ctx.moveTo(originXY.x, originXY.y)
+
+    ctx.lineTo(dimensions.x, dimensions.y)
+    ctx.stroke()
+    ctx.restore()
   }
 
   public isInRange(value1: number, value2: number) {
     value1 = Math.round(value1);
     value2 = Math.round(value2);
-    for (var i = value1 - this.aligningLineMargin, len = value1 + this.aligningLineMargin; i <= len; i++) {
+    for (let i = value1 - this.aligningLineMargin, len = value1 + this.aligningLineMargin; i <= len; i++) {
       if (i === value2) {
         return true;
       }
@@ -1160,6 +1277,19 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       canvas = this.backCanvas
     }
 
+    let zoom_point = this.front_zoom_point
+    if (side == 'back') {
+      zoom_point = this.back_zoom_point
+    }
+    let zoom = canvas.getZoom();
+
+    if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
+      canvas.zoomToPoint({
+        x: zoom_point.x,
+        y: zoom_point.y
+      }, 1);
+    }
+
     const modelBoundingRect = texture.getBoundingRect()
     let boundingRect = {
       left: modelBoundingRect.left,
@@ -1168,7 +1298,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       bottom: modelBoundingRect.top + modelBoundingRect.height,
     }
 
-    if(e.target.left > boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
+    if(e.target.left >= boundingRect.right + (e.target.width * e.target.scaleX / 4)) { // object goes right
       e.target.left = boundingRect.right + (e.target.width * e.target.scaleX / 4)
     }
     else if(e.target.left < boundingRect.left - (e.target.width * e.target.scaleX / 4)) { // object goes left
@@ -1177,7 +1307,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if(e.target.top < boundingRect.top + (e.target.height * e.target.scaleY / 3)) { // object goes top
       e.target.top = boundingRect.top + (e.target.height * e.target.scaleY / 3)
     }
-    else if(e.target.top > boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
+    else if(e.target.top >= boundingRect.bottom - (e.target.height * e.target.scaleY / 3)){ // object goes bottom
       e.target.top = boundingRect.bottom  - (e.target.height * e.target.scaleY / 3)
     }
 
@@ -1185,23 +1315,32 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
       const boundingDistance = {
         left: Math.abs(boundingRect.left - centerPoint.x),
-        right: Math.abs(boundingRect.right - centerPoint.x)
+        top: Math.abs(boundingRect.top - centerPoint.y),
+        right: Math.abs(boundingRect.right - centerPoint.x),
+        bottom: Math.abs(boundingRect.bottom - centerPoint.y)
       } as Record<any, any>
 
-      let moveTo = 'left'
+      let other_move_to = 'left'
       Object.keys(boundingDistance).forEach((key: string) => {
-        if (boundingDistance[key] > boundingDistance[moveTo]) {
-          moveTo = key
+        if (boundingDistance[key] > boundingDistance[other_move_to]) {
+          other_move_to = key
         }
       })
-      let pointXCompare = e.target.left + (e.target.width * e.target.scaleX / 4)
-      if(moveTo == 'left') {
-        pointXCompare = e.target.left - (e.target.width * e.target.scaleX / 4)
+      let moveTo = 'left'
+      if(boundingDistance.right > boundingDistance.left) {
+        moveTo = 'right'
       }
 
-      let direction = this.targetNonTransparent(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo)
+      let direction = this.targetNonTransparentVH(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo, other_move_to)
 
       e.target.left = direction.left
+    }
+
+    if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
+      canvas.zoomToPoint({
+        x: zoom_point.x,
+        y: zoom_point.y
+      }, zoom);
     }
 
     let dimText = this.dimTextFront
@@ -1211,7 +1350,20 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.showDimensions(e, dimText)
   }
 
-  public targetNonTransparent(canvas: fabric.Canvas, model: fabric.Image, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
+  public targetNonTransparentVH(canvas: fabric.Canvas, model: any, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, other_move_to: string) {
+    let direction = this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo)
+    if(direction.max_call <= 0 && moveTo != other_move_to) {
+      if(other_move_to == 'bottom') {
+        pointY++
+      } else {
+        pointY--
+      }
+      direction = this.targetNonTransparentVH(canvas, model, pointX, pointY, width, scaleX, moveTo, other_move_to)
+    }
+    return direction
+  }
+
+  public targetNonTransparent(canvas: fabric.Canvas, model: any, pointX: number, pointY: number, width: number, scaleX: number, moveTo: string, max_call = 600): Record<any, any> {
     let pointXCompare = pointX + (width * scaleX / 4)
     if(moveTo == 'left') {
       pointXCompare = pointX - (width * scaleX / 4)
@@ -1228,8 +1380,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         pointY = pointY + 1
       }
       return this.targetNonTransparent(canvas, model, pointX, pointY, width, scaleX, moveTo, max_call)
-    } else {
-      return {left: pointX, top: pointY}
+    }
+    else {
+      const viewportMatrix = canvas.viewportTransform as Record<any, any>;
+      pointX = pointX + viewportMatrix[4] * (canvas.getZoom() + model.zoomX)
+      pointY = pointY + viewportMatrix[5] * (canvas.getZoom() + model.zoomY)
+      return {left: pointX, top: pointY, max_call: max_call}
     }
   }
 
@@ -1238,9 +1394,19 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if(side == 'back' || (this.back && side == 'front')) {
       let texture = this.frontTexture
       let canvas = this.frontCanvas
+      let zoom_point = this.front_zoom_point
       if (side == 'back' && this.back) {
         texture = this.backTexture
         canvas = this.backCanvas
+        zoom_point = this.back_zoom_point
+      }
+
+      let zoom = canvas.getZoom();
+      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+        canvas.zoomToPoint({
+          x: zoom_point.x,
+          y: zoom_point.y
+        }, 1);
       }
 
       let add_index
@@ -1332,6 +1498,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           addTop = target.top
         }
 
+        if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+          canvas.zoomToPoint({
+            x: zoom_point.x,
+            y: zoom_point.y
+          }, zoom);
+        }
+
         if(clone_again) {
           if (otherSideObjects[add_index]) {
             if (side == 'back') {
@@ -1357,16 +1530,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           otherSideObjects[add_index].scaleX = target.scaleX
           otherSideObjects[add_index].scaleY = target.scaleY
           otherSideObjects[add_index].angle = -target.angle
-
-          if (side == 'back') {
-            this.frontCanvas.renderAll()
-          } else {
-            if (this.back) {
-              this.backCanvas.renderAll()
-            }
-          }
         } else {
-          let objectAdd = fabric.util.object.clone(target)
+          let objectAdd
+          if(target.type == "text") {
+            target.clone((cloned) => {
+              objectAdd = cloned;
+            })
+          } else {
+            objectAdd = fabric.util.object.clone(target)
+          }
+
           if(actualNearTo == 'top') {
             objectAdd.flipX = true
             objectAdd.flipY = true
@@ -1397,6 +1570,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       } else {
+        if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+          canvas.zoomToPoint({
+            x: zoom_point.x,
+            y: zoom_point.y
+          }, zoom);
+        }
         if (otherSideObjects[add_index]) {
           if (side == 'back') {
             this.frontCanvas.remove(otherSideObjects[add_index])
@@ -1406,6 +1585,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
           delete otherSideObjects[add_index]
+        }
+      }
+      if (side == 'back') {
+        this.frontCanvas.requestRenderAll()
+      } else {
+        if (this.back) {
+          this.backCanvas.requestRenderAll()
         }
       }
     }
@@ -1572,7 +1758,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (this.productType == 'customized') {
           model.bringToFront()
         }
-        canvas.renderAll()
+        canvas.requestRenderAll()
         this.addToOtherSide(img, logo.side)
       })
     }
@@ -1672,7 +1858,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (this.productType == 'customized') {
             model.bringToFront()
           }
-          canvas.renderAll()
+          canvas.requestRenderAll()
 
           if (this.mainPreview) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
@@ -1875,7 +2061,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
                 fabric.loadSVGFromString(textSvg, (objects: any) => {
                   fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group | Record<any, any>
-                  fabric_text.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * custom_text_item.height as number)
+                  fabric_text.scaleToHeight(custom_text_item.height as number)
                   fabric_text.set({
                     left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
                     top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
@@ -1954,9 +2140,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   this.frontCanvas.renderAll()
                   if(this.back) {
                     this.backCanvas.renderAll()
-                    setTimeout(() => {
-                      this.backCanvas.renderAll()
-                    }, 2000)
                   }
                   this.addToOtherSide(fabric_text, custom_text_item.placement, true)
                 })
@@ -2022,13 +2205,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (this.productType == 'customized') {
             this.frontModel.bringToFront()
           }
-          this.frontCanvas.renderAll()
+          this.frontCanvas.requestRenderAll()
         }
         if (render_back_canvas) {
           if (this.productType == 'customized') {
             this.backModel.bringToFront()
           }
-          this.backCanvas.renderAll()
+          this.backCanvas.requestRenderAll()
         }
       }
     }
@@ -2044,11 +2227,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public async handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
+  public handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
     let self: Record<any, any> = this;
-    if(this.mainPreview) {
-      await setUndoRedoItems('customTexts', 'modified')
-    }
     const custom_text_index =  fabric_object.get("custom_text_index");
     const custom_text_item_index =  fabric_object.get("custom_text_item_index");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
@@ -2056,6 +2236,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
+    this.frontCanvas.requestRenderAll()
     const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
     const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
     const converted_width = unitConversion(width)
@@ -2067,9 +2248,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
-    if(this.mainPreview) {
-      await setUndoRedoItems('customLogos', 'modified')
-    }
     let self: Record<any, any> = this;
     const logo_index =  fabric_object.get("logo_index");
     if(this.custom_logos[logo_index]) {
@@ -2171,6 +2349,27 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     display: block;
     margin: 0 auto;
     height: auto;
+  }
+}
+.zoom_in_out {
+  font-size: 20px;
+  display: flex;
+  width: 30px;
+  height: 28px;
+  border-radius: 5px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--theme-color);
+  color: white !important;
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+
+  &:active{
+    color: var(--theme-color) !important;
+    background: var(--theme-color-light);
   }
 }
 </style>

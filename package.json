@@ -1,5 +1,5 @@
 {
-  "name": "Santa",
+  "name": "Custimoo",
   "version": "0.1.1",
   "private": true,
   "scripts": {
@@ -34,7 +34,7 @@
     "core-js": "^3.6.5",
     "csq-vue-multi-draggable": "^1.0.1",
     "css-loader": "^6.7.1",
-    "fabric": "^4.4.0",
+    "fabric": "^5.3.0",
     "gleap": "^6.9.4",
     "hex-rgb": "^5.0.0",
     "html2pdf.js": "^0.9.3",
@@ -87,7 +87,7 @@
   },
   "devDependencies": {
     "@types/color-diff": "^1.2.0",
-    "@types/fabric": "^4.2.3",
+    "@types/fabric": "^4.5.14",
     "@types/hex-rgb": "^4.1.1",
     "@types/jquery": "^3.5.5",
     "@types/lodash": "^4.14.177",

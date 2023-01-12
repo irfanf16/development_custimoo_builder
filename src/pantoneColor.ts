@@ -5,9 +5,6 @@ import rgbHex from 'rgb-hex';
 import {default as diff, RGBColor} from 'color-diff'
 import {pantonesTcx} from '@/pantonesTcx';
 import {pantonesCoated} from '@/pantonesCoated';
-import {cmyk} from '@/cmyk';
-
-
 
 const get_rgbObject = (hexColor: string) => {
   const rgbcolor = hexRgb(hexColor) as RgbaObject
@@ -89,8 +86,8 @@ const getClosestColor = (inputHex: string, pantonesArray: Record<any, any>[]= []
   }
   if(colorType !== 'cmyk'){
     const inputRGB = get_rgbObject(inputHex)
-    const nearestColor = diff.closest(inputRGB,RGBList)
-    const nearestColorHex = rgbHex(nearestColor.R,nearestColor.G,nearestColor.B)
+    const nearestColor = diff.closest(inputRGB, RGBList)
+    const nearestColorHex = rgbHex(nearestColor.R, nearestColor.G, nearestColor.B)
     const indexInColorList = sample_pantones.findIndex((x: Record<any, any>) => {
       return x.hex.toLowerCase() == `#${nearestColorHex.toLowerCase()}`
     })
@@ -130,4 +127,4 @@ const getColorEncoding = (inputEncoding: string,colorType= 'pantone') => {
   return colorEncoding
 }
 
-export {getClosestColor, pantonesTcx, getColorEncoding,get_cmykObject,cmykObjectToLabel}
+export {getClosestColor, pantonesTcx, getColorEncoding, get_cmykObject, cmykObjectToLabel}
