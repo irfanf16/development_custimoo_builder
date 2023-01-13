@@ -33,7 +33,7 @@
             <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 pb-2">
               <b-button size="sm" class="btn-locker-folder" variant="secondary" :class="{'active': folder_i == activeFolderIndex}" @click="setActiveFolderIndex(activeLockerIndex, folder_i)"
                         v-for="(folder, folder_i) in getLockerProducts[activeLockerIndex].folders" :key="`folder_${activeLockerIndex}${folder_i}`">
-                {{folder.folder_name}} {{activeFolderIndex}} {{folder_i}}
+                {{folder.folder_name}}
               </b-button>
             </div>
           </div>
@@ -114,10 +114,11 @@ import {AxiosError} from "axios";
   mounted(){
     if(this.isCustomerAuthenticated){
       this.$store.dispatch('GET_LOCKER_PRODUCTS');
-      this.fetchColors(this.activeLockerIndex,this.activeFolderIndex)
+      this.getLockerProducts && this.getLockerProducts.length &&
+        this.fetchColors(this.activeLockerIndex,this.activeFolderIndex)
     }
     setTimeout(() => {
-    this.selectType(this.selectTypeIndex)
+      this.selectType(this.selectTypeIndex)
     }, 300)
   }
 })
@@ -207,7 +208,7 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   }
 
   public fetchColors(locker_i: number, folder_i: number) {
-    this.colors = JSON.parse(this.getLockerProducts[locker_i].folders[folder_i].color);
+    this.colors = JSON.parse(this.getLockerProducts[locker_i]!.folders[folder_i].color);
     return false;
   }
 
