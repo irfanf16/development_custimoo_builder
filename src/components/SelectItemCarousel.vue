@@ -14,7 +14,7 @@
                      :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index" :products_fonts="products_fonts"/>
             </div>
           </template>
-          <h3 class="text-center">{{ product.product_name }}</h3>
+          <h3 class="text-center" :title="product.product_name">{{ product.product_name }}</h3>
         </a>
       </template>
     </slither-slider>
@@ -168,7 +168,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     margin-top: 5px;
   }
 }

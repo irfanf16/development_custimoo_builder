@@ -90,7 +90,7 @@ export default class ItemsGrid extends Vue {
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     margin-top: 5px;
   }
 }
