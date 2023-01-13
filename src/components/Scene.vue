@@ -1529,6 +1529,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           otherSideObjects[add_index].scaleX = target.scaleX
           otherSideObjects[add_index].scaleY = target.scaleY
           otherSideObjects[add_index].angle = -target.angle
+          if (side == 'back') {
+            this.frontCanvas.requestRenderAll()
+          } else {
+            if (this.back) {
+              this.backCanvas.requestRenderAll()
+            }
+          }
         } else {
           let objectAdd
           if(target.type == "text") {
@@ -1558,6 +1565,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if (this.productType == 'customized') {
               this.frontModel.bringToFront()
             }
+            this.frontCanvas.requestRenderAll()
           } else {
             if (this.back) {
               objectAdd.clipPath = this.clip_path_back
@@ -1565,6 +1573,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               if (this.productType == 'customized') {
                 this.backModel.bringToFront()
               }
+              this.backCanvas.requestRenderAll()
             }
           }
         }
@@ -1578,19 +1587,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (otherSideObjects[add_index]) {
           if (side == 'back') {
             this.frontCanvas.remove(otherSideObjects[add_index])
+            this.frontCanvas.requestRenderAll()
           } else {
             if (this.back) {
               this.backCanvas.remove(otherSideObjects[add_index])
+              this.backCanvas.requestRenderAll()
             }
           }
           delete otherSideObjects[add_index]
-        }
-      }
-      if (side == 'back') {
-        this.frontCanvas.requestRenderAll()
-      } else {
-        if (this.back) {
-          this.backCanvas.requestRenderAll()
         }
       }
     }
