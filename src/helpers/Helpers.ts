@@ -515,10 +515,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
               }
               if(Object.prototype.hasOwnProperty.call(custom_text, "items")){
                 for (let items_index = 0; items_index < custom_text.items.length; items_index++) {
-
                   const custom_text_item = custom_text.items[items_index]
                   if(custom_text_item.selected){
-
                     const text_item_object = {
                       label: custom_text_item.label,
                       placement: custom_text_item.placement,
@@ -670,8 +668,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       scene_ref.backCanvas.discardActiveObject().renderAll()
       // const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
       // const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
-      const back_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
-      const front_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
+      const back_image = getImageFromCanvas('back')
+      const front_image = getImageFromCanvas('front')
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: Store.getters.getCustomLogos(),
@@ -1113,17 +1111,13 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
         svg_string += `${payload.svg_string}`
       }
     }
-
     const numbers_array:Record<any,any>[] = getSVGNumberArraysFromRoster(factory_product);
     const svg_numbers_payload = getSVGNumbers(numbers_array,logo_max_width,production_file_initial_dimension);
-    svg_string += `${svg_numbers_payload.svg_string}`;
     const numbers_width = svg_numbers_payload.width?svg_numbers_payload.width + 500:0;
     const logo_max_width_and_number_max_width = logo_max_width + numbers_width;
 
     const names_array:Record<any,any>[] = getSVGNameArraysFromRoster(factory_product);
     const svg_names_payload = getSVGNames(names_array,production_file_initial_dimension,logo_max_width_and_number_max_width);
-
-
     svg_string += `${svg_names_payload.svg_string}`;
     const names_height = svg_names_payload.height;
     const names_width = svg_names_payload.width;
@@ -1364,7 +1358,6 @@ const getSVGNames = (names_array:Record<any,any>[], production_file_dimension:Re
   })
 
   svg_string += `</g>`
-
   return {
     svg_string:svg_string,
     height:height,
@@ -1409,7 +1402,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
   const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
   let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${height_of_production_file})">`;
   let width = 0;
-  const setting = Store.getters.getSetting
+  const setting = Store.getters.getSetting('measurement_unit')
   custom_logos.forEach((custom_logo:Record<any,any>, index:number) => {
     const original_url = Object.prototype.hasOwnProperty.call(custom_logo,'original_png') && custom_logo.original_png;
     const updated_url = original_url?custom_logo.original_url:custom_logo.url;
@@ -1435,7 +1428,8 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
       }
     }
       if(Object.prototype.hasOwnProperty.call(custom_logo,'actualWidth')){
-        width += ((custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)) + 500;
+        const scaleX = Object.prototype.hasOwnProperty.call(custom_logo,'scaleX')? Object.prototype.hasOwnProperty.call(custom_logo,'scaleX'): 1;
+        width += ((custom_logo.actualWidth * scaleX)/parseFloat(measurement_ratio)) + 500;
       }
       else{
         width += 0;
@@ -1443,7 +1437,6 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
   });
 
   svg_string += `</g>`
-
   return {svg_string:svg_string,width:width};
 }
 
@@ -1707,8 +1700,8 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
     }
   }
   return {
-    back_image: getCanvasImage.ref_back?.toDataURL("image/png"),
-    front_image: getCanvasImage.ref_front.toDataURL("image/png"),
+    back_image: getImageFromCanvas('back'),
+    front_image: getImageFromCanvas('front'),
     custom_logos: Store.getters.getCustomLogos(),
     measurement_ratio: selected_product.measurement_ratio,
     custom_logo_svgs: [],
@@ -1741,17 +1734,24 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
   }
 }
 
-const getImageFromCanvas = (canvas:Canvas, options={}) => {
-  const canvas_options = {...{original_width: 600, original_height: 600, original_zoom: 1, image_type: 'image/png', width: 1200, height: 1200, zoom: 2}, ...options}
+const getImageFromCanvas = (side: string, options={}) => {
+  const canvas_options = {...{original_width: 600, original_height: 600, image_type: 'image/png', width: 1200, height: 1200, zoom: 2}, ...options}
+  let canvas = Store.getters.getCanvasImage.scene.frontCanvas
+  if(side == 'back') {
+    canvas = Store.getters.getCanvasImage.scene.backCanvas
+  }
   if(canvas) {
+    const original_transform = canvas.viewportTransform
+    const original_zoom = canvas.getZoom()
     canvas.setHeight(canvas_options.height)
     canvas.setWidth(canvas_options.width)
+    canvas.viewportTransform = Store.getters.getCanvasImage.scene.default_view_port
     canvas.setZoom(canvas_options.zoom)
-    // @ts-ignore
     const base64_image = canvas.toDataURL(canvas_options.image_type)
     canvas.setHeight(canvas_options.original_height)
     canvas.setWidth(canvas_options.original_width)
-    canvas.setZoom(canvas_options.original_zoom)
+    canvas.viewportTransform = original_transform
+    canvas.setZoom(original_zoom)
     return base64_image
   } else {
     console.error('Unable to get canvas image for canvas', canvas)
