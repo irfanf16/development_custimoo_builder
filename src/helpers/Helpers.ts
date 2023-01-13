@@ -1111,17 +1111,13 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
         svg_string += `${payload.svg_string}`
       }
     }
-
     const numbers_array:Record<any,any>[] = getSVGNumberArraysFromRoster(factory_product);
     const svg_numbers_payload = getSVGNumbers(numbers_array,logo_max_width,production_file_initial_dimension);
-    svg_string += `${svg_numbers_payload.svg_string}`;
     const numbers_width = svg_numbers_payload.width?svg_numbers_payload.width + 500:0;
     const logo_max_width_and_number_max_width = logo_max_width + numbers_width;
 
     const names_array:Record<any,any>[] = getSVGNameArraysFromRoster(factory_product);
     const svg_names_payload = getSVGNames(names_array,production_file_initial_dimension,logo_max_width_and_number_max_width);
-
-
     svg_string += `${svg_names_payload.svg_string}`;
     const names_height = svg_names_payload.height;
     const names_width = svg_names_payload.width;
@@ -1362,7 +1358,6 @@ const getSVGNames = (names_array:Record<any,any>[], production_file_dimension:Re
   })
 
   svg_string += `</g>`
-
   return {
     svg_string:svg_string,
     height:height,
@@ -1407,7 +1402,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
   const height_of_production_file = production_file_dimension.height? production_file_dimension.height.replace('px',''):6000;
   let svg_string = `<g xmlns="http://www.w3.org/2000/svg" transform="matrix(1 0 0 1 0 ${height_of_production_file})">`;
   let width = 0;
-  const setting = Store.getters.getSetting
+  const setting = Store.getters.getSetting('measurement_unit')
   custom_logos.forEach((custom_logo:Record<any,any>, index:number) => {
     const original_url = Object.prototype.hasOwnProperty.call(custom_logo,'original_png') && custom_logo.original_png;
     const updated_url = original_url?custom_logo.original_url:custom_logo.url;
@@ -1433,7 +1428,8 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
       }
     }
       if(Object.prototype.hasOwnProperty.call(custom_logo,'actualWidth')){
-        width += ((custom_logo.actualWidth * custom_logo.scaleX)/parseFloat(measurement_ratio)) + 500;
+        let scaleX = Object.prototype.hasOwnProperty.call(custom_logo,'scaleX')? Object.prototype.hasOwnProperty.call(custom_logo,'scaleX'): 1;
+        width += ((custom_logo.actualWidth * scaleX)/parseFloat(measurement_ratio)) + 500;
       }
       else{
         width += 0;
@@ -1441,7 +1437,6 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
   });
 
   svg_string += `</g>`
-
   return {svg_string:svg_string,width:width};
 }
 

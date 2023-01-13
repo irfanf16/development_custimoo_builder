@@ -66,8 +66,8 @@ $theme-color-light: #E7F4F1;
 :host, :root{
     max-width: 100%;
     display: block;
-    --theme-color: $theme-color;
-    --theme-color-light: $theme-color-light;
+    --theme-color: #219F84;
+    --theme-color-light: #E7F4F1;
 }
 
 @-webkit-keyframes vSelectSpinner {
