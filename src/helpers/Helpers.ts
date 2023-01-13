@@ -1428,7 +1428,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
       }
     }
       if(Object.prototype.hasOwnProperty.call(custom_logo,'actualWidth')){
-        let scaleX = Object.prototype.hasOwnProperty.call(custom_logo,'scaleX')? Object.prototype.hasOwnProperty.call(custom_logo,'scaleX'): 1;
+        const scaleX = Object.prototype.hasOwnProperty.call(custom_logo,'scaleX')? Object.prototype.hasOwnProperty.call(custom_logo,'scaleX'): 1;
         width += ((custom_logo.actualWidth * scaleX)/parseFloat(measurement_ratio)) + 500;
       }
       else{
