@@ -208,17 +208,17 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
           }
         })
       }
-
-      if(!this.mainPreview && this.selectedProductId == this.product_id) {
         self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
-          const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
-          if(logo && this.custom_logo_objects[logo_index]) {
-            const logoObject = this.custom_logo_objects[logo_index]
-            const otherSideObject = this.other_side_logos[logo_index]
-            this.eventAction(logo, logoObject, otherSideObject)
+          if(!this.mainPreview && this.selectedProductId == this.product_id) {
+            const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
+            if(logo && this.custom_logo_objects[logo_index]) {
+              const logoObject = this.custom_logo_objects[logo_index]
+              const otherSideObject = this.other_side_logos[logo_index]
+              this.eventAction(logo, logoObject, otherSideObject)
+              console.log('ccc', this.selectedProductId, this.product_id, logoObject.product_id, logo.product_id)
+            }
           }
         })
-      }
     })
   }
 })
