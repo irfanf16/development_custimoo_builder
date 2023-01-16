@@ -86,7 +86,7 @@ export default class ReplaceLogos extends Mixins(ModalAction){
   }
 
   get replaceable_logos() {
-    if(this.customLogos) {
+    if(this.customLogos && this.customLogos.length) {
       return this.customLogos.filter((custom_logo: Record<any, any>) => {
         return custom_logo.is_replace_success == true ? true : custom_logo.url && custom_logo.is_vector == false
       })

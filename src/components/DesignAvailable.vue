@@ -120,7 +120,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   display: flex;
   flex-wrap: wrap;
   // justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   //max-height: 15vh;
   overflow: hidden;
   overflow-y: auto;
