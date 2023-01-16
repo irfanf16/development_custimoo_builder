@@ -184,6 +184,24 @@
                         </div>
                       </div>
                     </b-tab>
+                    <b-tab lazy v-if="!getSelectionMode.readonly && locker_with_rosters(room.id).length" title="Rosters" draggable="false">
+                      <div class="d-flex text-left justify-content-start locker-rosters">
+                        <div style="width: max(20%, 250px)" class="bg-light border-right flex-shrink-0">
+                          <div class="fs-3" style="background: #495057; color: #fff; padding: 11px 16px">Select Design</div>
+                          <ul>
+                            <li class="px-3 py-2" :class="{'border-top': design_i>1, 'active': design_i == lockerActiveDesignIndex}" @click="()=>lockerActiveDesignIndex = design_i"
+                                v-for="(design, design_i) in locker_with_rosters(room.id)[0].products" :key="`locker_design_${design_i}`">
+                              {{ design.product_name }}
+                            </li>
+                          </ul>
+                        </div>
+                        <div style="width: 100%">
+                          <template v-for="(roster, roster_i) in locker_with_rosters(room.id)[0].products">
+                            <b-table v-if="roster_i == lockerActiveDesignIndex" hover :key="`roster_${roster_i}`" :items="roster.product_roster_detail | getProps"></b-table>
+                          </template>
+                        </div>
+                      </div>
+                    </b-tab>
                     <b-tab lazy :ref="`yearlyTab${room.id}`" draggable="false" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
                       <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
                         <template>
@@ -346,7 +364,7 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {getRandom, setCustomLogo, classObserver} from "@/helpers/Helpers";
+import {getRandom, setCustomLogo, classObserver, handleResponseException} from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
@@ -354,6 +372,7 @@ import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import ModalAction from "@/mixins/ModalAction";
 import {getDomDocument} from '@/helpers/Helpers';
+import {AxiosError} from "axios";
 
 @Component<LockerRoom>({
   components: {
@@ -392,7 +411,10 @@ import {getDomDocument} from '@/helpers/Helpers';
         classObserver(allElems, this.triggerDropping)
       }, 500)
     }
-  },
+
+    this.getLockerProductsRosters();
+
+    },
   destroyed() {
     const lockerTabs = this.$el.querySelector('.locker-tabs .lockerroom_titles') as Record<any, any>;
 
@@ -406,6 +428,15 @@ import {getDomDocument} from '@/helpers/Helpers';
         });
         classObserver(allElems, this.triggerDropping, true)
       }, 500)
+    }
+  },
+  filters: {
+    getProps(value:Record<any, any>){
+      const data:Record<any, any> = []
+      value.forEach((val:Record<any, any>)=>{
+        data.push({name: val.text, number: val.number, size: val.size, quantity: val.quantity})
+      })
+      return data;
     }
   }
 })
@@ -427,7 +458,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public renameID = '';
   public collection_available = false;
   public lockerActiveTabIndex = 0;
+  public lockerActiveDesignIndex = 0;
   public collection_base_url = ''
+  public lockers_and_rosters = []
   public design_moved_to_locker = ''
   public yearly_planner_template_id = null;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
@@ -446,9 +479,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  aslert(){
-    alert()
-  }
+  public data = [
+    { age: 40, first_name: 'Dickerson', last_name: 'Macdonald' },
+    { age: 21, first_name: 'Larsen', last_name: 'Shaw' },
+    { age: 89, first_name: 'Geneva', last_name: 'Wilson' },
+    { age: 38, first_name: 'Jami', last_name: 'Carney' }
+  ]
 
   private designMoved = (evt) =>{
     let design_name = evt.item.getAttribute('data-design-title');
@@ -470,6 +506,22 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public markText($event:Record<any, any>) {
     $event.target.select()
+  }
+
+  public async getLockerProductsRosters() {
+    let response: any = await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
+      handleResponseException(errorResponse)
+    })
+    if(response) {
+      let response_data: Record<any, any> = response.data;
+      if (response_data.success) {
+        this.lockers_and_rosters = response_data.result.lockers
+      }
+    }
+  }
+
+  public locker_with_rosters(id:any) {
+    return this.lockers_and_rosters.filter((item:Record<any, any>)=>item.id == id)
   }
 
   private get lockerProductInfo() {
@@ -980,6 +1032,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit("Change_Locker_Active_Tab", 0)
   }
   public handleTabChanged(tabIndex: number){
+    this.lockerActiveDesignIndex = 0;
     this.lockerActiveTabIndex = tabIndex
     this.$store.commit("Change_Locker_Active_Tab", tabIndex)
   }
