@@ -724,7 +724,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       let promises = []
       if (this.productType == 'customized') {
         ImageData.models.forEach((model) => {
-          promises.push(this.addModel(model.file_url, side) as never)
+          promises.push(this.addModel(model.file_url, model.composition, side) as never)
         })
       }
 
@@ -733,7 +733,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if (this.backTextureUrl && side == 'front') {
         promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
-
 
       const self: Record<any, any> = this
 
@@ -1608,9 +1607,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public async addModel(modelUrl: string, side: string) {
+  public async addModel(modelUrl: string, composition: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.Image.fromURL(modelUrl + '?nocache=2', async (img: any) => {
+      fabric.Image.fromURL(this.storageUrl + modelUrl + '?nocache=2', async (img: any) => {
         if(img.width > img.height) {
           img.scaleToWidth(this.canvasWidth - 10)
         } else {
@@ -1620,7 +1619,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           hasControls: false,
           selectable: false,
           evented: false,
-          globalCompositeOperation: 'multiply'
+          globalCompositeOperation: composition
           // globalCompositeOperation: 'overlay'
         })
 
