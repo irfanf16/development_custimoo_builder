@@ -4353,6 +4353,29 @@ $fontSize: 0.5;
     }
 }
 
+.locker-rosters {
+    thead, thead tr, thead tr th{
+        background: #495057;
+        border-color: #495057;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    ul{
+        li{
+            transition: 0.2s ease all;
+            cursor: pointer;
+
+            &.active{
+                position: relative;
+                left: 1px;
+                background: #fff;
+                box-shadow: -5px 0 8px -2px rgba(0,0,0,0.15);
+            }
+        }
+    }
+}
+
 .available-designs-section .design-col {
     &.selected_design{
         background: rgba(24, 144, 118, 0.1);
