@@ -32,7 +32,9 @@
           <template v-for="(style, i) in selectedProduct.productstyles">
             <template v-if="selectedProduct.productstyles.length > 1">
               <b-button :key="i"  v-if="productModels[currentStyle].model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
-                <img :src="storageUrl+style.front.file_url " height="100" />
+                <template v-if="style.front_models.length > 0">
+                  <img :src="storageUrl+style.front_models[0].file_url " height="100" />
+               </template>
               </b-button>
             </template>
           </template>

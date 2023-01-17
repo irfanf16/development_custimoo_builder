@@ -235,14 +235,12 @@
                                  :front="{
                                            textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                                            safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                           modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : '',
                                            models: selectedProduct.productstyles[styleIndex].front_models
                                          }"
 
                                  :back="{
                                           textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
                                           safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
-                                          modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : '',
                                           models: selectedProduct.productstyles[styleIndex].back_models
                                         }"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
@@ -256,7 +254,6 @@
                                  :front="{
                                             textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                                             safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                            modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : '',
                                             models: selectedProduct.productstyles[styleIndex].front_models
                                         }"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"

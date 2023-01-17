@@ -112,9 +112,9 @@
                   <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns">
                     <div v-if="design.design_show == 1" class="image-holder" :key="'front'+design.id">
                       <SceneThreeD v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                             :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : '',
+                             :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                               models: selectedProduct.productstyles[styleIndex].front_models}"
-                             :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : '',
+                             :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
                               models: selectedProduct.productstyles[styleIndex].back_models}"
                              :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                              :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
@@ -128,12 +128,6 @@
               <div class="d-none d-lg-block continue-btn-holder pt-5">
                 <b-button v-if="tabIndex > 0" @click="changeTabs(tabIndex-1)" class="mx-2 px-5 back-btn" variant="secondary">Back</b-button>
                 <b-button @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex <= 2) || (!hideColorSection && tabIndex <= 3)">Next</b-button>
-                <!-- <template v-if="isCustomerAuthenticated">
-                  <b-button @click="buyNow" class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                </template>
-                <template v-else>
-                  <b-button @click="setActionBeforeLogin('summary')" v-b-modal.modal-login class="mx-2 px-5" variant="secondary" v-if="(hideColorSection && tabIndex>2) || (!hideColorSection && tabIndex > 3)">Summary</b-button>
-                </template> -->
               </div>
             </div>
           </div>

@@ -4,7 +4,6 @@
         <div class="image-holder" :key="'front'+design.id">
           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : '',
                  models: selectedProduct.productstyles[styleIndex].front_models}"
                  :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
                  modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : '',
@@ -16,7 +15,6 @@
 
           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : '',
                  models: selectedProduct.productstyles[styleIndex].front_models}"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"

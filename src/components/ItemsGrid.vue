@@ -10,7 +10,6 @@
                    :front="{
                             textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
                             safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                            modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : '',
                             models: product.productstyles[0].front_models
                           }"
                    :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
