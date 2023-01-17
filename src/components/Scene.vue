@@ -198,27 +198,26 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
       }
 
-      if(!this.mainPreview && this.selectedProductId == this.product_id) {
-        self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
+      self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
+        if(!this.mainPreview && this.selectedProductId == this.product_id) {
           const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
           if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
             const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
             const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
             this.eventAction(text, textObject, otherSideObject)
           }
-        })
-      }
-        self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
-          if(!this.mainPreview && this.selectedProductId == this.product_id) {
-            const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
-            if(logo && this.custom_logo_objects[logo_index]) {
-              const logoObject = this.custom_logo_objects[logo_index]
-              const otherSideObject = this.other_side_logos[logo_index]
-              this.eventAction(logo, logoObject, otherSideObject)
-              console.log('ccc', this.selectedProductId, this.product_id, logoObject.product_id, logo.product_id)
-            }
+        }
+      })
+      self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
+        if(!this.mainPreview && this.selectedProductId == this.product_id) {
+          const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
+          if(logo && this.custom_logo_objects[logo_index]) {
+            const logoObject = this.custom_logo_objects[logo_index]
+            const otherSideObject = this.other_side_logos[logo_index]
+            this.eventAction(logo, logoObject, otherSideObject)
           }
-        })
+        }
+      })
     })
   }
 })
@@ -1480,10 +1479,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         const model_start = (texture.left - ((texture.width * texture.scaleX) / 2)) - 1
         const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
+        const height = target.height * target.scaleY;
         if(actualNearTo == 'top') {
-          const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - target.height, 0, 1, 'bottom')
+          const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - height , 0, 1, 'bottom')
           addLeft = this.canvasWidth - target.left
           addTop = direction.top - checkPointY
+          // console.log(direction.top, checkPointY, addTop, 'addTop')
         } else if (moreToWords == 'left') {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, checkPointY, 0, 1, 'left')
