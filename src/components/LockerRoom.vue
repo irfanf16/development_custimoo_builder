@@ -189,9 +189,14 @@
                         <div style="width: max(20%, 250px)" class="bg-light border-right flex-shrink-0">
                           <div class="fs-3" style="background: #495057; color: #fff; padding: 11px 16px">Select Design</div>
                           <ul>
-                            <li class="px-3 py-2" :class="{'border-top': design_i>1, 'active': design_i == lockerActiveDesignIndex}" @click="()=>lockerActiveDesignIndex = design_i"
+                            <li class="px-3 py-2 d-flex align-items-center gap-1" :class="{'border-top': design_i>1, 'active': design_i == lockerActiveDesignIndex}"
+                                @click="()=>lockerActiveDesignIndex = design_i"
                                 v-for="(design, design_i) in locker_with_rosters(room.id)[0].products" :key="`locker_design_${design_i}`">
-                              {{ design.product_name }}
+                              <span class="btn btn-secondary btn-sm rounded-circle flex-shrink-0" title="Edit Roster"
+                                    @click.stop="editProduct(room.id, room.product[design_i], design_i, '', true, {target: 'locker-room', activeLocker: tabIndex, lockerActiveTabIndex: lockerActiveTabIndex, lockerActiveDesignIndex: design_i})">
+                                <b-icon-pencil class="fs-2" />
+                              </span>
+                              <span>{{ design.product_name }}</span>
                             </li>
                           </ul>
                         </div>
@@ -413,8 +418,7 @@ import {AxiosError} from "axios";
     }
 
     this.getLockerProductsRosters();
-
-    },
+  },
   destroyed() {
     const lockerTabs = this.$el.querySelector('.locker-tabs .lockerroom_titles') as Record<any, any>;
 
@@ -517,6 +521,16 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       if (response_data.success) {
         this.lockers_and_rosters = response_data.result.lockers
       }
+
+      setTimeout(()=>{
+        if('target' in this.$store.getters.getBackFromRoster){
+          const {activeLocker, lockerActiveTabIndex, lockerActiveDesignIndex} = this.$store.getters.getBackFromRoster;
+          this.tabIndex = activeLocker;
+          this.lockerActiveTabIndex = lockerActiveTabIndex;
+          this.lockerActiveDesignIndex = lockerActiveDesignIndex;
+          this.$store.dispatch('setBackFromRoster', {})
+        }
+      }, 500);
     }
   }
 
@@ -1035,6 +1049,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.lockerActiveDesignIndex = 0;
     this.lockerActiveTabIndex = tabIndex
     this.$store.commit("Change_Locker_Active_Tab", tabIndex)
+
   }
   public productsAddedToLocker(payload: Record<any, any>) {
     let clones = payload.clone ? [payload.clone] : payload.clones;

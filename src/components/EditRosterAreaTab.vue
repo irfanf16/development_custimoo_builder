@@ -246,7 +246,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     const self = this as Record<any, any>;
     self.$eventBus.$emit('cancelLocker');
     self.close()
-    self.$modal.show('locker-modal')
+    self.$modal.show('locker-modal');
   }
 
   public cancelCart(){

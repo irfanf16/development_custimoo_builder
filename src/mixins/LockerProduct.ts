@@ -18,7 +18,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
     return this.$store.getters.getMainTotalTabs;
   }
 
-  public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="", editRoster=false) {
+  public async editProduct(room_id: number, room_product: Record<any, any>, ind: number, share_url="", editRoster=false, backTo={}) {
     let self: Record<any, any> = this;
     self.search_products = ''
     const response:Boolean = await self.editModeConfirmation();
@@ -65,9 +65,14 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
               await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
               this.showVModal('rostermodal');
               await this.$store.dispatch('setEditRosterFromLocker', true)
+              if('target' in backTo){
+                await this.$store.dispatch('setBackFromRoster', backTo)
+              }else{
+                await this.$store.dispatch('setBackFromRoster', {})
+              }
             },500)
           }else {
-            await this.$store.dispatch('setEditRosterFromLocker', false)
+            await this.$store.dispatch('setEditRosterFromLocker', false);
           }
         }, (error:Record<any, any>) => {
           console.error("Error while retrieving products",error)

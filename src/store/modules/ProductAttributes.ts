@@ -122,6 +122,7 @@ const ProductAttributes:Module<any, any> = {
     products_rosters:{},
     active_roster_index:0,
     edit_roster_from_locker:false,
+    back_from_roster: {},
     selectedCategory: {
       category_index: 0,
       category_id: null
@@ -196,6 +197,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_EDIT_ROSTER_FROM_LOCKER(state: Record<any, any>, payload: boolean){
       state.edit_roster_from_locker = payload
+    },
+    SET_BACK_FROM_ROSTER(state: Record<any, any>, payload: boolean){
+      state.back_from_roster = payload
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
@@ -1151,6 +1155,9 @@ const ProductAttributes:Module<any, any> = {
     getEditRosterFromLocker: state => {
       return state.edit_roster_from_locker;
     },
+    getBackFromRoster: state => {
+      return state.back_from_roster;
+    },
     getSearchLoader: state => {
       return state.searchLoader
     },
@@ -1203,7 +1210,6 @@ const ProductAttributes:Module<any, any> = {
       return state.showColorsLogoEditor
     },
     getLockerTabsIndex: state => {
-
       return state.lockerTabsIndex
     },
     getColorsFromRecent: state => {
@@ -1426,6 +1432,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setEditRosterFromLocker({commit}, payload) {
       commit('SET_EDIT_ROSTER_FROM_LOCKER', payload);
+    },
+    setBackFromRoster({commit}, payload) {
+      commit('SET_BACK_FROM_ROSTER', payload);
     },
     setVectorLogos({commit}, payload){
       commit('SET_VECTOR_LOGOS', payload)
