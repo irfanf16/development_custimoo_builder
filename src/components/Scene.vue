@@ -1477,11 +1477,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
         const height = target.height * target.scaleY;
-        if(actualNearTo == 'top') {
+        if(actualNearTo == 'top') { // todo may be find the direction from top for other side canvas to fix both side size mismatch issue
           const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - height , 0, 1, 'bottom')
+          const outside = direction.top - checkPointY
+          const modelSpaceTop = direction.top + (height / 2) - 3
+          addTop = modelSpaceTop - outside
           addLeft = this.canvasWidth - target.left
-          addTop = direction.top - checkPointY
-          // console.log(direction.top, checkPointY, addTop, 'addTop')
         } else if (moreToWords == 'left') {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, checkPointY, 0, 1, 'left')
