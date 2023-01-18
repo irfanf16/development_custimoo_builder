@@ -193,7 +193,7 @@
                                 @click="()=>lockerActiveDesignIndex = design_i"
                                 v-for="(design, design_i) in locker_with_rosters(room.id)[0].products" :key="`locker_design_${design_i}`">
                               <span class="btn btn-secondary btn-sm rounded-circle flex-shrink-0" title="Edit Roster"
-                                    @click.stop="editProduct(room.id, room.product[design_i], design_i, '', true, {target: 'locker-room', activeLocker: tabIndex, lockerActiveTabIndex: lockerActiveTabIndex, lockerActiveDesignIndex: design_i})">
+                                    @click.stop="editProduct(room.id, product_with_rosters(room.product, design.id), design_i, '', true, {target: 'locker-room', activeLocker: tabIndex, lockerActiveTabIndex: lockerActiveTabIndex, lockerActiveDesignIndex: design_i})">
                                 <b-icon-pencil class="fs-2" />
                               </span>
                               <span>{{ design.product_name }}</span>
@@ -536,6 +536,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public locker_with_rosters(id:any) {
     return this.lockers_and_rosters.filter((item:Record<any, any>)=>item.id == id)
+  }
+
+  public product_with_rosters(products: Record<any, any>[], id:any) {
+    return products.filter((item:Record<any, any>)=>item.id == id)[0]
+    // return this.lockers_and_rosters.filter((item:Record<any, any>)=>item.id == id)
   }
 
   private get lockerProductInfo() {
