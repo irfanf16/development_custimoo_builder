@@ -1941,6 +1941,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           this.other_side_logos[custom_logo_index] = null
         }
+        this.frontCanvas.requestRenderAll()
+        if (this.back) {
+          this.backCanvas.requestRenderAll()
+        }
       }
       this.custom_logo_objects[custom_logo_index] = null
     }
@@ -1997,11 +2001,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         const otherSideText = this.otherSideTexts[custom_text_index + '' + i]
         if(otherSideText) {
-          self.frontCanvas.remove(otherSideText)
+          this.frontCanvas.remove(otherSideText)
           if(this.back) {
-            self.backCanvas.remove(otherSideText)
+            this.backCanvas.remove(otherSideText)
           }
         }
+      }
+      this.frontCanvas.requestRenderAll()
+      if (this.back) {
+        this.backCanvas.requestRenderAll()
       }
     }
     /*
