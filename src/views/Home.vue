@@ -323,7 +323,7 @@
                      </template>
                   </template>
 
-                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing">Cancel</b-button>
+                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'cart_product'">Cancel</b-button>
                 </div>
               </div>
             </div>
