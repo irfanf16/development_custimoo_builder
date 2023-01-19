@@ -919,7 +919,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       logo.logo_colors = await this.fetchLogoColors(logo.id)
     }
     this.$store.commit('SET_COLORS_FROM_RECENT',false)
-    await setCustomLogo(logo,index)
     this.$emit('hideLockerRoomModal')
   }
 

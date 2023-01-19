@@ -7,7 +7,7 @@
 <!--          <font-awesome-icon :icon="['fas', 'trash-alt']"/>-->
           <BIconX class="position-relative" style="top: -1.7px" />
         </a>
-        <img @click="setLogo(index,logo)" style="max-width: 100%; height: auto;cursor: pointer" :src="storageUrl+logo.logo_url+'?nocache=1'" alt="not working" />
+        <img style="max-width: 100%; height: auto;cursor: pointer" :src="storageUrl+logo.logo_url+'?nocache=1'" alt="not working" />
       </div>
 
     </div>
@@ -27,7 +27,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {log} from "fabric/fabric-impl";
-import {processColorsCustom, setCustomLogo} from "../helpers/Helpers"
+import {processColorsCustom} from "../helpers/Helpers"
 import Store from "@/store";
 
 @Component<RecentLogos>({
@@ -96,40 +96,6 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
 
     return true
   }
-
-  public async setLogo(index:number,logo:any) {
-    this.showLoader = true;
-    try {
-      if(!logo.logo_colors) {
-        logo.logo_colors = await this.fetchLogoColors(logo.id)
-      }
-
-      let colors = processColorsCustom(logo.logo_colors)
-      this.$store.commit('SET_LOGO_COLORS', colors);
-
-      this.$store.commit('SET_COLORS_FROM_RECENT',true)
-      const settings = this.selectedProduct['logos_setting'][this.customLogoIndex]
-      await setCustomLogo(logo, this.customLogoIndex, this.selectedProduct.id)
-      if(settings && settings.logos_follows_product){
-        const ids = settings.following_product_ids
-        if(ids.length){
-          ids.forEach(async (new_item:number)=>{
-            if (new_item != this.selectedProduct.id){
-              await setCustomLogo(logo, this.customLogoIndex, new_item)
-            }
-          })
-        }
-      }
-    }
-    catch (err) {
-      console.log(err)
-      this.showLoader = false;
-    }
-    setTimeout(() => {
-      this.showLoader = false;
-    },1000)
-  }
-
 
    public async addLogoObject(index:number):Promise<void> {
     let logoSetting: Record<any, any>

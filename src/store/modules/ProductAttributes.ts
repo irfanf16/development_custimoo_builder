@@ -6,7 +6,6 @@ import {
   setRetrievedProductsCustomTexts,
   getRosterDetailDefaultObject,
   initCustomLogosNew,
-  setCustomLogo,
   getLogoSettings,
   setLogoSettings,
   getProductLogoSetting,
@@ -299,7 +298,7 @@ const ProductAttributes:Module<any, any> = {
                        Vue.set(state.customLogos[new_item], newCustomLogo.logoIndex, {...logo_settings})
                      }
                    } else {
-                     await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
+                     // await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
                    }
                  }
                })
