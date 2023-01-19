@@ -1172,8 +1172,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     setTimeout(() => {
       this.ref['frontImg'].height = canvasFront.clientHeight
       this.ref['frontImg'].width = canvasFront.clientWidth
-      this.ref['backImg'].height = canvasBack.clientHeight
-      this.ref['backImg'].width = canvasBack.clientWidth
+      if(canvasBack) {
+        this.ref['backImg'].height = canvasBack.clientHeight
+        this.ref['backImg'].width = canvasBack.clientWidth
+      }
     }, 100)
 
     this.ref['cartAnim'] && this.ref['cartAnim'].classList.add('cart-animation')
@@ -1254,7 +1256,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       const scene_ref = this.$store.getters.getCanvasImage.scene
       if (scene_ref) {
         scene_ref.frontCanvas.discardActiveObject().renderAll()
-        scene_ref.backCanvas.discardActiveObject().renderAll()
+        scene_ref.backCanvas?.discardActiveObject().renderAll()
       }
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       return
@@ -1265,11 +1267,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     })
     let main_scene = this.ref.mainScene[0];
     main_scene && main_scene.frontCanvas.discardActiveObject().renderAll();
-    main_scene && main_scene.backCanvas.discardActiveObject().renderAll();
+    main_scene && main_scene.backCanvas?.discardActiveObject().renderAll();
     let locker_front_png = (getImageFromCanvas('front') as string ).split(',')[1]
     let locker_back_png: string|null = null;
     if (this.mainProductType == "front_back") {
-      locker_back_png = (getImageFromCanvas('back') as string ).split(',')[1] as string
+      locker_back_png = (getImageFromCanvas('back') as string )?.split(',')[1] as string
     }
     let distinct: Record<any, any> = []
     let svgGroups = this.$store.getters.getSvgGroups

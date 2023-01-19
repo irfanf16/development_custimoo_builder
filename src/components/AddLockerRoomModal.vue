@@ -204,7 +204,7 @@ import { Canvas } from 'fabric/fabric-impl'
             return false
           }
           this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
-          this.canvasImage.back = (getImageFromCanvas('back') as string ).split(',')[1]
+          this.canvasImage.back = (getImageFromCanvas('back') as string )?.split(',')[1]
           let locker_front_png = this.canvasImage.front
           let locker_back_png = this.canvasImage.back
           let distinct:Record<any, any> = []
@@ -287,7 +287,7 @@ import { Canvas } from 'fabric/fabric-impl'
         })
         this.product_name = this.selectedProduct.product_name;
         this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
-        this.canvasImage.back = (getImageFromCanvas('back') as string ).split(',')[1]
+        this.canvasImage.back = (getImageFromCanvas('back') as string )?.split(',')[1]
         let locker_front_png = this.canvasImage.front
         let locker_back_png = this.canvasImage.back
         let distinct:Record<any, any> = []

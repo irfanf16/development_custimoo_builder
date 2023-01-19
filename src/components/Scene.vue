@@ -965,7 +965,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if(selected.side == 'back' || selected.side == 'Back'){
         this.frontCanvas.discardActiveObject().requestRenderAll()
       }else{
-        this.backCanvas.discardActiveObject().requestRenderAll()
+        if(this.back) {
+          this.backCanvas.discardActiveObject().requestRenderAll()
+        }
       }
     }
   }
@@ -1921,6 +1923,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       }
+      this.frontCanvas.requestRenderAll()
+      if(this.back) {
+        this.backCanvas.requestRenderAll()
+      }
       this.custom_logo_objects = []
     }
   }
@@ -1985,6 +1991,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
         }
+      }
+      this.frontCanvas.requestRenderAll()
+      if(this.back) {
+        this.backCanvas.requestRenderAll()
       }
       this.product_custom_text_objects = []
     }
