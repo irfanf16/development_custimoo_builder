@@ -5111,8 +5111,13 @@ $fontSize: 0.5;
 
     .edit-logo-modal{
         .fade-right{
+            overflow: hidden;
+
             ul{
+                @extend .theme-scroll-h;
                 flex-wrap: nowrap;
+                overflow-y: auto;
+
                 li{
                     white-space: nowrap;
                 }
