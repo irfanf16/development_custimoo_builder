@@ -61,6 +61,7 @@ import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 import LogoColorTabsNew from "@/components/LogoColorTabsNew.vue";
 import Store from "@/store";
+import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 
 @Component<LogoExtractedColors>({
   components: { LogoEditorModal, LogoDisclaimerModal, LogoEditor, LogoColorTabsNew },
@@ -68,7 +69,7 @@ import Store from "@/store";
    this.product_colors = getProductColors();
  }
 })
-export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalAction) {
+export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalAction, HideUpdateLockerButton) {
 
   /*
   * props starts here
@@ -123,12 +124,14 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.$store.dispatch('setDefaultColor', { index: this.active_logo_color_index, color: color.hex, pantone: color.pantone, name: color.name })
     this.$store.commit('SET_LOGO_COLOR', payload)
     self.$eventBus.$emit('changeDefaultColors')
+    this.hideLockerProductUpdateButton()
   }
 
 
   public deleteLogoColor(logo_color_index: number) {
     this.logoColorsInfo.colors[logo_color_index] = { hex: null, name: null, pantone: null }
     this.$set(this.logoColorsInfo.colors, logo_color_index, { hex: null, name: null, pantone: null })
+    this.hideLockerProductUpdateButton()
   }
 
   public useOriginalColors() {
@@ -139,6 +142,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.logoColorsInfo.is_shuffled = false
     Store.commit('SET_DEFAULT_COLORS', [])
     self.$eventBus.$emit('useProductOriginalColors')
+    this.hideLockerProductUpdateButton()
   }
 
   public async useLogoColors() {
@@ -148,6 +152,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     setDefaultColors()
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
     self.$eventBus.$emit('changeDefaultColors')
+    this.hideLockerProductUpdateButton()
   }
 
   public rollbackPreviousColors() {
@@ -162,6 +167,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {colors: shuffled, is_shuffled: true}})
     setDefaultColors()
     self.$eventBus.$emit('changeDefaultColors')
+    this.hideLockerProductUpdateButton()
   }
 
   public selectLogoColor(logo_color: Record<any, any>, logo_color_index: number) {
@@ -171,6 +177,7 @@ export default class LogoExtractedColors extends Mixins(ErrorMessages, ModalActi
     else {
       this.active_logo_color_index = logo_color_index
     }
+    this.hideLockerProductUpdateButton()
   }
   /*
   * Methods ends
