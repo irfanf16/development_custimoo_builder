@@ -53,7 +53,7 @@
                     <div>
                       <div class="fs-5 text-center text-secondary font-weight-bold">Logo Color</div>
                       <div class="text-center">
-                        Select any palette to recolor your logo
+                        Select any palette to recolor your logoaaaaa
                       </div>
                     </div>
                   </div>

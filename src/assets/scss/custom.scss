@@ -5109,6 +5109,16 @@ $fontSize: 0.5;
         }
     }
 
+    .edit-logo-modal{
+        .fade-right{
+            ul{
+                flex-wrap: nowrap;
+                li{
+                    white-space: nowrap;
+                }
+            }
+        }
+    }
 }
 
 .vm--modal{
