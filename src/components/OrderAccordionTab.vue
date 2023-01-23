@@ -61,7 +61,9 @@
                  v-for="(model, index)  in productModels" :key="index">
               <div class="image-holder"
                    v-if="selectedProduct.productstyles[styleIndex] && model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
-                <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front.file_url " alt="Collar"/>
+                <template v-if="selectedProduct.productstyles[styleIndex].front_models.length > 0">
+                  <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front_models[0].file_url" alt="Collar"/>
+                </template>
               </div>
               <div class="collar-details">
                 <strong v-if="selectedProduct.productstyles[styleIndex]">{{selectedProduct.productstyles[styleIndex].name }}</strong>

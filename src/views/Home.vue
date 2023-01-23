@@ -232,20 +232,37 @@
                       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                                 :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
-                                 modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
-                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
+                                 :front="{
+                                           textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                           safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                           models: selectedProduct.productstyles[styleIndex].front_models
+                                         }"
+
+                                 :back="{
+                                          textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
+                                          safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                          models: selectedProduct.productstyles[styleIndex].back_models
+                                        }"
+                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                 :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                                 :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                          />
 
                           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
+                                 :front="{
+                                            textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                            safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                            models: selectedProduct.productstyles[styleIndex].front_models
+                                        }"
+                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                 :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
+                                 :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                          />
                         </div>
                       </template>
                     </template>
