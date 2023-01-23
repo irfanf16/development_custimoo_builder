@@ -35,7 +35,7 @@
                      style="white-space: nowrap" @mouseenter="setLeft"
                      :class="{ 'pr-3': product_font_index + 1 == product_fonts.length }" role="button">
                   <div class="font_tooltip">{{product_custom_text.value ? product_font.label : ''}}</div>
-                  <span :key="`product_custom_text_${customTextIndex}_font-${selected_font&&selected_font}`"
+                  <span :key="`product_custom_text_${customTextIndex}_font-${product_custom_text.font_family&&product_custom_text.font_family}`"
                         :style="{background: product_font.value == product_custom_text.font_family && 'rgba(24, 144, 118, 0.1)'}"
                         class="d-flex px-2 py-1 rounded-lg">
                     {{product_custom_text.value ? product_custom_text.value : product_font.value}}
