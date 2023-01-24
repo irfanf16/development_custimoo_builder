@@ -442,7 +442,7 @@ import {
   setDefaultColors,
   isShadowDom,
   getDomDocument,
-  setUndoRedoItems, santaClone
+  setUndoRedoItems, santaClone, getCustomizerIframe
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1951,7 +1951,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public downloadPdfFile(base64, filename) {
     // Create a new link
-    const anchor = document.createElement('a');
+    const iframe = getCustomizerIframe()
+    let dom_document = document;
+    if(iframe) {
+      console.log('inside iframe')
+      dom_document = iframe.contentDocument
+    } else {
+      console.log('not iframe')
+    }
+    let anchor = dom_document.createElement('a');
     let url = 'data:application/pdf;base64,' + base64;
     anchor.setAttribute('href', url);
     anchor.setAttribute('download', filename);
