@@ -1944,6 +1944,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.downloadPdfFile(res.data.pdf, res.data.name);
       this.pdf_generation_loading = false
     }).catch(err => {
+      console.log('errerrerr', err)
       this.showToast('Something went wrong', 'error');
       this.pdf_generation_loading = false
     });
@@ -1952,13 +1953,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public downloadPdfFile(base64, filename) {
     // Create a new link
     const iframe = getCustomizerIframe()
-    let dom_document = document;
-    if(iframe) {
-      console.log('inside iframe')
-      dom_document = iframe.contentDocument
-    } else {
-      console.log('not iframe')
-    }
+    let dom_document = iframe ? iframe.contentWindow.parent.document : document
     let anchor = dom_document.createElement('a');
     let url = 'data:application/pdf;base64,' + base64;
     anchor.setAttribute('href', url);
@@ -1967,12 +1962,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     // anchor.style.display = 'none';
     anchor.setAttribute('id', `${Math.random()}`);
     // Append to the DOM
-    document.body.appendChild(anchor);
+    dom_document.body.appendChild(anchor);
     anchor.click();
 
     // Remove element from DOM
     setTimeout(() => {
-      document.body.removeChild(anchor);
+      dom_document.body.removeChild(anchor);
     },5000);
   }
 }

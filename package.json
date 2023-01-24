@@ -9,7 +9,7 @@
     "sass-compile": "sass ./src/assets/scss/custom.scss src/assets/css/custom.css --style compressed",
     "build:wc:customizer:wordpress": "vue-cli-service build --dest ./wordpress_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue",
     "build:wc:customizer:wordpress:staging": "vue-cli-service build --mode staging --dest ./wordpress_customizer_staging --target wc --name v-customizer ./src/webComponents/Customizer.vue",
-    "build:wc:customizer:self": "vue-cli-service build --dest ../self_customizer --target wc --name v-customizer ./src/webComponents/CustomizerAll.vue",
+    "build:wc:customizer:self": "vue-cli-service build --dest ./self_customizer --target wc --name v-customizer ./src/webComponents/CustomizerAll.vue",
     "build:wc:customizer:self:staging": "vue-cli-service build --mode staging --dest ./self_customizer_staging --target wc --name v-customizer ./src/webComponents/CustomizerAll.vue",
     "build:wc:orderdetail": "vue-cli-service build --mode wcOrderDetail --dest ./order_detail_customizer --target wc --name v-order-detail ./src/webComponents/orderDetail/wcOrderDetail.vue",
     "build:wc:orderdetail:staging": "vue-cli-service build --mode staging.wcOrderDetail --dest ./order_detail_customizer_staging --target wc --name v-order-detail ./src/webComponents/orderDetail/wcOrderDetail.vue",
