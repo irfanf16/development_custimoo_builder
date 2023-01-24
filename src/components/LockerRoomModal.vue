@@ -14,7 +14,7 @@
       <div class="modal-content lockerroom-modal">
         <div id="modal-center-lockerroom" class="modal-body">
           <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideVModal('locker-modal')"
-                      @showCollectionModal="showCollectionModal"
+                      @showCollectionModal="showCollectionModal" @lockerModalOpened="lockerModalOpened"
                       @editCollectionModal="editCollectionModal"
                       />
         </div>
@@ -50,6 +50,12 @@ export default class LockerRoomModal extends Mixins(ModalAction){
 
   private showCollectionModal = () => {
     this.$emit('showCollectionModal')
+  }
+
+  private lockerModalOpened(callback:() => any){
+    const locker_modal = this.$refs['locker-modal'] as Record<any, any>
+    console.log('opened', locker_modal)
+    locker_modal.open(callback())
   }
 
   public editCollectionModal = () => {

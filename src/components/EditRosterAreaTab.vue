@@ -11,7 +11,7 @@
            height="auto"
            :reset="true"
            :shiftY="0"
-           @opened="$emit('setRosterOpen', true)"
+           @opened="$emit('setRosterOpen', true), getLockerProductsRosters()"
            name="rostermodal" class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none"
           @closed="close" @before-close="handleRosterModalBeforeClose"
@@ -42,19 +42,19 @@
            :reset="true"
            :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg">
       <div class="modal-body">
-      <p class="mb-4">The {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Team Roster' | TitleCase}} can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
-      <div class="roster-template-area">
-        <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a  v-b-tooltip.hover
-                                                                                                           title="Enter roster in excel file">
-          <font-awesome-icon :icon="['fas', 'info-circle']"/>
-        </a></b-button>
-
-        <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template
-          <b-form-file  class="mb-2"></b-form-file>
-          <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
+        <p class="mb-4">The {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Team Roster' | TitleCase}} can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>
+        <div class="roster-template-area">
+          <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a  v-b-tooltip.hover
+                                                                                                             title="Enter roster in excel file">
             <font-awesome-icon :icon="['fas', 'info-circle']"/>
           </a></b-button>
-      </div>
+
+          <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template
+            <b-form-file  class="mb-2"></b-form-file>
+            <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">
+              <font-awesome-icon :icon="['fas', 'info-circle']"/>
+            </a></b-button>
+        </div>
       </div>
     </modal>
 

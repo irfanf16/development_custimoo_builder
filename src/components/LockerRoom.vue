@@ -417,7 +417,7 @@ import {AxiosError} from "axios";
       }, 500)
     }
 
-    this.getLockerProductsRosters();
+    this.$emit('lockerModalOpened', ()=>{this.getLockerProductsRosters()})
   },
   destroyed() {
     const lockerTabs = this.$el.querySelector('.locker-tabs .lockerroom_titles') as Record<any, any>;
@@ -493,7 +493,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   private designMoved = (evt) =>{
     let design_name = evt.item.getAttribute('data-design-title');
     let locker_name = evt.originalEvent.target.textContent;
-    console.log()
     this.showToast(`"${design_name} " is moved to "${locker_name}"`, 'success')
   }
 
@@ -516,6 +515,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     let response: any = await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
       handleResponseException(errorResponse)
     })
+
     if(response) {
       let response_data: Record<any, any> = response.data;
       if (response_data.success) {
@@ -528,7 +528,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           this.tabIndex = activeLocker;
           this.lockerActiveTabIndex = lockerActiveTabIndex;
           this.lockerActiveDesignIndex = lockerActiveDesignIndex;
-          this.$store.dispatch('setBackFromRoster', {})
         }
       }, 500);
     }
@@ -1050,7 +1049,18 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit("Change_Locker_Active_Tab", 0)
   }
   public handleTabChanged(tabIndex: number){
-    this.lockerActiveDesignIndex = 0;
+    const getBack = this.$store.getters.getBackFromRoster
+    if(tabIndex == 3 && getBack){
+      if('target' in getBack && getBack.lockerActiveDesignIndex != 0){
+        setTimeout(()=>{
+          this.lockerActiveDesignIndex = getBack.lockerActiveDesignIndex;
+          this.$store.dispatch('setBackFromRoster', {})
+        }, 550)
+      }else{
+        this.lockerActiveDesignIndex = 0;
+      }
+    }
+
     this.lockerActiveTabIndex = tabIndex
     this.$store.commit("Change_Locker_Active_Tab", tabIndex)
 
