@@ -638,18 +638,35 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (item.id == 'base') {
           count = 100000 // to make base always at first color position
         }
+        const selectProductPantonesList = getSelectedProductPantones(this.product_id)
         if (!item.id.includes('inside')) {
-          if (item.fill.includes('rgb')) {
-            item.fill = rgbHex(item.fill).includes('#')?rgbHex(item.fill): '#' + rgbHex(item.fill);
-          }
-          let pantone_product_id = 0;
-          if(this.product_id){
-            pantone_product_id = this.product_id;
-          }
-          const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
-          const pantoneColor = getClosestColor(item.fill, selectProductPantonesList,this.getColorType)
+          if(item.fill.gradientUnits) {
+            // item.fill.colorStops[0].color = "rgb(0,255,0)"
+            // item.fill.colorStops[1].color = "rgb(255,255,0)"
+            // item.set('fill', new fabric.Gradient(item.fill));
 
-          this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
+            let gradient_colors: Record<any, any>[] = []
+            item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
+              color_stop.color = rgbHex(color_stop.color).includes('#')? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
+              let pantoneColor: Record<any, any> = {pantone: '', name: ''}
+              if(this.mainPreview) {
+                pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
+              }
+              gradient_colors.push({ color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name })
+            })
+
+            this.svgGroups.push({ id: item.id, count: count, gradient_colors: gradient_colors })
+          }
+          else if (item.fill.includes('rgb')) {
+            item.fill = rgbHex(item.fill).includes('#')? rgbHex(item.fill) : '#' + rgbHex(item.fill);
+
+            let pantoneColor: Record<any, any> = {pantone: '', name: ''}
+            if(this.mainPreview) {
+              pantoneColor = getClosestColor(item.fill, selectProductPantonesList, this.getColorType)
+            }
+
+            this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
+          }
         }
       }
     })

@@ -14,9 +14,9 @@
       <b-collapse :id="'accordion-'+(index+1)" accordion="my-accordion" role="tabpanel">
         <b-card-body>
           <b-nav class="d-flex flex-wrap align-items-center" style="display: none">
-            <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item v-if="productColors" v-bind:class="{ 'active' : selectTypeIndex == (productColors.length) && !othersActive}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
-            <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(null, true)">Others</b-nav-item>
+            <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !showOther}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
+            <b-nav-item v-if="productColors" v-bind:class="{ 'active' : selectTypeIndex == (productColors.length) && !showOther}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
+            <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: showOther }" @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
           <div class="color-holder" style="padding-top: 5px;" ref="ColorAccordion">
             <div class="color-container">
@@ -43,16 +43,16 @@
                 <div v-if="ext_color.hex"  class="color-box"  @click="setColor({value: ext_color.hex, ...ext_color})"
                      :title="ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
                   <span v-if="ext_color.hex == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
-                          <BIconCheck />
-                        </span>
+                    <BIconCheck />
+                  </span>
                 </div>
               </template>
               <template v-else-if="!showOther" v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index">
                   <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
-                          <BIconCheck />
-                        </span>
+                    <BIconCheck />
+                  </span>
                 </div>
               </template>
             </div>
@@ -100,19 +100,6 @@ export default class ColorAccordion extends Vue {
   public selectedColorTab = 0;
   public colorImage = '/img/images/color-placeholder.png'
   public pantoneMessage = ''
-  public isActive = false
-  public othersActive = false
-
-  // public showit(){
-  //   // this.$emit('setScroll')
-  //   // this.$root.$on('bv::collapse::state', (collapseId:string, isJustShown:string) => {
-  //   //   console.log('collapseId:', collapseId)
-  //   //   console.log('isJustShown:', isJustShown)
-  //   //
-  //   //   console.log(this.svgGroups.length)
-  //   // })
-  //   // this.$emit('setScroll')
-  // }
 
   @Watch('productColors', {
     deep: true
@@ -130,7 +117,7 @@ export default class ColorAccordion extends Vue {
     if(this.productColors[this.selectTypeIndex]){
       return false;
     }else{
-      this.selectType(this.selectTypeIndex-1, false)
+      this.selectType(this.selectTypeIndex - 1, false)
     }
   }
 
@@ -166,23 +153,10 @@ export default class ColorAccordion extends Vue {
   }
 
   public selectType(index: number, showOther = false) {
-    if (showOther){
-      this.othersActive = true;
-    }
-    else {
-      this.othersActive = false;
-    }
-
     this.selectTypeIndex = index
     this.showOther = showOther
     if (this.productColors[index]){
       this.productColor = this.productColors[index].color_text
-    }
-    if(this.selectTypeIndex){
-      this.isActive = !this.isActive
-    }
-    else {
-      this.isActive = false
     }
   }
 
