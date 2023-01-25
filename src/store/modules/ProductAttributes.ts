@@ -953,21 +953,21 @@ const ProductAttributes:Module<any, any> = {
       state.revertRosterBool = payload;
     },
     SET_PRODUCT_EDIT_INFO_OBJECT(state:Record<any, any>, payload) {
-      // const updated_product_info_obj: Record<any, any> = {}
-      // for(const [edit_info_obj_key, edit_info_obj_value] of Object.entries(state.product_edit_info_object)) {
-      //   if(payload[edit_info_obj_key]) {
-      //     updated_product_info_obj[edit_info_obj_key] =  edit_info_obj_value
-      //   } else {
-      //     updated_product_info_obj[edit_info_obj_key] =  null
-      //   }
-      // }
+      const updated_product_info_obj: Record<any, any> = {}
+      for(const [edit_info_obj_key, edit_info_obj_value] of Object.entries(state.product_edit_info_object)) {
+        if(payload[edit_info_obj_key]) {
+          updated_product_info_obj[edit_info_obj_key] =  edit_info_obj_value
+        } else {
+          updated_product_info_obj[edit_info_obj_key] =  null
+        }
+      }
 
-      // const updated_payload: Record<any, any> = {};
-      // for(const [payload_key, payload_value] of Object.entries(payload)) {
-      //   updated_payload[payload_key] = payload_value
-      // }
-      // state.product_edit_info_object = Object.assign({}, state.product_edit_info_object, updated_payload);
-      state.product_edit_info_object = payload;
+      const updated_payload: Record<any, any> = {};
+      for(const [payload_key, payload_value] of Object.entries(payload)) {
+        updated_payload[payload_key] = payload_value
+      }
+      state.product_edit_info_object = Object.assign({}, state.product_edit_info_object, updated_payload);
+      // state.product_edit_info_object = payload;
     },
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
