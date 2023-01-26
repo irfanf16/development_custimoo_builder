@@ -664,12 +664,9 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       product_name = `${product_name} - ${design_name}`;
       const product_models = Store.getters.getProductModels;
       const selected_model_index = Store.getters.getSelectedModelIndex;
-      scene_ref.frontCanvas.discardActiveObject().renderAll()
-      scene_ref.backCanvas.discardActiveObject().renderAll()
-      // const back_image = getImageFromCanvas(getCanvasImage.scene.frontCanvas)
-      // const front_image = getImageFromCanvas(getCanvasImage.scene.backCanvas)
       const back_image = getImageFromCanvas('back')
       const front_image = getImageFromCanvas('front')
+
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: Store.getters.getCustomLogos(),
@@ -1428,7 +1425,7 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
       }
     }
       if(Object.prototype.hasOwnProperty.call(custom_logo,'actualWidth')){
-        let scaleX = Object.prototype.hasOwnProperty.call(custom_logo,'scaleX')? Object.prototype.hasOwnProperty.call(custom_logo,'scaleX'): 1;
+        const scaleX = Object.prototype.hasOwnProperty.call(custom_logo,'scaleX')? Object.prototype.hasOwnProperty.call(custom_logo,'scaleX'): 1;
         width += ((custom_logo.actualWidth * scaleX)/parseFloat(measurement_ratio)) + 500;
       }
       else{
@@ -1680,7 +1677,6 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
   const selected_product = Store.getters.getSelectedProduct;
   const style_index = Store.getters.getCurrentStyleIndex;
   const productCustomTexts = selected_product_custom_texts ? Store.getters.productCustomTexts(selected_product.id) : Store.getters.productCustomTexts()
-  const getCanvasImage = Store.getters.getCanvasImage
   const product_style = selected_product.productstyles[style_index];
   const design_index = findIndex(product_style.productdesigns, (design: Record<any, any>) => design.design_show == 1)
   const selected_design = product_style.productdesigns[design_index]
@@ -1741,6 +1737,7 @@ const getImageFromCanvas = (side: string, options={}) => {
     canvas = Store.getters.getCanvasImage.scene.backCanvas
   }
   if(canvas) {
+    canvas.discardActiveObject().renderAll()
     const original_transform = canvas.viewportTransform
     const original_zoom = canvas.getZoom()
     canvas.setHeight(canvas_options.height)
@@ -1753,9 +1750,8 @@ const getImageFromCanvas = (side: string, options={}) => {
     canvas.viewportTransform = original_transform
     canvas.setZoom(original_zoom)
     return base64_image
-  } else {
-    console.error('Unable to get canvas image for canvas', canvas)
   }
+  return ""
 }
 
 const classObserver = (elems:Record<any, any>, callMethod:any, disconnect = false) => {
@@ -1980,9 +1976,11 @@ const getCustomizerIframe = () => {
   return customizer_iframe
 }
 
+
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
-  sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, setCustomLogo, handleResponseException, logData, pathInfo,
+  sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
   getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,

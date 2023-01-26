@@ -142,7 +142,7 @@
                 <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                 <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
-                <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" v-if="!getProductEditInfoObject.editing" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
+                <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                   <div>
@@ -232,20 +232,37 @@
                       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                                 :back="{textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension, safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
-                                 modelUrl: selectedProduct.productstyles[styleIndex].back? storageUrl+selectedProduct.productstyles[styleIndex].back.file_url : ''}"
-                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
+                                 :front="{
+                                           textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                           safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                           models: selectedProduct.productstyles[styleIndex].front_models
+                                         }"
+
+                                 :back="{
+                                          textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
+                                          safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                          models: selectedProduct.productstyles[styleIndex].back_models
+                                        }"
+                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                 :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                                 :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                          />
 
                           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                 modelUrl: selectedProduct.productstyles[styleIndex].front? storageUrl+selectedProduct.productstyles[styleIndex].front.file_url : ''}"
-                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type" :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
+                                 :front="{
+                                            textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                            safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                            models: selectedProduct.productstyles[styleIndex].front_models
+                                        }"
+                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                 :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
+                                 :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                          />
                         </div>
                       </template>
                     </template>
@@ -323,7 +340,7 @@
                      </template>
                   </template>
 
-                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing">Cancel</b-button>
+                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'cart_product'">Cancel</b-button>
                 </div>
               </div>
             </div>
@@ -425,7 +442,7 @@ import {
   setDefaultColors,
   isShadowDom,
   getDomDocument,
-  setUndoRedoItems, santaClone
+  setUndoRedoItems, santaClone, getCustomizerIframe
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1172,8 +1189,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     setTimeout(() => {
       this.ref['frontImg'].height = canvasFront.clientHeight
       this.ref['frontImg'].width = canvasFront.clientWidth
-      this.ref['backImg'].height = canvasBack.clientHeight
-      this.ref['backImg'].width = canvasBack.clientWidth
+      if(canvasBack) {
+        this.ref['backImg'].height = canvasBack.clientHeight
+        this.ref['backImg'].width = canvasBack.clientWidth
+      }
     }, 100)
 
     this.ref['cartAnim'] && this.ref['cartAnim'].classList.add('cart-animation')
@@ -1254,7 +1273,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       const scene_ref = this.$store.getters.getCanvasImage.scene
       if (scene_ref) {
         scene_ref.frontCanvas.discardActiveObject().renderAll()
-        scene_ref.backCanvas.discardActiveObject().renderAll()
+        scene_ref.backCanvas?.discardActiveObject().renderAll()
       }
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
       return
@@ -1265,11 +1284,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     })
     let main_scene = this.ref.mainScene[0];
     main_scene && main_scene.frontCanvas.discardActiveObject().renderAll();
-    main_scene && main_scene.backCanvas.discardActiveObject().renderAll();
+    main_scene && main_scene.backCanvas?.discardActiveObject().renderAll();
     let locker_front_png = (getImageFromCanvas('front') as string ).split(',')[1]
     let locker_back_png: string|null = null;
     if (this.mainProductType == "front_back") {
-      locker_back_png = (getImageFromCanvas('back') as string ).split(',')[1] as string
+      locker_back_png = (getImageFromCanvas('back') as string )?.split(',')[1] as string
     }
     let distinct: Record<any, any> = []
     let svgGroups = this.$store.getters.getSvgGroups
@@ -1926,6 +1945,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.downloadPdfFile(res.data.pdf, res.data.name);
       this.pdf_generation_loading = false
     }).catch(err => {
+      console.log('errerrerr', err)
       this.showToast('Something went wrong', 'error');
       this.pdf_generation_loading = false
     });
@@ -1933,7 +1953,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public downloadPdfFile(base64, filename) {
     // Create a new link
-    const anchor = document.createElement('a');
+    const iframe = getCustomizerIframe()
+    let dom_document = iframe ? iframe.contentWindow.parent.document : document
+    let anchor = dom_document.createElement('a');
     let url = 'data:application/pdf;base64,' + base64;
     anchor.setAttribute('href', url);
     anchor.setAttribute('download', filename);
@@ -1941,12 +1963,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     // anchor.style.display = 'none';
     anchor.setAttribute('id', `${Math.random()}`);
     // Append to the DOM
-    document.body.appendChild(anchor);
+    dom_document.body.appendChild(anchor);
     anchor.click();
 
     // Remove element from DOM
     setTimeout(() => {
-      document.body.removeChild(anchor);
+      dom_document.body.removeChild(anchor);
     },5000);
   }
 }

@@ -6,7 +6,6 @@ import {
   setRetrievedProductsCustomTexts,
   getRosterDetailDefaultObject,
   initCustomLogosNew,
-  setCustomLogo,
   getLogoSettings,
   setLogoSettings,
   getProductLogoSetting,
@@ -122,6 +121,7 @@ const ProductAttributes:Module<any, any> = {
     products_rosters:{},
     active_roster_index:0,
     edit_roster_from_locker:false,
+    back_from_roster: {},
     selectedCategory: {
       category_index: 0,
       category_id: null
@@ -196,6 +196,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_EDIT_ROSTER_FROM_LOCKER(state: Record<any, any>, payload: boolean){
       state.edit_roster_from_locker = payload
+    },
+    SET_BACK_FROM_ROSTER(state: Record<any, any>, payload: boolean){
+      state.back_from_roster = payload
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
@@ -295,7 +298,7 @@ const ProductAttributes:Module<any, any> = {
                        Vue.set(state.customLogos[new_item], newCustomLogo.logoIndex, {...logo_settings})
                      }
                    } else {
-                     await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
+                     // await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
                    }
                  }
                })
@@ -950,21 +953,21 @@ const ProductAttributes:Module<any, any> = {
       state.revertRosterBool = payload;
     },
     SET_PRODUCT_EDIT_INFO_OBJECT(state:Record<any, any>, payload) {
-      // const updated_product_info_obj: Record<any, any> = {}
-      // for(const [edit_info_obj_key, edit_info_obj_value] of Object.entries(state.product_edit_info_object)) {
-      //   if(payload[edit_info_obj_key]) {
-      //     updated_product_info_obj[edit_info_obj_key] =  edit_info_obj_value
-      //   } else {
-      //     updated_product_info_obj[edit_info_obj_key] =  null
-      //   }
-      // }
+      const updated_product_info_obj: Record<any, any> = {}
+      for(const [edit_info_obj_key, edit_info_obj_value] of Object.entries(state.product_edit_info_object)) {
+        if(payload[edit_info_obj_key]) {
+          updated_product_info_obj[edit_info_obj_key] =  edit_info_obj_value
+        } else {
+          updated_product_info_obj[edit_info_obj_key] =  null
+        }
+      }
 
-      // const updated_payload: Record<any, any> = {};
-      // for(const [payload_key, payload_value] of Object.entries(payload)) {
-      //   updated_payload[payload_key] = payload_value
-      // }
-      // state.product_edit_info_object = Object.assign({}, state.product_edit_info_object, updated_payload);
-      state.product_edit_info_object = payload;
+      const updated_payload: Record<any, any> = {};
+      for(const [payload_key, payload_value] of Object.entries(payload)) {
+        updated_payload[payload_key] = payload_value
+      }
+      state.product_edit_info_object = Object.assign({}, state.product_edit_info_object, updated_payload);
+      // state.product_edit_info_object = payload;
     },
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
@@ -1151,6 +1154,9 @@ const ProductAttributes:Module<any, any> = {
     getEditRosterFromLocker: state => {
       return state.edit_roster_from_locker;
     },
+    getBackFromRoster: state => {
+      return state.back_from_roster;
+    },
     getSearchLoader: state => {
       return state.searchLoader
     },
@@ -1203,7 +1209,6 @@ const ProductAttributes:Module<any, any> = {
       return state.showColorsLogoEditor
     },
     getLockerTabsIndex: state => {
-
       return state.lockerTabsIndex
     },
     getColorsFromRecent: state => {
@@ -1426,6 +1431,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setEditRosterFromLocker({commit}, payload) {
       commit('SET_EDIT_ROSTER_FROM_LOCKER', payload);
+    },
+    setBackFromRoster({commit}, payload) {
+      commit('SET_BACK_FROM_ROSTER', payload);
     },
     setVectorLogos({commit}, payload){
       commit('SET_VECTOR_LOGOS', payload)

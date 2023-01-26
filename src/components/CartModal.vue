@@ -44,7 +44,7 @@
                 <div class="d-inline-flex gap-1">
                   <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.front_image"
                          alt="Front Design"></b-img>
-                  <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
+                  <b-img v-if="factory_product.back_image" style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
                          alt="Back Design"></b-img>
                 </div>
               </td>

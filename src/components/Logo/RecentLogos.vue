@@ -34,7 +34,6 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
 import {
   hideLockerProductSaveBtn,
   processColorsCustom,
-  setCustomLogo,
   setUndoRedoItems
 } from "@/helpers/Helpers"
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";

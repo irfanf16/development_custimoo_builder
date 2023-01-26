@@ -8,13 +8,13 @@
             <div class="image-holder" :key="'front'+design.id">
               <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio" :key="`scene${product.id}`"
                      :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                     modelUrl: product.productstyles[0].front? storageUrl+product.productstyles[0].front.file_thumbnail_url : ''}"
+                      models: product.productstyles[0].front_models}"
                      :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                      :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
                      :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index" :products_fonts="products_fonts"/>
             </div>
           </template>
-          <h3 class="text-center">{{ product.product_name }}</h3>
+          <h3 class="text-center" :title="product.product_name">{{ product.product_name }}</h3>
         </a>
       </template>
     </slither-slider>
@@ -168,7 +168,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     margin-top: 5px;
   }
 }

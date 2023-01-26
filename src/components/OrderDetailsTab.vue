@@ -474,7 +474,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     form_data.append("product_model_id", product_model_id.toString());
     let order_detail = await self.getOrderDetail();
     this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
-    this.canvasImage.scene.backCanvas.discardActiveObject().renderAll()
+    this.canvasImage.scene.backCanvas?.discardActiveObject().renderAll()
     form_data.append("order_detail", JSON.stringify(order_detail));
     let p2 = new Promise((resolve) => {
       this.pdf_front_image = getImageFromCanvas('front') as string

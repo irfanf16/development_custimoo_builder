@@ -198,27 +198,26 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
       }
 
-      if(!this.mainPreview && this.selectedProductId == this.product_id) {
-        self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
+      self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
+        if(!this.mainPreview && this.selectedProductId == this.product_id) {
           const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
           if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
             const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
             const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
             this.eventAction(text, textObject, otherSideObject)
           }
-        })
-      }
-
-      if(!this.mainPreview && this.selectedProductId == this.product_id) {
-        self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
+        }
+      })
+      self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
+        if(!this.mainPreview && this.selectedProductId == this.product_id) {
           const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
           if(logo && this.custom_logo_objects[logo_index]) {
             const logoObject = this.custom_logo_objects[logo_index]
             const otherSideObject = this.other_side_logos[logo_index]
             this.eventAction(logo, logoObject, otherSideObject)
           }
-        })
-      }
+        }
+      })
     })
   }
 })
@@ -264,8 +263,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private custom_logo_objects: any[] = []
   private mounted = false
-  private frontModel: fabric.Image
-  private backModel: fabric.Image
+  private front_models: fabric.Image[]= []
+  private back_models: fabric.Image[] = []
   private showSmall = { front: false, back: this.manageComponents.mobileScreen }
   private svgGroups: any[] = []
   private initialSvgGroups: any[] = []
@@ -720,10 +719,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
       fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
 
-      let model: any
+      let models: fabric.Image[] = []
       let promises = []
       if (this.productType == 'customized') {
-        promises.push(this.addModel(ImageData.modelUrl, side) as never)
+        ImageData.models.forEach((model) => {
+          promises.push(this.addModel(model.file_url, model.composition, side) as never)
+        })
       }
 
       promises.push(this.addTexture(ImageData.textureUrl, side, ImageData.file_extension) as never)
@@ -732,23 +733,24 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
 
-
       const self: Record<any, any> = this
 
       Promise.all(promises).then((values) => {
         let texture = this.frontTexture
-        model = this.frontModel
+        models = this.front_models
         if (side == 'back') {
           texture = this.backTexture
-          model = this.backModel
+          models = this.back_models
         }
 
         canvas.add(texture)
         canvas.viewportCenterObject(texture)
 
         if (this.productType == 'customized') {
-          canvas.add(model)
-          canvas.viewportCenterObject(model)
+          models.forEach((model: fabric.Image) => {
+            canvas.add(model)
+            canvas.viewportCenterObject(model)
+          })
         }
 
         if (side == 'back') {
@@ -966,7 +968,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if(selected.side == 'back' || selected.side == 'Back'){
         this.frontCanvas.discardActiveObject().requestRenderAll()
       }else{
-        this.backCanvas.discardActiveObject().requestRenderAll()
+        if(this.back) {
+          this.backCanvas.discardActiveObject().requestRenderAll()
+        }
       }
     }
   }
@@ -1477,10 +1481,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         const model_start = (texture.left - ((texture.width * texture.scaleX) / 2)) - 1
         const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
-        if(actualNearTo == 'top') {
-          const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - target.height, 0, 1, 'bottom')
+        const height = target.height * target.scaleY;
+        if(actualNearTo == 'top') { // todo may be find the direction from top for other side canvas to fix both side size mismatch issue
+          const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - height , 0, 1, 'bottom')
+          const outside = direction.top - checkPointY
+          const modelSpaceTop = direction.top + (height / 2) - 3
+          addTop = modelSpaceTop - outside
           addLeft = this.canvasWidth - target.left
-          addTop = direction.top - checkPointY
         } else if (moreToWords == 'left') {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
           const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, checkPointY, 0, 1, 'left')
@@ -1529,6 +1536,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           otherSideObjects[add_index].scaleX = target.scaleX
           otherSideObjects[add_index].scaleY = target.scaleY
           otherSideObjects[add_index].angle = -target.angle
+          if (side == 'back') {
+            this.frontCanvas.requestRenderAll()
+          } else {
+            if (this.back) {
+              this.backCanvas.requestRenderAll()
+            }
+          }
         } else {
           let objectAdd
           if(target.type == "text") {
@@ -1556,15 +1570,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             objectAdd.clipPath = this.clip_path_front
             this.frontCanvas.add(objectAdd)
             if (this.productType == 'customized') {
-              this.frontModel.bringToFront()
+              this.front_models.forEach((model: fabric.Image) => {
+                model.bringToFront()
+              })
             }
+            this.frontCanvas.requestRenderAll()
           } else {
             if (this.back) {
               objectAdd.clipPath = this.clip_path_back
               this.backCanvas.add(objectAdd)
               if (this.productType == 'customized') {
-                this.backModel.bringToFront()
+                this.back_models.forEach((model: fabric.Image) => {
+                  model.bringToFront()
+                })
               }
+              this.backCanvas.requestRenderAll()
             }
           }
         }
@@ -1578,27 +1598,22 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (otherSideObjects[add_index]) {
           if (side == 'back') {
             this.frontCanvas.remove(otherSideObjects[add_index])
+            this.frontCanvas.requestRenderAll()
           } else {
             if (this.back) {
               this.backCanvas.remove(otherSideObjects[add_index])
+              this.backCanvas.requestRenderAll()
             }
           }
           delete otherSideObjects[add_index]
         }
       }
-      if (side == 'back') {
-        this.frontCanvas.requestRenderAll()
-      } else {
-        if (this.back) {
-          this.backCanvas.requestRenderAll()
-        }
-      }
     }
   }
 
-  public async addModel(modelUrl: string, side: string) {
+  public async addModel(modelUrl: string, composition: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.Image.fromURL(modelUrl + '?nocache=2', async (img: any) => {
+      fabric.Image.fromURL(this.storageUrl + modelUrl + '?nocache=2', async (img: any) => {
         if(img.width > img.height) {
           img.scaleToWidth(this.canvasWidth - 10)
         } else {
@@ -1608,15 +1623,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           hasControls: false,
           selectable: false,
           evented: false,
-          globalCompositeOperation: 'multiply'
+          globalCompositeOperation: composition
           // globalCompositeOperation: 'overlay'
         })
 
         img.center().setCoords()
         if (side == 'back') {
-          this.backModel = img
+          this.back_models.push(img)
         } else {
-          this.frontModel = img
+          this.front_models.push(img)
         }
         resolve('done')
       }, { crossOrigin: 'Anonymous' })
@@ -1746,16 +1761,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           globalCompositeOperation: 'source-atop',
         })
 
-        let model = this.frontModel
+        let models = this.front_models
         let canvas = this.frontCanvas
         if (logo.side == 'back') {
           canvas = this.backCanvas
-          model = this.backModel
+          models = this.back_models
         }
 
         canvas.add(img)
         if (this.productType == 'customized') {
-          model.bringToFront()
+          models.forEach((model: fabric.Image) => {
+            model.bringToFront()
+          })
         }
         canvas.requestRenderAll()
         this.addToOtherSide(img, logo.side)
@@ -1828,12 +1845,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
           }
 
-          let model = this.frontModel
+          let models = this.front_models
           let canvas = this.frontCanvas
           let dimText = this.dimTextFront
           if (logo.side == 'back') {
             canvas = this.backCanvas
-            model = this.backModel
+            models = this.back_models
             dimText = this.dimTextBack
           }
 
@@ -1855,7 +1872,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           })
           canvas.add(img)
           if (this.productType == 'customized') {
-            model.bringToFront()
+            models.forEach((model: fabric.Image) => {
+              model.bringToFront()
+            })
           }
           canvas.requestRenderAll()
 
@@ -1915,6 +1934,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       }
+      this.frontCanvas.requestRenderAll()
+      if(this.back) {
+        this.backCanvas.requestRenderAll()
+      }
       this.custom_logo_objects = []
     }
   }
@@ -1934,6 +1957,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             this.backCanvas.remove(other_side_logo)
           }
           this.other_side_logos[custom_logo_index] = null
+        }
+        this.frontCanvas.requestRenderAll()
+        if (this.back) {
+          this.backCanvas.requestRenderAll()
         }
       }
       this.custom_logo_objects[custom_logo_index] = null
@@ -1976,6 +2003,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       }
+      this.frontCanvas.requestRenderAll()
+      if(this.back) {
+        this.backCanvas.requestRenderAll()
+      }
       this.product_custom_text_objects = []
     }
   }
@@ -1991,11 +2022,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         const otherSideText = this.otherSideTexts[custom_text_index + '' + i]
         if(otherSideText) {
-          self.frontCanvas.remove(otherSideText)
+          this.frontCanvas.remove(otherSideText)
           if(this.back) {
-            self.backCanvas.remove(otherSideText)
+            this.backCanvas.remove(otherSideText)
           }
         }
+      }
+      this.frontCanvas.requestRenderAll()
+      if (this.back) {
+        this.backCanvas.requestRenderAll()
       }
     }
     /*
@@ -2202,13 +2237,17 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         if (render_front_canvas) {
           if (this.productType == 'customized') {
-            this.frontModel.bringToFront()
+            this.front_models.forEach((model: fabric.Image) => {
+              model.bringToFront()
+            })
           }
           this.frontCanvas.requestRenderAll()
         }
         if (render_back_canvas) {
           if (this.productType == 'customized') {
-            this.backModel.bringToFront()
+            this.back_models.forEach((model: fabric.Image) => {
+              model.bringToFront()
+            })
           }
           this.backCanvas.requestRenderAll()
         }
