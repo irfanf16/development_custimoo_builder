@@ -6,6 +6,8 @@ const http = Axios.create({
   baseURL: process.env.VUE_APP_API_BASE_URL+"/api",
   headers: {
     "Content-type": "application/json",
+    "Access-Control-Allow-Origin": '*',
+    'test_header': 'test_header'
   }
 });
 
