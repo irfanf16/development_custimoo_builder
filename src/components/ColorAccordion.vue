@@ -16,7 +16,7 @@
           <b-nav class="d-flex flex-wrap align-items-center">
             <b-nav-item :class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item v-if="logoColorsInfo && logoColorsInfo.length" :class="{ 'active' : selectTypeIndex == (productColors.length) && !othersActive}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
-            <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !othersActive}" class="mr-2 " @click="selectType(productColors.length+1, false)">Locker colors</b-nav-item>
+            <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !othersActive}" class="mr-2 " v-if="isCustomerAuthenticated" @click="selectType(productColors.length+1, false)">Locker colors</b-nav-item>
             <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
           <div v-if="selectTypeIndex == (productColors.length + 1) && !othersActive" class="overflow-hidden fade-right pr-4">
