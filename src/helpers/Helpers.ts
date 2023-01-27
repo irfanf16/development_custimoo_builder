@@ -1874,7 +1874,7 @@ const getSantaModalConfig = () => {
   * */
   return {
     name: 'santa-confirm-modal', icon: 'success', title: '', text: 'This is default text', confirm_text: 'Ok', cancel_text: null,
-    click_to_close: false
+    click_to_close: false, close_on_confirm: false
   }
 }
 

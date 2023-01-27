@@ -17,7 +17,7 @@
                 <select class="form-control mt-1 custom-select" @change="handleLockerProductChange" :key="selected_locker_roster">
                   <option :value="null">Please Select Locker Product</option>
                   <template v-for="(locker_roster) in locker_rosters">
-                      <option :value="locker_roster.id" :key="locker_roster.id" :selected="locker_roster.id == selected_locker_roster">
+                      <option :value="locker_roster.id" :key="`${locker_roster.id}${selected_locker_roster}`" :selected="locker_roster.id == selected_locker_roster">
                         {{locker_roster.product_name}}
                       </option>
                   </template>
@@ -439,20 +439,16 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   public handleLockerProductChange(locker_product_id: any) {
+    const self = this as Record<any, any>;
     locker_product_id = locker_product_id.target.value
     if(locker_product_id) {
       locker_product_id = parseInt(locker_product_id);
       if(this.show_roster_change_warning) {
-        this.$swal.fire({
-          title: 'Are you sure?',
-          text: "By changing product any changes made on roster will be lost",
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
-          confirmButtonText: 'Yes, change it!'
-        }).then((result) => {
-          if (result.isConfirmed) {
+        self.$santaModal.show({
+          icon: 'warning', title: 'Are you sure?', text: 'By changing product any changes made on roster will be lost',
+          confirm_text: 'Yes, change it', cancel_text: 'No', close_on_confirm: true
+        },self).then((result) => {
+          if (result) {
             this.show_roster_change_warning = false
             this.show_undo_roster_btn = true
             this.roster_previous_state = JSON.parse(JSON.stringify(this.productRoster))
