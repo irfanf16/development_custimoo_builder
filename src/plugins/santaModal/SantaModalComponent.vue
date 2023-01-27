@@ -58,6 +58,9 @@ export default class SantaModal extends Vue {
       this.hide()
     }
     this.resolveGlobal(confirmed)
+    if(this.modal_data.close_on_confirm){
+      this.hide();
+    }
   }
 
   public show(modal_data) {
