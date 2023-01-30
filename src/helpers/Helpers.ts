@@ -1887,6 +1887,22 @@ const getDomDocument = (parent_doc= false) => {
   return dom_document ? dom_document?.shadowRoot : document
 }
 
+const getLockerColors = async (callback ?:(any) ) => {
+  const response: any = await http.get("locker_with_colors").catch((errorResponse: AxiosError) => {
+    handleResponseException(errorResponse)
+  })
+
+  if(response) {
+    const response_data: Record<any, any> = response.data;
+    if (response_data) {
+      await Store.dispatch('setLockerroomColors', response_data);
+      if(callback){
+        await callback();
+      }
+    }
+  }
+}
+
 // const getDomDocument = (return_iframe = false) => {
 //   let dom_document = document.querySelector(getWebComponentNames())
 //   console.log('window', window, )
@@ -1990,5 +2006,5 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe
+  classObserver, getCustomizerIframe, getLockerColors
 };

@@ -16,12 +16,12 @@
           <b-nav class="d-flex flex-wrap align-items-center">
             <b-nav-item :class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item v-if="logoColorsInfo && logoColorsInfo.length" :class="{ 'active' : selectTypeIndex == (productColors.length) && !othersActive}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
-            <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !othersActive}" class="mr-2 " v-if="isCustomerAuthenticated" @click="selectType(productColors.length+1, false)">Locker colors</b-nav-item>
+            <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !othersActive}" class="mr-2 " v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length" @click="selectType(productColors.length + 1, false)">Locker colors</b-nav-item>
             <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
           <div v-if="selectTypeIndex == (productColors.length + 1) && !othersActive" class="overflow-hidden fade-right pr-4">
             <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 py-2">
-              <template v-for="(room, i) in getLockerProducts">
+              <template v-for="(room, i) in lockerroomColors">
                 <b-button size="sm" class="btn-locker-color" variant="secondary" @click="setActiveLockerIndex(i)" :class="{'active': i == activeLockerIndex}"
                           :key="`locker_${i}`">
 <!--                  {{ room && room.folders[0].folder_name}}-->
@@ -32,7 +32,7 @@
 
             <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 pb-2">
               <b-button size="sm" class="btn-locker-folder" variant="secondary" :class="{'active': folder_i == activeFolderIndex}" @click="setActiveFolderIndex(activeLockerIndex, folder_i)"
-                        v-for="(folder, folder_i) in getLockerProducts[activeLockerIndex].folders" :key="`folder_${activeLockerIndex}${folder_i}`">
+                        v-for="(folder, folder_i) in lockerroomColors[activeLockerIndex].folders" :key="`folder_${activeLockerIndex}${folder_i}`">
                 {{folder.folder_name}}
               </b-button>
             </div>
@@ -96,9 +96,7 @@ import colorPicker from '@caohenghu/vue-colorpicker'
 import {LockerProducts} from '../mixins/LockerProduct'
 
 import {getClosestColor, pantonesTcx, getColorEncoding} from '@/pantoneColor'
-import {getSelectedProductPantones, handleResponseException, setUndoRedoItems} from "@/helpers/Helpers";
-import {http} from "@/httpCommon";
-import {AxiosError} from "axios";
+import {getSelectedProductPantones, getLockerColors, setUndoRedoItems} from "@/helpers/Helpers";
 
 @Component<ColorAccordion>({
   components: {
@@ -112,14 +110,12 @@ import {AxiosError} from "axios";
     }
   },
   mounted(){
-    if(this.isCustomerAuthenticated){
-      this.$store.dispatch('GET_LOCKER_PRODUCTS');
-      this.getLockerProducts && this.getLockerProducts.length &&
-        this.fetchColors(this.activeLockerIndex,this.activeFolderIndex)
-    }
     setTimeout(() => {
-      this.selectType(this.selectTypeIndex)
-    }, 300)
+      this.selectType(this.selectTypeIndex);
+    }, 300);
+    getLockerColors(()=>{
+      this.fetchColors(this.activeLockerIndex, this.activeFolderIndex)
+    });
   }
 })
 export default class ColorAccordion extends Mixins(LockerProducts) {
@@ -203,12 +199,15 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
+  get lockerroomColors(): Record<any, any> {
+    return this.$store.getters.getLockerroomColors;
+  }
   get getColorType(): string {
     return this.$store.getters.getSetting('color_type');
   }
 
   public fetchColors(locker_i: number, folder_i: number) {
-    this.colors = JSON.parse(this.getLockerProducts[locker_i]!.folders[folder_i].color);
+    this.colors = JSON.parse(this.lockerroomColors[locker_i]!.folders[folder_i].color);
     return false;
   }
 
