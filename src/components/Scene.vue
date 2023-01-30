@@ -387,21 +387,26 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         texture.forEach((item: Record<any, any>) => {
           item.id = item.id.toLowerCase()
           if (groupColors[item.id]) {
-            item.set('fill', groupColors[item.id].color)
+            if(item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
+              groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                item.fill.colorStops[gradient_color_index].color = gradient_color.color
+              })
+              item.set('fill', new fabric.Gradient(item.fill));
+            } else {
+              item.set('fill', groupColors[item.id].color)
+            }
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
               if (svgGroup.id == item.id) {
-                svgGroup.color = groupColors[item.id].color
-                svgGroup.pantone = groupColors[item.id].pantone
-                if (this.mainPreview) {
-                  this.$store.dispatch('updateSvgGroups', {
-                    index: index,
-                    id:item.id,
-                    color: groupColors[item.id].color,
-                    pantone: groupColors[item.id].pantone,
-                    name: groupColors[item.id].name
+                if(svgGroup.gradient_colors) {
+                  groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                    svgGroup.gradient_colors[gradient_color_index].color = gradient_color.color
+                    svgGroup.gradient_colors[gradient_color_index].pantone = gradient_color.pantone
+                    svgGroup.gradient_colors[gradient_color_index].name = gradient_color.name
                   })
+                } else {
+                  svgGroup.color = groupColors[item.id].color
+                  svgGroup.pantone = groupColors[item.id].pantone
                 }
-
               }
             })
           } else if (!defaultColors.length) {
@@ -641,10 +646,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         const selectProductPantonesList = getSelectedProductPantones(this.product_id)
         if (!item.id.includes('inside')) {
           if(item.fill.gradientUnits) {
-            // item.fill.colorStops[0].color = "rgb(0,255,0)"
-            // item.fill.colorStops[1].color = "rgb(255,255,0)"
-            // item.set('fill', new fabric.Gradient(item.fill));
-
             let gradient_colors: Record<any, any>[] = []
             item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
               color_stop.color = rgbHex(color_stop.color).includes('#')? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);

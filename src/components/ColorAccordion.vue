@@ -2,17 +2,28 @@
   <div class="accordion color-accordion" role="tablist">
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="'color-accordion'+index">
       <b-card-header header-tag="header" class="p-0" role="tab">
-        <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index)">
+        <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index, svgElement.gradient_colors? gradient_index === undefined? 0 : gradient_index : undefined)">
           <span class="text-uppercase text">{{ svgElement.id | capitalize }} </span>
           <span class="color">
-            <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
-            <span class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
+            <span v-if="svgElement.color" class="color-box" :style="{ background : svgElement.color }"></span>
+            <span v-if="svgElement.gradient_colors" class="color-box" :style="{ background : gradient_color_string(svgElement.gradient_colors) }"></span>
+
+            <span v-if="svgElement.color" class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span></span>
+            <span v-if="svgElement.gradient_colors" class="color-pantone-name gap-1">
+             <template v-for="(gradient_color, g_index) in svgElement.gradient_colors">
+               {{ gradient_color.pantone }}
+               <span :key="g_index" style="text-transform: uppercase; display: block">{{ gradient_color.name }} <template v-if="g_index < svgElement.gradient_colors.length - 1">/</template></span>
+             </template>
+            </span>
           </span>
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" accordion="my-accordion" role="tabpanel">
         <b-card-body>
+          <div v-if="svgElement.gradient_colors" class="d-flex w-100 flex-wrap gap-1 mt-1">
+            <button v-for="(gradient_color, g_index) in svgElement.gradient_colors" @click="showColor(index, g_index)" :key="g_index" :class="{'light': gradient_index !== g_index}" class="btn btn-secondary isBtn btn-sm">Gradient {{ g_index + 1 }}</button>
+          </div>
           <b-nav class="d-flex flex-wrap align-items-center" style="display: none">
             <b-nav-item v-bind:class="{ 'active' : index == selectTypeIndex && !showOther}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
             <b-nav-item v-if="productColors" v-bind:class="{ 'active' : selectTypeIndex == (productColors.length) && !showOther}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
@@ -95,6 +106,7 @@ export default class ColorAccordion extends Vue {
   public pantoneColorVal= '18-0107'
   public showOther = false
   public selectAccordionIndex = 0
+  public gradient_index: number|undefined = 0
   public selectTypeIndex = 0
   public productColor: any[] = []
   public selectedColorTab = 0;
@@ -142,14 +154,24 @@ export default class ColorAccordion extends Vue {
   get groupColors(){
     return this.$store.getters.getGroupColors
   }
-  public showColor(index: number) {
+  public showColor(index: number, gradient_index: number|undefined) {
     this.selectAccordionIndex = index
+    this.gradient_index = gradient_index
   }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
   get getColorType(): string {
     return this.$store.getters.getSetting('color_type');
+  }
+
+  public gradient_color_string(gradient_colors: Record<any, any>[]) {
+    let css_color = 'linear-gradient(90deg';
+    gradient_colors.forEach((gradient_color: Record<any, any>) => {
+      css_color += ',' + gradient_color.color
+    })
+    css_color += ')'
+    return css_color
   }
 
   public selectType(index: number, showOther = false) {
@@ -167,6 +189,7 @@ export default class ColorAccordion extends Vue {
       this.$store.dispatch('updateGroupColors',
         {
           index: this.svgGroups[this.selectAccordionIndex].id,
+          gradient_index: this.gradient_index,
           color: color.value,
           pantone: color.pantone,
           name: color.name

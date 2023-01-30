@@ -648,7 +648,16 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone, name: color.name })
+        if(color.gradient_index != undefined) {
+          let gradient_colors: Record<any, any>[] = []
+          if(state.groupColors[color.gradient_index] && state.groupColors[color.index].gradient_colors) {
+            gradient_colors = state.groupColors[color.index].gradient_colors
+          }
+          gradient_colors[color.gradient_index] = { color: color.color, pantone: color.pantone, name: color.name }
+          Vue.set(state.groupColors, color.index, { gradient_colors: gradient_colors })
+        } else {
+          Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone, name: color.name })
+        }
       }
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
@@ -658,14 +667,12 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
-        // const index = color.index
         const index = state.svgGroups.findIndex((svgGroup) => { return svgGroup.id === color.id  });
         delete color.index
         if(index >= 0){
           color = {...state.svgGroups[index], ...color}
           Vue.set(state.svgGroups, index, color)
         }
-
       }
     },
     updateAllRoster(state: Record<any, any>, rosterDetail: [Record<any, any>]){

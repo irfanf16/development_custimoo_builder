@@ -2,7 +2,7 @@
   <div class="accordion my-3" role="tablist">
     <b-card no-body v-if="selectedProduct.product_type != 'personalized' ">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-1 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Colors</span> <span
+        <b-button block v-b-toggle.accordion-1 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Colorssssss</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-1" visible accordion="my-accordion" role="tabpanel">

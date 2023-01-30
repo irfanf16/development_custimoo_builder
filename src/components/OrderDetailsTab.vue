@@ -69,8 +69,6 @@
               <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
             </template>
           </template>
-
-
         </div>
       </div>
     </div>
