@@ -1790,7 +1790,8 @@ const getExtensionFromString = (string: string) => {
 
 const getUrlParameter = (name = '') => {
   if(name) {
-    const url = window.parent.window.location.href
+    // const url = window.parent.window.location.href
+    const url = getWindowObject().window.location.href
     name = name.replace(/[[\]]/g, '\\$&');
     const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
     const results = regex.exec(url);
@@ -1798,14 +1799,16 @@ const getUrlParameter = (name = '') => {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
-  const hash_url = window.parent.window.location.hash
+  // const hash_url = window.parent.window.location.hash
+  const hash_url = getWindowObject().window.location.hash
   return hash_url.replace('#/', '')
 }
 
 const routerPush = (router, route_name) => {
   const router_url = router.resolve({name: route_name})
   if(router_url) {
-    window.parent.window.location.hash = router_url.href;
+    // window.parent.window.location.hash = router_url.href;
+    getWindowObject().window.location.hash = router_url.href;
   }
 }
 
@@ -1855,8 +1858,8 @@ const getSantaModalConfig = () => {
 
 const getDomDocument = (parent_doc= false) => {
   if(parent_doc) {
-    console.log('window.parent.document', window.parent, window.parent.document)
-    return window.parent.document
+    // return window.parent.document
+    return getWindowObject().document
   }
   const dom_document = document.querySelector(getWebComponentNames())
   return dom_document ? dom_document?.shadowRoot : document
@@ -1924,7 +1927,8 @@ const setUndoRedoItems = async (items_type: string, action_on_items: string, use
 }
 
 const getCustomizerIframe = () => {
-  const iframes =  window.parent.document.querySelectorAll('iframe')
+  // const iframes =  window.parent.document.querySelectorAll('iframe')
+  const iframes =  getWindowObject().document.querySelectorAll('iframe')
   let customizer_iframe: any = null
   Array.from(iframes, (iframe) => {
     const get_customizer = iframe?.contentDocument?.querySelector('v-customizer')
@@ -1933,6 +1937,15 @@ const getCustomizerIframe = () => {
     }
   })
   return customizer_iframe
+}
+
+const getWindowObject = () => {
+  try {
+    return window.parent
+  } catch (error) {
+    return window
+    console.info('Error while getting window object', error)
+  }
 }
 
 
@@ -1949,5 +1962,5 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe
+  classObserver, getCustomizerIframe, getWindowObject
 };
