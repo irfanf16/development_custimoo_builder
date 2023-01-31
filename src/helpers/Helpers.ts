@@ -1085,6 +1085,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     }
     const numbers_array:Record<any,any>[] = getSVGNumberArraysFromRoster(factory_product);
     const svg_numbers_payload = getSVGNumbers(numbers_array,logo_max_width,production_file_initial_dimension);
+    svg_string += `${svg_numbers_payload.svg_string}`;
     const numbers_width = svg_numbers_payload.width?svg_numbers_payload.width + 500:0;
     const logo_max_width_and_number_max_width = logo_max_width + numbers_width;
 
