@@ -185,31 +185,6 @@ const processColorsCustom = (colors: [], logos_count=4) => {
 
 }
 
-// const getSelectedProductPantones = (product_id: null|number = null) => {
-//   const productPantones: Record<any, any>[] = []
-//   let selectedProduct = Store.getters.getSelectedProduct;
-//   if(product_id){
-//     const search_product = getProductById(product_id);
-//     if(search_product)
-//       selectedProduct = search_product;
-//   }
-//
-//     selectedProduct.colors.forEach((product_colors: any, key: number) => {
-//     if(key == 0){
-//       const colors = product_colors.json_data
-//       colors.forEach((color: any) => {
-//         //let pantone = color.name
-//         let pantone = ''
-//         if(color.pantone){
-//           pantone = color.pantone
-//         }
-//         productPantones.push({pantone : pantone, name: color.name, hex: color.value});
-//       })
-//     }
-//   })
-//   return productPantones;
-// }
-
 const getSelectedProductPantones = (product_id: null|number = null) => {
   const product_pantones: Record<any, any>[] = []
   const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
@@ -1886,22 +1861,6 @@ const getDomDocument = (parent_doc= false) => {
   const dom_document = document.querySelector(getWebComponentNames())
   return dom_document ? dom_document?.shadowRoot : document
 }
-
-// const getDomDocument = (return_iframe = false) => {
-//   let dom_document = document.querySelector(getWebComponentNames())
-//   console.log('window', window, )
-//   console.log('window_parent', window.parent, window.parent.document)
-//   dom_document = dom_document ? dom_document?.shadowRoot : document
-//   const dom_document_iframe = dom_document.querySelector('iframe')
-//   console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
-//   if(return_iframe) {
-//     return dom_document_iframe
-//   }
-//   if(dom_document_iframe) {
-//     dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
-//   }
-//   return dom_document
-// }
 
 const urlToBase64 = async (urls) => {
   const response = await http.post('url_to_base64', {file_urls: urls}).catch((errorResponse) => {
