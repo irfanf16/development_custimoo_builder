@@ -189,7 +189,7 @@
                         <div style="width: max(20%, 250px)" class="bg-light border-right flex-shrink-0">
                           <div class="fs-3" style="background: #495057; color: #fff; padding: 11px 16px">Select Design</div>
                           <ul>
-                            <li class="px-3 py-2 d-flex align-items-center gap-1" :class="{'border-top': design_i>1, 'active': design_i == lockerActiveDesignIndex}"
+                            <li class="px-3 py-2 d-flex align-items-center gap-1" :class="{'border-top': design_i>0, 'active': design_i == lockerActiveDesignIndex}"
                                 @click="()=>lockerActiveDesignIndex = design_i"
                                 v-for="(design, design_i) in locker_with_rosters(room.id)[0].products" :key="`locker_design_${design_i}`">
                               <span class="btn btn-secondary btn-sm rounded-circle flex-shrink-0" title="Edit Roster"

@@ -1130,34 +1130,6 @@ button {
             }
         }
 
-        .btn-locker-color{
-            @extend .btn;
-            font-size: 12px;
-            font-weight: normal;
-            padding: 5px 10px;
-            color: $theme-color;
-            background: $theme-color-light;
-
-            &.active{
-                color: $theme-color-light;
-                background: $theme-color;
-            }
-        }
-
-        .btn-locker-folder{
-            @extend .btn;
-            font-size: 12px;
-            font-weight: normal;
-            padding: 5px 10px;
-            color: #666;
-            background: #ddd;
-
-            &.active{
-                color: #ddd;
-                background: #666;
-            }
-        }
-
         .nav-link {
             font-size: 12px;
             padding: 0.5rem;
@@ -1177,6 +1149,43 @@ button {
                     color: #219F84;
                     border-bottom: 1px solid #219F84;
                 }
+            }
+        }
+    }
+
+    .accordion, .customization-text-area{
+        .btn-locker-color{
+            @extend .btn;
+            font-size: 12px;
+            font-weight: normal;
+            padding: 5px 10px;
+            white-space: nowrap;
+            color: $theme-color;
+            background: $theme-color-light;
+            border-color: $theme-color-light;
+            min-width: auto;
+
+            &.active{
+                color: $theme-color-light;
+                background: $theme-color;
+                border-color: $theme-color;
+            }
+        }
+
+        .btn-locker-folder{
+            @extend .btn;
+            font-size: 12px;
+            font-weight: normal;
+            padding: 5px 10px;
+            color: #666;
+            background: #ddd;
+            border-color: #ddd;
+            min-width: auto;
+
+            &.active{
+                color: #ddd;
+                background: #666;
+                border-color: #666;
             }
         }
     }
@@ -2171,6 +2180,7 @@ button {
             border: 1px solid #EFF2F4;
             position: relative;
             cursor: pointer;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
 
             @media only screen and (min-width: 1024px) {
                 width: 32px;
