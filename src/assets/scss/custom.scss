@@ -1166,6 +1166,7 @@ button {
             background: $theme-color-light;
             border-color: $theme-color-light;
             min-width: auto;
+            white-space: nowrap;
 
             &.active{
                 color: $theme-color-light;
@@ -1183,6 +1184,7 @@ button {
             background: #ddd;
             border-color: #ddd;
             min-width: auto;
+            white-space: nowrap;
 
             &.active{
                 color: #ddd;
