@@ -91,7 +91,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
 import ModalAction from "@/mixins/ModalAction";
-import { getImageFromCanvas } from '@/helpers/Helpers'
+import { getImageFromCanvas, getLockerColors } from '@/helpers/Helpers'
 import { Canvas } from 'fabric/fabric-impl'
     @Component<AddLockerRoomModal>({
         components: {
@@ -253,6 +253,7 @@ import { Canvas } from 'fabric/fabric-impl'
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
               this.showToast('Design saved successfully', 'success')
+              await getLockerColors();
               this.product_name = ''
               this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
               if(this.close_on_add) {

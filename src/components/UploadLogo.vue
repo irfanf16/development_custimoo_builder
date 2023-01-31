@@ -353,6 +353,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     }
     this.$store.commit('customLogos', payload)
     this.$store.commit('SET_LOGO_COLORS', []);
+    this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true});
     this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
     if(this.customLogoIndex == 0) {
       this.$store.commit('REMOVE_TEAM_LOGO')
