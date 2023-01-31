@@ -1788,7 +1788,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;
     let order_item_id = order_products_info_obj.order_item_id;
     // updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
-    updated_product["status"] = "submitted_for_factory_review";
+    updated_product["status"] = "order_approve";
     order_products_info_obj.order_products.factory_products[order_product_active_index] = updated_product
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
       editing: true,

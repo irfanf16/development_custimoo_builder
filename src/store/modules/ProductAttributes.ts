@@ -236,7 +236,7 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
-      state.selectedPrdId = state.products[payload.selectedIndex].id;
+      state.selectedPrdId = payload.selected_id;
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
       Vue.set(state, payload.prd_type, payload.value)
