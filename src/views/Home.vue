@@ -442,7 +442,7 @@ import {
   setDefaultColors,
   isShadowDom,
   getDomDocument,
-  setUndoRedoItems, santaClone, getCustomizerIframe
+  setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1160,6 +1160,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.generatePdf()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
+
+    getLockerColors();
   }
 
   private async addToCart(resolve:any=null) {
@@ -1485,6 +1487,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           eval(this.company.login_code.logout_action)
         }
       }
+
+      this.$store.dispatch('setLockerroomColors', [])
     }
   }
 
