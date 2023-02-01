@@ -285,8 +285,8 @@ export class handleMainProducts extends Mixins(FetchCategories) {
 
       this.$store.commit('CHANGE_STYLE_INDEX', style_index);
       await this.$store.dispatch("getModels", retrieved_products[product_index].id);
+      await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index, selected_id: retrieved_products[product_index].id});
       await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
-      await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index});
       await setRetrievedProductsCustomTexts(retrieved_products)
       self.$root.$emit('sliderEvent', product_index);
 
@@ -331,7 +331,6 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       }
 
       let selected_product = this.$store.getters.getSelectedProduct;
-     // initCustomLogos(retrieved_products)
       await initCustomLogosNew(retrieved_products)
       this.$store.dispatch("setProductsRosters");
 
@@ -383,8 +382,8 @@ export class handleMainProducts extends Mixins(FetchCategories) {
             return product_style.id == style_id;
           });
         }
+        await this.$store.dispatch('setSelectedIndex', { selectedIndex: product_index,  selected_id: retrieved_products[product_index].id });
         await this.$store.commit('SET_PRODUCTS', { products: retrieved_products });
-        await this.$store.dispatch('setSelectedIndex', { selectedIndex: product_index });
         await setRetrievedProductsCustomTexts(retrieved_products)
         this.$store.commit('CHANGE_STYLE_INDEX', style_index);
         await this.$store.dispatch("getModels", retrieved_products[product_index].id);

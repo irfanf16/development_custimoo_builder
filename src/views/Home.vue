@@ -1507,7 +1507,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (this.isCustomerAuthenticated) {
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true) {
-
         if (locker_index) {
           let payload = {index: locker_index, attribute: 'active_tab', value: true}
           this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
@@ -1519,12 +1518,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           }
         }
         this.showVModal('locker-modal')
+      }
 
-        if (this.ref.saveToLockerModal) {
-          this.hideVModal('add-to-lockerroom')
-          this.ref.saveToLockerModal.showLoader = false;
-        }
-
+      if (this.ref.saveToLockerModal) {
+        this.hideVModal('add-to-lockerroom')
+        this.ref.saveToLockerModal.showLoader = false;
       }
     }
   }

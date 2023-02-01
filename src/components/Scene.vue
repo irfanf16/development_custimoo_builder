@@ -1935,7 +1935,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
       this.frontCanvas.requestRenderAll()
-      if(this.back) {
+      if(this.back && this.backCanvas) {
         this.backCanvas.requestRenderAll()
       }
       this.custom_logo_objects = []
@@ -2004,7 +2004,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
       this.frontCanvas.requestRenderAll()
-      if(this.back) {
+      if(this.back && this.backCanvas) {
         this.backCanvas.requestRenderAll()
       }
       this.product_custom_text_objects = []
