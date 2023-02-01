@@ -1867,16 +1867,18 @@ const getDomDocument = (parent_doc= false) => {
 }
 
 const getLockerColors = async (callback ?:(any) ) => {
-  const response: any = await http.get("locker_with_colors").catch((errorResponse: AxiosError) => {
-    handleResponseException(errorResponse)
-  })
-
-  if(response) {
-    const response_data: Record<any, any> = response.data;
-    if (response_data) {
-      await Store.dispatch('setLockerroomColors', response_data);
-      if(callback){
-        await callback();
+  const is_auth = Store.getters.isCustomerAuthenticated
+  if(is_auth) {
+    const response: any = await http.get("locker_with_colors").catch((errorResponse: AxiosError) => {
+      handleResponseException(errorResponse)
+    })
+    if(response) {
+      const response_data: Record<any, any> = response.data;
+      if (response_data) {
+        await Store.dispatch('setLockerroomColors', response_data);
+        if(callback){
+          await callback();
+        }
       }
     }
   }
