@@ -440,8 +440,6 @@ import {
   routerPush,
   getImageFromCanvas,
   setDefaultColors,
-  isShadowDom,
-  getDomDocument,
   setUndoRedoItems, santaClone, getCustomizerIframe
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
