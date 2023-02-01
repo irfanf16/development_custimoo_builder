@@ -1734,10 +1734,6 @@ button {
                 color: #000;
                 margin-bottom: 10px;
 
-                &:only-child{
-                    display: none;
-                }
-
                 &:hover {
                     background: none;
                     border-color: #219f84;
