@@ -129,7 +129,7 @@
                                   </div>
                                 </div>
                               </b-tab>
-                              <b-tab v-if="colors && colors.length">
+                              <b-tab v-if="lockerroomColors && lockerroomColors.length && isCustomerAuthenticated">
                                 <template #title>
                                   Locker colors
                                 </template>
@@ -150,9 +150,8 @@
                                       {{folder.folder_name}}
                                     </b-button>
                                   </div>
-
                                   <div class="color-container mt-1">
-                                    <template v-for="(color, colorIndex) in colors">
+                                    <template v-for="(color, colorIndex) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
                                       <div class="color-box" :style="{background: color.value}" v-if="color.value"
                                            :key="`text_color_${colorIndex}${color.name}`" :title="color.name"
                                            @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {...color, position: '1'}, select_color_type)"></div>
@@ -259,9 +258,7 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
     await this.productFonts();
 
-    await getLockerColors(()=>{
-      this.fetchColors(this.activeLockerIndex, this.activeFolderIndex)
-    });
+    await getLockerColors();
   },
   filters: {
     capitalize: (value: string) => {
@@ -308,6 +305,10 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   }
   get logoColorsInfo() {
     return filter(this.$store.getters.getLogoColorsInfo('extracted_colors'), 'hex')
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   get lockerColors() {
@@ -384,22 +385,20 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
   }
 
-
-  public fetchColors(locker_i: number, folder_i: number) {
-    this.colors = JSON.parse(this.lockerroomColors[locker_i]!.folders[folder_i].color);
-    return false;
-  }
+  public parseJSON(value: string) {
+      if(value){
+        return JSON.parse(value);
+      }
+    }
 
   public setActiveFolderIndex(locker_i: number, folder_i: number) {
     this.activeLockerIndex = locker_i;
     this.activeFolderIndex = folder_i;
-    this.fetchColors(locker_i, folder_i)
   }
 
   public setActiveLockerIndex(locker_i: number) {
     this.activeLockerIndex = locker_i;
     this.activeFolderIndex = 0;
-    this.fetchColors(locker_i, 0)
   }
 
   public handleTextOutline(custom_text_index:number, custom_text_item_index:number) {

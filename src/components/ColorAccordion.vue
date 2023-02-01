@@ -66,7 +66,7 @@
                         </span>
                 </div>
               </template>
-              <template v-else-if="selectTypeIndex == (productColors.length + 1) && !othersActive" v-for="(color, index) in colors">
+              <template v-else-if="selectTypeIndex == (productColors.length + 1) && !othersActive" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
                   <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
@@ -113,9 +113,7 @@ import {getSelectedProductPantones, getLockerColors, setUndoRedoItems} from "@/h
     setTimeout(() => {
       this.selectType(this.selectTypeIndex);
     }, 300);
-    getLockerColors(()=>{
-      this.fetchColors(this.activeLockerIndex, this.activeFolderIndex)
-    });
+    getLockerColors();
   }
 })
 export default class ColorAccordion extends Mixins(LockerProducts) {
@@ -134,7 +132,6 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   public colorImage = '/img/images/color-placeholder.png'
   public pantoneMessage = ''
   public isActive = false
-  public colors: [] = []
   public othersActive = false
 
   // public showit(){
@@ -206,21 +203,14 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
     return this.$store.getters.getSetting('color_type');
   }
 
-  public fetchColors(locker_i: number, folder_i: number) {
-    this.colors = JSON.parse(this.lockerroomColors[locker_i]!.folders[folder_i].color);
-    return false;
-  }
-
   public setActiveFolderIndex(locker_i: number, folder_i: number) {
     this.activeLockerIndex = locker_i;
     this.activeFolderIndex = folder_i;
-    this.fetchColors(locker_i, folder_i)
   }
 
   public setActiveLockerIndex(locker_i: number) {
     this.activeLockerIndex = locker_i;
     this.activeFolderIndex = 0;
-    this.fetchColors(locker_i, 0)
   }
 
   public selectType(index: number, showOther = false) {
