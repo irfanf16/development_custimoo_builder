@@ -26,7 +26,7 @@
       </b-form>
       </ValidationObserver>
     </div>
-    <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
   </b-modal>
 </template>
 

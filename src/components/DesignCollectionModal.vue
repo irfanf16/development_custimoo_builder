@@ -25,7 +25,7 @@
 
     <div class="modal-body">
       <div class="design-collection-form">
-        <div class="loader" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
+        <div class="loader" v-if="showLoader" ><img style="width: 100px" src="@assets/images/loading.gif" /></div>
         <b-form inline>
           <b-container fluid>
             <draggable class="row draggable gap-y-5" :options="{animation: 250, delayOnTouchOnly: true, delay: 500}"

@@ -22,7 +22,7 @@
             <div class="lockerroom-tabs">
               <div>
                 <b-card no-body>
-                  <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+                  <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
                   <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="handleLockerRoomChanged" @input="handleTabChanged" :no-fade="true">
                     <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" draggable="false">
                       <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
@@ -37,7 +37,7 @@
                                :data-room-index="i" :data-design-title="product.product_name"
                                :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                                :data-product-index="ind">
-                            <div class="fs-2" @click="logDom">
+                            <div class="fs-2">
                               Total products: <strong class="font-weight-bolder">{{product.roster_count ? product.roster_count : '0'}}</strong>
                             </div>
                             <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
@@ -349,7 +349,7 @@
               </div>
             </div>
 
-          <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+          <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
         </div>
       </div>
     </modal>
@@ -376,7 +376,6 @@ import ContactModal from "@/components/ContactModal.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import ModalAction from "@/mixins/ModalAction";
-import {getDomDocument} from '@/helpers/Helpers';
 import {AxiosError} from "axios";
 
 @Component<LockerRoom>({
@@ -1257,9 +1256,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public showContactPopup(room_id:number, room_index:number){
     this.ref['contactmodal'].showContactPopup(room_id, room_index)
-  }
-  public logDom() {
-    getDomDocument(true)
   }
 }
 </script>

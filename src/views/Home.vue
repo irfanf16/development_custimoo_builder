@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" >
     <meta name="viewport" content="width=device-width">
-    <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
         <template v-if="selectedProduct">
@@ -48,7 +48,7 @@
                       <template>
                         <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" :disabled="shareDesignLoader" style="min-width: 100px" @click.stop="shareDesign">
                           <template v-if="!shareDesignLoader">Share design</template>
-                          <img v-else width="20" height="20" src="../../src/assets/images/loading.gif" />
+                          <img v-else width="20" height="20" src="@assets/images/loading.gif" />
                         </b-button>
                         <Popper
                           style="font-size: 12px;"
@@ -77,7 +77,7 @@
 
                     <template v-if="isCustomerAuthenticated">
                       <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
-                      <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
+                      <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="@assets/images/loading.gif" /></b-button>
                     </template>
                     <b-button v-else @click="setActionBeforeLogin('generatePdf')"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
 
@@ -279,7 +279,7 @@
                           Update Cart
                         </b-button>
                         <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                          <img width="20" height="20" src="@assets/images/loading.gif" />
                         </b-button>
                       </template>
                     </template>
@@ -312,7 +312,7 @@
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                              <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                              <img width="20" height="20" src="@assets/images/loading.gif" />
                             </b-button>
                           </template>
                          </template>
@@ -440,8 +440,6 @@ import {
   routerPush,
   getImageFromCanvas,
   setDefaultColors,
-  isShadowDom,
-  getDomDocument,
   setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
