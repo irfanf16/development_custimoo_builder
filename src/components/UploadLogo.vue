@@ -11,7 +11,7 @@
     <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :class="{'pulse-animation': !(showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url)}" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
         <span class="vector-logos-error" v-if="!vector_logos && customLogos[customLogoIndex].url" v-b-tooltip="`Logo uploaded are not in vector format, please reupload to place order`"><b-icon-exclamation-circle-fill /></span>
-        <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+        <div class="loader relative" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
         </div>
@@ -353,6 +353,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     }
     this.$store.commit('customLogos', payload)
     this.$store.commit('SET_LOGO_COLORS', []);
+    this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true});
     this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
     if(this.customLogoIndex == 0) {
       this.$store.commit('REMOVE_TEAM_LOGO')

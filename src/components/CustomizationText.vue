@@ -129,6 +129,36 @@
                                   </div>
                                 </div>
                               </b-tab>
+                              <b-tab v-if="lockerroomColors && lockerroomColors.length && isCustomerAuthenticated">
+                                <template #title>
+                                  Locker colors
+                                </template>
+                                <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
+                                  <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 py-2">
+                                    <template v-for="(room, i) in lockerroomColors">
+                                      <b-button size="sm" class="btn-locker-color" variant="secondary" @click="setActiveLockerIndex(i)" :class="{'active': i == activeLockerIndex}"
+                                                :key="`locker_${i}`">
+                                        <!--                  {{ room && room.folders[0].folder_name}}-->
+                                        {{room && room.room_name}}
+                                      </b-button>
+                                    </template>
+                                  </div>
+
+                                  <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 pb-2">
+                                    <b-button size="sm" class="btn-locker-folder" variant="secondary" :class="{'active': folder_i == activeFolderIndex}" @click="setActiveFolderIndex(activeLockerIndex, folder_i)"
+                                              v-for="(folder, folder_i) in lockerroomColors[activeLockerIndex].folders" :key="`folder_${activeLockerIndex}${folder_i}`">
+                                      {{folder.folder_name}}
+                                    </b-button>
+                                  </div>
+                                  <div class="color-container mt-1">
+                                    <template v-for="(color, colorIndex) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
+                                      <div class="color-box" :style="{background: color.value}" v-if="color.value"
+                                           :key="`text_color_${colorIndex}${color.name}`" :title="color.name"
+                                           @click="customTextColorUpdated(customTextIndex, productCustomTextItemIndex, {...color, position: '1'}, select_color_type)"></div>
+                                    </template>
+                                  </div>
+                                </div>
+                              </b-tab>
                               <b-tab v-if="selectedProduct.is_custom_color_allowed">
                                 <template #title>
                                   Other
@@ -173,6 +203,7 @@
                                   </div>
                                 </div>
                               </b-tab>
+
 <!--                              <template #tabs-end>-->
 <!--                                <b-nav-item>Others</b-nav-item>-->
 <!--                                <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>-->
@@ -212,7 +243,7 @@ import TextColorTabs from "@/components/TextColorTabs.vue";
 import {HideUpdateLockerButton, ProductFonts} from "@/mixins/SelectedProductMixin";
 import {find, filter} from "lodash";
 import colorPicker from '@caohenghu/vue-colorpicker';
-import {getSelectedProductPantones, santaClone, setUndoRedoItems} from "@/helpers/Helpers";
+import {getSelectedProductPantones, santaClone, setUndoRedoItems, getLockerColors} from "@/helpers/Helpers";
 import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
 
@@ -225,7 +256,9 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
   async mounted() {
     let self: Record<any, any> = this;
 
-    await this.productFonts()
+    await this.productFonts();
+
+    await getLockerColors();
   },
   filters: {
     capitalize: (value: string) => {
@@ -249,6 +282,9 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   public default_font_obj = ''
   public pantoneMessage = ''
   public selected_font = '';
+  public activeLockerIndex = 0
+  public colors: [] = []
+  public activeFolderIndex = 0
 
   /* component props ends here */
 
@@ -261,11 +297,18 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
+  get lockerroomColors(): Record<any, any> {
+    return this.$store.getters.getLockerroomColors;
+  }
   get selectedProductId(): Record<any, any> {
     return this.$store.getters.getSelectedProductId
   }
   get logoColorsInfo() {
     return filter(this.$store.getters.getLogoColorsInfo('extracted_colors'), 'hex')
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   get lockerColors() {
@@ -340,6 +383,22 @@ export default class CustomizationText extends Mixins(ProductFonts, HideUpdateLo
     let pantoneColor = getClosestColor($event.hex,selectProductPantonesList, this.getColorType);
     let color = {value: pantoneColor.hex, position: '1', name: pantoneColor.pantone}
     this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
+  }
+
+  public parseJSON(value: string) {
+      if(value){
+        return JSON.parse(value);
+      }
+    }
+
+  public setActiveFolderIndex(locker_i: number, folder_i: number) {
+    this.activeLockerIndex = locker_i;
+    this.activeFolderIndex = folder_i;
+  }
+
+  public setActiveLockerIndex(locker_i: number) {
+    this.activeLockerIndex = locker_i;
+    this.activeFolderIndex = 0;
   }
 
   public handleTextOutline(custom_text_index:number, custom_text_item_index:number) {

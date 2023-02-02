@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrapper m-lg-4">
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     <div v-else class="container-fluid bg-white">
       <div class="text-left">
         <h1 class="h3">Address Book</h1>

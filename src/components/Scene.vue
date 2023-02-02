@@ -1,6 +1,6 @@
 <template>
   <div class="loading-holder">
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }"
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
@@ -1935,7 +1935,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
       this.frontCanvas.requestRenderAll()
-      if(this.back) {
+      if(this.back && this.backCanvas) {
         this.backCanvas.requestRenderAll()
       }
       this.custom_logo_objects = []
@@ -2004,7 +2004,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
       this.frontCanvas.requestRenderAll()
-      if(this.back) {
+      if(this.back && this.backCanvas) {
         this.backCanvas.requestRenderAll()
       }
       this.product_custom_text_objects = []

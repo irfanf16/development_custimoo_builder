@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
-    <div class="loader global" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader" ><img style="width: 100px" src="require('@/assets/images/loading.gif')" /></div>
     <div class="order-wrapper" v-if="order && order.id">
       <div class="d-flex justify-content-between align-items-center">
         <div class="fs-4 font-weight-bolder order-title p-2">Order # {{ order.order_no }}</div>

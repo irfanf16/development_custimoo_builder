@@ -185,31 +185,6 @@ const processColorsCustom = (colors: [], logos_count=4) => {
 
 }
 
-// const getSelectedProductPantones = (product_id: null|number = null) => {
-//   const productPantones: Record<any, any>[] = []
-//   let selectedProduct = Store.getters.getSelectedProduct;
-//   if(product_id){
-//     const search_product = getProductById(product_id);
-//     if(search_product)
-//       selectedProduct = search_product;
-//   }
-//
-//     selectedProduct.colors.forEach((product_colors: any, key: number) => {
-//     if(key == 0){
-//       const colors = product_colors.json_data
-//       colors.forEach((color: any) => {
-//         //let pantone = color.name
-//         let pantone = ''
-//         if(color.pantone){
-//           pantone = color.pantone
-//         }
-//         productPantones.push({pantone : pantone, name: color.name, hex: color.value});
-//       })
-//     }
-//   })
-//   return productPantones;
-// }
-
 const getSelectedProductPantones = (product_id: null|number = null) => {
   const product_pantones: Record<any, any>[] = []
   const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
@@ -1110,6 +1085,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     }
     const numbers_array:Record<any,any>[] = getSVGNumberArraysFromRoster(factory_product);
     const svg_numbers_payload = getSVGNumbers(numbers_array,logo_max_width,production_file_initial_dimension);
+    svg_string += `${svg_numbers_payload.svg_string}`;
     const numbers_width = svg_numbers_payload.width?svg_numbers_payload.width + 500:0;
     const logo_max_width_and_number_max_width = logo_max_width + numbers_width;
 
@@ -1815,7 +1791,8 @@ const getExtensionFromString = (string: string) => {
 
 const getUrlParameter = (name = '') => {
   if(name) {
-    const url = window.parent.window.location.href
+    // const url = window.parent.window.location.href
+    const url = getWindowObject().window.location.href
     name = name.replace(/[[\]]/g, '\\$&');
     const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
     const results = regex.exec(url);
@@ -1823,14 +1800,16 @@ const getUrlParameter = (name = '') => {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
-  const hash_url = window.parent.window.location.hash
+  // const hash_url = window.parent.window.location.hash
+  const hash_url = getWindowObject().window.location.hash
   return hash_url.replace('#/', '')
 }
 
 const routerPush = (router, route_name) => {
   const router_url = router.resolve({name: route_name})
   if(router_url) {
-    window.parent.window.location.hash = router_url.href;
+    // window.parent.window.location.hash = router_url.href;
+    getWindowObject().window.location.hash = router_url.href;
   }
 }
 
@@ -1880,28 +1859,30 @@ const getSantaModalConfig = () => {
 
 const getDomDocument = (parent_doc= false) => {
   if(parent_doc) {
-    console.log('window.parent.document', window.parent, window.parent.document)
-    return window.parent.document
+    // return window.parent.document
+    return getWindowObject().document
   }
   const dom_document = document.querySelector(getWebComponentNames())
   return dom_document ? dom_document?.shadowRoot : document
 }
 
-// const getDomDocument = (return_iframe = false) => {
-//   let dom_document = document.querySelector(getWebComponentNames())
-//   console.log('window', window, )
-//   console.log('window_parent', window.parent, window.parent.document)
-//   dom_document = dom_document ? dom_document?.shadowRoot : document
-//   const dom_document_iframe = dom_document.querySelector('iframe')
-//   console.log('dom_document_iframe', dom_document_iframe, document.querySelectorAll('iframe'))
-//   if(return_iframe) {
-//     return dom_document_iframe
-//   }
-//   if(dom_document_iframe) {
-//     dom_document = dom_document_iframe.contentWindow.document.querySelector(getWebComponentNames())
-//   }
-//   return dom_document
-// }
+const getLockerColors = async (callback ?:(any) ) => {
+  const is_auth = Store.getters.isCustomerAuthenticated
+  if(is_auth) {
+    const response: any = await http.get("locker_with_colors").catch((errorResponse: AxiosError) => {
+      handleResponseException(errorResponse)
+    })
+    if(response) {
+      const response_data: Record<any, any> = response.data;
+      if (response_data) {
+        await Store.dispatch('setLockerroomColors', response_data);
+        if(callback){
+          await callback();
+        }
+      }
+    }
+  }
+}
 
 const urlToBase64 = async (urls) => {
   const response = await http.post('url_to_base64', {file_urls: urls}).catch((errorResponse) => {
@@ -1965,7 +1946,8 @@ const setUndoRedoItems = async (items_type: string, action_on_items: string, use
 }
 
 const getCustomizerIframe = () => {
-  const iframes =  window.parent.document.querySelectorAll('iframe')
+  // const iframes =  window.parent.document.querySelectorAll('iframe')
+  const iframes =  getWindowObject().document.querySelectorAll('iframe')
   let customizer_iframe: any = null
   Array.from(iframes, (iframe) => {
     const get_customizer = iframe?.contentDocument?.querySelector('v-customizer')
@@ -1974,6 +1956,15 @@ const getCustomizerIframe = () => {
     }
   })
   return customizer_iframe
+}
+
+const getWindowObject = () => {
+  try {
+    return window.parent
+  } catch (error) {
+    return window
+    console.info('Error while getting window object', error)
+  }
 }
 
 
@@ -1990,5 +1981,5 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe
+  classObserver, getCustomizerIframe, getWindowObject, getLockerColors
 };

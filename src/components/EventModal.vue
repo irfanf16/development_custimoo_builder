@@ -244,7 +244,7 @@
       <b-modal id="email-template-modal" modal-class="edit_template" title="Edit Email Template">
         <VueEditor v-model="event_data.email_content"></VueEditor>
       </b-modal>
-      <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif"/></div>
+      <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif"/></div>
       <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
                      ref="reset-modal"></confirm-modal>
     </div>

@@ -53,6 +53,8 @@ const ProductAttributes:Module<any, any> = {
     rosterDetails: {},
     productionSVGs: {},
     lockerColors:[],
+    // lockerroomColors is being used for Locker Room Design Colors and it is the newest call for locker colors
+    lockerroomColors:[],
     logoTabIndex: 0,
     actionBeforeLogin: '',
     undoItems : [],
@@ -236,7 +238,7 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
-      state.selectedPrdId = state.products[payload.selectedIndex].id;
+      state.selectedPrdId = payload.selected_id;
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
       Vue.set(state, payload.prd_type, payload.value)
@@ -754,6 +756,9 @@ const ProductAttributes:Module<any, any> = {
         })
       }
       state.lockerColors = payload
+    },
+    SET_LOCKER_ROOM_COLORS(state:Record<any, any>, payload:Record<any, any>[]){
+      state.lockerroomColors = payload
     },
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
       state.actionBeforeLogin = action
@@ -1333,6 +1338,9 @@ const ProductAttributes:Module<any, any> = {
     getLockerColors: state => {
       return state.lockerColors
     },
+    getLockerroomColors: state => {
+      return state.lockerroomColors
+    },
     getActionBeforeLogin: state => {
       if(state.actionBeforeLogin) {
         return state.actionBeforeLogin
@@ -1428,6 +1436,9 @@ const ProductAttributes:Module<any, any> = {
   actions: {
     setSearchLoader({commit}, payload){
       commit('SET_SEARCH_LOADER', payload)
+    },
+    setLockerroomColors({commit}, payload){
+      commit('SET_LOCKER_ROOM_COLORS', payload)
     },
     setEditRosterFromLocker({commit}, payload) {
       commit('SET_EDIT_ROSTER_FROM_LOCKER', payload);
