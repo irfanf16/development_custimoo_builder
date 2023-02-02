@@ -286,10 +286,15 @@
                     <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel" v-if="!cartLoading">Cancel</b-button>
                   </template>
 
-                  <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
+                  <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary"
+                            v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1)))
+                            || (!hideColorSection && (tabIndex <= mainTotalTabs))"
+
+                  >Next</b-button>
 
                   <template v-else>
-                    <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
+                    <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'order_product'"></template>
+                    <b-button :key="'editRoster'" v-else-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
                       Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
                     </b-button>
 
@@ -539,7 +544,7 @@ Vue.filter('formatDate', function(value:string) {
       if (shared_url?.includes('share')) {
         routerPush(this.$router,'Home');
       }
-      this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
+
       this.jwtToken = localStorage.getItem('jwtToken') as string
       // await this.$store.dispatch('setJwtToken')
       if(!localStorage.getItem('browserToken')){
