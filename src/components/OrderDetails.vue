@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
 
     <div class="order-details-area">
       <div class="qty-area">

@@ -22,7 +22,7 @@
             <div class="lockerroom-tabs">
               <div>
                 <b-card no-body>
-                  <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+                  <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
                   <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="handleLockerRoomChanged" @input="handleTabChanged" :no-fade="true">
                     <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" draggable="false">
                       <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
@@ -349,7 +349,7 @@
               </div>
             </div>
 
-          <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+          <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
         </div>
       </div>
     </modal>

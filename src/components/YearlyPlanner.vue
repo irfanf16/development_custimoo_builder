@@ -150,7 +150,7 @@
           </tr>
         </tbody>
       </table>
-      <div class="loader relative" v-if="allEventsLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader relative" v-if="allEventsLoader"><img src="@assets/images/loading.gif" /></div>
     </div>
   </b-modal>
   <div class="row">
@@ -168,7 +168,7 @@
     </div>
 
   </div>
-  <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+  <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
   <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
                  ref="reset-modal">
   </confirm-modal>

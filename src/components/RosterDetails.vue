@@ -215,7 +215,7 @@
         </template>
       </template>
       <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
-        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+        <img width="20" height="20" src="@assets/images/loading.gif" />
       </button>
 
     </div>

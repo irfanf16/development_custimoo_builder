@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif"/></div>
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif"/></div>
     <div v-if="collection">
       <a :href="`${storageUrl}${collection.link}`" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
       <div id="collectionPdfContainer">
@@ -74,7 +74,7 @@
                       Purchase
                     </button>
                       <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
-                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                        <img width="20" height="20" src="@assets/images/loading.gif" />
                       </button>
                     </template>
                   </template>
@@ -84,7 +84,7 @@
                         Purchase
                       </button>
                       <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
-                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                        <img width="20" height="20" src="@assets/images/loading.gif" />
                       </button>
                     </template>
 
