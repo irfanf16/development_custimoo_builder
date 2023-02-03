@@ -675,7 +675,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       }
       if(scene_ref.customLogoObjects) {
         for (const custom_logo_svg of scene_ref.customLogoObjects) {
-          if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
+          if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object then it must contain several keys so > 3 is ok
             post_data.custom_logo_svgs.push(custom_logo_svg);
           }
         }
@@ -1030,7 +1030,7 @@ const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) =>
 
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-    $(svg_doc).find(`[id]`).each  (function(doc_item) {
+    $(svg_doc).find(`[id]`).each  (function() {
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id

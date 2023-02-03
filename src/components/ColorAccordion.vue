@@ -5,16 +5,18 @@
         <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index, svgElement.gradient_colors? gradient_index === undefined? 0 : gradient_index : undefined)">
           <span class="text-uppercase text">{{ svgElement.id | capitalize }} </span>
           <span class="color">
-            <span v-if="svgElement.color" class="color-box" :style="{ background : svgElement.color }"></span>
-            <span v-if="svgElement.gradient_colors" class="color-box" :style="{ background : gradient_color_string(svgElement.gradient_colors) }"></span>
-
-            <span v-if="svgElement.color" class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span></span>
-            <span v-if="svgElement.gradient_colors" class="color-pantone-name gap-1">
-             <template v-for="(gradient_color, g_index) in svgElement.gradient_colors">
-               {{ gradient_color.pantone }}
-               <span :key="g_index" style="text-transform: uppercase; display: block">{{ gradient_color.name }} <template v-if="g_index < svgElement.gradient_colors.length - 1">/</template></span>
-             </template>
-            </span>
+            <template v-if="svgElement.gradient_colors">
+              <span class="color-box" :style="{ background : gradient_color_string(svgElement.gradient_colors) }"></span>
+              <span class="color-pantone-name gap-1 text-uppercase">
+               <template v-for="(gradient_color, g_index) in svgElement.gradient_colors">
+                 {{ gradient_color.pantone }} {{ gradient_color.name }} <template v-if="g_index < svgElement.gradient_colors.length - 1">/</template>
+               </template>
+              </span>
+            </template>
+            <template v-else>
+              <span class="color-box" :style="{ background : svgElement.color }"></span>
+              <span class="color-pantone-name text-uppercase">{{ svgElement.pantone }} {{ svgElement.name }}</span>
+            </template>
           </span>
           <span class="accordion-icon"></span>
         </b-button>

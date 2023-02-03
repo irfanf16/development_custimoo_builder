@@ -445,10 +445,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             } else if (!defaultColors.length) {
               this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
                 if (svgGroup.id == item.id) {
-                  if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+                  if (item.fill.gradientUnits) {
+                    item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+                      gradient.color = this.initialSvgGroups[index][gradient_index].color
+                    })
+                    item.set('fill', new fabric.Gradient(item.fill));
+                  } else {
                     item.set('fill', this.initialSvgGroups[index].color)
-                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
                   }
+                  Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
                 }
               })
             }
@@ -464,35 +469,44 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if(this.productType == 'customized') {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if (defaultColors.length) {
-        let appliedDefaultColors: string[] = []
+        let appliedDefaultColors: string[]|string[][] = []
         let useColorIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-          appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
-          if (this.mainPreview) {
-            this.$store.dispatch('updateSvgGroups',
-              {
-                index: index,
-                id:svgGroup.id,
-                color: defaultColors[useColorIndex].color,
-                pantone: defaultColors[useColorIndex].pantone,
-                name: defaultColors[useColorIndex].name
-              })
-          }
-          svgGroup.color = defaultColors[useColorIndex].color
-          svgGroup.pantone = defaultColors[useColorIndex].pantone
-          svgGroup.name = defaultColors[useColorIndex].name
-
-          useColorIndex++
-          if (useColorIndex >= defaultColors.length) {
-            useColorIndex = 0
+          if(svgGroup.gradient_colors) {
+            let gradient_colors: string[] = []
+            svgGroup.gradient_colors.forEach((gradient_color, gradient_color_index) => {
+              gradient_colors.push(defaultColors[useColorIndex].color)
+              svgGroup.gradient_colors[gradient_color_index].color = defaultColors[useColorIndex].color
+              svgGroup.gradient_colors[gradient_color_index].pantone = defaultColors[useColorIndex].pantone
+              svgGroup.gradient_colors[gradient_color_index].name = defaultColors[useColorIndex].name
+              useColorIndex++
+              if (useColorIndex >= defaultColors.length) {
+                useColorIndex = 0
+              }
+            })
+            appliedDefaultColors[svgGroup.id] = gradient_colors
+          } else {
+            appliedDefaultColors[svgGroup.id] = defaultColors[useColorIndex].color
+            svgGroup.color = defaultColors[useColorIndex].color
+            svgGroup.pantone = defaultColors[useColorIndex].pantone
+            svgGroup.name = defaultColors[useColorIndex].name
+            useColorIndex++
+            if (useColorIndex >= defaultColors.length) {
+              useColorIndex = 0
+            }
           }
         })
 
         let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
         texture.forEach((item: Record<any, any>) => {
           item.id = item.id.toLowerCase()
-          if (appliedDefaultColors[item.id]) {
-            item.set('fill', appliedDefaultColors[item.id]);
+          if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+            item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+              gradient.color = appliedDefaultColors[item.id][gradient_index]
+            })
+            item.set('fill', new fabric.Gradient(item.fill));
+          } else if(appliedDefaultColors[item.id]) {
+            item.set('fill', appliedDefaultColors[item.id])
           }
         })
         this.frontCanvas.requestRenderAll()
@@ -501,8 +515,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
           texture.forEach((item: Record<any, any>) => {
             item.id = item.id.toLowerCase()
-            if (appliedDefaultColors[item.id]) {
-              item.set('fill', appliedDefaultColors[item.id]);
+            if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+              item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+                gradient.color = appliedDefaultColors[item.id][gradient_index]
+              })
+              item.set('fill', new fabric.Gradient(item.fill));
+            } else if(appliedDefaultColors[item.id]) {
+              item.set('fill', appliedDefaultColors[item.id])
             }
           })
           this.backCanvas.requestRenderAll()
@@ -518,31 +537,37 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       defaultSvgGroups[svgGroup.id] = svgGroup
     })
 
-    let appliedDefaultColors: string[] = []
+    let appliedDefaultColors: string[]|string[][] = []
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
       if(Object.keys(defaultSvgGroups).length && defaultSvgGroups[svgGroup.id]) {
-        appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
-        if (this.mainPreview) {
-          this.$store.dispatch('updateSvgGroups',
-            {
-              index: index,
-              id:svgGroup.id,
-              color: defaultSvgGroups[svgGroup.id].color,
-              pantone: defaultSvgGroups[svgGroup.id].pantone,
-              name: defaultSvgGroups[svgGroup.id].name
-            })
+        if(svgGroup.gradient_colors) {
+          let gradient_colors: string[] = []
+          svgGroup.gradient_colors.forEach((gradient_color, gradient_color_index) => {
+            gradient_colors.push(defaultSvgGroups[svgGroup.id].gradient_colors[gradient_color_index].color)
+            gradient_color.color = defaultSvgGroups[svgGroup.id].gradient_colors[gradient_color_index].color
+            gradient_color.pantone = defaultSvgGroups[svgGroup.id].gradient_colors[gradient_color_index].pantone
+            gradient_color.name = defaultSvgGroups[svgGroup.id].gradient_colors[gradient_color_index].name
+          })
+          appliedDefaultColors[svgGroup.id] = gradient_colors
+        } else {
+          appliedDefaultColors[svgGroup.id] = defaultSvgGroups[svgGroup.id].color
+          svgGroup.color = defaultSvgGroups[svgGroup.id].color
+          svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
+          svgGroup.name = defaultSvgGroups[svgGroup.id].name
         }
-        svgGroup.color = defaultSvgGroups[svgGroup.id].color
-        svgGroup.pantone = defaultSvgGroups[svgGroup.id].pantone
-        svgGroup.name = defaultSvgGroups[svgGroup.id].name
       }
     })
 
     let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
     texture.forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (appliedDefaultColors[item.id]) {
-        item.set('fill', appliedDefaultColors[item.id]);
+      if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+        item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+          gradient.color = appliedDefaultColors[item.id][gradient_index]
+        })
+        item.set('fill', new fabric.Gradient(item.fill));
+      } else if(appliedDefaultColors[item.id]) {
+        item.set('fill', appliedDefaultColors[item.id])
       }
     })
     this.frontCanvas.requestRenderAll()
@@ -551,8 +576,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
       texture.forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (appliedDefaultColors[item.id]) {
-          item.set('fill', appliedDefaultColors[item.id]);
+        if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+          item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+            gradient.color = appliedDefaultColors[item.id][gradient_index]
+          })
+          item.set('fill', new fabric.Gradient(item.fill));
+        } else if(appliedDefaultColors[item.id]) {
+          item.set('fill', appliedDefaultColors[item.id])
         }
       })
       this.backCanvas.requestRenderAll()
