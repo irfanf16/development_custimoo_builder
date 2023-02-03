@@ -10,9 +10,9 @@
     <div class="text-center">
         <span class="btn btn-secondary light rounded-circle confirm-icon">
           <BIconQuestion v-if="modal_data.icon === 'question'"/>
-          <BIconInfo v-if="modal_data.icon === 'success'" />
-          <BIconCrop v-if="modal_data.icon === 'error'" />
-
+          <BIconCheck v-if="modal_data.icon === 'success'" />
+          <BIconExclamation v-if="modal_data.icon === 'error'" />
+          <BIconInfo v-if="modal_data.icon === 'warning'" />
         </span>
     </div>
     <div class="fs-4 text-muted text-center p-4">

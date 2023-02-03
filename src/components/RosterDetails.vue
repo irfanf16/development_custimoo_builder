@@ -445,7 +445,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       locker_product_id = parseInt(locker_product_id);
       if(this.show_roster_change_warning) {
         self.$santaModal.show({
-          icon: 'warning', title: 'Are you sure?', text: 'By changing product any changes made on roster will be lost',
+          icon: 'warning', title: 'Are you sure?', text: 'Do you want to overwrite the current information',
           confirm_text: 'Yes, change it', cancel_text: 'No', close_on_confirm: true
         },self).then((result) => {
           if (result) {
