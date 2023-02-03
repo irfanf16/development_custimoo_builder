@@ -38,7 +38,7 @@
                                :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                                :data-product-index="ind">
                             <div class="fs-2">
-                              Total products: <strong class="font-weight-bolder">{{product.roster_count ? product.roster_count : '0'}}</strong>
+                              Total products: <strong class="font-weight-bolder">{{product.roster_total_quantity ? product.roster_total_quantity : '0'}}</strong>
                             </div>
                             <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                                    @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
