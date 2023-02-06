@@ -89,7 +89,7 @@
       <div class="d-flex mt-2 flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
             <template v-if="isCustomerAuthenticated">
-              <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+              <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                 <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                 <span v-if="this.ref['edit-roster'] && !this.ref['edit-roster'].$refs['order-details'].isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
                   Add to cart

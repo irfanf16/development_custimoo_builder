@@ -150,7 +150,7 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+      <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
         <b-button class="mt-4" @click="createOrder">Confirm Order</b-button>
       </div>
     </div>

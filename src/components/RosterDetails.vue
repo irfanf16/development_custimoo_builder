@@ -198,7 +198,7 @@
         <b-button @click="showVModal('replace-logo')" aria-label="Finalize Order" class="mx-2 px-5" variant="secondary">Finalize Design</b-button>
       </span>
       <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
-        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+        <template v-if="company.platform !== 'self'  || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform === 'self' && company.id !== 1)">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
                   :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
@@ -206,7 +206,7 @@
         </template>
       </template>
       <template v-else-if="!getCartLoading">
-        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+        <template v-if="company.platform !== 'self'  || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform === 'self' && company.id !== 1) ">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
                   :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart

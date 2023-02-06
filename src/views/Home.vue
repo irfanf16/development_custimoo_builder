@@ -123,7 +123,7 @@
                         </template>
                       </div>
                     </li>
-                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && customerPermissions.includes('place-order')) || company.platform == 'cdnExceptLogin')">
+                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform == 'self' && company.id !== 1)  || company.platform == 'cdnExceptLogin')">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>
@@ -301,7 +301,7 @@
                     <template v-else-if="isCustomerAuthenticated">
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                          <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+                          <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                             <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
                               <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" disabled>
                                 Add to Cart
