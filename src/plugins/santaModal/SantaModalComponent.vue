@@ -9,7 +9,7 @@
    <div class="modal-body">
     <div class="text-center">
         <span class="btn btn-secondary light rounded-circle confirm-icon">
-          <BIconQuestion v-if="modal_data.icon === 'question'"/>
+          <BIconQuestion v-if="modal_data.icon === 'confirm'"/>
           <BIconCheck v-if="modal_data.icon === 'success'" />
           <BIconExclamation v-if="modal_data.icon === 'error'" />
           <BIconInfo v-if="modal_data.icon === 'warning'" />
