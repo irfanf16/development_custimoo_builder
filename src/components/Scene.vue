@@ -717,7 +717,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       } else {
         this.frontCanvas = canvas
       }
-      fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center'
+      fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center' as string
+
+      (fabric.Image.prototype as Record<any, any>).getBase64 = function() {
+        let el = fabric.util.createCanvasElement() as Record<any, any>
+        el.width  = this._element.naturalWidth || this._element.width;
+        el.height = this._element.naturalHeight || this._element.height;
+        el.getContext("2d").drawImage(this._element, 0, 0);
+        return el.toDataURL();
+      }
 
       let models: fabric.Image[] = []
       let promises = []
