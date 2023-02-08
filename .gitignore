@@ -21,17 +21,10 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-# .env*
-
-
+.env*
+!.env.example
 src/assets/css/custom.css
 src/assets/css/custom.css.map
-env.development
-.env.development
-.env.staging
-.env.staging.wcOrderDetail
-.env.wcOrderDetail
-.env.woocom
 self_customizer/
 wordpress_customizer_staging/
 wordpress_customizer/
