@@ -132,10 +132,15 @@
                           <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'" v-click-outside-custom="hideRenamePopup"
                                class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
                             <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
-                            <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
-                              <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
-                              <b-icon-check v-else />
-                            </b-button>
+                            <div class="d-flex">
+                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
+                                <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
+                                <b-icon-check v-else />
+                              </b-button>
+                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0 close-rename" @click="()=>{renameID = '-1'}">
+                                <b-icon-x />
+                              </b-button>
+                            </div>
                           </div>
                         </div>
                         </template>
@@ -1627,6 +1632,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     border-radius: 0;
     border: none;
     background: none;
+  }
+
+  .close-rename{
+    background: var(--theme-color-light);
+    color: var(--theme-color);
   }
 }
 </style>
