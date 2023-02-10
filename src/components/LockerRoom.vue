@@ -129,7 +129,7 @@
                             </li>
                           </ul>
 
-                          <div v-if="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}`" v-click-outside-custom="hideRenamePopup"
+                          <div v-if="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}${i + ind}${ind}`" v-click-outside-custom="hideRenamePopup"
                                class="d-flex rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
                             <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
                             <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
@@ -140,6 +140,7 @@
                         </div>
                         </template>
                       </draggable>
+                            {{renameID}}
 
                     </b-tab>
                     <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file" draggable="false">
@@ -684,7 +685,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public hideRenamePopup() {
+    console.log('calling it')
     if(this.renameID != ''){
+      console.log('calling it inside')
+
       this.renameID = '';
     }
   }
