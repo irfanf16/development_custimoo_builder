@@ -85,7 +85,7 @@
                                 :anchor-el="$refs['share'+i+''+ind][0]"
                                 :on-close="hidePopper"
                               >
-                                <aside id="popper-content" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                                <aside id="popper-content" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                                   <div class="share-holder">
                                     <h3>Copy link and Share</h3>
                                     <div class="share-form">
@@ -129,7 +129,7 @@
                             </li>
                           </ul>
 
-                          <div v-if="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}`" v-click-outside="()=>{renameID != '' ? renameID = '' : false}"
+                          <div v-if="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}`" v-click-outside-custom="hideRenamePopup"
                                class="d-flex rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
                             <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
                             <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
@@ -290,7 +290,7 @@
                   :anchor-el="$refs['share-collection'+index][0]"
                   :on-close="hidePopper"
                   class="share-tooltip">
-                  <aside :id="'popper-content'+index" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                  <aside :id="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                     <div class="share-holder">
                       <h3>Copy link and Share</h3>
                       <div class="share-form">
@@ -357,7 +357,6 @@
 </template>
 
 <script lang="ts">
-import ClickOutside from 'vue-click-outside'
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
@@ -389,9 +388,6 @@ import {AxiosError} from "axios";
     ContactModal,
     Popper,
     draggable
-  },
-  directives: {
-    ClickOutside
   },
   mounted() {
     let href: any = location.href;
@@ -598,6 +594,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   get getSelectionMode() {
     return this.$store.getters.getSelectionMode;
   }
+
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
   }
@@ -684,6 +681,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
     this.$store.commit('SET_LOCKER_ACTIVE_INDEX', index)
     this.$store.commit('Change_Locker_Tabs_Index', index)
+  }
+
+  public hideRenamePopup() {
+    if(this.renameID != ''){
+      this.renameID = '';
+    }
   }
 
   public showDesignModal(product:Record<any, any>){
