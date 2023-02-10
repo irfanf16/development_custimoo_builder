@@ -1030,12 +1030,15 @@ const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) =>
 
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-    $(svg_doc).find(`[id]`).each  (function(doc_item) {
+    $(svg_doc).find(`[id]`).each (function(doc_item,doc_item_element) {
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
         if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
-          $(this).attr("fill", svg_group_item.color);
+          $(doc_item_element).attr("fill", svg_group_item.color);
+          if($(doc_item_element).children().length > 0){
+            $(doc_item_element).find('path').attr("fill", svg_group_item.color);
+          }
         }
       }
     })
