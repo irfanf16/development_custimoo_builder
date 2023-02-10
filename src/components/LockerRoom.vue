@@ -129,8 +129,8 @@
                             </li>
                           </ul>
 
-                          <div v-show="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}${i + ind}${ind}`" v-click-outside-custom="hideRenamePopup"
-                               class="d-flex rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
+                          <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'" v-click-outside-custom="hideRenamePopup"
+                               class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
                             <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
                             <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
                               <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
@@ -140,7 +140,6 @@
                         </div>
                         </template>
                       </draggable>
-                            {{renameID}}
 
                     </b-tab>
                     <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file" draggable="false">
@@ -455,7 +454,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public group = ''
   public current_product_name = ''
   public main_locker_tabs = 0
-  public renameID = '';
+  public renameID = '-1';
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public lockerActiveDesignIndex = 0;
