@@ -9,7 +9,7 @@ pipelines:
           - apt-get update
           - apt-get install -y zip
           - npm cache clean --force
-          - npm uninstall node-sass
+          - npm uninstall node-sass --force
           - npm i sass --save-dev
           - npm run sass-compile
           - npm install
