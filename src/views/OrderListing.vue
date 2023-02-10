@@ -91,7 +91,7 @@
                   <template v-for="(item,indexItem) in order.items" >
                     <div class="order-detail" :key="indexItem+index">
                       <div class="factory-container">
-                        <h2 class="factory-name d-flex align-items-center gap-1">{{item.factory_name}} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
+                        <h2 class="factory-name d-flex align-items-center gap-1"> {{ 'Factory ' + parseInt(indexItem + 1) }} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
                       </div>
                       <table class="w-100">
                         <template v-for="(product,indexProduct) in item.factory_products">
