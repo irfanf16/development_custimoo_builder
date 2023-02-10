@@ -13,7 +13,7 @@
       <b-tabs content-class="mt-3">
         <b-tab :key="`order_item_${order_item_index}`" v-for="(order_item, order_item_index) in order.items">
           <template #title>
-            {{ order_item.factory_name }}
+            {{ 'Factory ' + parseInt(order_item_index + 1) }}
           </template>
 
           <OrderFlowStatusLine :item_status="order_item.status" />
