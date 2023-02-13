@@ -3,6 +3,7 @@
 ## Project setup
 ```
 nvm install v14.16   ; first time, other versions does NOT work - really important
+nvm use v14.16       ; first time - switch to the correct npm and node version
 npm install
 ```
 
