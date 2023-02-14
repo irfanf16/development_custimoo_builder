@@ -1779,15 +1779,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (updated_product == null) {
       return false;
     }
-    if (updated_product) {
-      if (Object.prototype.hasOwnProperty.call(updated_product, 'production_url') && updated_product?.production_url) {
-        let content: string = await fetchUrlContent(updated_product?.production_url);
-        let production_content = await parseSvgStringFile(content, updated_product as Record<any, any>);
-        updated_product.svg_content = production_content;
-      }
-    } else {
-      return false;
-    }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
     let order_product_active_index = order_products_info_obj.order_products.active_index;
     updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;

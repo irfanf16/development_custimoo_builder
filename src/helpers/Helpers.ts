@@ -673,15 +673,15 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
       }
-      if(scene_ref.customLogoObjects) {
-        for (const custom_logo_svg of scene_ref.customLogoObjects) {
-          if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object then it must contain several keys so > 3 is ok
-            post_data.custom_logo_svgs.push(custom_logo_svg);
+      if(scene_ref.custom_logo_objects) {
+        for (const custom_logo_object of scene_ref.custom_logo_objects) {
+          if(custom_logo_object && Object.keys(custom_logo_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
+            post_data.custom_logo_svgs.push(custom_logo_object.getBase64());
           }
         }
       }
       const svg_content = await fetchUrlContent(post_data.production_url);
-      const production_file = await parseSvgStringFile(svg_content,post_data);
+      const production_file = await parseSvgStringFile(svg_content, post_data);
       post_data.svg_content = production_file
 
       clearInterval(interval)
@@ -1075,13 +1075,12 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     }
 
     let logo_max_width = 0 ;
-    if((factory_product.custom_logos.length >= 1)){
+    if((factory_product.custom_logos.length >= 1)) {
       const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
         return (Object.prototype.hasOwnProperty.call(custom_logo,'url') && custom_logo.url !== "" && custom_logo.url !== null)
       })
-      if(custom_logos_without_base64.length > 0){
-        const custom_logos = await Store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
-        const payload = getLogoSVG(custom_logos.data.custom_logos,factory_product.measurement_ratio,production_file_initial_dimension);
+      if(custom_logos_without_base64.length > 0) {
+        const payload = getLogoSVG(factory_product.custom_logo_svgs, factory_product.measurement_ratio, production_file_initial_dimension);
         logo_max_width = payload.width;
         svg_string += `${payload.svg_string}`
       }

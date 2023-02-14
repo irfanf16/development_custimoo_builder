@@ -1780,7 +1780,7 @@ const ProductAttributes:Module<any, any> = {
     setRevertRosterBOOL({commit},payload){
       commit('SET_REVERT_ROSTER_BOOL',payload);
     },
-    converturlToBase64({commit},payload){
+    converturlToBase64({commit},payload){ // todo needs to remove that after test as now base 64 converted through fabric js in scene
       return new Promise(function(resolve, reject) {
         http.post("convert-url-to-base64", payload).then((res) => {
           if (res.status == 200){
