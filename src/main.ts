@@ -97,7 +97,7 @@ Vue.filter("TitleCase", (value:Record<any,any>) => {
 import {eventBus} from "@/event/eventBus"
 Vue.prototype.$eventBus = eventBus
 
-import { logData } from '@/helpers/Helpers'
+import {getDomDocument, logData} from '@/helpers/Helpers'
 Vue.prototype.$logData = logData;
 
 import VueSweetalert2 from 'vue-sweetalert2';
@@ -111,6 +111,26 @@ Vue.use(VueSweetalert2);
 import ZoomOnHover from "vue-zoom-on-hover";
 Vue.use(ZoomOnHover);
 Vue.config.devtools = true
+
+Vue.directive('click-outside-custom', {
+  bind: function (el:Record<any, any>, binding:Record<any, any>, vnode:Record<any, any>) {
+    el.clickOutsideEvent = function (event) {
+      // here I check that click was outside the el and his children
+      if (!(el == event.target || el.contains(event.target))) {
+        // and if it did, call method provided in attribute value
+        vnode.context[binding.expression](event);
+      }
+    };
+    const doc = getDomDocument();
+    const outsideEl = doc.querySelector('.page-wrapper') as Record<any, any>
+    outsideEl.addEventListener('click', el.clickOutsideEvent)
+  },
+  unbind: function (el:Record<any, any>) {
+    const doc = getDomDocument();
+    const outsideEl = doc.querySelector('.page-wrapper') as Record<any, any>
+    outsideEl.removeEventListener('click', el.clickOutsideEvent)
+  },
+});
 
 import VueGtag from "vue-gtag";
 Vue.use(VueGtag, {

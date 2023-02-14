@@ -1030,12 +1030,15 @@ const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) =>
 
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-    $(svg_doc).find(`[id]`).each  (function() {
+    $(svg_doc).find(`[id]`).each (function(doc_item,doc_item_element) {
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
         if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
-          $(this).attr("fill", svg_group_item.color);
+          $(doc_item_element).attr("fill", svg_group_item.color);
+          if($(doc_item_element).children().length > 0){
+            $(doc_item_element).find('path').attr("fill", svg_group_item.color);
+          }
         }
       }
     })
@@ -1866,6 +1869,24 @@ const getDomDocument = (parent_doc= false) => {
   return dom_document ? dom_document?.shadowRoot : document
 }
 
+const getLockerColors = async (callback ?:(any) ) => {
+  const is_auth = Store.getters.isCustomerAuthenticated
+  if(is_auth) {
+    const response: any = await http.get("locker_with_colors").catch((errorResponse: AxiosError) => {
+      handleResponseException(errorResponse)
+    })
+    if(response) {
+      const response_data: Record<any, any> = response.data;
+      if (response_data) {
+        await Store.dispatch('setLockerroomColors', response_data);
+        if(callback){
+          await callback();
+        }
+      }
+    }
+  }
+}
+
 const urlToBase64 = async (urls) => {
   const response = await http.post('url_to_base64', {file_urls: urls}).catch((errorResponse) => {
     console.error('Error while converting url to base64', errorResponse)
@@ -1963,5 +1984,5 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe, getWindowObject
+  classObserver, getCustomizerIframe, getWindowObject, getLockerColors
 };

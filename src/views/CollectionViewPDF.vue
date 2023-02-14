@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif"/></div>
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif"/></div>
     <div v-if="collection">
       <a :href="`${storageUrl}${collection.link}`" download target="_blank" class="download-pdf rounded-circle btn btn-secondary light"><BIconDownload /></a>
       <div id="collectionPdfContainer">
@@ -69,12 +69,12 @@
                 </div>
                 <div class="pdf_price d-flex justify-content-center" style="border: none" >
                   <template v-if="isAuthenticated">
-                    <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+                    <template v-if="company.platform !== 'self'  || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                       <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs" @click="addToCart(collection_product,idxs)">
                       Purchase
                     </button>
                       <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
-                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                        <img width="20" height="20" src="@assets/images/loading.gif" />
                       </button>
                     </template>
                   </template>
@@ -84,7 +84,7 @@
                         Purchase
                       </button>
                       <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
-                        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                        <img width="20" height="20" src="@assets/images/loading.gif" />
                       </button>
                     </template>
 

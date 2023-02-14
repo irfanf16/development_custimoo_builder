@@ -77,7 +77,7 @@
           </a></b-button>
       </div>
     </b-modal>
-    <div class="loader global" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
 
   </div>
 </template>

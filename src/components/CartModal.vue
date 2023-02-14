@@ -10,7 +10,7 @@
     </div>
 
     <div class="theme-scroll" style="height: calc(100vh - 300px); overflow-y: auto; padding-bottom: 20px">
-      <div class="loader relative" v-if="viewLoader || cartLoading"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader relative" v-if="viewLoader || cartLoading"><img src="@assets/images/loading.gif" /></div>
       <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
         <thead class="bg-light">
           <tr>
@@ -150,7 +150,7 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+      <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
         <b-button class="mt-4" @click="createOrder">Confirm Order</b-button>
       </div>
     </div>

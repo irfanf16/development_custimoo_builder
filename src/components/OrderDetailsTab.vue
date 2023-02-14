@@ -40,7 +40,7 @@
           <template v-if="isCustomerAuthenticated">
             <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
 <!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
-              <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+              <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                 <button v-if="!isLoading" :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)">
 
                   <template v-if="getProductEditInfoObject.editing">
@@ -56,7 +56,7 @@
                   </template>
                 </button>
                 <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
-                  <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                  <img width="20" height="20" src="@assets/images/loading.gif" />
                 </button>
 
               </template>
@@ -65,7 +65,7 @@
             </template>
           </template>
           <template v-else>
-            <template v-if="company.platform !== 'self' || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+            <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
               <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
             </template>
           </template>
@@ -75,7 +75,7 @@
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
-    <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
   </div>
 </template>
 

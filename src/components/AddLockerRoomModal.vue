@@ -79,7 +79,7 @@
       </div>
 
         <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
-      <div class="loader" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     </div>
     </modal>
 </template>
@@ -91,7 +91,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
 import ModalAction from "@/mixins/ModalAction";
-import { getImageFromCanvas } from '@/helpers/Helpers'
+import { getImageFromCanvas, getLockerColors } from '@/helpers/Helpers'
 import { Canvas } from 'fabric/fabric-impl'
     @Component<AddLockerRoomModal>({
         components: {
@@ -253,6 +253,7 @@ import { Canvas } from 'fabric/fabric-impl'
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
               this.showToast('Design saved successfully', 'success')
+              await getLockerColors();
               this.product_name = ''
               this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
               if(this.close_on_add) {

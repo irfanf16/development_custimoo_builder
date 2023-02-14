@@ -28,7 +28,7 @@
       </span>
       </div>
 
-      <div class="loader" v-if="showLoader"><img :src="require('@/assets/images/loading.gif')" /></div>
+      <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
       <div class="p-5">
         <div class="d-flex flex-column flex-md-row w-100 gap-3">
           <div style="flex-basis: 50%; padding-top: 27px" class="checkboxes_container">

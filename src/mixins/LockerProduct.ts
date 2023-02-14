@@ -913,7 +913,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
           case 'locker_product':
             if (self.$store.getters.getHideSaveLockerButton === false) {
               self.$santaModal.show({
-                icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+                icon: 'confirm', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Save', cancel_text: 'Cancel',
               },self).then((confirmation) => {
                   if(confirmation){
                     self.$santaModal.hide();
@@ -941,7 +941,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
             break;
           case 'cart_product':
             self.$santaModal.show({
-              icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+              icon: 'confirm', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Save', cancel_text: 'Cancel',
             },self).then((confirmation) => {
               if(confirmation){
                 self.$santaModal.hide();
@@ -964,7 +964,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
             break;
           case 'order_product':
             self.$santaModal.show({
-              icon: 'success', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Yes', cancel_text: 'No',
+              icon: 'confirm', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Save', cancel_text: 'Cancel',
             },self).then((confirmation) => {
               if(confirmation){
                 self.$santaModal.hide();

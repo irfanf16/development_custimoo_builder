@@ -198,7 +198,7 @@
         <b-button @click="showVModal('replace-logo')" aria-label="Finalize Order" class="mx-2 px-5" variant="secondary">Finalize Design</b-button>
       </span>
       <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
-        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+        <template v-if="company.platform !== 'self'  || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform === 'self' && company.id !== 1)">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
                   :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
@@ -206,7 +206,7 @@
         </template>
       </template>
       <template v-else-if="!getCartLoading">
-        <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+        <template v-if="company.platform !== 'self'  || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform === 'self' && company.id !== 1) ">
           <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
                   :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
@@ -215,7 +215,7 @@
         </template>
       </template>
       <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
-        <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+        <img width="20" height="20" src="@assets/images/loading.gif" />
       </button>
 
     </div>
@@ -445,7 +445,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       locker_product_id = parseInt(locker_product_id);
       if(this.show_roster_change_warning) {
         self.$santaModal.show({
-          icon: 'warning', title: 'Are you sure?', text: 'By changing product any changes made on roster will be lost',
+          icon: 'warning', title: 'Are you sure?', text: 'Do you want to overwrite the current information',
           confirm_text: 'Yes, change it', cancel_text: 'No', close_on_confirm: true
         },self).then((result) => {
           if (result) {

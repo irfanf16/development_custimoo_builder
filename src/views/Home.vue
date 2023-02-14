@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" >
     <meta name="viewport" content="width=device-width">
-    <div class="loader global" v-if="showLoader && getUrlParams"><img src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
         <template v-if="selectedProduct">
@@ -48,7 +48,7 @@
                       <template>
                         <b-button :key="'shareDesign'" variant="outline-secondary" ref="shareDesign" :disabled="shareDesignLoader" style="min-width: 100px" @click.stop="shareDesign">
                           <template v-if="!shareDesignLoader">Share design</template>
-                          <img v-else width="20" height="20" src="../../src/assets/images/loading.gif" />
+                          <img v-else width="20" height="20" src="@assets/images/loading.gif" />
                         </b-button>
                         <Popper
                           style="font-size: 12px;"
@@ -77,7 +77,7 @@
 
                     <template v-if="isCustomerAuthenticated">
                       <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
-                      <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="../../src/assets/images/loading.gif" /></b-button>
+                      <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="@assets/images/loading.gif" /></b-button>
                     </template>
                     <b-button v-else @click="setActionBeforeLogin('generatePdf')"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
 
@@ -123,7 +123,7 @@
                         </template>
                       </div>
                     </li>
-                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && customerPermissions.includes('place-order')) || company.platform == 'cdnExceptLogin')">
+                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform == 'self' && company.id !== 1)  || company.platform == 'cdnExceptLogin')">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>
@@ -279,24 +279,29 @@
                           Update Cart
                         </b-button>
                         <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                          <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                          <img width="20" height="20" src="@assets/images/loading.gif" />
                         </b-button>
                       </template>
                     </template>
                     <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel" v-if="!cartLoading">Cancel</b-button>
                   </template>
 
-                  <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary" v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1))) || (!hideColorSection && (tabIndex <= mainTotalTabs))">Next</b-button>
+                  <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary"
+                            v-else-if="(hideColorSection && (tabIndex <= (mainTotalTabs-1)))
+                            || (!hideColorSection && (tabIndex <= mainTotalTabs))"
+
+                  >Next</b-button>
 
                   <template v-else>
-                    <b-button :key="'editRoster'" v-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
+                    <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'order_product'"></template>
+                    <b-button :key="'editRoster'" v-else-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
                       Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
                     </b-button>
 
                     <template v-else-if="isCustomerAuthenticated">
                       <template>
                         <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                          <template v-if="company.platform !== 'self'  || (company.platform == 'self' && customerPermissions.includes('place-order'))">
+                          <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                             <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
                               <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" disabled>
                                 Add to Cart
@@ -312,7 +317,7 @@
                               {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
                             </b-button>
                             <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                              <img width="20" height="20" src="../../src/assets/images/loading.gif" />
+                              <img width="20" height="20" src="@assets/images/loading.gif" />
                             </b-button>
                           </template>
                          </template>
@@ -440,9 +445,7 @@ import {
   routerPush,
   getImageFromCanvas,
   setDefaultColors,
-  isShadowDom,
-  getDomDocument,
-  setUndoRedoItems, santaClone, getCustomizerIframe
+  setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -539,7 +542,7 @@ Vue.filter('formatDate', function(value:string) {
       if (shared_url?.includes('share')) {
         routerPush(this.$router,'Home');
       }
-      this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
+
       this.jwtToken = localStorage.getItem('jwtToken') as string
       // await this.$store.dispatch('setJwtToken')
       if(!localStorage.getItem('browserToken')){
@@ -1160,6 +1163,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.generatePdf()
     }
     this.$store.commit("ACTION_BEFORE_LOGIN", '');
+
+    getLockerColors();
   }
 
   private async addToCart(resolve:any=null) {
@@ -1485,6 +1490,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           eval(this.company.login_code.logout_action)
         }
       }
+
+      this.$store.dispatch('setLockerroomColors', [])
     }
   }
 
@@ -1509,7 +1516,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (this.isCustomerAuthenticated) {
       let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       if (res == true) {
-
         if (locker_index) {
           let payload = {index: locker_index, attribute: 'active_tab', value: true}
           this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
@@ -1521,12 +1527,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           }
         }
         this.showVModal('locker-modal')
+      }
 
-        if (this.ref.saveToLockerModal) {
-          this.hideVModal('add-to-lockerroom')
-          this.ref.saveToLockerModal.showLoader = false;
-        }
-
+      if (this.ref.saveToLockerModal) {
+        this.hideVModal('add-to-lockerroom')
+        this.ref.saveToLockerModal.showLoader = false;
       }
     }
   }

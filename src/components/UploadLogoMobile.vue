@@ -15,7 +15,7 @@
 
     <div class="btn btn-secondary modal-handler" >
       <div class="upload-box position-relative" :style="{overflow: customLogos[customLogoIndex].url ? 'visible' : 'hidden'}">
-        <div class="loader relative" v-if="showLoader"><img src="../../src/assets/images/loading.gif" /></div>
+        <div class="loader relative" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
         <div class="uploaded-logo-holder" v-if="showImage && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
           <img :src="storageUrl+customLogos[customLogoIndex].url+'?nocache=1'" width="100%"/>
         </div>

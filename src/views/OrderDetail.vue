@@ -1,6 +1,6 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
-    <div class="loader global" v-if="showLoader" ><img style="width: 100px" src="../../src/assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader" ><img style="width: 100px" src="require('@/assets/images/loading.gif')" /></div>
     <div class="order-wrapper" v-if="order && order.id">
       <div class="d-flex justify-content-between align-items-center">
         <div class="fs-4 font-weight-bolder order-title p-2">Order # {{ order.order_no }}</div>
@@ -13,7 +13,7 @@
       <b-tabs content-class="mt-3">
         <b-tab :key="`order_item_${order_item_index}`" v-for="(order_item, order_item_index) in order.items">
           <template #title>
-            {{ order_item.factory_name }}
+            {{ 'Factory ' + parseInt(order_item_index + 1) }}
           </template>
 
           <OrderFlowStatusLine :item_status="order_item.status" />

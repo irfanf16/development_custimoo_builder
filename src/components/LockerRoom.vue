@@ -22,7 +22,7 @@
             <div class="lockerroom-tabs">
               <div>
                 <b-card no-body>
-                  <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+                  <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
                   <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="handleLockerRoomChanged" @input="handleTabChanged" :no-fade="true">
                     <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" draggable="false">
                       <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
@@ -37,8 +37,8 @@
                                :data-room-index="i" :data-design-title="product.product_name"
                                :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
                                :data-product-index="ind">
-                            <div class="fs-2" @click="logDom">
-                              Total products: <strong class="font-weight-bolder">{{product.roster_count ? product.roster_count : '0'}}</strong>
+                            <div class="fs-2">
+                              Total products: <strong class="font-weight-bolder">{{product.roster_total_quantity ? product.roster_total_quantity : '0'}}</strong>
                             </div>
                             <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                                    @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
@@ -85,7 +85,7 @@
                                 :anchor-el="$refs['share'+i+''+ind][0]"
                                 :on-close="hidePopper"
                               >
-                                <aside id="popper-content" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                                <aside id="popper-content" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                                   <div class="share-holder">
                                     <h3>Copy link and Share</h3>
                                     <div class="share-form">
@@ -129,13 +129,18 @@
                             </li>
                           </ul>
 
-                          <div v-if="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}`" v-click-outside="()=>{renameID != '' ? renameID = '' : false}"
-                               class="d-flex rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
+                          <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'" v-click-outside-custom="hideRenamePopup"
+                               class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
                             <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
-                            <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
-                              <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
-                              <b-icon-check v-else />
-                            </b-button>
+                            <div class="d-flex">
+                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
+                                <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
+                                <b-icon-check v-else />
+                              </b-button>
+                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0 close-rename" @click="()=>{renameID = '-1'}">
+                                <b-icon-x />
+                              </b-button>
+                            </div>
                           </div>
                         </div>
                         </template>
@@ -189,7 +194,7 @@
                         <div style="width: max(20%, 250px)" class="bg-light border-right flex-shrink-0">
                           <div class="fs-3" style="background: #495057; color: #fff; padding: 11px 16px">Select Design</div>
                           <ul>
-                            <li class="px-3 py-2 d-flex align-items-center gap-1" :class="{'border-top': design_i>1, 'active': design_i == lockerActiveDesignIndex}"
+                            <li class="px-3 py-2 d-flex align-items-center gap-1" :class="{'border-top': design_i>0, 'active': design_i == lockerActiveDesignIndex}"
                                 @click="()=>lockerActiveDesignIndex = design_i"
                                 v-for="(design, design_i) in locker_with_rosters(room.id)[0].products" :key="`locker_design_${design_i}`">
                               <span class="btn btn-secondary btn-sm rounded-circle flex-shrink-0" title="Edit Roster"
@@ -290,7 +295,7 @@
                   :anchor-el="$refs['share-collection'+index][0]"
                   :on-close="hidePopper"
                   class="share-tooltip">
-                  <aside :id="'popper-content'+index" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                  <aside :id="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                     <div class="share-holder">
                       <h3>Copy link and Share</h3>
                       <div class="share-form">
@@ -349,7 +354,7 @@
               </div>
             </div>
 
-          <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+          <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
         </div>
       </div>
     </modal>
@@ -357,7 +362,6 @@
 </template>
 
 <script lang="ts">
-import ClickOutside from 'vue-click-outside'
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
@@ -376,7 +380,6 @@ import ContactModal from "@/components/ContactModal.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import ModalAction from "@/mixins/ModalAction";
-import {getDomDocument} from '@/helpers/Helpers';
 import {AxiosError} from "axios";
 
 @Component<LockerRoom>({
@@ -390,9 +393,6 @@ import {AxiosError} from "axios";
     ContactModal,
     Popper,
     draggable
-  },
-  directives: {
-    ClickOutside
   },
   mounted() {
     let href: any = location.href;
@@ -459,7 +459,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public group = ''
   public current_product_name = ''
   public main_locker_tabs = 0
-  public renameID = '';
+  public renameID = '-1';
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public lockerActiveDesignIndex = 0;
@@ -482,13 +482,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       }
     }
   }
-
-  public data = [
-    { age: 40, first_name: 'Dickerson', last_name: 'Macdonald' },
-    { age: 21, first_name: 'Larsen', last_name: 'Shaw' },
-    { age: 89, first_name: 'Geneva', last_name: 'Wilson' },
-    { age: 38, first_name: 'Jami', last_name: 'Carney' }
-  ]
 
   private designMoved = (evt) =>{
     let design_name = evt.item.getAttribute('data-design-title');
@@ -606,6 +599,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   get getSelectionMode() {
     return this.$store.getters.getSelectionMode;
   }
+
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
   }
@@ -692,6 +686,15 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
     this.$store.commit('SET_LOCKER_ACTIVE_INDEX', index)
     this.$store.commit('Change_Locker_Tabs_Index', index)
+  }
+
+  public hideRenamePopup() {
+    console.log('calling it')
+    if(this.renameID != ''){
+      console.log('calling it inside')
+
+      this.renameID = '';
+    }
   }
 
   public showDesignModal(product:Record<any, any>){
@@ -1265,9 +1268,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public showContactPopup(room_id:number, room_index:number){
     this.ref['contactmodal'].showContactPopup(room_id, room_index)
   }
-  public logDom() {
-    getDomDocument(true)
-  }
 }
 </script>
 
@@ -1632,6 +1632,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     border-radius: 0;
     border: none;
     background: none;
+  }
+
+  .close-rename{
+    background: var(--theme-color-light);
+    color: var(--theme-color);
   }
 }
 </style>

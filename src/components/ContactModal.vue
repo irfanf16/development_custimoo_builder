@@ -32,7 +32,7 @@
           </b-form>
         </ValidationObserver>
       </div>
-      <div v-if="getContacts.length > 0">
+      <div v-if="getContacts && getContacts.length > 0">
         <div class="mt-3" style="max-height: 300px; overflow-y:auto">
           <table class="table table-bordered b-table-fixed mb-0 w-100 ">
             <thead class="bg-light">
@@ -60,7 +60,7 @@
 
 
       </div>
-      <div class="loader relative" v-if="viewLoader"><img src="../../src/assets/images/loading.gif" /></div>
+      <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
     </div>
   </modal>
 </template>
