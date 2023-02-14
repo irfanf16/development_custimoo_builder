@@ -673,13 +673,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
       }
-      if(scene_ref.custom_logo_objects) {
-        for (const custom_logo_object of scene_ref.custom_logo_objects) {
-          if(custom_logo_object && Object.keys(custom_logo_object).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
-            post_data.custom_logo_svgs.push(custom_logo_object.getBase64());
-          }
-        }
-      }
       const svg_content = await fetchUrlContent(post_data.production_url);
       const production_file = await parseSvgStringFile(svg_content, post_data);
       post_data.svg_content = production_file
@@ -1074,13 +1067,17 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
       height: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("height")
     }
 
-    let logo_max_width = 0 ;
+    let logo_max_width = 0;
+    const scene_ref = Store.getters.getCanvasImage.scene
     if((factory_product.custom_logos.length >= 1)) {
       const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
         return (Object.prototype.hasOwnProperty.call(custom_logo,'url') && custom_logo.url !== "" && custom_logo.url !== null)
       })
       if(custom_logos_without_base64.length > 0) {
-        const payload = getLogoSVG(factory_product.custom_logo_svgs, factory_product.measurement_ratio, production_file_initial_dimension);
+        custom_logos_without_base64.forEach((logo: Record<any, any>) => {
+          logo.base_64 = scene_ref.custom_logo_objects[logo.logo_index].getBase64()
+        })
+        const payload = getLogoSVG(custom_logos_without_base64, factory_product.measurement_ratio, production_file_initial_dimension);
         logo_max_width = payload.width;
         svg_string += `${payload.svg_string}`
       }
