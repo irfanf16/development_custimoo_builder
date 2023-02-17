@@ -455,12 +455,13 @@ import {getCompany} from "@/helpers/Helpers";
     comment_id = this.$route.query.comment_id;
 
      let customer_authenticated = this.isCustomerAuthenticated;
-     if(!customer_authenticated){
+     if(!customer_authenticated) {
        let jwttoken = localStorage.getItem("jwtToken");
        let customer = localStorage.getItem("customer");
        if(jwttoken != null && jwttoken != '' && customer != null && customer != '') {
-         let payload = { jwtToken: '', customer : {}};
+         let payload = { jwtToken: '', access_token : '',  customer : {}};
          payload.jwtToken = jwttoken;
+         payload.access_token = jwttoken;
          payload.customer = JSON.parse(customer);
          this.$store.commit('SET_CUSTOMER', payload);
          customer_authenticated = true;
