@@ -961,7 +961,7 @@ const fetchUrlContent = async (url:string) => {
   }
 }
 
-const getDocFromString = (doc_string: string, type:DOMParserSupportedType ="image/svg+xml") => {
+const getDocFromString = (doc_string: string, type: DOMParserSupportedType ="image/svg+xml") => {
   return new Promise((resolve) => {
     const parser = new DOMParser();
     const parsed = parser.parseFromString(doc_string, type);
@@ -1028,9 +1028,15 @@ const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
         if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
-          $(doc_item_element).attr("fill", svg_group_item.color);
-          if($(doc_item_element).children().length > 0){
-            $(doc_item_element).find('path').attr("fill", svg_group_item.color);
+          if(svg_group_item.gradient_colors) {
+            svg_group_item.gradient_colors.forEach((gradient_color: Record<any, any>, g_index: number) => {
+              $(svg_doc).find('#'+gradient_color.id).children().eq(g_index).css('stop-color', gradient_color.color)
+            })
+          } else {
+            $(doc_item_element).attr("fill", svg_group_item.color);
+            if($(doc_item_element).children().length > 0){
+              $(doc_item_element).find('path').attr("fill", svg_group_item.color);
+            }
           }
         }
       }
@@ -1060,7 +1066,7 @@ const getGroupImageTag = (factory_product:Record<any,any>, production_file_info:
 const parseSvgStringFile = async (svg_string:string, factory_product: Record<any,any>) => {
   if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
     let production_content = "";
-    svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
+    // svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
     const svg_doc_initial = await getDocFromString(svg_string);
     const production_file_initial_dimension:Record<any, any> = {
       width: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("width"),
@@ -1096,8 +1102,8 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
 
     const name_logo_number_max_width = logo_max_width + numbers_width + names_width;
 
-    const common_array:Record<any,any> [] = getSVGCommonArraysFromRoster(factory_product);
-    const svg_common_payload = getSVGCommonItems(common_array,production_file_initial_dimension,name_logo_number_max_width);
+    const common_array: Record<any,any> [] = getSVGCommonArraysFromRoster(factory_product);
+    const svg_common_payload = getSVGCommonItems(common_array, production_file_initial_dimension, name_logo_number_max_width);
     const common_width = svg_common_payload.width;
     const common_height = svg_common_payload.height;
 
@@ -1112,7 +1118,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     }
 
     //Applying Color on SVG Start
-    applyColorToSVG(factory_product,svg_doc as SVGTextElement|Document);
+    applyColorToSVG(factory_product, svg_doc as SVGTextElement|Document);
     //Applying Color on SVG End
 
     //Back Image

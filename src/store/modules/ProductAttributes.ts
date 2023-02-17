@@ -652,7 +652,7 @@ const ProductAttributes:Module<any, any> = {
       if (color) {
         if(color.gradient_index != undefined) {
           let gradient_colors: Record<any, any>[] = []
-          if(state.groupColors[color.gradient_index] && state.groupColors[color.index].gradient_colors) {
+          if(state.groupColors[color.index] && state.groupColors[color.index].gradient_colors) {
             gradient_colors = state.groupColors[color.index].gradient_colors
           }
           gradient_colors[color.gradient_index] = { color: color.color, pantone: color.pantone, name: color.name }
