@@ -144,7 +144,7 @@ export default {
       return this.$store.getters.isCustomerAuthenticated
     },
     is_hummel: function() {
-      return this.$store.getters.getCompany.id === 1
+      return this.$store.getters.getCompany.id == 1
     }
   },
   components: {
@@ -158,6 +158,7 @@ export default {
     }
   },
   mounted: async function() {
+    console.log(this.is_hummel)
     // window.parent.document.querySelector('v-customizer')
     getWindowObject().document.querySelector('v-customizer')
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
