@@ -23,11 +23,7 @@
 import {Component, Vue} from 'vue-property-decorator'
 
 
-@Component<Header>({
-  async mounted() {
-    console.log(this.is_hummel)
-  }
-})
+@Component<Header>({})
 export default class Header extends Vue {
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
