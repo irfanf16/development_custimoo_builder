@@ -19,19 +19,22 @@
     </header>
 </template>
 
-<script>
+<script lang="ts">
+import {Component, Vue} from 'vue-property-decorator'
 
-export default {
-    name: 'Header',
-    components: {},
-    computed:{
-      isCustomerAuthenticated: function () {
-        return this.$store.getters.isCustomerAuthenticated;
-      },
-      is_hummel: function() {
-        return this.$store.getters.getCompany.id == 1
-      }
-    }
+
+@Component<Header>({
+  async mounted() {
+    console.log(this.is_hummel)
+  }
+})
+export default class Header extends Vue {
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+  get is_hummel(): boolean {
+    return this.$store.getters.getCompany.id === 1;
+  }
 }
 </script>
 
