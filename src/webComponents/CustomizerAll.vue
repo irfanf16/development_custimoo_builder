@@ -1,6 +1,7 @@
 <script src="../mixins/LockerProduct.ts"></script>
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
+    <Header v-if="is_hummel" />
     <Navbar />
     <router-view/>
   </div>
@@ -141,6 +142,9 @@ export default {
   computed: {
     isCustomerAuthenticated: function() {
       return this.$store.getters.isCustomerAuthenticated
+    },
+    is_hummel: function() {
+      return this.$store.getters.getCompany.id === 1
     }
   },
   components: {

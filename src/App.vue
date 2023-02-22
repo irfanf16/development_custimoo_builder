@@ -1,6 +1,6 @@
 <template>
   <div id="santa" v-cloak>
-    <Header />
+    <Header v-if="is_hummel" />
     <Navbar />
     <router-view/>
   </div>
@@ -73,6 +73,9 @@ export default class App extends Mixins(LockerProducts,ErrorMessages) {
   public enviorment = process.env.VUE_APP_SOCKET_ENV
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
+  }
+  get is_hummel() : boolean {
+    return this.$store.getters.getCompany.id === 1
   }
 
   @Watch('isCustomerAuthenticated')
