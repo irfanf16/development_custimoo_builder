@@ -641,10 +641,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const selected_model_index = Store.getters.getSelectedModelIndex;
       const back_image = getImageFromCanvas('back')
       const front_image = getImageFromCanvas('front')
+      const custom_logos_original = Store.getters.getCustomLogos();
+      const custom_logos_filtered = custom_logos_original.filter(custom_logo => {
+        return custom_logo && 'id' in custom_logo
+      })
 
       const post_data: Record<any, any> = {
         back_image: back_image,
-        custom_logos: Store.getters.getCustomLogos(),
+        custom_logos: custom_logos_filtered,
         measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
         product_custom_texts: productCustomTexts,
