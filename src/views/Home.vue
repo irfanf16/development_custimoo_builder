@@ -445,7 +445,7 @@ import {
   routerPush,
   getImageFromCanvas,
   setDefaultColors,
-  setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors
+  setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors, processColorsCustom
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1377,15 +1377,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   public async handleCustomLogosUndoRedoActions(user_action: string, undo_redo_item: Record<any, any>) {
     let self: Record<any, any> = this
-    const { action_on_items, customLogos } = undo_redo_item
+    const { action_on_items, customLogos, meta: { logo_colors_info } } = undo_redo_item
     if(user_action == 'undo') {
       await setUndoRedoItems('customLogos', action_on_items, 'redo')
     }
+    this.$store.commit('SET_LOGO_COLORS_INFO', { data: logo_colors_info})
     await this.$store.commit('SET_CUSTOM_LOGOS', {
       custom_logos: santaClone(customLogos)
     })
     for (const customLogo of customLogos) {
-      const { logo_index } = customLogo.logo_index
+      const { logo_index } = customLogo
       await self.$eventBus.$emit("customLogoRemoved", logo_index)
       if(logo_index == 0) {
         await this.addRemoveTeamLogoOnAllProducts('remove')
@@ -1437,7 +1438,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await setUndoRedoItems('defaultColors', action_on_items, 'redo')
     }
     this.$store.commit('SET_LOGO_COLORS_INFO', { data: logo_colors_info})
-    const is_empty_default_colors = default_colors.filter(default_color => default_color != null).length == 0
+    const is_empty_default_colors = default_colors.filter(default_color => default_color != null && default_color.color).length == 0
     await this.$store.commit('SET_DEFAULT_COLORS', default_colors)
     if(is_empty_default_colors) {
       await self.$eventBus.$emit("useProductOriginalColors")

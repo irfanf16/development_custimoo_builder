@@ -42,7 +42,13 @@ import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import { fabric } from 'fabric'
 import { getClosestColor } from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import { getRandom, getSelectedProductPantones, setLogoSettings, unitConversion } from '@/helpers/Helpers'
+import {
+  getRandom,
+  getSelectedProductPantones,
+  setLogoSettings,
+  setUndoRedoItems,
+  unitConversion
+} from '@/helpers/Helpers'
 import {find} from "lodash";
 import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
@@ -826,11 +832,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       canvas.renderOnAddRemove = false
 
       if(this.mainPreview) {
-        canvas.on('object:modified', (e: Record<any, any>) => {
+        canvas.on('object:modified', async (e: Record<any, any>) => {
           const fabric_object = e.target;
           if(fabric_object.get("type") == "text") {
             this.handleCustomTextModifiedEvent(e.target)
           } else {
+            if(this.mainPreview) {
+              await setUndoRedoItems('customLogos', 'modified')
+            }
             this.handleCustomLogoModifiedEvent(e.target)
           }
           let objects = canvas.getObjects('line');

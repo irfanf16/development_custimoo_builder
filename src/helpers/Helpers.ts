@@ -1922,7 +1922,10 @@ const setUndoRedoItems = async (items_type: string, action_on_items: string, use
   switch (items_type) {
     case 'customLogos':
       Store.commit('SET_UNDO_REDO_ITEMS', {action: user_action, data: {
-          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getCustomLogos())
+          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getCustomLogos()),
+          meta: {
+            logo_colors_info: santaClone(await Store.getters.getLogoColorsInfo())
+          }
         }})
       break;
     case 'groupColors':
