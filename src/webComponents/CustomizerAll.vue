@@ -1,6 +1,7 @@
 <script src="../mixins/LockerProduct.ts"></script>
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
+    <Header />
     <Navbar />
     <router-view/>
   </div>
@@ -12,6 +13,7 @@ import {LockerProducts} from "@/mixins/LockerProduct";
 import router from '../router'
 import store from '../store'
 import Navbar from '@/components/Navbar.vue';
+import Header from '@/components/Header.vue';
 import Vue2TouchEvents from 'vue2-touch-events';
 Vue.use(Vue2TouchEvents);
 import vSelect from "vue-select";
@@ -144,7 +146,7 @@ export default {
     }
   },
   components: {
-    Navbar
+    Navbar, Header
   },
   watch: {
     isCustomerAuthenticated: async function(newVal, oldVaL) {
