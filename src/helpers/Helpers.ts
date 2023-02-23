@@ -1023,14 +1023,16 @@ const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) =>
 
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-    $(svg_doc).find(`[id]`).each (function(doc_item,doc_item_element) {
+    $(svg_doc).find(`[id]`).each (function(doc_item, doc_item_element) {
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
         if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
           if(svg_group_item.gradient_colors) {
+            let gradient_id = $(doc_item_element).attr('fill') as string
+            gradient_id = gradient_id.substring(gradient_id.indexOf('(') + 1, gradient_id.lastIndexOf(')'))
             svg_group_item.gradient_colors.forEach((gradient_color: Record<any, any>, g_index: number) => {
-              $(svg_doc).find('#'+gradient_color.id).children().eq(g_index).css('stop-color', gradient_color.color)
+              $(svg_doc).find(gradient_id).children().eq(g_index).css('stop-color', gradient_color.color)
             })
           } else {
             $(doc_item_element).attr("fill", svg_group_item.color);

@@ -677,7 +677,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (!item.id.includes('inside')) {
           if(item.fill.gradientUnits) {
             let gradient_colors: Record<any, any>[] = []
-            const gradient_id = item.fill.id.search("_") >= 0 ? item.fill.id.substring(0, item.fill.id.search("_")) : item.fill.id
             item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
               if (color_stop.color.includes('rgb')) {
                 color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
@@ -686,7 +685,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               if(this.mainPreview) {
                 pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
               }
-              gradient_colors.push({ id: gradient_id, color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name })
+              gradient_colors.push({ color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name })
             })
 
             this.svgGroups.push({ id: item.id, count: count, gradient_colors: gradient_colors })
@@ -718,7 +717,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if (!item.id.includes('inside')) {
             if(item.fill.gradientUnits) {
               let gradient_colors: Record<any, any>[] = []
-              const gradient_id = item.fill.id.search("_") >= 0 ? item.fill.id.substring(0, item.fill.id.search("_")) : item.fill.id
               item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
                 if (color_stop.color.includes('rgb')) {
                   color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
@@ -727,7 +725,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 if(this.mainPreview) {
                   pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
                 }
-                gradient_colors.push({ id: gradient_id, color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name })
+                gradient_colors.push({ color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name })
               })
 
               this.svgGroups.push({ id: item.id, count: count, gradient_colors: gradient_colors })
