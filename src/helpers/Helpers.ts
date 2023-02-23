@@ -1031,7 +1031,7 @@ const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
-        if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
+        if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase() && ($(doc_item_element)[0] as Record<any, any>).gradientUnits === undefined) { //exclude gradient item it self
           if(svg_group_item.gradient_colors) {
             let gradient_id = $(doc_item_element).attr('fill') as string
             gradient_id = gradient_id.substring(gradient_id.indexOf('(') + 1, gradient_id.lastIndexOf(')'))
