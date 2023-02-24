@@ -74,7 +74,7 @@
               <template v-else-if="selectTypeIndex == productColors.length && !showOther" v-for="(ext_color, ext_index) in logoColorsInfo">
                 <div v-if="ext_color.hex"  class="color-box"  @click="setColor({value: ext_color.hex, ...ext_color})"
                      :title="ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
-                  <span v-if="ext_color.hex == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
+                  <span v-if="ext_color.hex == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == ext_color.hex)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
                   </span>
                 </div>
@@ -82,15 +82,15 @@
               <template v-else-if="selectTypeIndex == (productColors.length + 1) && !showOther" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
-                  <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
-                          <BIconCheck />
-                        </span>
+                  <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
+                    <BIconCheck />
+                  </span>
                 </div>
               </template>
               <template v-else-if="!showOther" v-for="(color, index) in productColor">
                 <div v-if="color.value"  class="color-box"  @click="setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index">
-                  <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
+                  <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
                   </span>
                 </div>
