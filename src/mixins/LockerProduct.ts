@@ -1216,10 +1216,12 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
               let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
               if(ecommerce_update_id){
-                ecom_url = company_domain + '/cart/change.js'
+               // ecom_url = company_domain + '/cart/change.js'
+                ecom_url = company_domain + '/cart/change'
                 shopify_cart_data['line'] = product_edit_info_object.cart_product_info.shopify_line_item;
               }else{
-                ecom_url = company_domain + '/cart/add.js'
+                //ecom_url = company_domain + '/cart/add.js'
+                ecom_url = company_domain + '/cart/add'
                 shopify_cart_data['id'] = (cart_product as Record<any, any>).ecommerce_variant_id;
                }
 
