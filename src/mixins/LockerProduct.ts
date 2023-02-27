@@ -1252,7 +1252,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               http.post(ecom_url, shopify_cart_data).then((res: any) => {
                self.$store.dispatch('setCartLoading',false);
                 if(!collection_view) {
-                  window.location.replace(company_domain + '/cart');
+                  //window.location.replace(company_domain + '/cart');
                 }
               }).catch(err => {
                 http.delete(delete_cart_item_url);
