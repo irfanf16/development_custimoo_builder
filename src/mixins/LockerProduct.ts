@@ -1213,15 +1213,15 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             }
             else if(platform === 'shopify'){
               let shopify_cart_data:Record<any, any> = {};
-
+              let x_rand = Math.floor((Math.random() * 100) + 1);
               let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
               if(ecommerce_update_id){
                // ecom_url = company_domain + '/cart/change.js'
-                ecom_url = company_domain + '/cart/change'
+                ecom_url = company_domain + '/cart/change?token='+x_rand
                 shopify_cart_data['line'] = product_edit_info_object.cart_product_info.shopify_line_item;
               }else{
                 //ecom_url = company_domain + '/cart/add.js'
-                ecom_url = company_domain + '/cart/add'
+                ecom_url = company_domain + '/cart/add?token='+x_rand
                 shopify_cart_data['id'] = (cart_product as Record<any, any>).ecommerce_variant_id;
                }
 
@@ -1252,7 +1252,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               http.post(ecom_url, shopify_cart_data).then((res: any) => {
                self.$store.dispatch('setCartLoading',false);
                 if(!collection_view) {
-                  //window.location.replace(company_domain + '/cart');
+                  window.location.replace(company_domain + '/cart');
                 }
               }).catch(err => {
                 http.delete(delete_cart_item_url);
