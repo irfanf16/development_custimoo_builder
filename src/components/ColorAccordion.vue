@@ -24,7 +24,6 @@
               <template v-for="(room, i) in lockerroomColors">
                 <b-button size="sm" class="btn-locker-color" variant="secondary" @click="setActiveLockerIndex(i)" :class="{'active': i == activeLockerIndex}"
                           :key="`locker_${i}`">
-<!--                  {{ room && room.folders[0].folder_name}}-->
                   {{room && room.room_name}}
                 </b-button>
               </template>
@@ -59,7 +58,8 @@
                 <color-picker @changeColor="changeColor" theme="light" :key="svgElement.color" :color="svgElement.color" :sucker-hide="true" />
               </div>
               <template v-else-if="selectTypeIndex == productColors.length && !showOther" v-for="(ext_color, ext_index) in logoColorsInfo">
-                <div v-if="ext_color.hex"  class="color-box"  @click="setColor({value: ext_color.hex, ...ext_color})"
+                <div v-if="ext_color.hex"  class="color-box"
+                     @click="ext_color.hex == svgElement.color ? null : setColor({value: ext_color.hex, ...ext_color})"
                      :title="ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
                   <span v-if="ext_color.hex == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
                           <BIconCheck />
@@ -67,7 +67,7 @@
                 </div>
               </template>
               <template v-else-if="selectTypeIndex == (productColors.length + 1) && !othersActive" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
-                <div v-if="color.value"  class="color-box"  @click="setColor(color)"
+                <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
                   <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
                           <BIconCheck />
@@ -75,7 +75,7 @@
                 </div>
               </template>
               <template v-else-if="!showOther" v-for="(color, index) in productColor">
-                <div v-if="color.value"  class="color-box"  @click="setColor(color)"
+                <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index">
                   <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
                           <BIconCheck />
@@ -96,7 +96,12 @@ import colorPicker from '@caohenghu/vue-colorpicker'
 import {LockerProducts} from '../mixins/LockerProduct'
 
 import {getClosestColor, pantonesTcx, getColorEncoding} from '@/pantoneColor'
-import {getSelectedProductPantones, getLockerColors, setUndoRedoItems} from "@/helpers/Helpers";
+import {
+  getSelectedProductPantones,
+  getLockerColors,
+  setUndoRedoItems,
+  hideLockerProductSaveBtn
+} from "@/helpers/Helpers";
 
 @Component<ColorAccordion>({
   components: {
@@ -133,17 +138,6 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   public pantoneMessage = ''
   public isActive = false
   public othersActive = false
-
-  // public showit(){
-  //   // this.$emit('setScroll')
-  //   // this.$root.$on('bv::collapse::state', (collapseId:string, isJustShown:string) => {
-  //   //   console.log('collapseId:', collapseId)
-  //   //   console.log('isJustShown:', isJustShown)
-  //   //
-  //   //   console.log(this.svgGroups.length)
-  //   // })
-  //   // this.$emit('setScroll')
-  // }
 
   @Watch('productColors', {
     deep: true
@@ -237,6 +231,7 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   public async setColor(color: Record<any, any>) {
     let self: Record<any, any> = this
     await setUndoRedoItems('groupColors','updated')
+    hideLockerProductSaveBtn()
     if (color.value){
       this.$store.dispatch('updateGroupColors',
         {
