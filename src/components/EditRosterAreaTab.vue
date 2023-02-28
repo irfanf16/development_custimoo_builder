@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="d-flex gap-2" v-if="!getProductEditInfoObject.editing || ( getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product')">
+    <div class="d-flex gap-2" v-show="!getProductEditInfoObject.editing || ( getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product')">
       <b-button class="d-none d-lg-block" @click="show">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</b-button>
 <!--      <button class="btn btn-secondary light" v-if="isCustomerAuthenticated && company.platform != 'cdnExceptLogin'" @click="shareRoster">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'roster' }} url</button>-->
     </div>

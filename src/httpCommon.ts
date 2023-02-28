@@ -40,7 +40,7 @@ http.interceptors.request.use((request: AxiosRequestConfig ) => {
 http.interceptors.response.use(function (response) {
   return response;
 }, function (error) {
-  if(500 === error.response.status && error.response.data.message == 'Expired token') {
+  if(error.response && 500 === error.response.status && error.response.data.message == 'Expired token') {
     localStorage.setItem('jwtToken', '');
     localStorage.setItem('adminToken', '');
     location.reload()
