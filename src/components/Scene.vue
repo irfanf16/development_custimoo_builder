@@ -418,12 +418,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           } else if (!defaultColors.length) {
             this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
               if (svgGroup.id == item.id) {
-                if (this.svgGroups[index].color != this.initialSvgGroups[index].color) {
+                if (item.fill && item.fill.gradientUnits) {
+                  item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+                    gradient.color = this.initialSvgGroups[index][gradient_index]
+                  })
+                  item.set('fill', new fabric.Gradient(item.fill));
+                } else {
                   item.set('fill', this.initialSvgGroups[index].color)
-                  if (!this.back) {
-                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
-                  }
                 }
+                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
               }
             })
           }
@@ -434,26 +437,34 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           texture.forEach((item: Record<any, any>) => {
             item.id = item.id.toLowerCase()
             if (groupColors[item.id]) {
-              item.set('fill', groupColors[item.id].color);
-              if (this.mainPreview) {
-                this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-                  if (svgGroup.id == item.id) {
-                    this.$store.dispatch('updateSvgGroups', {
-                      index: index,
-                      id: item.id,
-                      color: groupColors[item.id].color,
-                      pantone: groupColors[item.id].pantone,
-                      name: groupColors[item.id].name
-                    })
-                  }
+              if(item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
+                groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                  item.fill.colorStops[gradient_color_index].color = gradient_color.color
                 })
+                item.set('fill', new fabric.Gradient(item.fill));
+              } else {
+                item.set('fill', groupColors[item.id].color)
               }
+              this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                if (svgGroup.id == item.id) {
+                  if(svgGroup.gradient_colors) {
+                    groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                      svgGroup.gradient_colors[gradient_color_index].color = gradient_color.color
+                      svgGroup.gradient_colors[gradient_color_index].pantone = gradient_color.pantone
+                      svgGroup.gradient_colors[gradient_color_index].name = gradient_color.name
+                    })
+                  } else {
+                    svgGroup.color = groupColors[item.id].color
+                    svgGroup.pantone = groupColors[item.id].pantone
+                  }
+                }
+              })
             } else if (!defaultColors.length) {
               this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
                 if (svgGroup.id == item.id) {
-                  if (item.fill.gradientUnits) {
+                  if (item.fill && item.fill.gradientUnits) {
                     item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                      gradient.color = this.initialSvgGroups[index][gradient_index].color
+                      gradient.color = this.initialSvgGroups[index][gradient_index]
                     })
                     item.set('fill', new fabric.Gradient(item.fill));
                   } else {
@@ -506,7 +517,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
         texture.forEach((item: Record<any, any>) => {
           item.id = item.id.toLowerCase()
-          if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+          if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
             item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
               gradient.color = appliedDefaultColors[item.id][gradient_index]
             })
@@ -521,7 +532,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
           texture.forEach((item: Record<any, any>) => {
             item.id = item.id.toLowerCase()
-            if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+            if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
               item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
                 gradient.color = appliedDefaultColors[item.id][gradient_index]
               })
@@ -567,7 +578,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
     texture.forEach((item: Record<any, any>) => {
       item.id = item.id.toLowerCase()
-      if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+      if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
         item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
           gradient.color = appliedDefaultColors[item.id][gradient_index]
         })
@@ -582,7 +593,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
       texture.forEach((item: Record<any, any>) => {
         item.id = item.id.toLowerCase()
-        if (appliedDefaultColors[item.id] && item.fill.gradientUnits) {
+        if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
           item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
             gradient.color = appliedDefaultColors[item.id][gradient_index]
           })
@@ -681,7 +692,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           count = 100000 // to make base always at first color position
         }
         if (!item.id.includes('inside')) {
-          if(item.fill.gradientUnits) {
+          if(item.fill && item.fill.gradientUnits) {
             let gradient_colors: Record<any, any>[] = []
             item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
               if (color_stop.color.includes('rgb')) {
@@ -721,7 +732,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             count = 100000 // to make base always at first color position
           }
           if (!item.id.includes('inside')) {
-            if(item.fill.gradientUnits) {
+            if(item.fill && item.fill.gradientUnits) {
               let gradient_colors: Record<any, any>[] = []
               item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
                 if (color_stop.color.includes('rgb')) {
@@ -1354,7 +1365,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return false;
   }
 
-
   public objectScaling(e: Record<any, any>, side: string) { // bound object to do not move out from product
     let texture = this.frontTexture
     let canvas = this.frontCanvas
@@ -1469,8 +1479,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
     else {
       const viewportMatrix = canvas.viewportTransform as Record<any, any>;
-      pointX = pointX + viewportMatrix[4] * (canvas.getZoom() + model.zoomX)
-      pointY = pointY + viewportMatrix[5] * (canvas.getZoom() + model.zoomY)
+      pointX = pointX + viewportMatrix[4]
+      pointY = pointY + viewportMatrix[5]
       return {left: pointX, top: pointY, max_call: max_call}
     }
   }
