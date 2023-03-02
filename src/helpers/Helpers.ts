@@ -1072,7 +1072,7 @@ const getGroupImageTag = (factory_product:Record<any,any>, production_file_info:
 const parseSvgStringFile = async (svg_string:string, factory_product: Record<any,any>) => {
   if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
     let production_content = "";
-    // svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
+    svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
     const svg_doc_initial = await getDocFromString(svg_string);
     const production_file_initial_dimension:Record<any, any> = {
       width: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("width"),
