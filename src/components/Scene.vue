@@ -411,6 +411,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   })
                 } else {
                   svgGroup.color = groupColors[item.id].color
+                  svgGroup.name = groupColors[item.id].name
                   svgGroup.pantone = groupColors[item.id].pantone
                 }
               }
@@ -455,6 +456,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     })
                   } else {
                     svgGroup.color = groupColors[item.id].color
+                    svgGroup.name = groupColors[item.id].name
                     svgGroup.pantone = groupColors[item.id].pantone
                   }
                 }
