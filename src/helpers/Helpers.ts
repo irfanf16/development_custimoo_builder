@@ -1082,9 +1082,9 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     let logo_max_width = 0;
     const scene_ref = Store.getters.getCanvasImage.scene
     if((factory_product.custom_logos.length >= 1)) {
-      const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
+      const custom_logos_without_base64 = santaClone(factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
         return (Object.prototype.hasOwnProperty.call(custom_logo,'url') && custom_logo.url !== "" && custom_logo.url !== null)
-      })
+      }))
       if(custom_logos_without_base64.length > 0) {
         custom_logos_without_base64.forEach((logo: Record<any, any>) => {
           logo.base_64 = scene_ref.custom_logo_objects[logo.logo_index].getBase64()
