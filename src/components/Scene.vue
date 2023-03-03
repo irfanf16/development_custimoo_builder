@@ -900,7 +900,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               })
             }
 
-            if (this.mainPreview) {
+            if (this.mainPreview && this.selectedProductId == this.product_id) {
               this.setProductionSVG()
               this.$store.commit('STORE_CANVAS_IMAGE', {
                 front: this.$refs.front,
@@ -918,15 +918,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       })
       canvas.renderOnAddRemove = false
 
-      if(this.mainPreview) {
+      if(this.mainPreview && this.selectedProductId == this.product_id) {
         canvas.on('object:modified', async (e: Record<any, any>) => {
           const fabric_object = e.target;
           if(fabric_object.get("type") == "text") {
             this.handleCustomTextModifiedEvent(e.target)
           } else {
-            if(this.mainPreview) {
-              await setUndoRedoItems('customLogos', 'modified')
-            }
+            await setUndoRedoItems('customLogos', 'modified')
             this.handleCustomLogoModifiedEvent(e.target)
           }
           let objects = canvas.getObjects('line');
@@ -1440,6 +1438,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         y: zoom_point.y
       }, zoom);
     }
+    e.target.scaleX = e.target.scaleX + 0.0000000000000001
+    canvas.requestRenderAll()
 
     let dimText = this.dimTextFront
     if (e.target.side == 'back' || e.target.side == 'Back') {
@@ -1973,7 +1973,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           canvas.requestRenderAll()
 
-          if (this.mainPreview) {
+          if (this.mainPreview && this.selectedProductId == this.product_id) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
             const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
             this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
@@ -1987,7 +1987,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             })
           }
           this.custom_logo_objects[logo.logo_index as number] = img
-          if (this.mainPreview) {
+          if (this.mainPreview && this.selectedProductId == this.product_id) {
             await this.$store.commit("UPDATE_CUSTOM_LOGO_OBJECTS", {
               index: logo.logo_index,
               data: img,
@@ -2178,7 +2178,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (Object.keys(custom_text).length && custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
             let fabric_text: fabric.Text | fabric.Group | Record<any, any>
-            if (this.mainPreview) {
+            if (this.mainPreview && this.selectedProductId == this.product_id) {
               const font = this.products_fonts[custom_text.font_family]
               if (font) {
                 const path = font.opentype_font.getPath(custom_text.value, 0, 0, 72, {features: { liga: true, rlig: true }})
