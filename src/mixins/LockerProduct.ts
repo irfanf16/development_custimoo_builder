@@ -185,6 +185,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
     prms.then(async () => {
       if(append_products) {
         await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
+        this.$store.commit('SET_APPLICATION_MOUNTED')
         return false;
       }
       // await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
@@ -314,19 +315,22 @@ export class handleMainProducts extends Mixins(FetchCategories) {
             }
           })
         }
+        this.$store.commit('SET_APPLICATION_MOUNTED')
         return false;
       }
 
       if(product_edit_info_object.type == "cart_product") {
-        await self.setCartProductData(retrieved_products)
+        await this.setCartProductData(retrieved_products)
         self.$eventBus.$emit("customLogoResetAndAdd")
         self.$eventBus.$emit("changeColors")
+        this.$store.commit('SET_APPLICATION_MOUNTED')
         return false;
       }
       if(product_edit_info_object.type == "order_product") {
-        await self.updateFactoryProduct(product_edit_info_object.order_product_info.order_products.factory_products[active_index]);
+        await this.updateFactoryProduct(product_edit_info_object.order_product_info.order_products.factory_products[active_index]);
         self.$eventBus.$emit("customLogoResetAndAdd")
         self.$eventBus.$emit("changeColors")
+        this.$store.commit('SET_APPLICATION_MOUNTED')
         return false;
       }
 
@@ -345,6 +349,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       this.$store.dispatch("getModels", selected_product.product_id);
       const factory_setting = this.$store.getters.getFactorySettings(selected_product.factory_id);
       this.$store.commit('SET_SETTING', factory_setting)
+      this.$store.commit('SET_APPLICATION_MOUNTED')
     })
   }
 
@@ -1330,8 +1335,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     let self = this;
     let get_last_active_product_data = self.$store.getters.getLastActiveProductData;
     let update_order_item_products = self.$store.getters.getUpdateOrderItemProducts;
-    let search_loader = this.$store.getters.getSearchLoader;
-    let show_loader = this.$store.getters.getShowLoader;
 
     let url = `/list/products?customized=${get_last_active_product_data.customized}&personalized=${get_last_active_product_data.personalized}&private=${get_last_active_product_data.private_product}`;
     if(get_last_active_product_data.search_products) {
@@ -1339,19 +1342,14 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     }
     http.get(url).then(async (response: Record<any, any>) => {
       if(response.data.products.data.length > 0 ){
-        await self.handleMainProducts(response);
+        await this.handleMainProducts(response);
         if(update_order_item_products) {
           await self.updateFactoryProduct(update_order_item_products.factory_products[update_order_item_products.active_index]);
         }
-
-        if(show_loader || search_loader){
-          await self.$store.dispatch('setShowLoader', false)
-          await self.$store.dispatch('setSearchLoader', false)
-        }
       }else{
         this.showError("No Product Found")
-        await self.$store.dispatch('setShowLoader', false)
-        await self.$store.dispatch('setSearchLoader', false)
+        this.$store.dispatch('setShowLoader', false)
+        this.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
       console.error("Error while getting order detail", error?.response?.data?.message)
