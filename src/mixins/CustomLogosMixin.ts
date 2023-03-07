@@ -10,6 +10,7 @@ import {
 export default class CustomLogosMixin extends Vue{
   public addRemoveTeamLogoOnAllProducts(action = 'add', team_logo: Record<any, any> = {}) {
     const custom_logos = this.$store.getters.getCustomLogos('all')
+    const selected_product_id = this.$store.getters.getSelectedProductId
     if(action == 'add') {
       const team_logo_obj = getLogoUpdatedProps(team_logo)
       for(const product_id in custom_logos) {
@@ -17,8 +18,17 @@ export default class CustomLogosMixin extends Vue{
         if(product_team_logo) {
           delete product_team_logo.scaleX
           delete product_team_logo.scaleY
+          let selected_product_updated_props = {}
+          /*
+          * Update x_axis and y_axis for selected product. Not other products
+          * */
+          if(product_id == selected_product_id && team_logo.x_axis) {
+              selected_product_updated_props = {
+                x_axis: team_logo.x_axis, y_axis: team_logo.y_axis
+              }
+          }
           this.$store.commit('SET_CUSTOM_LOGOS', {
-            product_id: product_id, logo_index: 0, custom_logos: {...product_team_logo, ...team_logo_obj}
+            product_id: product_id, logo_index: 0, custom_logos: {...product_team_logo, ...team_logo_obj, ...selected_product_updated_props}
           })
         }
       }

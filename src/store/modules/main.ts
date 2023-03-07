@@ -4,6 +4,7 @@ import { Module } from "vuex";
 const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 const Main:Module<any, any> = {
   state: {
+    application_mounted: false,
     isSafari: process.env.NODE_ENV === 'staging' ? /^((?!chrome|android).)*safari/i.test(navigator.userAgent) : false,
     manageComponents: {
       mobileScreen: mobileScreen,
@@ -26,6 +27,11 @@ const Main:Module<any, any> = {
 
   },
   mutations: {
+    SET_APPLICATION_MOUNTED(state:Record<any, any>) {
+      state.application_mounted = true
+      state.showLoader = false
+      state.searchLoader = false
+    },
     manageComponents(state: Record<any, any>, payload: Record<any, any>) {
       state.manageComponents[payload.index] = payload.value
     },
@@ -53,6 +59,9 @@ const Main:Module<any, any> = {
     }
   },
   getters: {
+    getApplicationMounted: state => {
+      return state.application_mounted
+    },
     getManageComponents: state => {
       return state.manageComponents
     },

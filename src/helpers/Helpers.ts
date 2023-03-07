@@ -641,10 +641,14 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const selected_model_index = Store.getters.getSelectedModelIndex;
       const back_image = getImageFromCanvas('back')
       const front_image = getImageFromCanvas('front')
+      const custom_logos_original = Store.getters.getCustomLogos();
+      const custom_logos_filtered = custom_logos_original.filter(custom_logo => {
+        return custom_logo && 'id' in custom_logo
+      })
 
       const post_data: Record<any, any> = {
         back_image: back_image,
-        custom_logos: Store.getters.getCustomLogos(),
+        custom_logos: custom_logos_filtered,
         measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
         product_custom_texts: productCustomTexts,
@@ -673,15 +677,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
       }
-      if(scene_ref.customLogoObjects) {
-        for (const custom_logo_svg of scene_ref.customLogoObjects) {
-          if(custom_logo_svg && Object.keys(custom_logo_svg).length > 3) { // logic here is if it is fabric object the it must contain several keys so > 2 is ok
-            post_data.custom_logo_svgs.push(custom_logo_svg);
-          }
-        }
-      }
       const svg_content = await fetchUrlContent(post_data.production_url);
-      const production_file = await parseSvgStringFile(svg_content,post_data);
+      const production_file = await parseSvgStringFile(svg_content, post_data);
       post_data.svg_content = production_file
 
       clearInterval(interval)
@@ -968,7 +965,7 @@ const fetchUrlContent = async (url:string) => {
   }
 }
 
-const getDocFromString = (doc_string: string, type:DOMParserSupportedType ="image/svg+xml") => {
+const getDocFromString = (doc_string: string, type: DOMParserSupportedType ="image/svg+xml") => {
   return new Promise((resolve) => {
     const parser = new DOMParser();
     const parsed = parser.parseFromString(doc_string, type);
@@ -1030,12 +1027,23 @@ const parseRosterDetailFromFactoryProduct = (factory_product:Record<any,any>) =>
 
 const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any>) => {
   factory_product.svg_groups.forEach((svg_group_item:Record<any,any>) => {
-    $(svg_doc).find(`[id]`).each  (function(doc_item) {
+    $(svg_doc).find(`[id]`).each (function(doc_item, doc_item_element) {
       let doc_elem_id = $(this).attr("id");
       if(doc_elem_id) {
         doc_elem_id = doc_elem_id.search("_") >= 0 ? doc_elem_id.substring(0, doc_elem_id.search("_")) : doc_elem_id
-        if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase()) {
-          $(this).attr("fill", svg_group_item.color);
+        if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase() && ($(doc_item_element)[0] as Record<any, any>).gradientUnits === undefined) { //exclude gradient item it self
+          if(svg_group_item.gradient_colors) {
+            let gradient_id = $(doc_item_element).attr('fill') as string
+            gradient_id = gradient_id.substring(gradient_id.indexOf('(') + 1, gradient_id.lastIndexOf(')'))
+            svg_group_item.gradient_colors.forEach((gradient_color: Record<any, any>, g_index: number) => {
+              $(svg_doc).find(gradient_id).children().eq(g_index).css('stop-color', gradient_color.color)
+            })
+          } else {
+            $(doc_item_element).attr("fill", svg_group_item.color);
+            if($(doc_item_element).children().length > 0){
+              $(doc_item_element).find('path').attr("fill", svg_group_item.color);
+            }
+          }
         }
       }
     })
@@ -1071,14 +1079,17 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
       height: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("height")
     }
 
-    let logo_max_width = 0 ;
-    if((factory_product.custom_logos.length >= 1)){
-      const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
+    let logo_max_width = 0;
+    const scene_ref = Store.getters.getCanvasImage.scene
+    if((factory_product.custom_logos.length >= 1)) {
+      const custom_logos_without_base64 = santaClone(factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
         return (Object.prototype.hasOwnProperty.call(custom_logo,'url') && custom_logo.url !== "" && custom_logo.url !== null)
-      })
-      if(custom_logos_without_base64.length > 0){
-        const custom_logos = await Store.dispatch('converturlToBase64',{custom_logos:custom_logos_without_base64});
-        const payload = getLogoSVG(custom_logos.data.custom_logos,factory_product.measurement_ratio,production_file_initial_dimension);
+      }))
+      if(custom_logos_without_base64.length > 0) {
+        custom_logos_without_base64.forEach((logo: Record<any, any>) => {
+          logo.base_64 = scene_ref.custom_logo_objects[logo.logo_index].getBase64()
+        })
+        const payload = getLogoSVG(custom_logos_without_base64, factory_product.measurement_ratio, production_file_initial_dimension);
         logo_max_width = payload.width;
         svg_string += `${payload.svg_string}`
       }
@@ -1097,8 +1108,8 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
 
     const name_logo_number_max_width = logo_max_width + numbers_width + names_width;
 
-    const common_array:Record<any,any> [] = getSVGCommonArraysFromRoster(factory_product);
-    const svg_common_payload = getSVGCommonItems(common_array,production_file_initial_dimension,name_logo_number_max_width);
+    const common_array: Record<any,any> [] = getSVGCommonArraysFromRoster(factory_product);
+    const svg_common_payload = getSVGCommonItems(common_array, production_file_initial_dimension, name_logo_number_max_width);
     const common_width = svg_common_payload.width;
     const common_height = svg_common_payload.height;
 
@@ -1113,7 +1124,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     }
 
     //Applying Color on SVG Start
-    applyColorToSVG(factory_product,svg_doc as SVGTextElement|Document);
+    applyColorToSVG(factory_product, svg_doc as SVGTextElement|Document);
     //Applying Color on SVG End
 
     //Back Image
@@ -1919,7 +1930,10 @@ const setUndoRedoItems = async (items_type: string, action_on_items: string, use
   switch (items_type) {
     case 'customLogos':
       Store.commit('SET_UNDO_REDO_ITEMS', {action: user_action, data: {
-          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getCustomLogos())
+          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getCustomLogos()),
+          meta: {
+            logo_colors_info: santaClone(await Store.getters.getLogoColorsInfo())
+          }
         }})
       break;
     case 'groupColors':

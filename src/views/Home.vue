@@ -4,7 +4,7 @@
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
     <b-container fluid>
       <b-row>
-        <template v-if="selectedProduct">
+        <template v-if="application_mounted && selectedProduct">
           <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
@@ -445,7 +445,7 @@ import {
   routerPush,
   getImageFromCanvas,
   setDefaultColors,
-  setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors
+  setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors, processColorsCustom
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -688,6 +688,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.frontPreview = getImageFromCanvas('front') as string
       this.backPreview = getImageFromCanvas('back') as string
     }
+  }
+
+  get application_mounted() {
+    return this.$store.getters.getApplicationMounted
   }
 
   get logoColorsInfo() {
@@ -1377,15 +1381,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   public async handleCustomLogosUndoRedoActions(user_action: string, undo_redo_item: Record<any, any>) {
     let self: Record<any, any> = this
-    const { action_on_items, customLogos } = undo_redo_item
+    const { action_on_items, customLogos, meta: { logo_colors_info } } = undo_redo_item
     if(user_action == 'undo') {
       await setUndoRedoItems('customLogos', action_on_items, 'redo')
     }
+    this.$store.commit('SET_LOGO_COLORS_INFO', { data: logo_colors_info})
     await this.$store.commit('SET_CUSTOM_LOGOS', {
       custom_logos: santaClone(customLogos)
     })
     for (const customLogo of customLogos) {
-      const { logo_index } = customLogo.logo_index
+      const { logo_index } = customLogo
       await self.$eventBus.$emit("customLogoRemoved", logo_index)
       if(logo_index == 0) {
         await this.addRemoveTeamLogoOnAllProducts('remove')
@@ -1437,7 +1442,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       await setUndoRedoItems('defaultColors', action_on_items, 'redo')
     }
     this.$store.commit('SET_LOGO_COLORS_INFO', { data: logo_colors_info})
-    const is_empty_default_colors = default_colors.filter(default_color => default_color != null).length == 0
+    const is_empty_default_colors = default_colors.filter(default_color => default_color != null && default_color.color).length == 0
     await this.$store.commit('SET_DEFAULT_COLORS', default_colors)
     if(is_empty_default_colors) {
       await self.$eventBus.$emit("useProductOriginalColors")
@@ -1777,15 +1782,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self = this;
     let updated_product: Record<any, any> = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if (updated_product == null) {
-      return false;
-    }
-    if (updated_product) {
-      if (Object.prototype.hasOwnProperty.call(updated_product, 'production_url') && updated_product?.production_url) {
-        let content: string = await fetchUrlContent(updated_product?.production_url);
-        let production_content = await parseSvgStringFile(content, updated_product as Record<any, any>);
-        updated_product.svg_content = production_content;
-      }
-    } else {
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info

@@ -729,7 +729,7 @@ button {
             border-radius: 0;
         }
 
-        .btn {
+        .btn:not(.isBtn) {
             background: none;
             border: none;
             color: #03142E;
@@ -6043,7 +6043,7 @@ $fontSize: 0.5;
 }
 
 .vm--modal {
-    margin-top: 80px;
+    margin-top: 140px;
 
     @media (max-width: 768px) {
         margin: 0 auto !important;
