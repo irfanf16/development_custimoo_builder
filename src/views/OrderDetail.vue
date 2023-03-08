@@ -13,7 +13,7 @@
       <b-tabs content-class="mt-3">
         <b-tab :key="`order_item_${order_item_index}`" v-for="(order_item, order_item_index) in order.items">
           <template #title>
-            {{ order_item.factory_name }}
+            {{ 'Factory ' + parseInt(order_item_index + 1) }}
           </template>
 
           <OrderFlowStatusLine :item_status="order_item.status" />
@@ -453,7 +453,23 @@ import {getCompany} from "@/helpers/Helpers";
       this.order_id = this.$route.params.order_id;
     }
     comment_id = this.$route.query.comment_id;
-     if(this.isCustomerAuthenticated){
+
+     let customer_authenticated = this.isCustomerAuthenticated;
+     if(!customer_authenticated) {
+       let jwttoken = localStorage.getItem("jwtToken");
+       let customer = localStorage.getItem("customer");
+       if(jwttoken != null && jwttoken != '' && customer != null && customer != '') {
+         let payload = { jwtToken: '', access_token : '',  customer : {}};
+         payload.jwtToken = jwttoken;
+         payload.access_token = jwttoken;
+         payload.customer = JSON.parse(customer);
+         this.$store.commit('SET_CUSTOMER', payload);
+         customer_authenticated = true;
+       }
+     }
+
+
+     if(customer_authenticated){
        await self.getOrderDetail();
        if(comment_id) {
          let timer = setInterval(function() {

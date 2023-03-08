@@ -10,11 +10,24 @@
           <div class="order-selected-colors">
             <button class="px-4" v-for="(svgColor, index) in svgGroups" :key="index">
               <span class="text-uppercase color-title">{{ svgColor.id }}</span>
-              <span class="color-circle" :style="{background: svgColor.color}" style="box-shadow: 0 0 0 1px #000 inset"></span>
-              <div class="text-left ml-1" style="font-size: 12px">
-                <span class="text-uppercase d-block" v-if="svgColor.pantone">{{ svgColor.pantone +" "+ svgColor.name }}</span>
-                <span class="text-uppercase d-block" v-else>{{ svgColor.name }}</span>
-              </div>
+              <template v-if="svgColor.gradient_colors">
+                <span class="color-circle" :style="{ background : gradient_color_string(svgColor.gradient_colors) }" style="box-shadow: 0 0 0 1px #000 inset"></span>
+                <div class="text-left ml-1" style="font-size: 12px">
+                  <span class="text-uppercase d-block">
+                    <template v-for="(gradient_color, g_index) in svgColor.gradient_colors">
+                      {{ gradient_color.pantone }} {{ gradient_color.name }} <template v-if="g_index < svgColor.gradient_colors.length - 1">/</template>
+                    </template>
+                  </span>
+                </div>
+              </template>
+              <template v-else>
+                <span class="color-circle" :style="{background: svgColor.color}" style="box-shadow: 0 0 0 1px #000 inset"></span>
+                <div class="text-left ml-1" style="font-size: 12px">
+                  <span class="text-uppercase d-block">
+                    {{ svgColor.pantone }} {{ svgColor.name }}
+                  </span>
+                </div>
+              </template>
             </button>
           </div>
         </b-card-body>
@@ -216,6 +229,14 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal, Modal
     return this.$store.getters.getFactorySettings(this.selectedProduct.factory_id)?.vector_image_constraint
   }
 
+  public gradient_color_string(gradient_colors: Record<any, any>[]) {
+    let css_color = 'linear-gradient(90deg';
+    gradient_colors.forEach((gradient_color: Record<any, any>) => {
+      css_color += ',' + gradient_color.color
+    })
+    css_color += ')'
+    return css_color
+  }
 
   public checkIndex(text_type: string) {
     return findIndex(this.customTexts, { type: text_type })

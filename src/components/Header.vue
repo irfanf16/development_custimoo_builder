@@ -1,5 +1,5 @@
 <template>
-    <header v-if="$route.name != 'CollectionUrl'" id="header" class="shadow py-3 py-lg-0">
+    <header v-if="is_hummel && $route.name != 'CollectionUrl'" id="header" class="shadow py-3 py-lg-0">
         <b-container fluid>
             <b-row class="align-items-center py-4">
                 <b-col cols="6" lg="2">
@@ -19,16 +19,18 @@
     </header>
 </template>
 
-<script>
+<script lang="ts">
+import {Component, Vue} from 'vue-property-decorator'
 
-export default {
-    name: 'Header',
-    components: {},
-    computed:{
-      isCustomerAuthenticated: function () {
-        return this.$store.getters.isCustomerAuthenticated;
-      }
-    }
+
+@Component<Header>({})
+export default class Header extends Vue {
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+  get is_hummel(): boolean {
+    return this.$store.getters.getCompany.id === 1;
+  }
 }
 </script>
 

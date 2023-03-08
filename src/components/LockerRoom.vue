@@ -85,7 +85,7 @@
                                 :anchor-el="$refs['share'+i+''+ind][0]"
                                 :on-close="hidePopper"
                               >
-                                <aside id="popper-content" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                                <aside id="popper-content" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                                   <div class="share-holder">
                                     <h3>Copy link and Share</h3>
                                     <div class="share-form">
@@ -129,13 +129,18 @@
                             </li>
                           </ul>
 
-                          <div v-if="renameID == `${i + ind}${ind}`" :key="`rename-locker-${renameID}`" v-click-outside="()=>{renameID != '' ? renameID = '' : false}"
-                               class="d-flex rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
+                          <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'" v-click-outside-custom="hideRenamePopup"
+                               class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
                             <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
-                            <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
-                              <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
-                              <b-icon-check v-else />
-                            </b-button>
+                            <div class="d-flex">
+                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
+                                <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
+                                <b-icon-check v-else />
+                              </b-button>
+                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0 close-rename" @click="()=>{renameID = '-1'}">
+                                <b-icon-x />
+                              </b-button>
+                            </div>
                           </div>
                         </div>
                         </template>
@@ -290,7 +295,7 @@
                   :anchor-el="$refs['share-collection'+index][0]"
                   :on-close="hidePopper"
                   class="share-tooltip">
-                  <aside :id="'popper-content'+index" v-click-outside="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                  <aside :id="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                     <div class="share-holder">
                       <h3>Copy link and Share</h3>
                       <div class="share-form">
@@ -357,7 +362,6 @@
 </template>
 
 <script lang="ts">
-import ClickOutside from 'vue-click-outside'
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
 import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
@@ -389,9 +393,6 @@ import {AxiosError} from "axios";
     ContactModal,
     Popper,
     draggable
-  },
-  directives: {
-    ClickOutside
   },
   mounted() {
     let href: any = location.href;
@@ -458,7 +459,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public group = ''
   public current_product_name = ''
   public main_locker_tabs = 0
-  public renameID = '';
+  public renameID = '-1';
   public collection_available = false;
   public lockerActiveTabIndex = 0;
   public lockerActiveDesignIndex = 0;
@@ -598,6 +599,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   get getSelectionMode() {
     return this.$store.getters.getSelectionMode;
   }
+
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
   }
@@ -684,6 +686,15 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
     this.$store.commit('SET_LOCKER_ACTIVE_INDEX', index)
     this.$store.commit('Change_Locker_Tabs_Index', index)
+  }
+
+  public hideRenamePopup() {
+    console.log('calling it')
+    if(this.renameID != ''){
+      console.log('calling it inside')
+
+      this.renameID = '';
+    }
   }
 
   public showDesignModal(product:Record<any, any>){
@@ -1621,6 +1632,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     border-radius: 0;
     border: none;
     background: none;
+  }
+
+  .close-rename{
+    background: var(--theme-color-light);
+    color: var(--theme-color);
   }
 }
 </style>

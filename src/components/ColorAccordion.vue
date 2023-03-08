@@ -2,29 +2,41 @@
   <div class="accordion color-accordion" role="tablist">
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="'color-accordion'+index">
       <b-card-header header-tag="header" class="p-0" role="tab">
-        <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index)">
+        <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index, svgElement.gradient_colors? gradient_index === undefined? 0 : gradient_index : undefined)">
           <span class="text-uppercase text">{{ svgElement.id | capitalize }} </span>
           <span class="color">
-            <span class="color-box" :style="{ background : svgElement.color? svgElement.color : ' url(' + colorImage + ') no-repeat 50% 50% / 20px' }"></span>
-            <span class="color-pantone-name">{{ svgElement.pantone }}<span style="text-transform: uppercase; display: block">{{ svgElement.name }}</span><span style="text-transform: uppercase;">{{ svgElement.pantoneName }}</span></span>
+            <template v-if="svgElement.gradient_colors">
+              <span class="color-box" :style="{ background : gradient_color_string(svgElement.gradient_colors) }"></span>
+              <span class="color-pantone-name gap-1 text-uppercase">
+               <template v-for="(gradient_color, g_index) in svgElement.gradient_colors">
+                 {{ gradient_color.pantone }} {{ gradient_color.name }} <template v-if="g_index < svgElement.gradient_colors.length - 1">/</template>
+               </template>
+              </span>
+            </template>
+            <template v-else>
+              <span class="color-box" :style="{ background : svgElement.color }"></span>
+              <span class="color-pantone-name text-uppercase">{{ svgElement.pantone }} {{ svgElement.name }}</span>
+            </template>
           </span>
           <span class="accordion-icon"></span>
         </b-button>
       </b-card-header>
       <b-collapse :id="'accordion-'+(index+1)" accordion="my-accordion" role="tabpanel">
         <b-card-body>
+          <div v-if="svgElement.gradient_colors" class="d-flex w-100 flex-wrap gap-1 mt-1">
+            <button v-for="(gradient_color, g_index) in svgElement.gradient_colors" @click="showColor(index, g_index)" :key="g_index" :class="{'light': gradient_index == g_index}" class="btn btn-secondary isBtn btn-sm">Gradient {{ g_index + 1 }}</button>
+          </div>
           <b-nav class="d-flex flex-wrap align-items-center">
-            <b-nav-item :class="{ 'active' : index == selectTypeIndex && !othersActive}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
-            <b-nav-item v-if="logoColorsInfo && logoColorsInfo.length" :class="{ 'active' : selectTypeIndex == (productColors.length) && !othersActive}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
-            <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !othersActive}" class="mr-2 " v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length" @click="selectType(productColors.length + 1, false)">Locker colors</b-nav-item>
-            <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(null, true)">Others</b-nav-item>
+            <b-nav-item :class="{ 'active' : index == selectTypeIndex && !showOther}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
+            <b-nav-item v-if="logoColorsInfo && logoColorsInfo.length" :class="{ 'active' : selectTypeIndex == (productColors.length) && !showOther}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
+            <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !showOther}" class="mr-2 " v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length" @click="selectType(productColors.length + 1, false)">Locker colors</b-nav-item>
+            <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: showOther }" @click="selectType(null, true)">Others</b-nav-item>
           </b-nav>
-          <div v-if="selectTypeIndex == (productColors.length + 1) && !othersActive" class="overflow-hidden fade-right pr-4">
+          <div v-if="selectTypeIndex == (productColors.length + 1) && !showOther" class="overflow-hidden fade-right pr-4">
             <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 py-2">
               <template v-for="(room, i) in lockerroomColors">
                 <b-button size="sm" class="btn-locker-color" variant="secondary" @click="setActiveLockerIndex(i)" :class="{'active': i == activeLockerIndex}"
                           :key="`locker_${i}`">
-<!--                  {{ room && room.folders[0].folder_name}}-->
                   {{room && room.room_name}}
                 </b-button>
               </template>
@@ -59,27 +71,28 @@
                 <color-picker @changeColor="changeColor" theme="light" :key="svgElement.color" :color="svgElement.color" :sucker-hide="true" />
               </div>
               <template v-else-if="selectTypeIndex == productColors.length && !showOther" v-for="(ext_color, ext_index) in logoColorsInfo">
-                <div v-if="ext_color.hex"  class="color-box"  @click="setColor({value: ext_color.hex, ...ext_color})"
+                <div v-if="ext_color.hex"  class="color-box"
+                     @click="ext_color.hex == svgElement.color ? null : setColor({value: ext_color.hex, ...ext_color})"
                      :title="ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
-                  <span v-if="ext_color.hex == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
-                          <BIconCheck />
-                        </span>
+                  <span v-if="ext_color.hex == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == ext_color.hex)" class="selected" style="z-index: 100; opacity: 1">
+                    <BIconCheck />
+                  </span>
                 </div>
               </template>
-              <template v-else-if="selectTypeIndex == (productColors.length + 1) && !othersActive" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
-                <div v-if="color.value"  class="color-box"  @click="setColor(color)"
+              <template v-else-if="selectTypeIndex == (productColors.length + 1) && !showOther" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
+                <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
-                  <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
-                          <BIconCheck />
-                        </span>
+                  <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
+                    <BIconCheck />
+                  </span>
                 </div>
               </template>
               <template v-else-if="!showOther" v-for="(color, index) in productColor">
-                <div v-if="color.value"  class="color-box"  @click="setColor(color)"
+                <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index">
-                  <span v-if="color.value == svgElement.color" class="selected" style="z-index: 100; opacity: 1">
-                          <BIconCheck />
-                        </span>
+                  <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
+                    <BIconCheck />
+                  </span>
                 </div>
               </template>
             </div>
@@ -96,7 +109,12 @@ import colorPicker from '@caohenghu/vue-colorpicker'
 import {LockerProducts} from '../mixins/LockerProduct'
 
 import {getClosestColor, pantonesTcx, getColorEncoding} from '@/pantoneColor'
-import {getSelectedProductPantones, getLockerColors, setUndoRedoItems} from "@/helpers/Helpers";
+import {
+  getSelectedProductPantones,
+  getLockerColors,
+  setUndoRedoItems,
+  hideLockerProductSaveBtn
+} from "@/helpers/Helpers";
 
 @Component<ColorAccordion>({
   components: {
@@ -124,6 +142,7 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   public pantoneColorVal= '18-0107'
   public showOther = false
   public selectAccordionIndex = 0
+  public gradient_index: number|undefined = 0
   public activeLockerIndex = 0
   public activeFolderIndex = 0
   public selectTypeIndex = 0
@@ -131,19 +150,6 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   public selectedColorTab = 0;
   public colorImage = '/img/images/color-placeholder.png'
   public pantoneMessage = ''
-  public isActive = false
-  public othersActive = false
-
-  // public showit(){
-  //   // this.$emit('setScroll')
-  //   // this.$root.$on('bv::collapse::state', (collapseId:string, isJustShown:string) => {
-  //   //   console.log('collapseId:', collapseId)
-  //   //   console.log('isJustShown:', isJustShown)
-  //   //
-  //   //   console.log(this.svgGroups.length)
-  //   // })
-  //   // this.$emit('setScroll')
-  // }
 
   @Watch('productColors', {
     deep: true
@@ -161,7 +167,7 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
     if(this.productColors[this.selectTypeIndex]){
       return false;
     }else{
-      this.selectType(this.selectTypeIndex-1, false)
+      this.selectType(this.selectTypeIndex - 1, false)
     }
   }
 
@@ -190,8 +196,9 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   get groupColors(){
     return this.$store.getters.getGroupColors
   }
-  public showColor(index: number) {
+  public showColor(index: number, gradient_index: number|undefined) {
     this.selectAccordionIndex = index
+    this.gradient_index = gradient_index
   }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -203,6 +210,14 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
     return this.$store.getters.getSetting('color_type');
   }
 
+  public gradient_color_string(gradient_colors: Record<any, any>[]) {
+    let css_color = 'linear-gradient(90deg';
+    gradient_colors.forEach((gradient_color: Record<any, any>) => {
+      css_color += ',' + gradient_color.color
+    })
+    css_color += ')'
+    return css_color
+  }
   public setActiveFolderIndex(locker_i: number, folder_i: number) {
     this.activeLockerIndex = locker_i;
     this.activeFolderIndex = folder_i;
@@ -214,33 +229,22 @@ export default class ColorAccordion extends Mixins(LockerProducts) {
   }
 
   public selectType(index: number, showOther = false) {
-    if (showOther){
-      this.othersActive = true;
-    }
-    else {
-      this.othersActive = false;
-    }
-
     this.selectTypeIndex = index
     this.showOther = showOther
     if (this.productColors[index]){
       this.productColor = this.productColors[index].color_text
-    }
-    if(this.selectTypeIndex){
-      this.isActive = !this.isActive
-    }
-    else {
-      this.isActive = false
     }
   }
 
   public async setColor(color: Record<any, any>) {
     let self: Record<any, any> = this
     await setUndoRedoItems('groupColors','updated')
+    hideLockerProductSaveBtn()
     if (color.value){
       this.$store.dispatch('updateGroupColors',
         {
           index: this.svgGroups[this.selectAccordionIndex].id,
+          gradient_index: this.gradient_index,
           color: color.value,
           pantone: color.pantone,
           name: color.name
