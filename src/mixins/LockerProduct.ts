@@ -1010,12 +1010,11 @@ export class RosterDetailsGlobal extends Mixins(){
     return this.$store.getters.getActiveRosterIndex;
   }
 
-  get productRoster(): Record<any, any>[] {
-    return this.$store.getters.getProductRosters()
-  }
-
   get customText(): Record<any, any>[] {
     return this.$store.getters.getCustomTexts();
+  }
+  get productRoster(): Record<any, any>[] {
+    return this.$store.getters.getProductRosters()
   }
 
   get custom_name_index() : number {

@@ -3,11 +3,11 @@
     <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }"
       style="display: flex; justify-content: space-between;">
-      <a @click="setShowSmall('back')" :class="{ 'show-small': showSmall.front }">
+      <a @click="setShowSmall('back')" class="scene-container" :class="{ 'show-small': showSmall.front }">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
         <div class="d-flex gap-2 align-items-center justify-content-center">
           <h2>Front</h2>
-          <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1">
+          <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': manageComponents.mobileScreen}">
             <a class="zoom_in_out" @click="zoomInOut('front', 'in')">
               <b-icon-zoom-in />
             </a>
@@ -18,12 +18,12 @@
         </div>
       </a>
 
-      <a @click="setShowSmall('front')" :class="{ 'show-small': showSmall.back }" v-if="back">
+      <a @click="setShowSmall('front')" class="scene-container" :class="{ 'show-small': showSmall.back }" v-if="back">
         <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth"
           :height="canvasHeight"></canvas>
         <div class="d-flex gap-2 align-items-center justify-content-center">
           <h2>Back</h2>
-          <div style="margin-top: 20px" class="d-flex align-items-center gap-1" v-if="mainPreview">
+          <div style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': manageComponents.mobileScreen}" v-if="mainPreview">
             <a class="zoom_in_out" @click="zoomInOut('back', 'in')">
               <b-icon-zoom-in />
             </a>
@@ -67,6 +67,7 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
     self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
     self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$on("changeColors", this.changeColors)
+    self.$eventBus.$on("storeCanvasImage", this.storeCanvasImage)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -261,6 +262,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private backCanvas !: fabric.Canvas
   private front_zoom_point: fabric.Point
   private back_zoom_point: fabric.Point
+  private last_canvas_pointer: fabric.Point
   private frontTexture !: any
   private backTexture !: any
   private default_view_port: number[]
@@ -349,6 +351,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getIsSafari
   }
 
+  public storeCanvasImage() {
+    if (this.mainPreview && this.mounted) {
+      this.$store.commit('STORE_CANVAS_IMAGE', {
+        front: this.$refs.front,
+        back: this.$refs.back,
+        scene: this
+      })
+    }
+  }
+
   public eventAction(item: Record<any, any>, object: Record<any, any>, otherSideObject: Record<any, any>) {
     object.center()
     object.set({
@@ -421,7 +433,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               if (svgGroup.id == item.id) {
                 if (item.fill && item.fill.gradientUnits) {
                   item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                    gradient.color = this.initialSvgGroups[index][gradient_index]
+                    if(this.initialSvgGroups[index][gradient_index]) {
+                      gradient.color = this.initialSvgGroups[index][gradient_index].color
+                    }
                   })
                   item.set('fill', new fabric.Gradient(item.fill));
                 } else {
@@ -466,7 +480,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 if (svgGroup.id == item.id) {
                   if (item.fill && item.fill.gradientUnits) {
                     item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                      gradient.color = this.initialSvgGroups[index][gradient_index]
+                      if(this.initialSvgGroups[index][gradient_index]) {
+                        gradient.color = this.initialSvgGroups[index][gradient_index].color
+                      }
                     })
                     item.set('fill', new fabric.Gradient(item.fill));
                   } else {
@@ -946,10 +962,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         })
 
         canvas.on('mouse:down', (opt) => {
+          this.is_back_dragging = false
+          this.is_front_dragging = false
           if(opt.target == null) {
+            this.last_canvas_pointer = canvas.getPointer(opt.e, false) as fabric.Point
             const pointer = canvas.getPointer(opt.e, false) as fabric.Point
-            this.is_back_dragging = false
-            this.is_front_dragging = false
             if(side == 'back') {
               this.back_zoom_point = pointer
               this.is_back_dragging = true
@@ -962,17 +979,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         canvas.on('mouse:move', (opt) => {
           if(this.is_back_dragging || this.is_front_dragging) {
-            const e = opt.e;
-
-            let movement = new fabric.Point(e.movementX, e.movementY)
+            const e = opt.e as Record<any, any>;
+            const pointer = canvas.getPointer(opt.e, false) as fabric.Point
+            let movement = new fabric.Point(Math.trunc((this.last_canvas_pointer.x - pointer.x) / -2), Math.trunc((this.last_canvas_pointer.y - pointer.y) / -2))
+            this.last_canvas_pointer = pointer
 
             if(this.is_back_dragging) { // while dragging canvas side change so that's why it put in if else
-              let scale_by = -5 / this.backCanvas.getZoom()
+              let scale_by = -5 / this.backCanvas.getZoom() // scale by this number to move object into same direction where mouse goes
               this.back_zoom_point.x = this.back_zoom_point.x + (movement.x * scale_by) / this.backCanvas.getZoom()
               this.back_zoom_point.y = this.back_zoom_point.y + (movement.y * scale_by) / this.backCanvas.getZoom()
               this.zoomCanvas('back', this.backCanvas.getZoom()) // manage panning with zoom move to point
             } else if(this.is_front_dragging) {
-              let scale_by = -5 / this.frontCanvas.getZoom()
+              let scale_by = -5 / this.frontCanvas.getZoom() // scale by this number to move object into same direction where mouse goes
               this.front_zoom_point.x = this.front_zoom_point.x + (movement.x * scale_by) / this.frontCanvas.getZoom()
               this.front_zoom_point.y = this.front_zoom_point.y + (movement.y * scale_by) / this.frontCanvas.getZoom()
               this.zoomCanvas('front', this.frontCanvas.getZoom()) // manage panning with zoom move to point
@@ -1108,7 +1126,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     opt.e.stopPropagation()
   }
 
-  public zoomCanvas(side: string, zoom) {
+  public zoomCanvas(side: string, zoom: number) {
     let dim_text = this.dimTextFront
     let canvas = this.frontCanvas
     let pointer = this.front_zoom_point
@@ -1563,7 +1581,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
       let checkPointY = centerPoint.y
       if(actualNearTo == 'top') {
-        checkPointY = target.top - (target.height * target.scaleY / 2)
+        checkPointY = target.top - (target.height * target.scaleY / 3)
       }
 
       let otherSideObjects = this.other_side_logos
@@ -1579,9 +1597,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         const height = target.height * target.scaleY;
         if(actualNearTo == 'top') { // todo may be find the direction from top for other side canvas to fix both side size mismatch issue
           const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - height , 0, 1, 'bottom')
-          const outside = direction.top - checkPointY
-          const modelSpaceTop = direction.top + (height / 2) - 3
-          addTop = modelSpaceTop - outside
+          addTop = direction.top - checkPointY
           addLeft = this.canvasWidth - target.left
         } else if (moreToWords == 'left') {
           const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')

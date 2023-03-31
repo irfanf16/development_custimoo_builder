@@ -23,8 +23,6 @@ pnpm-debug.log*
 *.sw?
 .env*
 !.env.example
-src/assets/css/custom.css
-src/assets/css/custom.css.map
 self_customizer/
 wordpress_customizer_staging/
 wordpress_customizer/

@@ -6,7 +6,7 @@
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <div>
-        <LogoUploader @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
+        <LogoPlacementMobile @showOther="updateOtherTab" :numberOfLogosAllowed="selectedProduct.allowed_logos_count" :logosSetting="selectedProduct.logos_setting"/>
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 1" >
@@ -14,52 +14,7 @@
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
-      <div class="grid gap-1 text-left">
-<!--        <div class="mobile_controls">-->
-<!--          <label>Color C</label>-->
-<!--        </div>-->
-<!--        <div class="mobile_controls">-->
-<!--          <label>Apply to</label>-->
-<!--        </div>-->
-
-        <div class="overflow-hidden mt-2 fade-right">
-          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
-            <li v-for="(svgColor, index) in svgGroups" :key="index">
-              <a style="text-transform: capitalize" :class="activePart == index ? 'active_line' : ''" @click="setActivePart(index)">{{ svgColor.id }}</a>
-            </li>
-          </ul>
-        </div>
-        <div class="d-flex align-items-center">
-          <div style="color: #666;">Selected color:</div>
-          <div class="d-flex align-items-center">
-            <span class="selected-color ml-2 flex-shrink-0" :style="{background: svgGroups[activePart].color}"></span>
-            <div class="m-1 text-muted">
-              <span>{{ svgGroups[activePart].pantone }}</span>
-              <span style="text-transform: uppercase" class="ml-1">{{ svgGroups[activePart].name }}</span>
-            </div>
-          </div>
-        </div>
-        <div class="overflow-hidden fade-right">
-          <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
-            <li v-for="(colorName, index) in productColors" :key="index">
-              <a class="faded_text text-capitalize" :class="activeCollection == index ? 'active_dark' : ''" @click="setActiveCollection(index)">{{colorName.name}}</a>
-            </li>
-
-            <li  v-if="selectedProduct.is_custom_color_allowed">
-              <a class="faded_text text-capitalize" @click="showOther">Other</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
-        <div class="color_circle" :key="index" v-for="(color, index) in (typeof productColors[activeCollection].color_text === 'string' ? JSON.parse(productColors[activeCollection].color_text) : productColors[activeCollection].color_text)" :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}" @click="setColor(color)"></div>
-      </div>
-
-      <div v-if="showOtherColors && selectedProduct.is_custom_color_allowed" class="mobile-other">
-        <span class="close" @click="hideOther"><BIconX /></span>
-        <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="color" :sucker-hide="true"/>
-      </div>
+      <ColorAccordionMobile @showOther="updateOtherTab" :productColors="productColors" :key="selectedProduct.id" />
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_name_number">
 <!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
@@ -91,7 +46,7 @@
             <template v-if="isCustomerAuthenticated">
               <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                 <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                <span v-if="this.ref['edit-roster'] && !this.ref['edit-roster'].$refs['order-details'].isLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                <span v-if="!cartLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
                   Add to cart
                 </span></span>
                   <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
@@ -138,18 +93,22 @@ import TextCustomization from "@/components/mobile/TextCustomization.vue";
 import Collars from "@/components/mobile/Collars.vue";
 import {getClosestColor} from "@/pantoneColor";
 import readXlsxFile from "read-excel-file";
-import LogoUploader from "@/components/mobile/LogoUploader.vue";
+import LogoPlacementMobile from "@/components/mobile/LogoPlacementMobile.vue";
 import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {getRosterDetailDefaultObject, getSelectedProductPantones} from "@/helpers/Helpers";
+import {getRosterDetailDefaultObject, getSelectedProductPantones, getDomDocument} from "@/helpers/Helpers";
 import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
+import CustomizationTabsMixin from '../mixins/CustomizationTabsMixin'
+import ColorAccordionMobile from "@/components/mobile/ColorAccordionMobile.vue";
+
 
 @Component<CustomTabs>({
   components: {
-    LogoUploader,
+    ColorAccordionMobile,
+    LogoPlacementMobile,
     TextCustomization,
     EditRosterAreaTab,
     Collars,
@@ -164,25 +123,20 @@ import ModalAction from "@/mixins/ModalAction";
   }
 })
 
-export default class CustomTabs extends Mixins(cartModalData) {
+export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsMixin) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
   @Prop() activeTab!: number
   @Prop() sideTabIndex!: number
   @Prop() maximized!: boolean
   @Prop() tabIcons!: Record<any, any>
-  private showOtherTab = false
-  private activePart = 0;
-  private activeCollection = 0;
   private activeFont = 0;
   private activeEye = -1;
   private playersDataHeight = 0;
-  public productColors: any[] = []
   public fontsColors: any[] = []
   public firstColor!: Record<any, any>
   public secondColor!: Record<any, any>
   public fontOptions: Record<any, any>[] = []
-  public color = '#59c7f9'
-  public showOtherColors = false
+  // public color = '#59c7f9'
   public pantoneColorVal= '13-4411'
   // privat tabTop = window.screen.availHeight - 190;
   public id = 0
@@ -190,8 +144,7 @@ export default class CustomTabs extends Mixins(cartModalData) {
   public sizeOptions: Record<any, any>[] = []
   public fileData: Record<any, any>[] = []
   public ref = this.$refs as Record<any, any>
-  public frontImage = ''
-  public backImage = ''
+  private showOtherTab = false
   public productName = ''
   public showLoader = false
   public designsIndex = 0;
@@ -225,6 +178,10 @@ export default class CustomTabs extends Mixins(cartModalData) {
 
   private addToCart() {
     this.addToCartMixin(this.products_fonts);
+  }
+
+  get cartLoading(): Record<any, any> {
+    return this.$store.getters.getCartLoading;
   }
 
   get isCustomerAuthenticated(): boolean {
@@ -280,7 +237,14 @@ export default class CustomTabs extends Mixins(cartModalData) {
   }
 
   get productSizes(){
-    return this.selectedProduct.sizes[0].json_data
+    const sizes:Record<any, any>[] = [];
+    this.selectedProduct.sizes[0].json_data.forEach((item)=>{
+      sizes.push({
+        text: item.name,
+        value: item.name,
+      })
+    })
+    return sizes;
   }
 
   public changeProduct(designsIndex: number) {
@@ -395,12 +359,14 @@ export default class CustomTabs extends Mixins(cartModalData) {
 
   private setPlayersDataHeight = (idx: number) => {
     return (e:Record<any, any>) => {
-      let element = document.querySelectorAll('.customize_controls') as Record<any, any>;
+      const main_doc = getDomDocument() as Record<any, any>
+      let element = main_doc.querySelectorAll('.customize_controls') as Record<any, any>;
     }
   }
 
   private setMinMax = (idx: number) => {
-    let element = document.querySelector('.customize_controls') as Record<any, any>;
+    const main_doc = getDomDocument() as Record<any, any>
+    let element = main_doc.querySelector('.customize_controls') as Record<any, any>;
 
     if(!element){
       let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
@@ -420,20 +386,20 @@ export default class CustomTabs extends Mixins(cartModalData) {
     this.showOtherTab = value
   }
 
-  public setColor(color: Record<any, any>) {
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
-    this.$store.dispatch('updateGroupColors',
-      {
-        index: this.svgGroups[this.activePart].id,
-        color: color.value,
-        pantone: color.pantone,
-        name: color.name
-      })
-  }
+  // public setColor(color: Record<any, any>) {
+  //   this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
+  //   this.$store.dispatch('updateGroupColors',
+  //     {
+  //       index: this.svgGroups[this.selectAccordionIndex].id,
+  //       color: color.value,
+  //       pantone: color.pantone,
+  //       name: color.name
+  //     })
+  // }
 
   private resizeTab(idx: number){
     return (e:Record<any, any>) => {
-      let cursorPosition = e.changedTouches[0].clientY;
+      let cursorPosition = e.changedTouches && e.changedTouches[0].clientY;
       if(cursorPosition <= 15){
         cursorPosition = 15
       }else if(cursorPosition >= window.screen.availHeight - 190){
@@ -446,7 +412,8 @@ export default class CustomTabs extends Mixins(cartModalData) {
       //   this.direction = "down"
       // }
       // this.tabTop = cursorPosition;
-      let element = document.querySelector('.customize_controls') as Record<any, any>;
+      const main_doc = getDomDocument() as Record<any, any>
+      let element = main_doc.querySelector('.customize_controls') as Record<any, any>;
       if(!element){
         let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
         element = shadow_dom.querySelector('.customize_controls') as Record<any, any>;
@@ -455,12 +422,6 @@ export default class CustomTabs extends Mixins(cartModalData) {
     }
   }
 
-  private setActivePart(index:number){
-    this.activePart = index;
-  }
-  private setActiveCollection(index:number){
-    this.activeCollection = index;
-  }
   private setActiveFont(index:number){
     this.activeFont = index;
   }
@@ -494,22 +455,6 @@ export default class CustomTabs extends Mixins(cartModalData) {
     this.$emit('switchTabs', ind, false)
   }
 
-  private showOther(){
-    this.showOtherColors = true
-    this.showOtherTab = true
-  }
-  private hideOther(){
-    this.showOtherColors = false
-    this.showOtherTab = false
-  }
-
-  public hideOtherTab(){
-    this.showOtherTab = false
-  }
-
-  get svgGroups() {
-    return this.$store.getters.getSvgGroups
-  }
   get groupColors(){
     return this.$store.getters.getGroupColors
   }
@@ -528,37 +473,6 @@ export default class CustomTabs extends Mixins(cartModalData) {
     this.productColorsManipulation()
   }
 
-  public productColorsManipulation() {
-    this.productColors = []
-    this.selectedProduct.colors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = colors.json_data
-      this.productColors = this.productColors.concat(finalColor)
-    })
-    this.productColors = this.productColors.concat(this.lockerColors)
-
-    if(this.logoColors.length){
-      let logoColorsNew: any[] = []
-      this.logoColors.forEach((color: any, index: number) => {
-        logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
-      })
-      let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
-      this.productColors = this.productColors.concat(teamLogoColors)
-    }
-  }
-
-  public fontsColorsManipulation() {
-    this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: []}
-      finalColor.color_text = colors.json_data
-      this.fontsColors = this.fontsColors.concat(finalColor)
-    })
-    if (this.fontsColors.length) {
-      this.firstColor = this.fontsColors[0].color_text[0]
-      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
-    }
-  }
-
   // public showLoader = false
   // @Prop({required: false, default:0}) tabIndexNew!: number
   // @Prop({required: false, default:0}) activeTab!: number
@@ -568,9 +482,6 @@ export default class CustomTabs extends Mixins(cartModalData) {
   //   return this.$store.getters.getManageComponents
   // }
   //
-  get selectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
-  }
   //
   get productModels(): Record<any, any> {
     return this.$store.getters.getProductModels;
@@ -594,60 +505,12 @@ export default class CustomTabs extends Mixins(cartModalData) {
   // public fontsColors: any[] = []
   // public firstColor!: Record<any, any>
   // public secondColor!: Record<any, any>
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
   //
   // get hideTab(): Record<any, any> {
   //   return this.$store.getters.getHideTab
   // }
   get lockerColors(){
     return this.$store.getters.getLockerColors
-  }
-
-  public fontsList(): void {
-    let productFonts = this.selectedProduct.namefonts
-    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-    if (productFonts.length){
-      let item = productFonts[0].json_data
-      if(item) {
-        this.fontOptions = []
-        item.forEach((fonts: any, key: number) => {
-          let fontNameParam = fonts.path.split('/').reverse()
-          fontNameParam = fontNameParam[0].split('.')
-          let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-          let font = {
-            value: fontNameParam[0] as string,
-            text: fontName as string
-          }
-          let hasMatch = false;
-          for (let index = 0; index < this.fontOptions.length; ++index) {
-            let obj = this.fontOptions[index];
-            if(obj.text == font.text){
-              hasMatch = true;
-              break;
-            }
-          }
-          if (!hasMatch){
-            this.fontOptions.push(font)
-          }
-          let fontUrl = this.storageUrl + fonts.path
-          const headElement = document.querySelector('head') as Record<any, any>
-          let style_tag = document.createElement('style')
-          style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
-          headElement.appendChild(style_tag)
-          if (shadow_dom) {
-            $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
-            setTimeout(() => {
-              $(shadow_dom).find("#delete_after_load").remove()
-            }, 100)
-          }else {
-            $('#santa').append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
-            setTimeout(() => {
-              $("#delete_after_load").remove()
-            }, 100)
-          }
-        })
-      }
-    }
   }
 
   public addTab(index: number) {
@@ -673,11 +536,11 @@ export default class CustomTabs extends Mixins(cartModalData) {
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
   }
 
-  public changeColor(color: Record<any, any>) {
-    const selectProductPantonesList = getSelectedProductPantones()
-    let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType);
-    this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
-  }
+  // public changeColor(color: Record<any, any>) {
+  //   const selectProductPantonesList = getSelectedProductPantones()
+  //   let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType);
+  //   this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
+  // }
 }
 </script>
 

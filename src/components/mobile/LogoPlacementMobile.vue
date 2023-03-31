@@ -13,14 +13,10 @@
             <div class="logo-placement-area mb-3 mb-lg-4 pt-0">
               <div class="logo-placement-holder mb-lg-3" :class="logo_tab.url ? 'hasLogo': 'noLogo'">
                 <div class="logo-holder">
-                  <UploadLogo v-if="!mobileScreen" :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
-                              :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
+                  <LogoUploaderMobile :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
+                                    :ref="'logoUploadModalOpener'+ltIdx" :customLogo="logo_tab" :key="'top'+ltIdx">
                     <span slot="upload_text">Click to upload logo or drag a file here</span>
-                  </UploadLogo>
-                  <UploadLogoMobile v-else :customLogoIndex="ltIdx" :showImage="true" :showActions="true"
-                                    :ref="'logoUploadModalOpener'+ltIdx" :key="'top'+ltIdx">
-                    <span slot="upload_text">Click to upload logo or drag a file here</span>
-                  </UploadLogoMobile>
+                  </LogoUploaderMobile>
                   <div class="logo-placemet-content">
                     <b-button :class="{'invisible': !getRecentLogos.length > 0}" class="logo-editor-button py-2" @click="showRecentLogosHandler" style="line-height: normal;" size="sm" variant="secondary">
                         Logos
@@ -40,12 +36,12 @@
             <div class="mb-lg-3 w-100">
               <div class="color-holder" style="margin-top: -10px; padding-top: 10px;">
                 <div class="color-container">
-                  <div class="color-box" v-for="(imageColor, icIdx) in imageColors"
-                       @click="selectLogoColor(icIdx, imageColor)" :title="imageColor.name"
+                  <div class="color-box" v-for="(imageColor, icIdx) in logoColorsInfo.colors"
+                       @click="selectLogoColor(imageColor, +icIdx)" :title="imageColor.name"
                        :class="{'active-swatch' : icIdx==selectedSwatchIndex, 'noColor': !imageColor.hex}"
                        :style="{background: imageColor.hex ? imageColor.hex : '#fff'}" :key="icIdx">
                     <template v-if="imageColor.hex">
-                          <span class="removeColor" @click="deleteLogoColor(icIdx)">
+                          <span class="removeColor" @click.stop="deleteLogoColor(icIdx)">
                             <BIconX />
                           </span>
                     </template>
@@ -57,31 +53,32 @@
                           </span>
                   </div>
 
-                  <div v-if="showLogoColors" class="mobile-other">
+                  <div v-if="active_logo_color_index >= 0" class="mobile-other">
                     <span class="close" @click="hideOther"><BIconX /></span>
                     <h2>Choose a color</h2>
-                    <LogoColorTabs @setSwatchColor="setSwatchColor"
-                                   :swatchPantone="defSwatchPantone"
-                                   :swatchcolor="defSwatchColor"
-                                   :productColors="productColors"
-                                   :showSVGS="Boolean(showSVGs)" :defSwatchColor.sync="defSwatchColor"
+                    <LogoColorTabsNew v-if="active_logo_color_index >= 0" @setSwatchColor="setSwatchColor" :productColors="product_colors"
+                                      :logoColorIndex="active_logo_color_index"
                     />
                   </div>
 
                   <div v-if="showRecentLogos" class="mobile-other recent-logos-mobile">
                     <span class="close" @click="hideRecentLogosHandler"><BIconX /></span>
                     <div>
-                      <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
+                      <template v-if="customLogos && customLogos.length > 0">
+                        <recent-logos :custom-logo-index="ltIdx" :custom-logo="customLogos[ltIdx]"/>
+                      </template>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="d-flex align-items-center justify-content-center gap-1">
-                <b-button @click="useLogoColors()" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px" v-if="imageColors.length > 1">
-                  <template v-if="usingColorLogos"> Original Colors</template>
-                  <template v-else> Logo Colors</template>
+                <b-button @click="useLogoColors" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px" v-if="!logoColorsInfo.using_logo_colors">
+                  Logo Colors
                 </b-button>
-                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors($event)" :class="!(usingColorLogos && imageColors.length > 1) ? 'invisible': 'pulse-animation'"
+                <b-button @click="useOriginalColors" class="use-btn flex-shrink-1" style="white-space: nowrap; max-width: 200px" v-else>
+                  Original Colors
+                </b-button>
+                <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors" :class="!logoColorsInfo.using_logo_colors ? 'invisible': 'pulse-animation'"
                           variant="secondary"><b-icon-shuffle />
                 </b-button>
                 <b-button class="use-btn flex-shrink-1" style="width: auto" @click="rollbackPreviousColors()" :class="{'invisible': !(previousImageColors.length && usingColorLogos)}" variant="secondary">
@@ -101,27 +98,38 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Watch} from 'vue-property-decorator'
-import {getCustomLogos, setLogoSettings} from "@/helpers/Helpers";
+import {Component, Mixins, Prop} from 'vue-property-decorator'
+import {getProductColors, setLogoSettings} from "@/helpers/Helpers";
 import UploadLogo from "@/components/UploadLogo.vue"
-import UploadLogoMobile from "@/components/UploadLogoMobile.vue"
+import UploadLogoMobile from "@/components/mobile/LogoUploaderMobile.vue"
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
-import LogoColorTabs from "@/components/LogoColorTabs.vue"
-import RecentLogos from "@/components/RecentLogos.vue";
+import LogoColorTabsNew from "@/components/LogoColorTabsNew.vue"
+import RecentLogos from "@/components/Logo/RecentLogos.vue";
+import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
+import LogoUploaderMobile from "@/components/mobile/LogoUploaderMobile.vue";
 
-@Component<LogoUploader>({
+@Component<LogoPlacementMobile>({
   components: {
+    LogoUploaderMobile,
     RecentLogos,
     UploadLogo,
     UploadLogoMobile,
     SaveLogoModal,
     SaveColorModal,
-    LogoColorTabs
+    LogoColorTabsNew
+  },
+  mounted() {
+    this.product_colors = getProductColors();
+
+    const logo_disclaimer_info = localStorage.getItem("logoDisclaimerInfo")
+    if(logo_disclaimer_info) {
+      this.logoDisclaimerInfo = JSON.parse(logo_disclaimer_info)
+    }
   }
 })
 
-export default class LogoUploader extends Vue {
+export default class LogoPlacementMobile extends Mixins(LogoUploaderColors) {
   @Prop({required: true}) numberOfLogosAllowed!: number
   @Prop({required: false, default: () => { return [{
       url: '',
@@ -145,7 +153,11 @@ export default class LogoUploader extends Vue {
   public defSwatchColor = '#ffffff'
   public defSwatchPantone = '11-0601'
   public showSVGs = false
+  public product_colors: Record<any, any>[] = []
   public showRecentLogos = false
+  public pulse_info: Record<any, any> = {
+    use_original_colors: true, shuffle: true, use_logo_colors: true
+  }
 
   public async rollbackPreviousColors () {
     this.initialExtractedColors.forEach((defaultColor: Record<any, any>, index: number) => {
@@ -159,9 +171,8 @@ export default class LogoUploader extends Vue {
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  get customLogos(): [Record<any, any>] {
-    //return this.$store.getters.getCustomLogos()
-    return  getCustomLogos(true, true);
+  get customLogos() {
+    return this.$store.getters.getCustomLogos();
   }
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
@@ -194,136 +205,42 @@ export default class LogoUploader extends Vue {
     return this.$store.getters.getRecentLogos
   }
 
-  public getColors() {
-
-    this.productColors = []
-    this.selectedProduct.colors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = colors.json_data
-      this.productColors = this.productColors.concat(finalColor)
-    })
-    this.productColors = this.productColors.concat(this.lockerColors)
-
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo()
   }
 
-  public setSwatchColor(color: Record<any, any>) {
-    let payload = {color_info : color , index : this.selectedSwatchIndex}
-    this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
-    this.$store.dispatch('setDefaultColor', { index: this.selectedSwatchIndex, color: color.hex, pantone: color.pantone, name: color.name })
-    this.$store.commit('SET_LOGO_COLOR', payload)
-  }
+  // public getColors() {
+  //
+  //   this.productColors = []
+  //   this.selectedProduct.colors.forEach((colors: any, key: number) => {
+  //     let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
+  //     finalColor.color_text = colors.json_data
+  //     this.productColors = this.productColors.concat(finalColor)
+  //   })
+  //   this.productColors = this.productColors.concat(this.lockerColors)
+  //
+  // }
 
-  public deleteLogoColor(index: number) {
-    this.imageColors[index].hex = null
-    this.imageColors[index].name = null
-    this.imageColors[index].pantone = null
-  }
-
-  useLogoColors() {
-    if(this.usingColorLogos) {
-      /*this.$store.commit('SET_LOGO_COLORS', [])*/
-      for (let i = 0; i < 4; i++) {
-        this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
-      }
-    } else {
-      if (this.imageColors.length ==0 && this.initialExtractedColors.length){
-        this.$store.commit('SET_LOGO_COLORS', this.initialExtractedColors)
-      }
-      this.$store.dispatch('setGroupColors', {})
-      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
-      for (let i = 0; i < 4; i++) {
-        if(this.imageColors[i]) {
-          this.$store.dispatch('setDefaultColor', { index: i, color: this.imageColors[i].hex, pantone: this.imageColors[i].pantone, name: this.imageColors[i].name})
-        } else {
-          this.$store.dispatch('setDefaultColor', { index: i, color: '', pantone: '', name: '' })
-        }
-      }
-    }
-    this.$store.commit("UPDATE_USING_COLOR_LOGOS", !this.usingColorLogos);
-
-  }
-
-
-  shuffleLogoColors(e:Record<any, any>) {
-    e.currentTarget.classList.remove('pulse-animation')
-    if(this.imageColors && this.imageColors.length > 1) {
-      this.previousImageColors = JSON.parse(JSON.stringify(this.imageColors))
-      /*.filter((imageColor: Record<any, any>, icIdx) => {
-      return imageColor.hex
-    })*/;
-      /*  let empty_logo_indexes: any = [];*/
-      let imageColors = JSON.parse(JSON.stringify(this.imageColors))
-      /*.filter((imageColor: Record<any, any>, icIdx) => {
-      if(imageColor.hex == null) {
-        empty_logo_indexes.push(icIdx);
-      }
-      return imageColor.hex
-    })*/
-
-      let shuffle = (previousValue: Record<any, any>, currentValue: Record<any, any>, currentIndex: number, array: Record<any, any>[]) => {
-        if (currentIndex !== 1) return previousValue;
-
-        array.sort(() => Math.random() - 0.5)
-        return array;
-      }
-
-      if (!this.checkColorOccurence(imageColors)){
-        while (JSON.stringify(this.previousImageColors) == JSON.stringify(imageColors)) {
-          imageColors.reduce(shuffle)
-        }
-      }
-      /* empty_logo_indexes.forEach((emptyLogoIndex: number) => {
-         imageColors[emptyLogoIndex] = {hex: null, pantone: null, name: null};
-       });*/
-
-
-      this.$store.dispatch("SET_LOGO_COLORS", imageColors);
-      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.defaultColors)), action: 'defaultColor' })
-      imageColors.forEach((imageColor: Record<any, any>, index: number) => {
-        this.$store.dispatch('setDefaultColor', {
-          index: index,
-          color: imageColor.hex,
-          pantone: imageColor.pantone,
-          name: imageColor.name
-        })
-      })
-    }
-  }
-  public  checkColorOccurence(data:Record<any, any>){
-    let x = 0
-    let current = data[0].hex
-    let matched = true
-    for (x; x < data.length; x++){
-      if (JSON.stringify(current) == JSON.stringify(data[x].hex)){
-        current = data[x].hex
-        matched = true
-      }else{
-        matched = false
-        break
-      }
-    }
-    return matched
-  }
-
-  public selectLogoColor(index: number, imageColor: Record<any, any>){
-    if(index==this.selectedSwatchIndex) {
-      this.showLogoColors = false;
-      this.selectedSwatchIndex = -1;
-      this.$emit('showOther', false);
-    } else {
-      this.selectedSwatchIndex = index
-      this.defSwatchColor = imageColor.hex
-      this.defSwatchPantone = imageColor.pantone
-      this.getColors();
-      this.showLogoColors = true
-      this.$emit('showOther', true);
-    }
-  }
+  // public selectLogoColor(index: number, imageColor: Record<any, any>){
+  //   if(index==this.selectedSwatchIndex) {
+  //     this.showLogoColors = false;
+  //     this.selectedSwatchIndex = -1;
+  //     this.$emit('showOther', false);
+  //   } else {
+  //     this.selectedSwatchIndex = index
+  //     this.defSwatchColor = imageColor.hex
+  //     this.defSwatchPantone = imageColor.pantone
+  //     this.getColors();
+  //     this.showLogoColors = true
+  //     this.$emit('showOther', true);
+  //   }
+  // }
 
   public hideOther() {
     this.showLogoColors = false
     this.$emit('showOther', this.showLogoColors);
     this.selectedSwatchIndex = -1;
+    this.selectLogoColor({},-1)
   }
 
   private showRecentLogosHandler(){

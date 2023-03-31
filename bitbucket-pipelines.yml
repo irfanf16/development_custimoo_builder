@@ -11,7 +11,6 @@ pipelines:
           - npm cache clean --force
           - npm uninstall node-sass --force
           - npm i sass --save-dev
-          - npm run sass-compile
           - npm install
           - npm run build:wc:customizer:self
           - npm run build:wc:customizer:wordpress

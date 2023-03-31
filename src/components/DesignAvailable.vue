@@ -108,7 +108,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
     if(this.manageComponents.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
-      this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: true})
+      // this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: true})
     }
   }
 }

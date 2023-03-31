@@ -26,17 +26,27 @@
           <slot name="upload_text">Upload Logo</slot>
         </div>
         <div class="remove-img" v-if="showActions && customLogos[customLogoIndex] && customLogos[customLogoIndex].url">
-          <a  @click="deleteLogo">
+          <a  @click="removeLogo(customLogoIndex)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogos[customLogoIndex].url ? 'none' : 'block'}"
-                type="file"
-                name="logos" ref="fileInput"
-                @change="uploadLogoImage"
-                @click="onClickUpload"
-                @drop="onDragUpload"
-                class="fileLoader"
+        <template v-if="replaceLogo">
+          <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
+                  type="file"
+                  name="logos" ref="logoUploadInput"
+                  @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
+                  @click="handleInputOnClick($event, replaceLogo, customLogo, customLogoIndex)"
+                  @drop="handleInputOnDrag($event, replaceLogo, customLogo, customLogoIndex)"
+                  class="fileLoader"
+                  accept="application/postscript,application/pdf,application/eps,image/eps,image/tiff">
+        </template>
+        <input v-else :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
+               type="file"
+               name="logos" ref="logoUploadInput"
+               @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
+               @click="handleInputOnClick($event, replaceLogo, customLogo, customLogoIndex)"
+               @drop="handleInputOnDrag($event, replaceLogo, customLogo, customLogoIndex)"
+               class="fileLoader"
                accept="image/*,application/postscript,application/pdf">
       </div>
 
@@ -56,35 +66,7 @@
       <b-icon-pencil />
     </b-button>
 
-
-    <modal :width="500" :resizable="true" :scrollable="true" height="auto" :reset="true"
-           :shiftY="0" name="upload-logo-disclaimer" id="upload-logo-disclaimer" size="md" :hide-footer="true"
-           :hide-header="true" class="upload-logo-disclaimer" ref="upload-logo-disclaimer">
-      <div class="modal-header d-flex justify-content-between">
-        <span class="fs-5 font-weight-bold">Attention!</span>
-        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('upload-logo-disclaimer')"><BIconX /></span>
-      </div>
-      <div class="modal-body">
-        <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
-          laws. You may
-          review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
-        <div class="mb-2">
-          <b-form-checkbox
-            id="checkbox-1"
-            v-model="status"
-            name="checkbox-1"
-            value="accepted"
-            unchecked-value="not_accepted">
-            Don't show again.
-          </b-form-checkbox>
-        </div>
-        <div class="upload-logo-buttons justify-content-center d-flex gap-1">
-          <button class="btn btn-secondary light text-center justify-content-center p-2" @click="hideModal">Cancel</button>
-          <button v-if="this.uploadType=='click'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoBtn">Confirm and Upload</button>
-          <button v-if="this.uploadType=='drag'" class="btn btn-secondary text-center justify-content-center p-2" style="background: #219F84; color: #fff" @click="uploadLogoDraged">Confirm and Upload</button>
-        </div>
-      </div>
-    </modal>
+    <LogoDisclaimerModal @disclaimer-accepted="handleDisclaimerAction" @hide-disclaimer-modal="handleDisclaimerModalHideEvent"/>
   </div>
 </template>
 
@@ -96,12 +78,14 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import $ from "jquery";
-import { getSelectedProductPantones, getUploadedLogoObject, setLogoSettings} from '../helpers/Helpers'
+import { getSelectedProductPantones, getUploadedLogoObject} from '../../helpers/Helpers'
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
+import {LogoUploaderMixin} from "@/mixins/LogoUploaderMixin";
 import ModalAction from "@/mixins/ModalAction";
+import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 
-@Component<UploadLogo>({
-  components: {LogoEditorModal},
+@Component<LogoUploaderMobile>({
+  components: {LogoEditorModal, LogoDisclaimerModal},
   mounted() {
       if (localStorage.getItem('logo_modal_status') == null) {
         this.open_modal = true
@@ -110,7 +94,7 @@ import ModalAction from "@/mixins/ModalAction";
       }
  }
 })
-export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
+export default class LogoUploaderMobile extends Mixins(ErrorMessages, ModalAction, LogoUploaderMixin) {
   public status = 'accepted'
   public open_modal!: boolean
   public mounted!: boolean
@@ -126,6 +110,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   @Prop({ required: true }) customLogoIndex!: number
   @Prop({ required: false, default: true }) showImage!: boolean
   @Prop({ required: false, default: true }) showActions!: boolean
+  @Prop({ required: true }) customLogo!: Record<any, any>
+  @Prop({ required: false }) replaceLogo!: boolean
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
@@ -141,7 +127,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   })
   customLogosChanged(newVal: [Record<any, any>]) {
     if (this.customLogos[0] && !this.customLogos[0].url) {
-      let inputRef = this.$refs.fileInput as Record<any, any>
+      let inputRef = this.$refs.logoUploadInput as Record<any, any>
       inputRef.value = null;
     }
     if (this.customLogos[0] && this.logoUrl != this.customLogos[0].url) {
@@ -258,18 +244,18 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     this.showLoader = true;
       http.post('/customer/upload/logo', fd, header)
       .then(resp => {
-        this.colors = resp.data.colors;
-        const inputRef = this.$refs.fileInput as Record<any, any>
+        this.colors = resp.data.result.logo_colors;
+        const inputRef = this.$refs.logoUploadInput as Record<any, any>
         inputRef.value = null;
-        custom_logo.original_logo = resp.data.file.logo_url;
-        custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
-        custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
-        custom_logo.original_logo_url = resp.data.file.original_logo_url;
+        custom_logo.original_logo = resp.data.result.customer_logo.logo_url;
+        custom_logo.transparent_logo = resp.data.result.customer_logo.transparent_logo_url;
+        custom_logo.smart_transparent_logo = resp.data.result.customer_logo.smart_transparent_logo_url;
+        custom_logo.original_logo_url = resp.data.result.customer_logo.original_logo_url;
         custom_logo.is_smart_transparent = false;
-        custom_logo.url = resp.data.file.logo_url;
-        custom_logo.id = resp.data.file.id;
+        custom_logo.url = resp.data.result.customer_logo.logo_url;
+        custom_logo.id = resp.data.result.customer_logo.id;
         custom_logo.upload = true
-        let customObj = getUploadedLogoObject(resp.data.file)
+        let customObj = getUploadedLogoObject(resp.data.result.customer_logo)
         let getLogos:Record<any, any> = []
         if (this.customLogos.length > 1){
           getLogos = this.customLogos.slice(0, -1)
@@ -350,19 +336,19 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
 
 
 
-  public deleteLogo() {
-    let inputRef = this.$refs.fileInput as Record<any, any>
-    inputRef.value = null;
-    let logo = setLogoSettings(this.customLogoIndex);
-    logo.logoIndex = this.customLogoIndex;
-    logo.removeLogo = true
-    let payload = {
-      custom_logo : logo
-    }
-    this.$store.commit('customLogos', payload)
-    this.$store.commit('SET_LOGO_COLORS', []);
-    this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
-  }
+  // public deleteLogo() {
+  //   let inputRef = this.$refs.fileInput as Record<any, any>
+  //   inputRef.value = null;
+  //   let logo = setLogoSettings(this.customLogoIndex);
+  //   logo.logoIndex = this.customLogoIndex;
+  //   logo.removeLogo = true
+  //   let payload = {
+  //     custom_logo : logo
+  //   }
+  //   this.$store.commit('customLogos', payload)
+  //   this.$store.commit('SET_LOGO_COLORS', []);
+  //   this.$store.commit('SET_INITIAL_LOGO_COLORS', []);
+  // }
 
   public toggleLogoBackground(type:string,val:boolean) {
     let payload = {index:this.customLogoIndex,type,val}

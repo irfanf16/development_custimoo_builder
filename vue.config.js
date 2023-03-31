@@ -1,6 +1,7 @@
 const path = require("path");
 
 module.exports = {
+  publicPath: '/',
   pluginOptions: {
     i18n: {
       locale: 'en',
@@ -29,11 +30,6 @@ module.exports = {
       .use('vue-loader')
       .tap(options => {
         // modify the options...
-
-
-
-
-
 
         return options
       })

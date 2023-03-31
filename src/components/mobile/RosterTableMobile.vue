@@ -27,37 +27,52 @@
       <template v-for="(roster, index) in rosterDetails" >
         <tr :key="index">
           <template v-if="selectedProduct.allow_name_number">
-            <td @click="editRosterPlayer(index)" v-if="custom_name_index != -1 || custom_number_index != -1" style="width: 10%; text-align: center" :class="{'activeEye': eyeIndex == index}"><BIconEye /></td>
+            <td @click="handleRosterItemFocus(index)" v-if="custom_name_index != -1 || custom_number_index != -1" style="width: 10%; text-align: center" :class="{'activeEye': active_roster_index == index}"><BIconEye /></td>
             <td v-if="custom_name_index != -1" style="width: 50%">
-              <b-form-input @focus="editRosterPlayer(index)"
-                class="text-center" ref="myInputs"
-                v-model="roster.text" />
+<!--              <b-form-input @focus="editRosterPlayer(index)"-->
+<!--                class="text-center" ref="myInputs"-->
+<!--                v-model="roster.text" />-->
+              <b-form-input :value="roster.text" @input="handleRosterUpdate($event, 'name', index)"
+                            @focus="handleRosterItemFocus(index)" ref="myInputs"
+              ></b-form-input>
             </td>
             <td v-if="custom_number_index != -1" style="width: 10%; text-align: center">
-              <b-form-input @focus="editRosterPlayer(index)"
-                class="text-center" ref="myInputs" type="number"
-                v-model="roster.number" />
+              <b-form-input :value="roster.number" @input="handleRosterUpdate($event, 'number', index)"
+                            @focus="handleRosterItemFocus(index)" ref="myInputs" type="number"
+              ></b-form-input>
+<!--              <b-form-input @focus="editRosterPlayer(index)"-->
+<!--                class="text-center" ref="myInputs" type="number"-->
+<!--                v-model="roster.number" />-->
             </td>
           </template>
           <td style="width: 10%; text-align: center">
-            <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">
-              <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.name}}</b-form-select-option>
+            <b-form-select @focus="handleRosterItemFocus(index)"
+                           @change="handleRosterUpdate($event, 'size', index)"
+                           :value="roster.size_index" ref="myInputs"
+            >
+              <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
+                {{ productSize.text }}</b-form-select-option>
             </b-form-select>
+<!--            <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">-->
+<!--              <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.name}}</b-form-select-option>-->
+<!--            </b-form-select>-->
           </td>
           <td style="width: 10%; text-align: center">
-            <b-form-input
-              class="text-center" ref="myInputs" type="number"
-              placeholder="0" v-model="roster.quantity"
-            ></b-form-input>
+            <div class="qty">
+              <b-form-input @focus="handleRosterItemFocus(index)" type="number" ref="myInputs"
+                            class="text-center" placeholder="0" :value="roster.quantity"
+                            @input="handleRosterUpdate($event, 'quantity', index)"
+              />
+            </div>
           </td>
-          <td  class="fs-3" style="width: 40px; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX v-if="rosterDetails.length > 1" @click="removeIndex(index)" /></td>
+          <td  class="fs-3" style="width: 40px; word-spacing: 10px; text-align: center; color: #fff; background: rgba(250,0,0,0.7)"><BIconX v-if="rosterDetails.length > 1" @click="removeRosterItem(index)" /></td>
         </tr>
       </template>
       </tbody>
     </table>
 
     <div class="roster-row mb-2 flex justify-content-end gap-1 button-holder p-0">
-      <button @click="addPlayer" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
+      <button @click="addRosterItem" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
         <BIconPlus />
       </button>
 
@@ -90,11 +105,12 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop} from 'vue-property-decorator'
 import readXlsxFile from "read-excel-file";
 import {default as $} from "jquery";
 import {http} from "@/httpCommon";
 import { findIndex } from 'lodash'
+import RosterTabMixin from "@/mixins/RosterTabMixin";
 
 @Component<RosterTableMobile>({
   mounted() {
@@ -102,7 +118,7 @@ import { findIndex } from 'lodash'
     this.fontsList()
   }
 })
-export default class RosterTableMobile extends Vue {
+export default class RosterTableMobile extends Mixins(RosterTabMixin) {
   @Prop({required: true}) productSizes!: any
   @Prop() productId!: number
   private roster: any[] = []
@@ -136,9 +152,6 @@ export default class RosterTableMobile extends Vue {
   get company(){
     return this.$store.getters.getCompany
   }
-  get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getRosterDetails()
-  }
   get customText():Record<any, any>[]{
     return this.$store.getters.getCustomTexts();
   }
@@ -151,9 +164,6 @@ export default class RosterTableMobile extends Vue {
     this.$store.commit('SET_EDITING_ROSTER_PLAYER_INDEX', index)
   }
 
-  public addPlayer() {
-    this.$emit('addPlayer', this.rosterDetails.length);
-  }
   public saveRoster(id:number){
     http.post('update/roster', {id:id, roster: this.rosterDetails}).then((res) => {
       if (res.status == 201){

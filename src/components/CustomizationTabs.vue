@@ -115,9 +115,9 @@ import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 // import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
-import {default as $} from 'jquery';
 import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import CustomizationTabsMixin from "@/mixins/CustomizationTabsMixin";
 import {filter} from "lodash"
 
 @Component<CustomizationTabs>({
@@ -146,7 +146,7 @@ import {filter} from "lodash"
     this.setTotalTabs();
   },
 })
-export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
+export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, CustomizationTabsMixin) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) isColorShuffled!: boolean
   @Prop({required: true}) customTextIndex!: number
@@ -165,7 +165,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     },
   }
   @Prop({required: false, default:0}) tabIndexNew!: number
-  public fontOptions: Record<any, any>[] = []
 
   private setRosterOpen(val:boolean){
     this.$emit('setRosterOpen', val)
@@ -182,10 +181,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
   }
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
-  }
-
-  get selectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
   }
 
   get customLogos(): Record<any, any> {
@@ -208,10 +203,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     return this.$store.getters.getSelectedProduct.productnames;
   }
 
-  get logoColors(): any[] {
-    return this.$store.getters.getLogosColors
-  }
-
   get productSizes(){
     return this.selectedProduct.sizes[0].json_data
   }
@@ -223,11 +214,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
 
   public tabIndex = 0
 
-  public productColors: any[] = []
-  public fontsColors: any[] = []
-  public firstColor!: Record<any, any>
-  public secondColor!: Record<any, any>
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   get hideTab(): Record<any, any> {
     return this.$store.getters.getHideTab
@@ -287,38 +273,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     this.$emit('open-add-to-locker')
   }
 
-  public productColorsManipulation() {
-    this.productColors = []
-    this.selectedProduct.colors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = colors.json_data
-      this.productColors = this.productColors.concat(finalColor)
-    })
-    // if (this.lockerColors.length > 0){
-    //   this.productColors = this.productColors.concat(this.lockerColors)
-    // }
-    if(this.logoColors.length){
-      let logoColorsNew: any[] = []
-      this.logoColors.forEach((color: any, index: number) => {
-        logoColorsNew = logoColorsNew.concat([{name: color.pantone, value: color.hex, position: index+1}])
-      })
-      let teamLogoColors = [{name: 'Team Logo Colors', color_text: logoColorsNew, selectedColor: ''}]
-      this.productColors = this.productColors.concat(teamLogoColors)
-    }
-  }
-
-  public fontsColorsManipulation() {
-    this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: []}
-      finalColor.color_text = colors.json_data
-      this.fontsColors = this.fontsColors.concat(finalColor)
-    })
-    if (this.fontsColors.length) {
-      this.firstColor = this.fontsColors[0].color_text[0]
-      this.secondColor = this.fontsColors[0].color_text? this.fontsColors[0].color_text[1] : this.fontsColors[0].color_text[0]
-    }
-  }
-
   public async getModels() {
     await this.$store.dispatch("getModels", this.selectedProduct.product_id);
   }
@@ -331,52 +285,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal) {
     this.previous_tab = index;
   }
 
-  public fontsList(): void {
-    let productFonts = this.selectedProduct.namefonts
-    let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-    if (productFonts.length){
-      let item = productFonts[0].json_data
-      if(item) {
-        this.fontOptions = []
-        item.forEach((fonts: any, key: number) => {
-          let fontNameParam = fonts.path.split('/').reverse()
-          fontNameParam = fontNameParam[0].split('.')
-          let fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-          let font = {
-            value: fontNameParam[0] as string,
-            text: fontName as string
-          }
-          let hasMatch = false;
-          for (let index = 0; index < this.fontOptions.length; ++index) {
-            let obj = this.fontOptions[index];
-            if(obj.text == font.text){
-              hasMatch = true;
-              break;
-            }
-          }
-          if (!hasMatch){
-            this.fontOptions.push(font)
-          }
-          let fontUrl = this.storageUrl + fonts.path
-          const headElement = document.querySelector('head') as Record<any, any>
-          let style_tag = document.createElement('style')
-          style_tag.innerHTML = "@font-face{font-family: " + font.value + "; src: url('" + fontUrl + "')}"
-          headElement.appendChild(style_tag)
-          if (shadow_dom) {
-            $(shadow_dom).append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
-            setTimeout(() => {
-              $(shadow_dom).find("#delete_after_load").remove()
-            }, 100)
-          }else {
-            $('#santa').append('<p id="delete_after_load" style="visibility: hidden; font-family: ' + font.value + '">aa</p>')
-            setTimeout(() => {
-              $("#delete_after_load").remove()
-            }, 100)
-          }
-        })
-      }
-    }
-  }
 
   public addTab(index: number) {
     let text = {

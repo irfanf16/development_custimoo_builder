@@ -12,7 +12,7 @@ const Main:Module<any, any> = {
       ItemToCustomize: true,
       DefaultColorShuffleBtn: true,
       ExtractedColors: false,
-      CustomizationTabs: !mobileScreen
+      CustomizationTabs: false
     },
     hideTab: {
       logoHide: !mobileScreen,
@@ -79,6 +79,9 @@ const Main:Module<any, any> = {
     },
     getMainTotalTabs: state => {
       return state.mainTotalTabs
+    },
+    getMobileScreen: state => {
+      return state.manageComponents.mobileScreen
     }
   },
   actions: {

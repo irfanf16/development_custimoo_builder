@@ -2,11 +2,12 @@
   <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" >
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
+
     <b-container fluid>
       <b-row>
         <template v-if="application_mounted && selectedProduct">
-          <b-col v-if="manageComponents.CustomizationTabs" cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs v-if="!mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
+          <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
+            <CustomizationTabs v-if="!manageComponents.mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
                                @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
                                :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
@@ -147,34 +148,37 @@
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                   <div>
                     <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction()"
-                              :disabled="undoItems && undoItems.length == 0">
+                              :disabled="undoItems && undoItems.length == 0" style="padding: 7px">
                       <span class="d-sm-block d-none">Undo</span>
-                      <span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal" /></span>
-                    </b-button>
-                    <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction('redo')"
-                              :disabled="redoItems && redoItems.length == 0">
-                      <span class="d-sm-block d-none">Redo</span>
                       <span class="d-sm-none d-block"><BIconReplyFill /></span>
                     </b-button>
-                    <template v-if="isCustomerAuthenticated">
-                      <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                        <button v-if="!($root.$refs.Order_Details && $root.$refs.Order_Details.isLoading)" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
-                          <b-icon-cart />
-                        </button>
-                        <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
-                          <i class="fa fa-spinner fa-spin"></i>
-                        </button>
+                    <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction('redo')"
+                              :disabled="redoItems && redoItems.length == 0" style="padding: 7px">
+                      <span class="d-sm-block d-none">Redo</span>
+                      <span class="d-sm-none d-block"><BIconReplyFill class="flip_horizontal"/></span>
+                    </b-button>
+                    <div class="d-inline-flex gap-1" v-if="isCustomerAuthenticated">
+                      <template v-if="getProductEditInfoObject.type == 'locker_product'">
+                        <b-button :key="'updateLockerProduct'" variant="secondary" v-if="hideSaveLockerButton == false"
+                                  @click="getLockers" class="light fs-2 py-0 px-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" fill="currentColor" height="1em" width="1em" >
+                            <path d="M 5 2 C 3.346 2 2 3.346 2 5 L 2 45 C 2 46.654 3.346 48 5 48 L 45 48 C 46.654 48 48 46.654 48 45 L 48 28.59375 L 39.96875 36.625 L 39.96875 46 L 10.03125 46 L 10.03125 28.8125 C 10.03125 27.2825 11.2825 26.03125 12.8125 26.03125 L 33.375 26.03125 L 41.625 17.78125 C 43.345 16.06125 45.849 15.596 48 16.375 L 48 12 C 48 11.734 47.90675 11.46825 47.71875 11.28125 L 38.71875 2.28125 C 38.53175 2.09325 38.266 2 38 2 L 5 2 z M 12 4 L 35 4 C 36.103 4 37 4.897 37 6 L 37 17 C 37 18.103 36.103 19 35 19 L 12 19 C 10.897 19 10 18.103 10 17 L 10 6 C 10 4.897 10.897 4 12 4 z M 30 6 C 29.447 6 29 6.447 29 7 L 29 16 C 29 16.553 29.447 17 30 17 L 33 17 C 33.553 17 34 16.553 34 16 L 34 7 C 34 6.447 33.553 6 33 6 L 30 6 z M 45.9375 18 C 44.894375 18.00025 43.82675 18.392 43.03125 19.1875 L 42.8125 19.4375 A 1.0001 1.0001 0 0 0 42.59375 19.625 L 42.34375 19.875 L 26.90625 35.3125 A 1.0001 1.0001 0 0 0 26.625 35.75 L 25.03125 41.75 A 1.0001 1.0001 0 0 0 26.25 42.96875 L 32.25 41.375 A 1.0001 1.0001 0 0 0 32.6875 41.09375 L 48.125 25.65625 C 48.123545 25.657341 48.258793 25.522605 48.375 25.40625 A 1.0001 1.0001 0 0 0 48.5625 25.1875 C 48.668661 25.0813 48.8125 24.96875 48.8125 24.96875 C 50.4045 23.37675 50.4025 20.7785 48.8125 19.1875 C 48.0155 18.391 46.980625 17.99975 45.9375 18 z M 43.75 21.28125 L 46.71875 24.25 L 31.46875 39.5 L 31.40625 39.53125 L 28.46875 36.59375 L 28.5 36.53125 L 43.75 21.28125 z M 6 41 L 8 41 L 8 43 L 6 43 L 6 41 z M 42 41 L 44 41 L 44 43 L 42 43 L 42 41 z"/>
+                          </svg>
+                        </b-button>
+                        <b-button :key="'savetolocker'" variant="outline-secondary" @click="getLockers(false, true)">
+                          <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg>
+                        </b-button>
                       </template>
-                      <button class="btn btn-secondary light" :key="'savetolocker'" @click="getLockers">
-                        <span class="d-sm-block d-none">Save</span>
-                        <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
-                      </button>
-                    </template>
+                      <template v-else>
+                        <b-button @click="getLockers(false, true)" :key="'loginmodalsavelockerroom'" variant="outline-secondary">
+                          <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg>
+                        </b-button>
+                      </template>
+                    </div>
                     <template v-else>
-                      <button class="btn btn-secondary light" @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" v-b-modal.modal-login>
-                        <span class="d-sm-block d-none">Save</span>
-                        <span class="d-sm-none d-block"><svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg></span>
-                      </button>
+                      <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">
+                        <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg>
+                      </b-button>
                     </template>
                   </div>
 
@@ -190,35 +194,103 @@
                     </button>
                     <template v-else>
                       <template v-if="isCustomerAuthenticated">
-                        <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                          <button v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
-                            <b-icon-cart />
-                          </button>
-                          <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
-                            <i class="fa fa-spinner fa-spin"></i>
-                          </button>
+                        <template>
+                          <template v-if="$store.getters.getUpdateOrderItemProducts == null">
+                            <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+                            <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+                              <b-button :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
+                                <b-icon-cart />
+                              </b-button>
+                            </span>
+
+                              <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                                <b-button @click="showVModal('replace-logo')" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                                  <b-icon-card-checklist />
+                                </b-button>
+                              </span>
+                              <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px" @click="addToCart(null)">
+                                <b-icon-cart-check v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" />
+                                <b-icon-cart v-else />
+                              </b-button>
+                              <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
+                                <i class="fa fa-spinner fa-spin"></i>
+                              </button>
+                            </template>
+                          </template>
                         </template>
                       </template>
-                      <template v-else>
-                        <button v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
-                          <b-icon-cart />
+
+                      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false && isRosterOpened">
+                        <button @click="showVModal('replace-logo')" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                          <b-icon-card-checklist />
                         </button>
-                      </template>
+                      </span>
+
+                      <template v-else>
+                        <template v-if="company.platform !== 'self'">
+                          <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
+                            <button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px"><b-icon-cart /></button>
+                          </span>
+                            <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px"><b-icon-cart /></b-button>
+                          </template>
+                          <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                            <button @click="showVModal('replace-logo')" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                              <b-icon-card-checklist />
+                            </button>
+                          </span>
+                        </template>
                     </template>
+<!--                    <template v-else>-->
+<!--                      <template v-if="isCustomerAuthenticated">-->
+<!--                        <template v-if="$store.getters.getUpdateOrderItemProducts == null">-->
+<!--                          <button v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">-->
+<!--                            <b-icon-cart />-->
+<!--                          </button>-->
+<!--                          <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">-->
+<!--                            <i class="fa fa-spinner fa-spin"></i>-->
+<!--                          </button>-->
+<!--                        </template>-->
+<!--                      </template>-->
+<!--                      <template v-else>-->
+<!--                        <button v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">-->
+<!--                          <b-icon-cart />-->
+<!--                        </button>-->
+<!--                      </template>-->
+<!--                    </template>-->
 
                     <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
 
-                    <button @click="toggleDD" class="custom-link reset-btn" ref="toggler"><BIconThreeDotsVertical /></button>
-                    <b-dropdown ref="dd-menu" :right="true" :offset="30" :boundary="ref['toggler']" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
-                      <b-dropdown-item><button @click="showDesign">Change Design / Item</button></b-dropdown-item>
-                      <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></b-dropdown-item>
-                      <b-dropdown-item v-else><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></b-dropdown-item>
-                      <b-dropdown-item v-if="isCustomerAuthenticated"><button :key="'summarybutton'" @click="buyNow">Summary</button></b-dropdown-item>
-                      <b-dropdown-item v-else><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></b-dropdown-item>
-                      <b-dropdown-item @click="resetStore">Reset</b-dropdown-item>
-                      <b-dropdown-item v-if="!isCustomerAuthenticated"><button @click="gotoLogin">Login</button></b-dropdown-item>
-                      <b-dropdown-item v-if="isCustomerAuthenticated"><button @click="logoutCustomer">Logout</button></b-dropdown-item>
-                    </b-dropdown>
+                    <button @click="toggleDD" class="custom-link reset-btn position-relative" v-click-outside="() => showDD = false">
+                      <BIconThreeDotsVertical />
+
+                      <ul class="dropdown-menu dropdown-menu-right" :class="{'show': showDD}" ref="dd-menu" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
+                        <li>
+                          <a class="dropdown-item" target="_self"><button @click="showDesign">Change Design / Item</button></a>
+                        </li>
+                        <li v-if="isCustomerAuthenticated">
+                          <a class="dropdown-item" target="_self"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></a>
+                        </li>
+                        <li v-else>
+                          <a class="dropdown-item" target="_self"><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></a>
+                        </li>
+<!--                        <li v-if="isCustomerAuthenticated">-->
+<!--                          <a class="dropdown-item" target="_self"><button :key="'summarybutton'" @click="buyNow">Summary</button></a>-->
+<!--                        </li>-->
+<!--                        <li v-else>-->
+<!--                          <a class="dropdown-item" target="_self"><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></a>-->
+<!--                        </li>-->
+                        <li @click="resetStore">
+                          <a class="dropdown-item" target="_self">Reset</a>
+                        </li>
+                        <li v-if="!isCustomerAuthenticated">
+                          <a class="dropdown-item" target="_self"><button @click="gotoLogin">Login</button></a>
+                        </li>
+                        <li v-if="isCustomerAuthenticated">
+                          <a class="dropdown-item" target="_self"><button @click="logoutCustomer">Logout</button></a>
+                        </li>
+                      </ul>
+                    </button>
+
                   </div>
                 </div>
               </div>
@@ -430,6 +502,7 @@ import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMo
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
+import ClickOutside from 'vue-click-outside';
 
 import {
   logData,
@@ -445,7 +518,11 @@ import {
   routerPush,
   getImageFromCanvas,
   setDefaultColors,
-  setUndoRedoItems, santaClone, getCustomizerIframe, getLockerColors, processColorsCustom
+  setUndoRedoItems,
+  santaClone,
+  getCustomizerIframe,
+  getLockerColors,
+  getDomDocument, processColorsCustom
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -596,6 +673,9 @@ Vue.filter('formatDate', function(value:string) {
     next((vm:Record<any, any>) => {
       vm.prevRoute = from
      })
+  },
+  directives: {
+    ClickOutside
   }
   //  destroyed() {
   //   this.$store.dispatch("updateOrderItemProducts", null);
@@ -643,6 +723,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private product: Record<any, any> = {}
   private frontPreview = ''
   private backPreview = ''
+  private showDD = false;
   private customTextIndex = -1
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
@@ -803,7 +884,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         }
         self.$store.dispatch('setActiveTab', ind);
       } else {
-        let shadow_dom = (this.$root as Record<any, any>).$options.shadowRoot;
+        let shadow_dom = getDomDocument();
         customizer_tabs = shadow_dom.querySelectorAll('.sideNav li a')
 
         for (let i = 0; i < customizer_tabs.length; i++) {
@@ -1467,6 +1548,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.$store.dispatch('setManageComponents', {index: 'DefaultColorShuffleBtn', value: true})
       this.$store.dispatch('setActiveTab', -1)
       this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: false})
+      this.showDD = false;
     }
   }
 
@@ -1542,7 +1624,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public toggleDD() {
-    this.ref['dd-menu'].show()
+    this.showDD = this.showDD ? false : true;
   }
 
   public changeSide(index: number) {

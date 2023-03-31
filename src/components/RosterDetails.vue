@@ -226,10 +226,10 @@
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import {filter, find, findIndex, map} from 'lodash';
 import ErrorMessages from '@/mixins/ErrorMessages';
-import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
-import { rosterDefaultItem } from "@/helpers/Helpers";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import RosterTabMixin from "@/mixins/RosterTabMixin";
 
 
 @Component<RosterDetails>({
@@ -240,7 +240,7 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     this.fontsList()
   },
 })
-export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton,RosterDetailsGlobal) {
+export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton, RosterTabMixin) {
   /*
   * component props starts
   * */
@@ -282,10 +282,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public selected_locker = null
   public locker_rosters: Record<any, any>[] = []
   public roster_previous_state: Record<any, any>[] = []
-  public show_roster_change_warning = false
   public show_undo_roster_btn = false
   public is_admin_token = localStorage.getItem('adminToken')
-  public handle_text_change_timer!: number
 
   /*
   *  component data properties ends
@@ -368,9 +366,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getVectorLogos
   }
 
-  get rosterDetails(): [Record<any, any>] {
-    return this.$store.getters.getProductRosters()
-  }
 
   get company() {
     return this.$store.getters.getCompany
@@ -399,31 +394,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   /*
   * component methods starts
   * */
-
-  public addPlayer(obj: Record<any, any>) {
-    this.$emit('addPlayer', this.rosterDetails.length);
-  }
-
-  public addRosterItem() {
-    let self: Record<any, any> = this;
-    this.show_roster_change_warning = true
-    let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0])));
-    roster_items = [...this.productRoster, roster_items];
-    self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-  }
-
-  public removeRosterItem(roster_item_index: number) {
-    this.show_roster_change_warning = true
-    this.$store.commit('REMOVE_ROSTER_ITEM', roster_item_index)
-  }
-
-  public resetRosterItem(roster_item: Record<any, any>) {
-    roster_item = JSON.parse(JSON.stringify(roster_item))
-    let first_size = this.productSizes[0].value
-    return Object.assign(roster_item, {
-      text: '',  number: '',  size_index: 0,  size: first_size,  code: first_size, quantity: 1, information: ''
-    })
-  }
 
   public addRosterItemOnTab($event:Record<any, any>) {
     (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem();
@@ -589,31 +559,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
       this.$store.commit('UPDATE_ROSTER', updated_roster)
     })
     this.syncRosterWithCustomText('name', this.rosterDetails[this.active_roster_index].text)
-  }
-
-  public async handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
-    const self: Record<any, any> = this;
-    this.show_roster_change_warning = true
-    let roster_updated_key = type == 'name' ? 'text' : type;
-    let product_id = self.selectedProduct.id;
-    let roster_data = {
-      [roster_updated_key] : updated_val
-    }
-    if(type == 'size') {
-      // in case of type size the updated value will have selected size index
-      let selected_size = self.productSizes[updated_val]
-      roster_data['size_index'] = updated_val
-      roster_data['size'] = selected_size.value
-      roster_data['code'] = selected_size.value
-    }
-    self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
-    //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.
-    if(['name', 'number'].includes(type)) {
-      clearTimeout (this.handle_text_change_timer);
-      this.handle_text_change_timer = setTimeout(() => {
-        self.syncRosterWithCustomText(type, updated_val)
-      }, 300)
-    }
   }
 
   public async syncRosterWithCustomText(type: string, text_number_value: string) {

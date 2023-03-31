@@ -856,6 +856,43 @@ button {
     }
 }
 
+.btn-locker-color{
+    @extend .btn;
+    font-size: 12px !important;
+    font-weight: normal !important;
+    padding: 5px 10px !important;
+    white-space: nowrap !important;
+    color: $theme-color !important;
+    background: $theme-color-light !important;
+    border-color: $theme-color-light !important;
+    min-width: auto !important;
+    white-space: nowrap !important;
+
+    &.active{
+        color: $theme-color-light !important;
+        background: $theme-color !important;
+        border-color: $theme-color !important;
+    }
+}
+
+.btn-locker-folder{
+    @extend .btn;
+    font-size: 12px !important;
+    font-weight: normal !important;
+    padding: 5px 10px !important;
+    color: #666 !important;
+    background: #ddd !important;
+    border-color: #ddd !important;
+    min-width: auto !important;
+    white-space: nowrap !important;
+
+    &.active{
+        color: #ddd !important;
+        background: #666 !important;
+        border-color: #666 !important;
+    }
+}
+
 .customization-tabs {
     position: fixed;
     left: 0;
@@ -1155,44 +1192,44 @@ button {
         }
     }
 
-    .accordion, .customization-text-area{
-        .btn-locker-color{
-            @extend .btn;
-            font-size: 12px;
-            font-weight: normal;
-            padding: 5px 10px;
-            white-space: nowrap;
-            color: $theme-color;
-            background: $theme-color-light;
-            border-color: $theme-color-light;
-            min-width: auto;
-            white-space: nowrap;
-
-            &.active{
-                color: $theme-color-light;
-                background: $theme-color;
-                border-color: $theme-color;
-            }
-        }
-
-        .btn-locker-folder{
-            @extend .btn;
-            font-size: 12px;
-            font-weight: normal;
-            padding: 5px 10px;
-            color: #666;
-            background: #ddd;
-            border-color: #ddd;
-            min-width: auto;
-            white-space: nowrap;
-
-            &.active{
-                color: #ddd;
-                background: #666;
-                border-color: #666;
-            }
-        }
-    }
+    //.accordion, .customization-text-area{
+    //    .btn-locker-color{
+    //        @extend .btn;
+    //        font-size: 12px;
+    //        font-weight: normal;
+    //        padding: 5px 10px;
+    //        white-space: nowrap;
+    //        color: $theme-color;
+    //        background: $theme-color-light;
+    //        border-color: $theme-color-light;
+    //        min-width: auto;
+    //        white-space: nowrap;
+    //
+    //        &.active{
+    //            color: $theme-color-light;
+    //            background: $theme-color;
+    //            border-color: $theme-color;
+    //        }
+    //    }
+    //
+    //    .btn-locker-folder{
+    //        @extend .btn;
+    //        font-size: 12px;
+    //        font-weight: normal;
+    //        padding: 5px 10px;
+    //        color: #666;
+    //        background: #ddd;
+    //        border-color: #ddd;
+    //        min-width: auto;
+    //        white-space: nowrap;
+    //
+    //        &.active{
+    //            color: #ddd;
+    //            background: #666;
+    //            border-color: #666;
+    //        }
+    //    }
+    //}
 
     .logo-placement-tabs {
         margin: 0 auto;
@@ -4725,7 +4762,7 @@ $fontSize: 0.5;
             background: rgb(240, 195, 67);
             color: rgb(167, 119, 32);
             opacity: 1;
-            font-size: 3em;
+            font-size: 1.4em;
             overflow: hidden;
 
             &:after {
@@ -4907,12 +4944,22 @@ $fontSize: 0.5;
 .front {
     .image-holder {
         .canvas-area-holder {
-            a:last-child {
+            .scene-container:last-child {
                 height: 30px !important;
                 width: 30px !important;
                 position: absolute;
                 left: 0;
                 top: 20px;
+
+                .zooming-controls {
+                    display: none !important;
+                }
+            }
+
+            .scene-container:first-child{
+                .zooming-controls {
+                    display: flex !important;
+                }
             }
         }
     }
@@ -4921,12 +4968,22 @@ $fontSize: 0.5;
 .back {
     .image-holder {
         .canvas-area-holder {
-            a:first-child {
+            .scene-container:first-child {
                 height: 30px !important;
                 width: 30px !important;
                 position: absolute;
                 left: 0;
                 top: 20px;
+
+                .zooming-controls {
+                    display: none !important;
+                }
+            }
+
+            .scene-container:last-child{
+                .zooming-controls {
+                    display: flex !important;
+                }
             }
         }
     }
@@ -5856,7 +5913,8 @@ $fontSize: 0.5;
                         right: -10px;
                         opacity: 1;
                         background: #219F84;
-                        font-size: 18px;
+                        color: #fff;
+                        font-size: 16px;
                     }
                 }
 
@@ -5864,7 +5922,8 @@ $fontSize: 0.5;
                     right: -10px;
                     opacity: 1;
                     background: #999999;
-                    font-size: 18px;
+                    color: #fff;
+                    font-size: 16px;
                 }
             }
         }
@@ -6038,11 +6097,20 @@ $fontSize: 0.5;
     }
 }
 
+.vm--overlay{
+    height: 100% !important;
+}
+
 .vm--container {
     padding: 1.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    bottom: auto !important;
 }
 
 .vm--modal {
+    //margin-top: 0px;
     margin-top: 140px;
 
     @media (max-width: 768px) {
@@ -6521,10 +6589,38 @@ $fontSize: 0.5;
                 justify-content: center;
                 white-space: nowrap;
                 flex-shrink: 0;
-                border: 1px solid #ddd;
 
-                &.active{
-                    border: 1px solid #81beb1;
+                @media screen and (min-width: 991px) {
+                    border: 1px solid #ddd;
+
+                    &.active{
+                        border: 1px solid #81beb1;
+                    }
+                }
+            }
+        }
+    }
+
+    .sportswear-parts{
+        &>div{
+            &>.nav-tabs {
+                .nav-item {
+                    &:only-child{
+                        display: none;
+                    }
+                    a{
+                        @media screen and (max-width: 991px){
+                            background: white;
+                            border: 1px solid #ddd;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+
+                            &.active{
+                                background: $theme-color-light;
+                                border: 1px solid $theme-color;
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -39,7 +39,7 @@ import Store from "@/store";
 
 export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts) {
 
-  @Prop({required:false}) customLogoIndex!: number
+  @Prop({required:false}) customLogoIndex!: number | string
   @Prop({required: false, default: () => { return [{
       url: '',
       width: 200,

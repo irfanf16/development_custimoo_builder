@@ -8,8 +8,7 @@
     </div>
     <div class="modal-body">
       <p class="mb-3">By uploading an image, you guarantee that your use of the image does not infringe any rights or
-        laws. You may
-        review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
+        laws. You may review Customizer’s design rejection reasons <a href="#">HERE</a>.</p>
       <div class="mb-2">
         <b-form-checkbox
           id="checkbox-1"
@@ -20,8 +19,8 @@
         </b-form-checkbox>
       </div>
       <div class="upload-logo-buttons justify-content-center d-flex gap-1">
-        <button class="btn btn-secondary light text-center justify-content-center p-2" @click="$emit('hide-disclaimer-modal')">Cancel</button>
-        <button class="btn btn-secondary text-center justify-content-center p-2"
+        <button class="btn btn-secondary light text-center justify-content-center p-2" :class="{'btn-sm': mobileScreen}" @click="$emit('hide-disclaimer-modal')">Cancel</button>
+        <button class="btn btn-secondary text-center justify-content-center p-2" :class="{'btn-sm': mobileScreen}"
                 style="background: #219F84; color: #fff"
                 @click="$emit('disclaimer-accepted', !dont_show_again)"
         >
@@ -47,6 +46,9 @@ export default class LogoDisclaimerModal extends Mixins(ModalAction) {
 
   public dont_show_again = true
 
+  get mobileScreen() {
+    return this.$store.getters.getMobileScreen;
+  }
   /*
   * data props ends
   * */
