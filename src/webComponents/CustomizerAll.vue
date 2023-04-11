@@ -17,7 +17,7 @@ import Header from '@/components/Header.vue';
 
 import CommonImportMixin from '../mixins/CommonImportMixin.vue'
 
-import {getWindowObject} from "../helpers/Helpers";
+import { getDomDocument, getWindowObject } from '../helpers/Helpers'
 
 export default {
   store, router,
@@ -60,6 +60,16 @@ export default {
       faStyles.textContent = dom.css()
       shadowRoot.appendChild(faStyles)
     }
+
+    const doc = getDomDocument(true) ? getDomDocument(true) : getDomDocument();
+    const style1 = doc.createElement('style');
+    const style2 = doc.createElement('style');
+    const isOnepage = doc.location.host == 'mckiesports.com';
+    style1.innerHTML = `.vm--block-scroll{overflow-y: auto;} ${isOnepage && '.vm--container{top: auto !important}.vm--modal{margin-top: 0px !important}'}`;
+    style2.innerHTML = `.vm--block-scroll{overflow-y: auto;} ${isOnepage && '.vm--container{top: auto !important}.vm--modal{margin-top: 0px !important}'}`;
+    doc.head.appendChild(style1);
+    const customizer = doc.querySelector('v-customizer')
+    customizer?.shadowRoot.appendChild(style2)
   }
 }
 </script>

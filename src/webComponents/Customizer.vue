@@ -9,6 +9,7 @@ import store from '../store'
 import {dom} from '@fortawesome/fontawesome-svg-core'
 import CommonImportMixin from '../mixins/CommonImportMixin.vue'
 
+import { getDomDocument } from '../helpers/Helpers'
 export default {
   store, router,
   name: "Customizer",
@@ -31,6 +32,15 @@ export default {
       faStyles.textContent = dom.css()
       shadowRoot.appendChild(faStyles)
     }
+    
+    const doc = getDomDocument(true) ? getDomDocument(true) : getDomDocument();
+    const style1 = doc.createElement('style');
+    const style2 = doc.createElement('style');
+    style1.innerHTML = `.vm--block-scroll{overflow-y: auto;}`;
+    style2.innerHTML = `.vm--block-scroll{overflow-y: auto;}`;
+    doc.head.appendChild(style1);
+    const customizer = doc.querySelector('v-customizer')
+    customizer?.shadowRoot.appendChild(style2)
   }
 }
 </script>
