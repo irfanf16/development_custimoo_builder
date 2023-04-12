@@ -33,5 +33,7 @@ module.exports = {
 
         return options
       })
+    config.output.chunkFilename('[name].[hash].js')
+    config.resolve.alias.set('@assets', path.resolve(__dirname, 'src/assets'));
   }
 }
