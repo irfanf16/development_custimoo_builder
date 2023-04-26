@@ -133,12 +133,22 @@
                   <div class="change-product-area d-lg-none d-flex align-items-center justify-content-end">
                   </div>
                 </header>
-                <div v-if="!mobileScreen" class="undo-btn-area text-left pt-3">
-                  <b-button variant="outline-secondary  mr-2" @click="handleUndoRedoAction()"
-                            :disabled="undoItems && undoItems.length == 0">Undo</b-button>
-                  <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction('redo')"
-                            :disabled="redoItems && redoItems.length == 0">Redo</b-button>
-                  <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
+                <div v-if="!mobileScreen" class="undo-btn-area position-relative text-left pt-3">
+                  <div>
+                    <b-button variant="outline-secondary  mr-2" @click="handleUndoRedoAction()"
+                              :disabled="undoItems && undoItems.length == 0">Undo</b-button>
+                    <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction('redo')"
+                              :disabled="redoItems && redoItems.length == 0">Redo</b-button>
+                    <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
+                  </div>
+
+                  <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute" style="left: 0; right: 0; top: 15px;" v-if="MSRP">
+                    <template v-if="MSRP.pivot.price">
+                      MSRP: {{MSRP.pivot.price + " " + MSRP.code}}
+                    </template>
+                  </div>
+
+                  <div>&nbsp;</div>
                 </div>
                 <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -297,6 +307,12 @@
             </template>
 
             <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
+              <div v-if="mobileScreen && MSRP" class="w-100 fs-1 font-weight-bolder text-center">
+                <template v-if="MSRP.pivot.price">
+                  MSRP: {{MSRP.pivot.price + " " + MSRP.code}}
+                </template>
+              </div>
+
               <div v-bind:class="{active: isActive}">
                 <div class="twoD-view">
                   <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
@@ -667,7 +683,6 @@ Vue.filter('formatDate', function(value:string) {
       await this.$eventBus.$on('updateOrder', async (resolve: any) => {
         await this.UpdateOrderProducts(false,false,resolve);
       });
-
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {
@@ -792,6 +807,26 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get mainTotalTabs(){
     return this.$store.getters.getMainTotalTabs;
+  }
+
+  get modelIndex(){
+    return this.$store.getters.getSelectedModelIndex;
+  }
+
+  get MSRP(){
+    let currency = this.$store.getters.getSetting('currency');
+    let msrp_currency = null;
+    if(this.selectedProduct && currency && this.modelIndex > -1){
+       let skucurrency = this.selectedProduct.productmodels[this.modelIndex].sku.skucurrency;
+      if(skucurrency){
+        let currencyIndex = skucurrency.findIndex((cur)=> {
+          return cur.code.toLowerCase() === currency.id.toLowerCase();
+        });
+        msrp_currency = skucurrency[currencyIndex];
+      }
+    }
+
+    return msrp_currency;
   }
 
 
@@ -2172,6 +2207,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 }
 //.customization-preview-process{
 .undo-btn-area {
+  display: flex;
+  //justify-content: space-between;
+
   .btn {
     color: #000;
     border-color: #DDDFE3;
