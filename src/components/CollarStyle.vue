@@ -1,8 +1,9 @@
 <template>
     <b-tabs :class="{'have-scroll': productModels && productModels.length > 5, 'only-style': productModels && productModels.length == 1}">
-        <b-tab v-for="(model, index)  in productModels" :key="index" @click="selectModelStyle(index)">
+        <b-tab v-for="(model, index)  in productModels" :key="'model_' + index + selected_model_index" :id="'model_' + index + selected_model_index" @click.stop="selectModelStyle(index)" :active="index === selected_model_index">
             <template #title>
               <span v-html="model.model_name.replaceAll(' ', '<br>')"></span>
+<!--              <span>{{model.model_name}}</span>-->
               <BIconCheckCircleFill />
             </template>
             <div class="collar-area">
@@ -25,14 +26,18 @@
                   <h2 class="fw-bold mb-2 fz-18">Choose option</h2>
                     <div class="collar-designs">
                       <template v-for="(style, i) in selectedProduct.productstyles">
-                        <template v-if="selectedProduct.productstyles.length > 1">
+                        <template>
                           <div :key="i+'collar'" class="text-center">
-                            <b-button :key="i" v-if="model.model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
-                              <template v-if="style.front_models.length > 0">
-                                <img :src="storageUrl+style.front_models[0].file_url" alt="Collar"/>
+                            <template v-for="(front_model, index) in style.front_models">
+                              <template v-if="index === 0">
+                                <b-button :key="'front_model_' + index" v-if="model.model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
+                                  <img v-if="style.style_icon_url" :src="storageUrl+style.style_icon_url" alt="Collar" :key="'front_model_style_icon' + index"/>
+                                  <img v-else :src="storageUrl+style.front_models[0].file_url" alt="Collar" :key="'front_model_file_url' + index"/>
+                                </b-button>
+                                <span class="mt-1 d-inline-flex" v-if="model.model_styles.includes(style.id)" :key="'front_model_url_name' + index">{{style.name}}</span>
+
                               </template>
-                            </b-button>
-                            <span class="mt-1 d-inline-flex">{{style.name}}</span>
+                            </template>
                           </div>
                         </template>
                       </template>
@@ -56,8 +61,8 @@ import {http} from "@/httpCommon";
 import moment from "moment";
 import {findIndex} from "lodash";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import {getLockerColors} from "@/helpers/Helpers";
     @Component<CollarStyle>({
-
     })
 
     export default class CollarStyle extends Mixins(HideUpdateLockerButton) {
@@ -87,14 +92,24 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
         return this.$store.getters.getCompany
       }
 
+      get selected_model_index() {
+        return this.$store.getters.getSelectedModelIndex;
+      }
+
+      public setSelectedModelIndex(value){
+        this.$store.commit('SET_SELECTED_MODEL_INDEX',value);
+      }
+
       public selectModelStyle(modelIndex: number) {
         this.$store.commit('SET_SELECTED_MODEL_INDEX', modelIndex)
-        for (let styleIndex = 0; styleIndex < this.selectedProduct.productstyles.length; styleIndex++) {
-          if (this.productModels[modelIndex].model_styles.includes(this.selectedProduct.productstyles[styleIndex].id)) {
-            if(styleIndex != this.getLastActiveProductData.style_index) {
-              this.changeStyleIndex(styleIndex)
-              break;
-            }
+        let style_id = this.productModels[modelIndex].model_styles.find( style_id => style_id === this.getLastActiveProductData.style_id);
+        if(style_id && style_id > -1){
+          let newStyleIndex = this.selectedProduct.productstyles.findIndex( product_style => product_style.id === style_id);
+            this.changeStyleIndex(newStyleIndex);
+        }else{
+          if(this.productModels[modelIndex].model_styles.length > 0){
+            let newStyleIndex = this.selectedProduct.productstyles.findIndex( product_style => product_style.id === this.productModels[modelIndex].model_styles[0]);
+            this.changeStyleIndex(newStyleIndex);
           }
         }
       }
@@ -128,10 +143,13 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
             }
           }
         }
+        let model_index = this.selected_model_index;
+        let model =  this.productModels[model_index];
+        let model_id = model.hasOwnProperty('id')?model.id:null;
         this.$store.commit('CHANGE_STYLE_INDEX', i);
         let design_index = findIndex(this.selectedProduct.productstyles[i].productdesigns, "design_show")
-        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.selectedProduct.productstyles[i].id,
-          design_index:   design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.selectedProduct.productstyles[i].id,model_index:model_index,
+          model_id:model_id, design_index:   design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
         })
       }
     }

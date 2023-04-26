@@ -169,7 +169,6 @@ import ModalAction from "@/mixins/ModalAction";
 @Component<OrderAccordionTab>({
   mounted(){
     this.$eventBus.$on('handleNonVectorCustomLogosCount',this.notVectorLogosCount);
-    console.log('vectorImageConstraint', this.vectorImageConstraint)
   }
 })
 export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal, ModalAction) {

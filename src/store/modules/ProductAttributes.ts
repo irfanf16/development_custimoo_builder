@@ -1137,7 +1137,6 @@ const ProductAttributes:Module<any, any> = {
       * @param payload can have string { both, undoItems, redoItems }
       * */
       const reset_items  = payload ? payload : 'both'
-      console.log('reset_items', reset_items)
       if(reset_items == 'both') {
         state['undoItems'] = []
         state['redoItems'] = []

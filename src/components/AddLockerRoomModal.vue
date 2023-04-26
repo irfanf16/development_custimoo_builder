@@ -244,7 +244,7 @@ import { Canvas } from 'fabric/fabric-impl'
 
             this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
               editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
-              locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id,
+              locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id, model_id:locker.model_id,
                 design_id: locker.design_id},
               cart_product_info: null, order_product_info: null
             })

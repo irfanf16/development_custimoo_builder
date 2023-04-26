@@ -10,7 +10,7 @@ import {
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
-import { FetchCategories } from '@/mixins/SelectedProductMixin'
+import {FetchCategories, HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
@@ -37,7 +37,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
 
         self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
           editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: '', private_product: is_private },
-          locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, design_id: room_product.design_id, locker_product_name },
+          locker_product_info: { product_id: product_id, locker_product_id: room_product_id, style_id: room_product.style_id, model_id: room_product.model_id, design_id: room_product.design_id, locker_product_name },
           cart_product_info: null, order_product_info: null
         })
 
@@ -143,7 +143,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
             }
             //todo ends her
             const handle_collection_product =  new Promise(async (resolve, reject) => {
-              const handle_collection_product_promise =  await self.handleCollectionProducts( response, product_id , room_product_id , room_product.style_id , room_product.design_id );
+              const handle_collection_product_promise =  await self.handleCollectionProducts( response, product_id , room_product_id , room_product.model_id, room_product.style_id , room_product.design_id );
               resolve(handle_collection_product_promise);
             });
             handle_collection_product.then(() => {
@@ -162,8 +162,19 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
 }
 
 @Component
-export class handleMainProducts extends Mixins(FetchCategories) {
+export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerButton) {
 
+  get styleIndex():number{
+    return this.$store.getters.getCurrentStyleIndex;
+  }
+
+  get productModels(): Record<any, any> {
+    return this.$store.getters.getProductModels;
+  }
+
+  get getLastActiveProductData() {
+    return this.$store.getters.getLastActiveProductData
+  }
   public async handleMainProducts(response: Record<any, any>){
     let self: Record<any, any> = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject
@@ -202,17 +213,19 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       let product_id = null;
       let product_index = 0;
       let style_index = 0;
+      let model_index = 0 ;
       let design_id = null;
       let editing_product_detail = response_data.editing_product_detail
       let active_index = 0;
       let set_last_active_data = false
+
       /*
       * The default value for edit_product_index is -1. -1 Means product is not being edited. product_edit_info_object.editing check is added as the edit_product_index
       * will have value only when it's being edited.
       * */
       let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
       if(is_editing) {
-        ({product_index, style_index, design_id, active_index} = await this.handleEditMode(retrieved_products));
+        ({product_index, style_index, design_id, active_index , model_index } = await this.handleEditMode(retrieved_products));
       }
       else {
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
@@ -226,15 +239,27 @@ export class handleMainProducts extends Mixins(FetchCategories) {
               return retrieved_product.id == last_active_prod_data.product_id
             })
             if(product_index >= 0 ) {
+              model_index = last_active_prod_data.model_index;
               style_index = last_active_prod_data.style_index;
               design_id = last_active_prod_data.design_id
             } else {
               product_index = 0
+              model_index = 0
               style_index = 0
-              let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
+              let style_id = retrieved_products[product_index].productmodels[model_index].model_style[style_index].id;
+              style_index = findIndex(retrieved_products[product_index].productmodels[model_index].model_style, (model_style:Record<any,any>) => {
+                return model_style.id === style_id;
+              });
+              let styleIndex = findIndex(retrieved_products[product_index].productstyles , (product_style:Record<any,any>) => {
+                    return product_style.id === style_id;
+              });
+              if(styleIndex < 0){
+                styleIndex = 0
+              }
+              let design_index = findIndex(retrieved_products[product_index].productstyles[styleIndex].productdesigns, (product_design: Record<any, any>) => {
                 return product_design.design_show
               })
-              design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
+              design_id = retrieved_products[product_index].productstyles[styleIndex].productdesigns[design_index].id
             }
             this.$store.commit('SET_CUSTOM_LOGOS', {
               product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
@@ -246,20 +271,35 @@ export class handleMainProducts extends Mixins(FetchCategories) {
             if(sync_id) {
               product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
                 if(retrieved_product.ecommerceproduct.length > 0)
-                    return retrieved_product.ecommerceproduct[0].sync_id === sync_id;
+                    return retrieved_product.ecommerceproduct[0].sync_id == sync_id;
               });
-              product_index = product_index >=0 ? product_index : 0
+              product_index = product_index >=0 ? product_index : 0;
+              model_index = 0;
               product_id = retrieved_products[product_index].id
             }
             else {
               product_index = 0
+              model_index = 0
               product_id = retrieved_products[product_index].id
             }
             style_index = 0;
-            let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
+            let style_id = 0;
+            if(retrieved_products[product_index].productmodels[model_index].model_style.length > 0){
+              style_id = retrieved_products[product_index].productmodels[model_index].model_style[style_index].id;
+            }
+            else{
+              style_id = retrieved_products[product_index].productstyles[0].id;
+            }
+            let styleIndex = findIndex(retrieved_products[product_index].productstyles , (product_style:Record<any,any>) => {
+              return product_style.id === style_id;
+            });
+            if(styleIndex < 0){
+              styleIndex = 0
+            }
+            let design_index = findIndex(retrieved_products[product_index].productstyles[styleIndex].productdesigns, (product_design: Record<any, any>) => {
               return product_design.design_show
             })
-            design_id = retrieved_products[product_index].productstyles[style_index].productdesigns[design_index].id
+            design_id = retrieved_products[product_index].productstyles[styleIndex].productdesigns[design_index].id
             let category_index = 0
             let category_id = null
             if(last_active_prod_data.category_id) {
@@ -267,7 +307,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
               category_id = last_active_prod_data.category_id
             }
             let last_active_obj_updated_values = {category_index: category_index, category_id: category_id, design_index: design_index, design_id: design_id, product_id:  product_id,
-              search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id,
+              search_products: self.search_products, style_id: retrieved_products[0].productstyles[0].id, model_id:retrieved_products[product_index].productmodels[model_index].id,model_index:model_index,
               customized: this.$store.getters.getCustomized, personalized: this.$store.getters.getPersonalized,private_product:this.$store.getters.getPrivateProduct
             }
             let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
@@ -275,7 +315,21 @@ export class handleMainProducts extends Mixins(FetchCategories) {
           }
         }
       }
-      retrieved_products[product_index].productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
+      let style_id = 0;
+      if(retrieved_products[product_index].productmodels[model_index].model_style.length > 0){
+        style_id = retrieved_products[product_index].productmodels[model_index].model_style[style_index].id;
+      }
+      else{
+        style_id = retrieved_products[product_index].productstyles[0].id;
+      }
+      let styleIndex = findIndex(retrieved_products[product_index].productstyles , (product_style:Record<any,any>) => {
+        return product_style.id === style_id;
+      });
+      if(styleIndex < 0){
+        styleIndex = 0
+      }
+
+      retrieved_products[product_index].productstyles[styleIndex].productdesigns.forEach((item: Record<any, any>) => {
         if (item.id == design_id) {
           Vue.set(item, 'design_show', 1)
           this.$store.dispatch('setSelectedProductDesignID', item.id)
@@ -283,13 +337,22 @@ export class handleMainProducts extends Mixins(FetchCategories) {
           Vue.set(item, 'design_show', 0)
         }
       })
-
-      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+      await this.$store.commit('SET_SELECTED_MODEL_INDEX', model_index);
+      this.$store.commit('CHANGE_STYLE_INDEX', styleIndex);
       await this.$store.dispatch("getModels", retrieved_products[product_index].id);
       await this.$store.dispatch('setSelectedIndex', {selectedIndex: product_index, selected_id: retrieved_products[product_index].id});
       await this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
       await setRetrievedProductsCustomTexts(retrieved_products)
       self.$root.$emit('sliderEvent', product_index);
+
+      // let productModels = this.$store.getters.getProductModels;
+      // let defaultIndex = productModels.findIndex(model => model.is_default === 1);
+      // if(defaultIndex > -1){
+      //   this.selectModelStyle(2);
+      // }
+      // else{
+      //   this.selectModelStyle(0);
+      // }
 
       //If we are editing locker product then set the locker product data and return
       if(self.is_shared_product  || product_edit_info_object.type == "locker_product") {
@@ -345,22 +408,40 @@ export class handleMainProducts extends Mixins(FetchCategories) {
           await this.$store.dispatch('setCustomObj', product.id)
         }
       }
+      let last_active_product_data = self.$store.getters.getLastActiveProductData;
+      if(last_active_product_data.product_id){
+        await this.$store.commit('SET_SELECTED_MODEL_INDEX', last_active_product_data.model_index);
+        await this.$store.commit('CHANGE_STYLE_INDEX', last_active_product_data.style_index);
+      }else{
+        model_index = retrieved_products[product_index].productmodels.findIndex((product_model) => {
+          return product_model.is_default === 1;
+        });
+        let style = retrieved_products[product_index].productmodels[model_index].model_style[0];
+        if(style){
+          styleIndex = retrieved_products[product_index].productstyles.findIndex((product_style) => {
+            return product_style.id === style.id;
+          }) ;
+        }
+        if(styleIndex && styleIndex < 0){
+          styleIndex = 0;
+        }
+        await this.$store.commit('SET_SELECTED_MODEL_INDEX', model_index);
+        await this.$store.commit('CHANGE_STYLE_INDEX', styleIndex);
+      }
       this.$store.dispatch('setColorSectionVisibility')
-      this.$store.dispatch("getModels", selected_product.product_id);
+      //this.$store.dispatch("getModels", selected_product.product_id);
       const factory_setting = this.$store.getters.getFactorySettings(selected_product.factory_id);
       this.$store.commit('SET_SETTING', factory_setting)
       this.$store.commit('SET_APPLICATION_MOUNTED')
     })
   }
 
-  public handleCollectionProducts(response: Record<any, any>, product_id: number , room_product_id: number , style_id:number , design_id: number){
+  public handleCollectionProducts(response: Record<any, any>, product_id: number , room_product_id: number , model_id: number ,style_id:number , design_id: number){
     let self: Record<any, any> = this;
     let response_data = response.data;
     let response_products_obj = response_data.products;
     let retrieved_products = response_products_obj.data;
     let active_product_detail = response.data.editing_product_detail;
-
-
 
     return new Promise((resolve, reject) => {
       const prms = new Promise((resolve) => {
@@ -374,6 +455,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
         await this.$store.dispatch('setPrivateProduct', response.data.private_product);
 
         let product_index = 0;
+        let model_index = 0;
         let style_index = 0;
 
         let editing_product_detail = response_data.editing_product_detail
@@ -383,6 +465,9 @@ export class handleMainProducts extends Mixins(FetchCategories) {
         * */
         product_index = 0
         if(product_index >= 0) {
+          model_index = findIndex(retrieved_products[product_index].productmodels,(product_model:Record<any,any>) => {
+              return product_model.id === style_id;
+          });
           style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
             return product_style.id == style_id;
           });
@@ -390,6 +475,8 @@ export class handleMainProducts extends Mixins(FetchCategories) {
         await this.$store.dispatch('setSelectedIndex', { selectedIndex: product_index,  selected_id: retrieved_products[product_index].id });
         await this.$store.commit('SET_PRODUCTS', { products: retrieved_products });
         await setRetrievedProductsCustomTexts(retrieved_products)
+        await this.$store.commit('SET_SELECTED_MODEL_INDEX', model_index);
+        this.$store.commit('CHANGE_STYLE_INDEX', style_index);
         this.$store.commit('CHANGE_STYLE_INDEX', style_index);
         await this.$store.dispatch("getModels", retrieved_products[product_index].id);
         this.$root.$emit('sliderEvent', product_index);
@@ -407,6 +494,8 @@ export class handleMainProducts extends Mixins(FetchCategories) {
         }
         this.$store.dispatch('setColorSectionVisibility')
         this.$store.dispatch("getModels", selected_product.product_id);
+        await this.$store.commit('SET_SELECTED_MODEL_INDEX', model_index);
+        this.$store.commit('CHANGE_STYLE_INDEX', style_index);
         selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
           if (item.id == design_id) {
             Vue.set(item, 'design_show', 1)
@@ -512,6 +601,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
     let style_index = 0;
     let design_id = null;
     let active_index = 0; //active index is only used for edit order product
+    let model_index = 0 ;
 
     let edit_type = product_edit_info_object.type;
     switch (edit_type) {
@@ -520,25 +610,47 @@ export class handleMainProducts extends Mixins(FetchCategories) {
           return retrieved_product.id == product_edit_info_object.locker_product_info.product_id
         });
         if(product_index >= 0) {
-          style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
-            return product_style.id == product_edit_info_object.locker_product_info.style_id;
+          product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
+            return retrieved_product.id === product_edit_info_object.locker_product_info.product_id
           });
+          model_index = findIndex(retrieved_products[product_index].productmodels, (product_model: Record<any, any>) => {
+            return product_model.id === product_edit_info_object.locker_product_info.model_id;
+          });
+          style_index = findIndex(retrieved_products[product_index].productmodels[model_index].model_style, (product_style: Record<any, any>) => {
+            return product_style.id === product_edit_info_object.locker_product_info.style_id;
+          });
+          if(style_index < 0){
+            style_index = 0
+          }
         }
         design_id = product_edit_info_object.locker_product_info.design_id;
         break;
       case "cart_product": //in case of editing cart product only one product shown. So product index will always be 0
-        style_index = findIndex(retrieved_products[0].productstyles, (product_style: Record<any, any>) => {
-          return product_style.id == product_edit_info_object.cart_product_info.cart_item_product.style_id;
+        model_index = findIndex(retrieved_products[0].productmodels, (product_model: Record<any, any>) => {
+          return product_model.id == product_edit_info_object.cart_product_info.cart_item_product.model_id;
         });
+        style_index = findIndex(retrieved_products[0].productmodels[model_index].model_style, (product_style: Record<any, any>) => {
+          return product_style.id === product_edit_info_object.cart_product_info.cart_item_product.style_id;
+        });
+        if(style_index < 0){
+          style_index = 0
+        }
         design_id =  product_edit_info_object.cart_product_info.cart_item_product.design_id;
         break;
       case "order_product": //in case of editing order product only one product shown. So product index will always be 0
         active_index = product_edit_info_object.order_product_info.order_products.active_index;
         let order_edit_product = product_edit_info_object.order_product_info.order_products.factory_products[active_index]
         let product_roster_detail = order_edit_product.product_roster_detail;
-        style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
-          return product_style.id == order_edit_product.style_id;
+        model_index = findIndex(retrieved_products[product_index].productmodels, (product_model:Record<any,any>) => {
+          return product_model.id === product_edit_info_object.order_product_info.order_products.factory_products[active_index].model_id;
         });
+        style_index = findIndex(retrieved_products[0].productmodels[model_index].model_style, (product_style: Record<any, any>) => {
+          return product_style.id === order_edit_product.style_id;
+        });
+        if(style_index  < 0){
+          style_index = 0;
+        }
+
         design_id =  order_edit_product.design_id;
         this.$store.commit('UPDATE_ROSTER',product_roster_detail);
         if(order_edit_product.product_type == "customized") {
@@ -551,7 +663,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
         break;
     }
     return {
-      product_index: product_index, style_index: style_index, design_id: design_id, active_index: active_index
+      product_index: product_index, style_index: style_index, design_id: design_id, active_index: active_index , model_index: model_index
     }
   }
 
@@ -580,7 +692,14 @@ export class handleMainProducts extends Mixins(FetchCategories) {
   public async updateFactoryProduct(factory_product: Record<any, any>) {
     let self: Record<any, any> = this;
     let selected_product = this.$store.getters.getSelectedProduct;
+    let selected_product_model_index = selected_product.productmodels.findIndex((x: Record<any, any>) => x.id === factory_product.model_id);
+
     let selected_product_style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === factory_product.style_id);
+
+    if(selected_product_style_index < 0){
+      selected_product_style_index = 0;
+    }
+    await this.$store.commit('SET_SELECTED_MODEL_INDEX', selected_product_model_index);
     await this.$store.commit('CHANGE_STYLE_INDEX', selected_product_style_index)
 
     await this.$store.commit('RESET_CUSTOM_TEXTS')
@@ -654,14 +773,26 @@ export class handleMainProducts extends Mixins(FetchCategories) {
 
   public async setLockerProductData(active_product_detail:Record<any, any>) {
     let self: Record<any, any> = this;
+    let style_index = 0;
+    let styleIndex = 0;
+    let model_index = 0 ;
     let selected_product = self.$store.getters.getSelectedProduct;
     let collection_view = self.$store.getters.getCollectionView;
-    let style_index = selected_product.productstyles.findIndex((x: Record<any, any>) => x.id === active_product_detail.style_id);
+    model_index = selected_product.productmodels.findIndex((product_model: Record<any, any>) => product_model.id === active_product_detail.model_id);
+    style_index = selected_product.productmodels[model_index].model_style.findIndex((productstyle) => productstyle.id === active_product_detail.style_id);
     if(style_index < 0 ) {
       style_index = 0
       console.error("Error while getting style of selected product")
     }
-    await this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+    styleIndex = selected_product.productstyles.findIndex((product_style)=> {
+      return product_style.id === active_product_detail.style_id;
+    });
+    if(styleIndex <  0){
+      styleIndex = 0;
+      console.error("Error while getting style of selected product")
+    }
+    await this.$store.commit('SET_SELECTED_MODEL_INDEX', model_index);
+    await this.$store.commit('CHANGE_STYLE_INDEX', styleIndex);
     let customLogos = self.$store.getters.getCustomLogoObject
     if(!customLogos[active_product_detail.product_id]) {
       await this.$store.dispatch('setCustomObj', active_product_detail.product_id)
@@ -695,7 +826,7 @@ export class handleMainProducts extends Mixins(FetchCategories) {
     })
     await this.$store.dispatch('overRideGroupColors', JSON.parse(active_product_detail.groupcolors));
     this.setProductTeamLogoColors(active_product_detail.custom_logos)
-    selected_product.productstyles[style_index].productdesigns.forEach((item: Record<any, any>) => {
+    selected_product.productstyles[styleIndex].productdesigns.forEach((item: Record<any, any>) => {
       if (item.id == active_product_detail.design_id) {
         Vue.set(item, 'design_show', 1)
         this.$store.dispatch('setSelectedProductDesignID', item.id)
@@ -748,10 +879,20 @@ export class handleMainProducts extends Mixins(FetchCategories) {
     //in case of cart edit product there is only one product
     let retrieved_cart_product = retrieved_products[0];
     this.$store.dispatch("getModels", retrieved_cart_product.product_id);
-    let selectedIndex = retrieved_cart_product.productstyles.findIndex((productstyle: Record<any, any>) => productstyle.id === cart_item_product.style_id);
+    let modelIndex = retrieved_cart_product.productmodels.findIndex((product_model: Record<any, any>) => product_model.id === cart_item_product.model_id);
+    let style = retrieved_cart_product.productmodels[modelIndex].model_style.find((productstyle) => productstyle.id === cart_item_product.style_id);
+    let selectedIndex = 0;
+    if(style){
+      selectedIndex = retrieved_cart_product.productstyles.findIndex((productstyle: Record<any, any>) => productstyle.id === style.id);
+    }
+    else{
+      selectedIndex = retrieved_cart_product.productstyles.findIndex((productstyle: Record<any, any>) => productstyle.id === cart_item_product.style_id);
+    }
     if(selectedIndex < 0) {
+      selectedIndex = 0;
       console.log("Style not found while editing cart product")
     }
+    await this.$store.commit('SET_SELECTED_MODEL_INDEX', modelIndex);
     await this.$store.commit('CHANGE_STYLE_INDEX', selectedIndex);
     let customLogos = this.$store.getters.getCustomLogoObject
     if (!customLogos[cart_item_product.product_id]) {
@@ -787,6 +928,59 @@ export class handleMainProducts extends Mixins(FetchCategories) {
       data: { using_logo_colors: false,  is_shuffled: false,  colors: cart_item_product.logo_colors,  extracted_colors: cart_item_product.logo_colors }
     })
     this.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
+  }
+  get choosenProduct(): Record<any, any> {
+    return this.$store.getters.getSelectedProduct;
+  }
+  public selectModelStyles(modelIndex: number) {
+
+    this.$store.commit('SET_SELECTED_MODEL_INDEX', modelIndex);
+    let styleIndex = this.productModels[modelIndex].model_styles.findIndex( style_id => style_id === this.getLastActiveProductData.style_id);
+    if(styleIndex > -1){
+      let newStyleIndex = this.choosenProduct.productstyles.findIndex( product_style => product_style.id === this.getLastActiveProductData.style_index);
+      this.changeStyleIndex(newStyleIndex);
+    }else{
+      if(this.productModels[modelIndex].model_styles.length > 0){
+        let newStyleIndex = this.choosenProduct.productstyles.findIndex( product_style => product_style.id === this.productModels[modelIndex].model_styles[0]);
+        this.changeStyleIndex(newStyleIndex);
+      }
+    }
+  }
+  public changeStyleIndex(i: number) {
+    const currentDesign = this.choosenProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+      return item.design_show
+    })
+    if(currentDesign.length){
+      const design_name = currentDesign[0].design_name
+      let designFound = false;
+      const newDesign = this.choosenProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
+        if(item.design_name.toLowerCase() == design_name.toLowerCase()) {
+          designFound  = true
+          Vue.set(item, 'design_show', 1)
+          this.$store.dispatch('setSelectedProductDesignID',item.id)
+        } else {
+          Vue.set(item, 'design_show', 0)
+        }
+      })
+      this.hideLockerProductUpdateButton(true)
+      if (!designFound){
+        if(!this.choosenProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
+          this.choosenProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
+            if (index ==0 ){
+              Vue.set(this.choosenProduct.productstyles[i].productdesigns[0], 'design_show', 1)
+              this.$store.dispatch('setSelectedProductDesignID',this.choosenProduct.productstyles[i].productdesigns[0].id)
+            }else{
+              Vue.set(this.choosenProduct.productstyles[i].productdesigns[index], 'design_show', 0);
+            }
+          })
+        }
+      }
+    }
+    this.$store.commit('CHANGE_STYLE_INDEX', i);
+    let design_index = findIndex(this.choosenProduct.productstyles[i].productdesigns, "design_show")
+    this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.choosenProduct.productstyles[i].id,
+      design_index:   design_index, design_id: this.choosenProduct.productstyles[i].productdesigns[design_index].id
+    })
   }
 
 }

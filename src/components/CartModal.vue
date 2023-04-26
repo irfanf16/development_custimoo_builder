@@ -33,11 +33,11 @@
             <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
               <td>
                 <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
-                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
+                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name + '-' + factory_product.model_name }}</span>
                 </template>
                 <template v-else="">
                   <a style="cursor:pointer;color:blue;text-decoration: underline"
-                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
+                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name + '-' + factory_product.model_name }}</a>
                 </template>
               </td>
               <td>
@@ -351,7 +351,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public async editCartItem(cart_item_index: number, factory_product_index: number, edit=true) {
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
-    let cart_item_product = cart_item.factory_products[factory_product_index]
+    let cart_item_product = cart_item.factory_products[factory_product_index];
+
     const categories_promise = this.fetchCategories(null, cart_item_product.product_id);
     categories_promise.then( async (response) => {
       let is_private = this.$store.getters.getPrivateProduct;
@@ -368,7 +369,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
         editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
-          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item
+          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, model_id: cart_item_product.model_id, ecommerce_cart_id, shopify_line_item
         },
         order_product_info: null
       })
@@ -380,7 +381,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
       await http.get(url).then(async (response: Record<any, any>) => {
         await (this as Record<any, any>).handleMainProducts(response);
-
       })
       // if(!is_private){
       //   await this.$store.dispatch('setProductType', { prd_type: cart_item_product.product_type, value: true });
@@ -405,6 +405,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', last_active_product_object)
   }
 
+
   public deleteConfirm(cart_item: Record<any, any>, factory_product: Record<any, any>) {
     this.$emit("deleteCartItem", { cart_item: cart_item, factory_product: factory_product });
   }
@@ -417,6 +418,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 .highlightMOQ{
   background: #FF4500;
   color: #ffffff;
+
 }
 .loader {
   &.relative {

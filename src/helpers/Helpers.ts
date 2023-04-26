@@ -1507,7 +1507,7 @@ const authenticateUser = async (token: string) => {
 
 const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   const default_obj = {
-    category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+    category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, model_id:null, model_index: 0, style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
     roster_detail: [], products_rosters: {}
   }
@@ -1694,6 +1694,7 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
     design_id: selected_design.id,
     logo_colors: Store.getters.getLogosColors,
     model_id: product_models[selected_model_index].id,
+    model_index:selected_model_index,
     model_name: product_models[selected_model_index].model_name,
     product_id: selected_product.product_id,
     ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
