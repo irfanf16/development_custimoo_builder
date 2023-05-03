@@ -659,6 +659,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         logo_colors: Store.getters.getLogosColors,
         model_id: product_models[selected_model_index].id,
         model_name: product_models[selected_model_index].model_name,
+        model_description: product_models[selected_model_index].product_model_description,
+        sku_id: product_models[selected_model_index].sku_id,
+        sku_number: product_models[selected_model_index].sku_number,
+        sizechart_reference: product_models[selected_model_index].sizechart_reference,
         minimum_order_quantity: product_models[selected_model_index].minimum_order_quantity,
         minimum_order_quantity_type: product_models[selected_model_index].minimum_order_quantity_type,
         product_id: selected_product.product_id,
@@ -672,6 +676,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         // front_design:front_design,
         product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,
+        style_name: product_style.name,
+        addons : selected_product.addons !== null ? selected_product.addons.join(', ') : '',
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null
       }

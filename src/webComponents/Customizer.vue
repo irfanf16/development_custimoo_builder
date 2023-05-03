@@ -8,8 +8,8 @@ import router from './router'
 import store from '../store'
 import {dom} from '@fortawesome/fontawesome-svg-core'
 import CommonImportMixin from '../mixins/CommonImportMixin.vue'
-
 import { getDomDocument } from '../helpers/Helpers'
+
 export default {
   store, router,
   name: "Customizer",
@@ -32,7 +32,7 @@ export default {
       faStyles.textContent = dom.css()
       shadowRoot.appendChild(faStyles)
     }
-    
+
     const doc = getDomDocument(true) ? getDomDocument(true) : getDomDocument();
     const style1 = doc.createElement('style');
     const style2 = doc.createElement('style');

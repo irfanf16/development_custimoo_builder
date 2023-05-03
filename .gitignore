@@ -22,5 +22,11 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
+.env*
+!.env.example
+self_customizer/
+wordpress_customizer_staging/
+wordpress_customizer/
+order_detail_customizer/
+order_detail_customizer_staging/
 package-lock.json

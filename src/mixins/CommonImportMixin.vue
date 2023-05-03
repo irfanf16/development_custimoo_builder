@@ -198,16 +198,6 @@ export default class CommonImportMixin extends Vue{
       const current_locale = i18n.locale;
       i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
     });
-
-    const doc = getDomDocument(true) ? getDomDocument(true) : getDomDocument();
-    const style1 = doc.createElement('style');
-    const style2 = doc.createElement('style');
-    const isOnepage = doc.location.host == 'mckiesports.com';
-    style1.innerHTML = `.vm--block-scroll{overflow-y: auto;} ${isOnepage && '.vm--container{top: auto !important}.vm--modal{margin-top: 0px !important}'}`;
-    style2.innerHTML = `.vm--block-scroll{overflow-y: auto;} ${isOnepage && '.vm--container{top: auto !important}.vm--modal{margin-top: 0px !important}'}`;
-    doc.head.appendChild(style1);
-    const customizer = doc.querySelector('v-customizer') as Record<any, any>
-    customizer.shadowRoot.appendChild(style2)
   }
 
   get isCustomerAuthenticated(): boolean {
