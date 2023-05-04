@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "test:unit": "vue-cli-service test:unit",
     "build:development": "vue-cli-service build --mode development",
     "build:staging": "vue-cli-service build --mode staging",
     "build:wc:customizer:ecommerce": "vue-cli-service build --dest ./wordpress_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue",
