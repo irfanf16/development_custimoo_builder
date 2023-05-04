@@ -7,8 +7,8 @@ ignore=$2
 
 
 if [ -z "$domain" ]; then
-    echo "Site was not provided as first parameter - will default to custimoo-v2-frontend.test"
-    domain="custimoo-v2-frontend.test"
+    domain="custimoo_builder.local"
+    echo "Site was not provided as first parameter - will default to $domain"
 fi
 
 if which ifconfig >/dev/null; then

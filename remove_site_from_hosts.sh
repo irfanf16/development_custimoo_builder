@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#line_to_remove="custimoo-v22-backend.test"
+#line_to_remove="custimoo_builder.local"
 line_to_remove=$1
 
 # Check if the line exists in the file

@@ -2,9 +2,20 @@
 PARENT_DIR="${PWD##*/}"
 
 # Set the domain name
-domain="custimoo_builder.test"
-backend_domain="http://custimoo-v2-backend.test"
-build_mode="production"
+domain=$1
+
+# Check if the first parameter is empty
+if [ -z "$1" ]; then
+    domain="custimoo-builder.local"
+    echo "first parameter is empty. Will set site to $domain"
+    backend_domain="http://custimoo-v2-backend.local"
+    build_mode="local_build"
+else
+    #domain="custimoo-builder.test"
+    backend_domain="http://custimoo-v2-backend.test"
+    build_mode="development.test"
+fi
+
 # Check if domain parameter set
 if [ -n "$DOMAIN_NAME" ]; then
   domain="$DOMAIN_NAME"
@@ -112,6 +123,67 @@ elif [ "$build_mode" == "staging" ]; then
   echo "http://$domain/self_staging/demo.html"
   echo "http://$domain/wordpress_customizer_staging/demo.html"
   echo "http://$domain/santa_order_detail_staging/demo.html"
+elif [ "$build_mode" == "local_build" ]; then
+  # Check if domain already is in /var/www/ directory
+  if [ ! -d /var/www/$domain ]; then
+    echo "********** CREATING VIRTUAL HOST  **********"
+    # Create virtual host for project on Nginx
+    ./setup_domain.sh $domain
+    echo "********** SETTING DOMAIN NAME IN HOST FILE START  **********"
+    ./setup_dns.sh $domain y
+    ./setup_windows_hosts.sh $domain
+    echo "********** SETTING DOMAIN NAME IN HOST FILE END   **********"
+  fi
+  # changing backend domain url in the inv file
+  if [ -e .env.development ]; then
+    echo "File exists, skipping."
+  else
+    cp .env.example .env.development
+    # changing backend domain url in the inv file
+    sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$backend_domain_escaped/g" .env.development
+  fi
+  #npm run build:wc:customizer:ecommerce
+  #npm run build:wc:customizer:self
+  #npm run build:wc:orderdetail
+  npm run build:development
+
+  sudo rm -rf /var/www/$domain/*
+#  sudo mv ./wordpress_customizer /var/www/$domain/
+#  sudo mv ./self /var/www/$domain/
+#  sudo mv ./santa_order_detail /var/www/$domain/
+  sudo mv ./dist /var/www/$domain/
+
+  echo "check following urls in your browser"
+  #echo "http://$domain/self/demo.html"
+  #echo "http://$domain/wordpress_customizer/demo.html"
+  #echo "http://$domain/santa_order_detail/demo.html"
+  echo "http://$domain"
+elif [ "$build_mode" == "development.test" ]; then
+  # Check if domain already is in /var/www/ directory
+  if [ ! -d /var/www/$domain ]; then
+    echo "********** CREATING VIRTUAL HOST  **********"
+    # Create virtual host for project on Nginx
+    ./setup_domain.sh $domain
+    echo "********** SETTING DOMAIN NAME IN HOST FILE START  **********"
+    ./setup_dns.sh $domain y
+    ./setup_windows_hosts.sh $domain
+    echo "********** SETTING DOMAIN NAME IN HOST FILE END   **********"
+  fi
+   
+  if [ -e .env.development.test ]; then
+    echo "File exists - cp .env.developmen.test to .env.development"
+    cp .env.development.test .env.development
+  else
+    cp .env.example .env.development
+    # changing backend domain url in the inv file
+    sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$backend_domain_escaped/g" .env.development
+  fi
+  npm run build:development
+  sudo rm -rf /var/www/$domain/*
+  sudo mv ./dist /var/www/$domain/
+  echo "check following urls in your browser"
+  echo "http://$domain"
+
 else
   if [ -e .env.development ]; then
     echo "File exists, skipping."

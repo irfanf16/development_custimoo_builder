@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "build:development": "vue-cli-service build --mode development",
     "build:staging": "vue-cli-service build --mode staging",
     "build:wc:customizer:ecommerce": "vue-cli-service build --dest ./wordpress_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue",
     "build:wc:customizer:ecommerce:staging": "vue-cli-service build --mode staging --dest ./wordpress_customizer_staging --target wc --name v-customizer ./src/webComponents/Customizer.vue",
@@ -37,6 +38,7 @@
     "gleap": "^6.9.4",
     "hex-rgb": "^5.0.0",
     "html2pdf.js": "^0.9.3",
+    "jest-watcher": "^29.5.0",
     "jquery": "^3.6.0",
     "laravel-echo": "^1.11.3",
     "lodash": "^4.17.21",

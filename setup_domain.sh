@@ -4,7 +4,7 @@
 domain=$1
 
 # Set the document root directory
-docroot="/var/www/$domain"
+docroot="/var/www/$domain/dist"
 
 # Create the document root directory
 sudo mkdir -p $docroot

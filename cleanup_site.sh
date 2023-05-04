@@ -4,15 +4,12 @@ sites_enabled="/etc/nginx/sites-enabled/"
 sites_available="/etc/nginx/sites-available/"
 
 PARENT_DIR="${PWD##*/}"
-DB_NAME="custimoo_backend"
-DB_USER="wsl_root"
-DB_PASSWORD="Password123@"
 
 # Set the domain name
 domain=$1
 # Check if the first parameter is empty
 if [ -z "$1" ]; then
-    domain="custimoo-v2-backend.test"
+    domain="custimoo_builder.local"
     echo "first parameter is empty. Will set site to $domain"
 fi
 
