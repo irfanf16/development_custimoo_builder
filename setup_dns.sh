@@ -7,7 +7,7 @@ ignore=$2
 
 
 if [ -z "$domain" ]; then
-    domain="custimoo_builder.local"
+    domain="custimoo-builder.local"
     echo "Site was not provided as first parameter - will default to $domain"
 fi
 

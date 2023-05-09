@@ -9,7 +9,7 @@ PARENT_DIR="${PWD##*/}"
 domain=$1
 # Check if the first parameter is empty
 if [ -z "$1" ]; then
-    domain="custimoo_builder.local"
+    domain="custimoo-builder.local"
     echo "first parameter is empty. Will set site to $domain"
 fi
 

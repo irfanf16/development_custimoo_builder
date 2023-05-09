@@ -1,10 +1,22 @@
 #!/bin/bash
+wwwroot="/var/www/"
 
 # Set the domain name
 domain=$1
 
 # Set the document root directory
-docroot="/var/www/$domain/dist"
+docroot=$2
+
+if [ -z "$domain" ]; then
+    echo "Site was not provided as first parameter - will default to custimoo-v2-backend.local"
+    domain="custimoo-builder.local"
+fi
+if [ -z "$docroot" ]; then
+    # Set the document root directory
+    docroot="$wwwroot$domain/dist"
+    echo "docroot was not provided as second parameter - will default to $docroot"
+fi
+
 
 # Create the document root directory
 sudo mkdir -p $docroot
