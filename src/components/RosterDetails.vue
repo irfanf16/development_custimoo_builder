@@ -28,7 +28,7 @@
           </div>
         </div>
       <div class="ml-auto" :class="{'mr-2': !!(selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails && rosterDetails.length > 0)}">
-        <template v-if="modelIndex && modelIndex > -1">
+        <template v-if="parseInt(modelIndex) > -1">
           <a v-if="productModels && productModels.length > 0 && productModels[modelIndex] && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url" class="btn btn-secondary fs-3 btn-sm"
              title="Size Guide"
              :href="`${storage_url}${productModels[modelIndex].image_url}`"
