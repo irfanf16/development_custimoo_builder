@@ -63,7 +63,7 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
     self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
     self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
     self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
-    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColors)
+    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
     self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
     self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$on("changeColors", this.changeColors)
@@ -403,56 +403,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         let groupColors = this.groupColors
         let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
         texture.forEach((item: Record<any, any>) => {
-          item.id = item.id.toLowerCase()
-          if (groupColors[item.id]) {
-            if(item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
-              groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
-                item.fill.colorStops[gradient_color_index].color = gradient_color.color
-              })
-              item.set('fill', new fabric.Gradient(item.fill));
-            } else {
-              item.set('fill', groupColors[item.id].color)
-            }
-            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-              if (svgGroup.id == item.id) {
-                if(svgGroup.gradient_colors) {
-                  groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
-                    svgGroup.gradient_colors[gradient_color_index].color = gradient_color.color
-                    svgGroup.gradient_colors[gradient_color_index].pantone = gradient_color.pantone
-                    svgGroup.gradient_colors[gradient_color_index].name = gradient_color.name
-                  })
-                } else {
-                  svgGroup.color = groupColors[item.id].color
-                  svgGroup.name = groupColors[item.id].name
-                  svgGroup.pantone = groupColors[item.id].pantone
-                }
-              }
-            })
-          } else if (!defaultColors.length) {
-            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-              if (svgGroup.id == item.id) {
-                if (item.fill && item.fill.gradientUnits) {
-                  item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                    if(this.initialSvgGroups[index][gradient_index]) {
-                      gradient.color = this.initialSvgGroups[index][gradient_index].color
-                    }
-                  })
-                  item.set('fill', new fabric.Gradient(item.fill));
-                } else {
-                  item.set('fill', this.initialSvgGroups[index].color)
-                }
-                Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
-              }
-            })
-          }
-        })
-        this.frontCanvas.requestRenderAll()
-        if (this.back) {
-          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
-          texture.forEach((item: Record<any, any>) => {
+          if(item.id) {
             item.id = item.id.toLowerCase()
             if (groupColors[item.id]) {
-              if(item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
+              if (item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
                 groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
                   item.fill.colorStops[gradient_color_index].color = gradient_color.color
                 })
@@ -462,7 +416,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
               this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
                 if (svgGroup.id == item.id) {
-                  if(svgGroup.gradient_colors) {
+                  if (svgGroup.gradient_colors) {
                     groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
                       svgGroup.gradient_colors[gradient_color_index].color = gradient_color.color
                       svgGroup.gradient_colors[gradient_color_index].pantone = gradient_color.pantone
@@ -480,7 +434,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 if (svgGroup.id == item.id) {
                   if (item.fill && item.fill.gradientUnits) {
                     item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                      if(this.initialSvgGroups[index][gradient_index]) {
+                      if (this.initialSvgGroups[index][gradient_index]) {
                         gradient.color = this.initialSvgGroups[index][gradient_index].color
                       }
                     })
@@ -492,12 +446,67 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 }
               })
             }
+          }
+        })
+        this.frontCanvas.requestRenderAll()
+        if (this.back) {
+          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
+          texture.forEach((item: Record<any, any>) => {
+            if(item.id) {
+              item.id = item.id.toLowerCase()
+              if (groupColors[item.id]) {
+                if (item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
+                  groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                    item.fill.colorStops[gradient_color_index].color = gradient_color.color
+                  })
+                  item.set('fill', new fabric.Gradient(item.fill));
+                } else {
+                  item.set('fill', groupColors[item.id].color)
+                }
+                this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                  if (svgGroup.id == item.id) {
+                    if (svgGroup.gradient_colors) {
+                      groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                        svgGroup.gradient_colors[gradient_color_index].color = gradient_color.color
+                        svgGroup.gradient_colors[gradient_color_index].pantone = gradient_color.pantone
+                        svgGroup.gradient_colors[gradient_color_index].name = gradient_color.name
+                      })
+                    } else {
+                      svgGroup.color = groupColors[item.id].color
+                      svgGroup.name = groupColors[item.id].name
+                      svgGroup.pantone = groupColors[item.id].pantone
+                    }
+                  }
+                })
+              } else if (!defaultColors.length) {
+                this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                  if (svgGroup.id == item.id) {
+                    if (item.fill && item.fill.gradientUnits) {
+                      item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+                        if (this.initialSvgGroups[index][gradient_index]) {
+                          gradient.color = this.initialSvgGroups[index][gradient_index].color
+                        }
+                      })
+                      item.set('fill', new fabric.Gradient(item.fill));
+                    } else {
+                      item.set('fill', this.initialSvgGroups[index].color)
+                    }
+                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+                  }
+                })
+              }
+            }
           })
           this.backCanvas.requestRenderAll()
         }
         this.unHideColorGrouping()
       }
     }
+  }
+
+  public changeDefaultColorsEvent() {
+    this.$store.dispatch('setGroupColors', {})
+    this.changeDefaultColors()
   }
 
   public async changeDefaultColors(): Promise<void> {
@@ -534,14 +543,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
         texture.forEach((item: Record<any, any>) => {
-          item.id = item.id.toLowerCase()
-          if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
-            item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-              gradient.color = appliedDefaultColors[item.id][gradient_index]
-            })
-            item.set('fill', new fabric.Gradient(item.fill));
-          } else if(appliedDefaultColors[item.id]) {
-            item.set('fill', appliedDefaultColors[item.id])
+          if(item.id) {
+            item.id = item.id.toLowerCase()
+            if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
+              item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+                gradient.color = appliedDefaultColors[item.id][gradient_index]
+              })
+              item.set('fill', new fabric.Gradient(item.fill));
+            } else if (appliedDefaultColors[item.id]) {
+              item.set('fill', appliedDefaultColors[item.id])
+            }
           }
         })
         this.frontCanvas.requestRenderAll()
@@ -549,14 +560,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (this.back) {
           texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
           texture.forEach((item: Record<any, any>) => {
-            item.id = item.id.toLowerCase()
-            if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
-              item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                gradient.color = appliedDefaultColors[item.id][gradient_index]
-              })
-              item.set('fill', new fabric.Gradient(item.fill));
-            } else if(appliedDefaultColors[item.id]) {
-              item.set('fill', appliedDefaultColors[item.id])
+            if(item.id) {
+              item.id = item.id.toLowerCase()
+              if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
+                item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+                  gradient.color = appliedDefaultColors[item.id][gradient_index]
+                })
+                item.set('fill', new fabric.Gradient(item.fill));
+              } else if (appliedDefaultColors[item.id]) {
+                item.set('fill', appliedDefaultColors[item.id])
+              }
             }
           })
           this.backCanvas.requestRenderAll()
@@ -595,14 +608,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
     texture.forEach((item: Record<any, any>) => {
-      item.id = item.id.toLowerCase()
-      if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
-        item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-          gradient.color = appliedDefaultColors[item.id][gradient_index]
-        })
-        item.set('fill', new fabric.Gradient(item.fill));
-      } else if(appliedDefaultColors[item.id]) {
-        item.set('fill', appliedDefaultColors[item.id])
+      if(item.id) {
+        item.id = item.id.toLowerCase()
+        if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
+          item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+            gradient.color = appliedDefaultColors[item.id][gradient_index]
+          })
+          item.set('fill', new fabric.Gradient(item.fill));
+        } else if (appliedDefaultColors[item.id]) {
+          item.set('fill', appliedDefaultColors[item.id])
+        }
       }
     })
     this.frontCanvas.requestRenderAll()
@@ -610,14 +625,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (this.back) {
       texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
       texture.forEach((item: Record<any, any>) => {
-        item.id = item.id.toLowerCase()
-        if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
-          item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-            gradient.color = appliedDefaultColors[item.id][gradient_index]
-          })
-          item.set('fill', new fabric.Gradient(item.fill));
-        } else if(appliedDefaultColors[item.id]) {
-          item.set('fill', appliedDefaultColors[item.id])
+        if(item.id) {
+          item.id = item.id.toLowerCase()
+          if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
+            item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
+              gradient.color = appliedDefaultColors[item.id][gradient_index]
+            })
+            item.set('fill', new fabric.Gradient(item.fill));
+          } else if (appliedDefaultColors[item.id]) {
+            item.set('fill', appliedDefaultColors[item.id])
+          }
         }
       })
       this.backCanvas.requestRenderAll()
@@ -703,38 +720,45 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     const selectProductPantonesList = getSelectedProductPantones(this.product_id)
     let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
     texture.forEach((item: Record<any, any>) => {
-      item.id = item.id.toLowerCase()
-      if (!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
-        let count = 1
-        if (item.id == 'base') {
-          count = 100000 // to make base always at first color position
-        }
-        if (!item.id.includes('inside')) {
-          if(item.fill && item.fill.gradientUnits) {
-            let gradient_colors: Record<any, any>[] = []
-            item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
-              if (color_stop.color.includes('rgb')) {
-                color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
+      if(item.id) {
+        item.id = item.id.toLowerCase()
+        if (!item.id.includes('noncustomizable') && !this.containsObject({id: item.id})) {
+          let count = 1
+          if (item.id == 'base') {
+            count = 100000 // to make base always at first color position
+          }
+          if (!item.id.includes('inside')) {
+            if (item.fill && item.fill.gradientUnits) {
+              let gradient_colors: Record<any, any>[] = []
+              item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
+                if (color_stop.color.includes('rgb')) {
+                  color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
+                }
+                let pantoneColor: Record<any, any> = {pantone: '', name: ''}
+                if (this.mainPreview) {
+                  pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
+                }
+                gradient_colors.push({color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name})
+              })
+
+              this.svgGroups.push({id: item.id, count: count, gradient_colors: gradient_colors})
+            } else {
+              if (item.fill.includes('rgb')) {
+                item.fill = rgbHex(item.fill).includes('#') ? rgbHex(item.fill) : '#' + rgbHex(item.fill);
               }
               let pantoneColor: Record<any, any> = {pantone: '', name: ''}
-              if(this.mainPreview) {
-                pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
+              if (this.mainPreview) {
+                pantoneColor = getClosestColor(item.fill, selectProductPantonesList, this.getColorType)
               }
-              gradient_colors.push({ color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name })
-            })
 
-            this.svgGroups.push({ id: item.id, count: count, gradient_colors: gradient_colors })
-          }
-          else {
-            if (item.fill.includes('rgb')) {
-              item.fill = rgbHex(item.fill).includes('#') ? rgbHex(item.fill) : '#' + rgbHex(item.fill);
+              this.svgGroups.push({
+                id: item.id,
+                color: item.fill,
+                count: count,
+                pantone: pantoneColor.pantone,
+                name: pantoneColor.name
+              })
             }
-            let pantoneColor: Record<any, any> = {pantone: '', name: ''}
-            if(this.mainPreview) {
-              pantoneColor = getClosestColor(item.fill, selectProductPantonesList, this.getColorType)
-            }
-
-            this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
           }
         }
       }
@@ -743,38 +767,49 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (this.backTexture) {
       texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
       texture.forEach((item: Record<any, any>) => {
-        item.id = item.id.toLowerCase()
-        if (!item.id.includes('noncustomizable') && !this.containsObject({ id: item.id })) {
-          let count = 1
-          if (item.id == 'base') {
-            count = 100000 // to make base always at first color position
-          }
-          if (!item.id.includes('inside')) {
-            if(item.fill && item.fill.gradientUnits) {
-              let gradient_colors: Record<any, any>[] = []
-              item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
-                if (color_stop.color.includes('rgb')) {
-                  color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
+        if(item.id) {
+          item.id = item.id.toLowerCase()
+          if (!item.id.includes('noncustomizable') && !this.containsObject({id: item.id})) {
+            let count = 1
+            if (item.id == 'base') {
+              count = 100000 // to make base always at first color position
+            }
+            if (!item.id.includes('inside')) {
+              if (item.fill && item.fill.gradientUnits) {
+                let gradient_colors: Record<any, any>[] = []
+                item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
+                  if (color_stop.color.includes('rgb')) {
+                    color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
+                  }
+                  let pantoneColor: Record<any, any> = {pantone: '', name: ''}
+                  if (this.mainPreview) {
+                    pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
+                  }
+                  gradient_colors.push({
+                    color: color_stop.color,
+                    pantone: pantoneColor.pantone,
+                    name: pantoneColor.name
+                  })
+                })
+
+                this.svgGroups.push({id: item.id, count: count, gradient_colors: gradient_colors})
+              } else {
+                if (item.fill.includes('rgb')) {
+                  item.fill = rgbHex(item.fill).includes('#') ? rgbHex(item.fill) : '#' + rgbHex(item.fill);
                 }
                 let pantoneColor: Record<any, any> = {pantone: '', name: ''}
-                if(this.mainPreview) {
-                  pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
+                if (this.mainPreview) {
+                  pantoneColor = getClosestColor(item.fill, selectProductPantonesList, this.getColorType)
                 }
-                gradient_colors.push({ color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name })
-              })
 
-              this.svgGroups.push({ id: item.id, count: count, gradient_colors: gradient_colors })
-            }
-            else {
-              if (item.fill.includes('rgb')) {
-                item.fill = rgbHex(item.fill).includes('#') ? rgbHex(item.fill) : '#' + rgbHex(item.fill);
+                this.svgGroups.push({
+                  id: item.id,
+                  color: item.fill,
+                  count: count,
+                  pantone: pantoneColor.pantone,
+                  name: pantoneColor.name
+                })
               }
-              let pantoneColor: Record<any, any> = {pantone: '', name: ''}
-              if(this.mainPreview) {
-                pantoneColor = getClosestColor(item.fill, selectProductPantonesList, this.getColorType)
-              }
-
-              this.svgGroups.push({ id: item.id, color: item.fill, count: count, pantone: pantoneColor.pantone, name: pantoneColor.name })
             }
           }
         }
@@ -1915,7 +1950,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public addLogos(logo: Record<any, any>, from_load = false) {
     logo = this.custom_logos[logo.logo_index]
 
-    if(logo.product_id == this.product_id && (this.mounted || from_load)) {
+    if(logo && logo.product_id == this.product_id && (this.mounted || from_load)) {
       if(this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }

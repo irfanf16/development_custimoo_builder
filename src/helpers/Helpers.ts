@@ -691,6 +691,29 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
   })
 }
 
+const syncGroupColorsWithSvgGroups = async() => {
+  let groupColors = Store.getters.getGroupColors
+  let svgGroups = Store.getters.getSvgGroups
+
+  let group_ids: string[] = []
+  svgGroups.forEach((svgGroup: Record<any, any>) => {
+    group_ids.push(svgGroup.id)
+    if(!groupColors[svgGroup.id]) {
+      if (svgGroup.gradient_colors) {
+        groupColors[svgGroup.id] = {gradient_colors: svgGroup.gradient_colors}
+      } else {
+        groupColors[svgGroup.id] = {color: svgGroup.color, name: svgGroup.name, pantone: svgGroup.pantone}
+      }
+    }
+  })
+  const group_colors_keys = Object.keys(groupColors)
+  group_colors_keys.forEach((group_colors_key) => {
+    if(!group_ids.includes(group_colors_key)) {
+      delete groupColors[group_colors_key]
+    }
+  })
+}
+
 const initCustomLogos = async(retrieved_products: Record<any, any>) => {
   const team_logo = await getTeamLogo()
   retrieved_products.forEach((product: Record<any, any>) => {
@@ -2012,5 +2035,5 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize
+  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups
 };

@@ -91,7 +91,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
 import ModalAction from "@/mixins/ModalAction";
-import { getImageFromCanvas, getLockerColors } from '@/helpers/Helpers'
+import {getImageFromCanvas, getLockerColors, syncGroupColorsWithSvgGroups} from '@/helpers/Helpers'
 import { Canvas } from 'fabric/fabric-impl'
     @Component<AddLockerRoomModal>({
         components: {
@@ -192,6 +192,7 @@ import { Canvas } from 'fabric/fabric-impl'
       }
 
       public async saveToLocker(){
+        syncGroupColorsWithSvgGroups()
         this.showLoader = true
         const modelIndex = this.$store.getters.getSelectedModelIndex
         if (this.isCustomerAuthenticated) {
