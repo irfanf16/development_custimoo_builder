@@ -1,0 +1,150 @@
+#!/bin/bash
+
+#define script variables
+working_directory=$(pwd)
+parent_dir=$(basename "$(pwd)")
+env_file_name=.env
+sudo chmod -R 777 ../$parent_dir
+
+#parameters with default values
+build_directory_name="artifacts"
+domain="custimoo-builder.test"
+api_url="http://custimoo-v2-backend.test"
+modes=("development")
+build_types=("selfcustomizer")
+
+# Define a usage function
+function usage {
+  #  echo "Usage: $0 [-f|--filename FILENAME] [-s|--size SIZE]" >&2
+  echo "Below is the list of accepted parameters"
+  echo "   -b, --builddirectoryname   Set the build directory name (default: $build_directory_name)"
+  echo "   -d, --domain               Set the domain name/virtual host with which you want to access build (default: $domain)"
+  echo "   -u, --apiurl               Set the build api url (default: $api_url)"
+  echo "   -m, --modes                Possible values are {development,production,serve,staging}. Set modes this could have
+                                      multiple values separated with comma. (default: ${modes[*]})"
+  echo "   -t, --buildtypes           Possible values are {ecommercecustomizer,selfcustomizer,orderdetail}
+                                      Set modes this could have multiple values separated with comma.
+                                      (default: ${build_types[*]})"
+  echo "   -h, --help                 Display this help message"
+  exit 1
+}
+# Parse command-line options/parameters
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+  -b | --builddirectoryname)
+    build_directory_name="$2"
+    shift
+    ;;
+  -d | --domain)
+    domain="$2"
+    shift
+    ;;
+  -u | --apiurl)
+    api_url="$2"
+    shift
+    ;;
+  -m | --modes)
+    IFS=',' read -r -a modes <<<"$2"
+    shift
+    ;;
+  -t | --buildtypes)
+    IFS=',' read -r -a build_types <<<"$2"
+    shift
+    ;;
+  -h | --help) usage ;;
+  *)
+    echo "Invalid option: $1" >&2
+    usage
+    ;;
+  esac
+  shift
+done
+
+api_url_escaped=$(echo "$api_url" | sed 's/\//\\\//g')
+
+# If nginx is installed
+if which nginx >/dev/null; then
+  echo "********** Nginx is already installed the version is: $(nginx -v) **********"
+  sudo service nginx enable
+  sudo service nginx start
+  sudo service nginx status
+else # nginx is not installed. Then install it
+  echo "**********   NGINX INSTALLATION START  **********"
+  sudo apt-get update -y
+  sudo apt-get install nginx -y
+  sudo service nginx enable
+  sudo service nginx start
+  sudo service nginx status
+  echo "**********   NGINX INSTALLATION END  **********"
+fi
+
+. ~/.nvm/nvmm.sh # Source the NVM script to load it into the current shell
+# If nvm is installed
+if which nvm >/dev/null; then
+  echo "********** NVM is already installed the version is: $(nvm -version) **********"
+else # nvm is not installed. Then install it
+  echo "**********  NVM installation started  **********"
+  sudo apt-get install curl
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+  command -v nvm
+  source ~/.nvm/nvm.sh # Source the NVM script to load it into the current shell
+  nvm install v14.16
+  nvm use 14.16 ## using node v14.16.1 (npm v6.14.12)
+  echo "**********   NVM installation completed  **********"
+fi
+
+# Clean cache and install npm
+#echo "********** NPM RUNNING  **********"
+#npm cache clean --force
+#npm install
+#echo "********** END NPM INSTALLED **********"
+
+#check if modes have serve mode then only run serve mode and do nothing
+have_serve_mode=false
+for mode in "${modes[@]}"; do
+  if [ "$mode" = "serve" ]; then
+    #if .env.development file does not exists then create it
+    if [ ! -e .env.development ]; then
+      cp .env.example "$env_file_name"
+      # changing backend domain url in the inv file
+      sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" .env.development
+    fi
+    npm run serve
+    have_serve_mode=true
+  fi
+done
+
+if ! $have_serve_mode; then
+  for mode in "${modes[@]}"; do
+    env_file_name=".env.$mode"
+    if [[ $mode != "production" ]] && [[ $mode != "staging" ]]; then
+      # changing backend domain url in the inv file
+      sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" "$env_file_name"
+    fi
+
+    for build_type in "${build_types[@]}"; do
+      npm_command="$npm_command:$build_type"
+      echo "*********** npm running $npm_command"
+      echo "npm "$npm_command
+      npm run "$npm_command:$mode"
+    done
+  done
+  # If virtual host does not exist
+  if [ ! -e "/etc/nginx/sites-available/$domain" ]; then
+    echo "********** CREATING VIRTUAL HOST  **********"
+    # Create virtual host for project on Nginx
+    ./setup_domain_v1.sh -d "$domain" -b "$build_directory_name"
+    ./setup_dns.sh "$domain" y
+    ./setup_windows_hosts.sh "$domain"
+    echo "********** SETTING DOMAIN NAME IN HOST FILE END   **********"
+  fi
+
+  for mode in "${modes[@]}"; do
+    if [ "$mode" != 'serve' ]; then
+      for build_type in "${build_types[@]}"; do
+        mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
+        echo "$domain/$build_type/$mode"
+      done
+    fi
+  done
+fi

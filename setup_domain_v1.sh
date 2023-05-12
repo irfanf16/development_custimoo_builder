@@ -1,25 +1,30 @@
 #!/bin/bash
-wwwroot="/var/www/"
 
 # Set the domain name
-domain=$1
+domain=$domain
+build_directory_name=$build_directory_name
 
-# Set the document root directory
-docroot=$2
+# Define a usage function
+function usage {
+#  echo "Usage: $0 [-f|--filename FILENAME] [-s|--size SIZE]" >&2
+  echo "Below is the list of accepted parameters"
+  echo "   -b, --builddirectoryname   Set the build directory name"
+  echo "   -d, --domain               Set domain"
+  echo "   -h, --help                 Display this help message"
+  exit 1
+}
+# Parse command-line options/parameters
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -b|--builddirectoryname) build_directory_name="$2"; shift ;;
+    -d|--domain) domain="$2"; shift ;;
+    -h|--help) usage ;;
+    *) echo "Invalid option: $1" >&2; usage ;;
+  esac
+  shift
+done
 
-if [ -z "$domain" ]; then
-    echo "Site was not provided as first parameter - will default to custimoo-v2-backend.local"
-    domain="custimoo-builder.local"
-fi
-if [ -z "$docroot" ]; then
-    # Set the document root directory
-    docroot="$wwwroot$domain/dist"
-    echo "docroot was not provided as second parameter - will default to $docroot"
-fi
-
-
-# Create the document root directory
-sudo mkdir -p $docroot
+docroot=$( pwd )'/'"$build_directory_name"
 
 # Create a new NGINX configuration file
 config="/etc/nginx/sites-available/$domain"
@@ -37,7 +42,7 @@ sudo sh -c "echo 'server {
                 add_header Access-Control-Allow-Origin *;
         }
         error_page 404 /;
-       
+
 }' > $config"
 
 # Create a symbolic link to enable the site

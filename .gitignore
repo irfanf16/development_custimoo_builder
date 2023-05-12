@@ -30,3 +30,4 @@ wordpress_customizer/
 order_detail_customizer/
 order_detail_customizer_staging/
 package-lock.json
+/artifacts
