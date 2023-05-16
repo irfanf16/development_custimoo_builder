@@ -81,7 +81,7 @@ fi
 source ~/.nvm/nvm.sh # Source the NVM script to load it into the current shell
 # If nvm is installed
 if command -v nvm >/dev/null 2>&1; then
-  echo "********** NVM is already installed the version is: $(nvm -version) **********"
+  echo "********** NVM is already installed the version is: $(nvm --version) **********"
 else # nvm is not installed. Then install it
   echo "**********  NVM installation started  **********"
   sudo apt-get install curl
@@ -99,19 +99,15 @@ npm cache clean --force
 npm install
 #echo "********** END NPM INSTALLED **********"
 
-#if .env.development file does not exists then create it
-if [ ! -e .env.development ]; then
-  sudo cp .env.example "$env_file_name"
-  echo ".env.development file created"
-  # changing backend domain url in the inv file
-  sudo chmod 777 "$env_file_name"
-  sudo sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" .env.development
-fi
-
 #check if modes have serve mode then only run serve mode and do nothing
 have_serve_mode=false
 for mode in "${modes[@]}"; do
   if [ "$mode" = "serve" ]; then
+    if [ ! -e .env.development ]; then
+      sudo cp .env.example .env.development
+      # changing backend domain url in the inv file
+      sudo sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" .env.development
+    fi
     npm run serve
     have_serve_mode=true
   fi
@@ -119,12 +115,17 @@ done
 
 if ! $have_serve_mode; then
   for mode in "${modes[@]}"; do
-    env_file_name=".env.$mode"
     if [[ $mode != "production" ]] && [[ $mode != "staging" ]]; then
       # changing backend domain url in the inv file
-      sudo sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" "$env_file_name"
+      env_file_name=".env.$mode"
+      if [ ! -e "$env_file_name" ]; then
+        sudo cp .env.example "$env_file_name"
+        # changing backend domain url in the inv file
+        sudo sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" "$env_file_name"
+      else
+        sudo sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" "$env_file_name"
+      fi
     fi
-
     for build_type in "${build_types[@]}"; do
       npm_command="buildv2:$build_type"
       echo "*********** npm running $npm_command"
