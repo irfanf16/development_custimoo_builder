@@ -95,20 +95,21 @@ fi
 
 # Clean cache and install npm
 #echo "********** NPM RUNNING  **********"
-#npm cache clean --force
-#npm install
+npm cache clean --force
+npm install
 #echo "********** END NPM INSTALLED **********"
+
+#if .env.development file does not exists then create it
+if [ ! -e .env.development ]; then
+  cp .env.example "$env_file_name"
+  # changing backend domain url in the inv file
+  sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" .env.development
+fi
 
 #check if modes have serve mode then only run serve mode and do nothing
 have_serve_mode=false
 for mode in "${modes[@]}"; do
   if [ "$mode" = "serve" ]; then
-    #if .env.development file does not exists then create it
-    if [ ! -e .env.development ]; then
-      cp .env.example "$env_file_name"
-      # changing backend domain url in the inv file
-      sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" .env.development
-    fi
     npm run serve
     have_serve_mode=true
   fi
