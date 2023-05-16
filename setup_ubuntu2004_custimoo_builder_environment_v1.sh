@@ -78,9 +78,9 @@ else # nginx is not installed. Then install it
   echo "**********   NGINX INSTALLATION END  **********"
 fi
 
-. ~/.nvm/nvmm.sh # Source the NVM script to load it into the current shell
+source ~/.nvm/nvm.sh # Source the NVM script to load it into the current shell
 # If nvm is installed
-if which nvm >/dev/null; then
+if command -v nvm >/dev/null 2>&1; then
   echo "********** NVM is already installed the version is: $(nvm -version) **********"
 else # nvm is not installed. Then install it
   echo "**********  NVM installation started  **********"
@@ -129,22 +129,20 @@ if ! $have_serve_mode; then
       npm run "$npm_command:$mode"
     done
   done
-  # If virtual host does not exist
-  if [ ! -e "/etc/nginx/sites-available/$domain" ]; then
-    echo "********** CREATING VIRTUAL HOST  **********"
-    # Create virtual host for project on Nginx
-    ./setup_domain_v1.sh -d "$domain" -b "$build_directory_name"
-    ./setup_dns.sh "$domain" y
-    ./setup_windows_hosts.sh "$domain"
-    echo "********** SETTING DOMAIN NAME IN HOST FILE END   **********"
-  fi
+
+  echo "********** CREATING VIRTUAL HOST  **********"
+  # Create virtual host
+  ./setup_domain_v1.sh -d "$domain" -b "$build_directory_name"
+  #check if windows hosts file does not have domain then add that domain
+    if ! grep -q "$domain" /mnt/c/Windows/System32/drivers/etc/hosts; then
+      ./setup_windows_hosts.sh "$domain"
+    fi
+  echo "********** CREATING VIRTUAL HOST END  **********"
 
   for mode in "${modes[@]}"; do
-    if [ "$mode" != 'serve' ]; then
-      for build_type in "${build_types[@]}"; do
-        mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
-        echo "$domain/$build_type/$mode"
-      done
-    fi
+    for build_type in "${build_types[@]}"; do
+      mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
+      echo "$domain/$build_type/$mode"
+    done
   done
 fi
