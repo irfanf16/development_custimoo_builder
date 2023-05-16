@@ -101,9 +101,12 @@ npm install
 
 #if .env.development file does not exists then create it
 if [ ! -e .env.development ]; then
-  cp .env.example "$env_file_name"
+  sudo cp .env.example "$env_file_name"
+  echo ".env.development file created"
   # changing backend domain url in the inv file
-  sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" .env.development
+  sudo sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" .env.development
+else
+  echo ".env.development file already exists"
 fi
 
 #check if modes have serve mode then only run serve mode and do nothing
@@ -120,7 +123,7 @@ if ! $have_serve_mode; then
     env_file_name=".env.$mode"
     if [[ $mode != "production" ]] && [[ $mode != "staging" ]]; then
       # changing backend domain url in the inv file
-      sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" "$env_file_name"
+      sudo sed -i "s/VUE_APP_API_BASE_URL=.*/VUE_APP_API_BASE_URL=$api_url_escaped/g" "$env_file_name"
     fi
 
     for build_type in "${build_types[@]}"; do
