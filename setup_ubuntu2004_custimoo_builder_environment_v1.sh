@@ -123,7 +123,7 @@ if ! $have_serve_mode; then
     fi
 
     for build_type in "${build_types[@]}"; do
-      npm_command="$npm_command:$build_type"
+      npm_command="buildv2:$build_type"
       echo "*********** npm running $npm_command"
       echo "npm "$npm_command
       npm run "$npm_command:$mode"
