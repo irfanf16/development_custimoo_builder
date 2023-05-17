@@ -35,7 +35,7 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '~bootstrap/dist/css/bootstrap.css';
 @import '~bootstrap-vue/dist/bootstrap-vue.css';
 @import '~vue-js-modal/dist/styles.css';
