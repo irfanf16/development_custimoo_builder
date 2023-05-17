@@ -8,8 +8,8 @@ sudo chmod -R 777 ../$parent_dir
 
 #parameters with default values
 build_directory_name="artifacts"
-domain="custimoo-builder.test"
-api_url="http://custimoo-v2-backend.test"
+domain="custimoo-builder.local"
+api_url="http://custimoo-v2-backend.local"
 modes=("development")
 build_types=("selfcustomizer")
 
