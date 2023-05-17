@@ -12,12 +12,14 @@ domain="custimoo-builder.local"
 api_url="http://custimoo-v2-backend.local"
 modes=("development")
 build_types=("selfcustomizer")
+protocol="http"
 
 # Define a usage function
 function usage {
   #  echo "Usage: $0 [-f|--filename FILENAME] [-s|--size SIZE]" >&2
   echo "Below is the list of accepted parameters"
   echo "   -b, --builddirectoryname   Set the build directory name (default: $build_directory_name)"
+  echo "   -p, --protocol             Set the protocol. could have any one {http, https} (default: $protocol)"
   echo "   -d, --domain               Set the domain name/virtual host with which you want to access build (default: $domain)"
   echo "   -u, --apiurl               Set the build api url (default: $api_url)"
   echo "   -m, --modes                Possible values are {development,production,serve,staging}. Set modes this could have
@@ -33,6 +35,10 @@ while [[ "$#" -gt 0 ]]; do
   case $1 in
   -b | --builddirectoryname)
     build_directory_name="$2"
+    shift
+    ;;
+  -p | --protocol)
+    protocol="$2"
     shift
     ;;
   -d | --domain)
@@ -114,6 +120,8 @@ for mode in "${modes[@]}"; do
 done
 
 if ! $have_serve_mode; then
+  vue_config_string_find_and_replace="// modify the options"
+  last_mode="${modes[-1]}"
   for mode in "${modes[@]}"; do
     if [[ $mode != "production" ]] && [[ $mode != "staging" ]]; then
       # changing backend domain url in the inv file
@@ -130,7 +138,13 @@ if ! $have_serve_mode; then
       npm_command="buildv2:$build_type"
       echo "*********** npm running $npm_command"
       echo "npm "$npm_command
+      sed -i "s|$vue_config_string_find_and_replace|$vue_config_string_find_and_replace..|g" ./vue.config.js
+#      updateVueConfigFile
+      sleep 1
       npm run "$npm_command:$mode"
+       if [ "$mode" == "$last_mode" ]; then
+           sed -i '/modify the options/c\/\/modify the options..' ./vue.config.js
+        fi
     done
   done
 
@@ -146,7 +160,7 @@ if ! $have_serve_mode; then
   for mode in "${modes[@]}"; do
     for build_type in "${build_types[@]}"; do
       mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
-      echo "$domain/$build_type/$mode"
+      echo "$protocol://$domain/$build_type/$mode"
     done
   done
 fi
