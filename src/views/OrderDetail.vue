@@ -445,8 +445,12 @@ import {getCompany} from "@/helpers/Helpers";
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
 
      if(this.company.platform == "wordpress") {
-      this.order_id = this.$route.query.order_id;
-    } else if(this.company.platform == "shopify"){
+       if(this.ecommerce_order_id) {
+         this.order_id = this.ecommerce_order_id;
+       } else {
+         this.order_id = this.$route.query.order_id;
+       }
+     } else if(this.company.platform == "shopify") {
        this.order_id = this.ecommerce_order_id;
      }
      else {
