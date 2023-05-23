@@ -815,8 +815,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get MSRP(){
     let currency = this.$store.getters.getSetting('currency');
+    let show_msrp = false
+    if(currency && currency.visible && ['self','cdnExceptLogin'].includes(this.company.platform)) {
+      show_msrp = true
+    }
     let msrp_currency = null;
-    if(this.selectedProduct && currency && this.modelIndex > -1){
+    if(this.selectedProduct && show_msrp && this.modelIndex > -1){
        let skucurrency = this.selectedProduct.productmodels[this.modelIndex].sku.skucurrency;
       if(skucurrency){
         let currencyIndex = skucurrency.findIndex((cur)=> {
