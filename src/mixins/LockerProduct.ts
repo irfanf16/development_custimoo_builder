@@ -284,7 +284,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             }
             style_index = 0;
             let style_id = 0;
-            if(retrieved_products[product_index].productmodels[model_index].model_style.length > 0){
+            if(retrieved_products[product_index].productmodels[model_index] && retrieved_products[product_index].productmodels[model_index].model_style.length > 0){
               style_id = retrieved_products[product_index].productmodels[model_index].model_style[style_index].id;
             }
             else{
@@ -316,7 +316,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         }
       }
       let style_id = 0;
-      if(retrieved_products[product_index].productmodels[model_index].model_style.length > 0){
+      if(retrieved_products[product_index].productmodels[model_index] && retrieved_products[product_index].productmodels[model_index].model_style.length > 0){
         style_id = retrieved_products[product_index].productmodels[model_index].model_style[style_index].id;
       }
       else{
