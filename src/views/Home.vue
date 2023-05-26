@@ -816,7 +816,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get MSRP(){
     let currency = this.$store.getters.getSetting('currency');
     let show_msrp = false
-    if(currency && currency.visible && ['self','cdnExceptLogin'].includes(this.company.platform)) {
+    if(currency && currency.visible) {
       show_msrp = true
     }
     let msrp_currency = null;
