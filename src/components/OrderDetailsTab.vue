@@ -66,7 +66,7 @@
           </template>
           <template v-else>
             <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-              <button  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
+              <button  @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
             </template>
           </template>
         </div>
@@ -245,30 +245,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
-  }
-
-  public setActionBeforeLogin(type: string) {
-    this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$store.commit('SET_SELECTION_MODE',{
-      readonly:false,
-      collectionAddmoreMode:false,
-      eventProductMode:false,
-      eventCollectionMode:false
-    })
-    this.gotoLogin()
-  }
-
-  public gotoLogin(){
-    if (this.company.platform == 'self'){
-      this.$modal.show('loginModal')
-    }
-    else{
-      if(this.company.login_code.type == 'url') {
-        window.location.href = this.company.login_code.action
-      } else {
-        eval(this.company.login_code.action)
-      }
-    }
   }
 
   public async addToCart() {

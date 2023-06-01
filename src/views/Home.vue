@@ -8,7 +8,7 @@
         <template v-if="application_mounted && selectedProduct">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!manageComponents.mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
-                               @setActionBeforeLogin="setActionBeforeLogin" @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
+                               @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
                                :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
@@ -671,6 +671,7 @@ Vue.filter('formatDate', function(value:string) {
       await this.$eventBus.$on('saveRosterToLocker', ()=>{
         this.getLockers(false,false,null,true)
       })
+      this.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
       await this.$eventBus.$on('cancelLocker', ()=>{
         this.cancelEdit()
       })

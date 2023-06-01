@@ -57,7 +57,7 @@
             </template>
             <template v-else>
               <template v-if="company.platform !== 'self'">
-                <span v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
                 Add to cart
               </span></span>
               </template>
@@ -200,16 +200,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
     return this.$store.getters.getCustomerPermissions
   }
 
-  public async setActionBeforeLogin(type: string) {
-    this.$store.commit("ACTION_BEFORE_LOGIN", type);
-    this.$store.commit('SET_SELECTION_MODE',{
-      readonly:false,
-      collectionAddmoreMode:false,
-      eventProductMode:false,
-      eventCollectionMode:false
-    })
-    this.gotoLogin()
-  }
   public gotoLogin(){
     if (this.company.platform == 'self'){
       this.$modal.show('loginModal')

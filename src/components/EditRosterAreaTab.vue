@@ -59,7 +59,7 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @addToCartAnimation="()=>this.$emit('addToCartAnimation')" @setActionBeforeLogin="setActionBeforeLogin" :products_fonts="products_fonts" :lockers="lockers" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
+      <RosterDetails @addToCartAnimation="()=>this.$emit('addToCartAnimation')" :products_fonts="products_fonts" :lockers="lockers" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab :products_fonts="products_fonts" @open-add-to-locker="openAddToLocker" ref="order-details" />
@@ -90,9 +90,7 @@ import {AxiosError, AxiosResponse} from "axios";
   },
     async mounted() {
     this.setProductSizes()
-    if (this.isCustomerAuthenticated) {
-      await this.getLockerProductsRosters()
-    }
+    await this.getLockerProductsRosters()
 
     await this.setRosterTotal(this.productRosters)
   }
@@ -212,10 +210,6 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   public shareRoster(){
     this.ref['order-details'].getLockers();
-  }
-
-  private setActionBeforeLogin(val:string){
-    this.$emit('setActionBeforeLogin', val)
   }
 
   public openAddToLocker () {
@@ -391,7 +385,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   public async getLockerProductsRosters() {
-    let response: any = await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
+    let response: any = this.isCustomerAuthenticated && await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
       handleResponseException(errorResponse)
     })
     if(response) {

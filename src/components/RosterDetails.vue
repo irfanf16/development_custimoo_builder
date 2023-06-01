@@ -181,7 +181,7 @@
       <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
       <template v-if="!isCustomerAuthenticated" >
         <template v-if="company.platform !== 'self'">
-          <button class="btn btn-secondary w-auto fw-bold" @click="$root.$children[0].$children[2].setActionBeforeLogin('addToCart')"
+          <button class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart');"
                   :disabled="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
             Add to Cart
           </button>
