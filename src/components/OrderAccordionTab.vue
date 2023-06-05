@@ -121,7 +121,7 @@
                   </div>
                 </div>
 
-                <div class="vector-logo-error d-flex justify-content-between" v-if="vectorImageConstraint? non_vector_logos_count > 0 : false">Logo is not vector <span @click="()=>showVModal('replace-logo')" class="text-info cursor-pointer fw-bold">Replace</span></div>
+                <div class="vector-logo-error d-flex justify-content-between" v-if="vectorImageConstraint? !logo.is_vector && logo.url  : false">Logo is not vector <span @click="()=>showVModal('replace-logo')" class="text-info cursor-pointer fw-bold">Replace</span></div>
               </div>
             </template>
 
