@@ -19,7 +19,7 @@
     </div>
     <confirm-modal popup_icon="info" message="This logo cannot be deleted as it is using in one of your locker product"
                    cancel_text="" confirm_text="" name="delete-logo-ref" ref="delete-logo-ref"></confirm-modal>
-    <div class="loader" v-if="showLoader"><img src="@/assets/images/loading.gif" /></div>
+    <div class="loader" v-if="updatingLogo"><img src="@/assets/images/loading.gif" /></div>
   </div>
 
 </template>
@@ -88,6 +88,9 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
   }
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
+  }
+  get updatingLogo(): Record<any, any> {
+    return this.$store.getters.getUpdatingLogo
   }
 
   /*

@@ -1,6 +1,6 @@
 <template>
   <div class="position-relative">
-    <div class="loader" v-if="searchLoader"><img src="@assets/images/loading.gif" /></div>
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: number_of_slides, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
       <template v-for="(product, index) in products">
         <a ref="products" v-on:click="productDesigns(index)" :class="{'selected_item': selectedItemIndex == index}" :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
@@ -47,11 +47,9 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
   public multipleLogo = false;
   public has_more_products = false;
-  public showLoader = false;
   public number_of_slides = 4;
-
-  get searchLoader() {
-    return this.$store.getters.getSearchLoader
+  get showLoader() {
+    return this.$store.getters.getUpdatingLogo
   }
 
   get products() {
@@ -142,9 +140,6 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
       // }
       http.get(url).then(async (response: Record<any, any>) => {
         await self.handleMainProducts(response);
-        if((self as Record<any,any>)["showLoader"]) {
-          (self as Record<any,any>).showLoader = false;
-        }
       }, (error) => {
         console.error("Error while getting order detail", error.response.data.message)
       })

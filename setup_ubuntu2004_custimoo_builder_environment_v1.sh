@@ -4,7 +4,7 @@
 working_directory=$(pwd)
 parent_dir=$(basename "$(pwd)")
 env_file_name=.env
-sudo chmod -R 777 ../$parent_dir
+#sudo chmod -R 777 ../$parent_dir
 
 #parameters with default values
 build_directory_name="artifacts"

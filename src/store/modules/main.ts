@@ -30,7 +30,6 @@ const Main:Module<any, any> = {
     SET_APPLICATION_MOUNTED(state:Record<any, any>) {
       state.application_mounted = true
       state.showLoader = false
-      state.searchLoader = false
     },
     manageComponents(state: Record<any, any>, payload: Record<any, any>) {
       state.manageComponents[payload.index] = payload.value

@@ -177,7 +177,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   public customized = this.$store.getters.getCustomized
   public search = '';
   public showLoader = false;
-  public searchLoader = false;
   public timeout = 0;
 
 
@@ -233,8 +232,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     await this.exitFromEditMode()
     if(this.timeout) clearTimeout(this.timeout);
     this.timeout = setTimeout(async () => {
-      //search function
-      await self.$store.dispatch('setSearchLoader', true)
       self.showLoader = true;
       let product_filter : string | null = null;
       if(self.search_products){

@@ -1949,12 +1949,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public addLogos(logo: Record<any, any>, from_load = false) {
     logo = this.custom_logos[logo.logo_index]
-
     if(logo && logo.product_id == this.product_id && (this.mounted || from_load)) {
       if(this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
       if (logo.url && (logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
+       if(this.mainPreview) {
+         this.$store.commit('SET_UPDATING_LOGO', true)
+       }
         if (logo.customLogo) {
           this.custom_logo_objects[logo.logo_index as number] = true
         }
@@ -2056,6 +2058,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           })
 
           this.addToOtherSide(img, logo.side)
+          if(this.mainPreview && this.mounted) {
+            this.$store.commit('SET_UPDATING_LOGO', false)
+          }
         }, { crossOrigin: 'Anonymous' })
       }
     }

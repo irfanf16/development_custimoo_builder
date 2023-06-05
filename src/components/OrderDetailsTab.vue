@@ -403,14 +403,12 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
           await self.updateFactoryProduct(self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index]);
         }
 
-        if(self["showLoader"] || self["searchLoader"]) {
+        if(self["showLoader"]) {
           self.showLoader = false;
-          await self.$store.dispatch('setSearchLoader', false)
         }
       }else{
         this.showError("No Product Found")
         self.showLoader = false
-        await self.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
       console.error("Error while getting order detail", error?.response?.data?.message)

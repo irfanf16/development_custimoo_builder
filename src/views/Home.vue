@@ -1139,19 +1139,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getHideSaveLockerButton;
   }
 
-  // get undoRedoArrays(): boolean {
-  //   let undo = this.$store.getters.getUndoItems;
-  //   let redo = this.$store.getters.getRedoItems;
-  //   let hidebtn = this.$store.getters.getHideSaveLockerButton;
-  //   let editProductInfo = this.getProductEditInfoObject;
-  //   if (hidebtn && editProductInfo.editing && editProductInfo.type == 'locker_product') {
-  //     if (undo.length > 0 || redo.length > 0) {
-  //       this.hideLockerProductUpdateButton()
-  //     }
-  //   }
-  //   return hidebtn
-  // }
-
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
   }
@@ -1786,9 +1773,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  get searchLoader() {
-    return this.$store.getters.getSearchLoader
-  }
 
   private async cancelCart() {
     let self: Record<any, any> = this;
@@ -1828,22 +1812,19 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         const validate_data = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
         if (validate_data.validated) {
           await self.handleMainProducts(response);
-          if (self["showLoader"] || self["searchLoader"]) {
+          if (self["showLoader"]) {
             self.showLoader = false;
-            await self.$store.dispatch('setSearchLoader', false)
           }
         } else {
           this.showError(validate_data.message)
-          if (self["showLoader"] || self["searchLoader"]) {
+          if (self["showLoader"]) {
             self.showLoader = false;
-            await self.$store.dispatch('setSearchLoader', false)
           }
           this.exitFromEditMode();
           resetLastActiveProductData();
           const categories_promise = this.fetchCategories('customized');
           categories_promise.then(async (response) => {
             await self.retrieveProducts()
-            await self.$store.dispatch('setSearchLoader', false)
           });
           return false;
         }
@@ -1855,7 +1836,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         const categories_promise = this.fetchCategories('customized');
         categories_promise.then(async (response) => {
           await self.retrieveProducts()
-          await self.$store.dispatch('setSearchLoader', false)
         });
 
       }

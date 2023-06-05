@@ -23,7 +23,6 @@ const ProductAttributes:Module<any, any> = {
     personalized_count: 0 ,
     customized_count:0,
     private_product_count:0,
-    searchLoader: false,
     showLoader:true,
     lockerActiveTabIndex:0,
     lockerTabsIndex:0,
@@ -136,7 +135,8 @@ const ProductAttributes:Module<any, any> = {
       is_shuffled: false,
       extracted_colors: [],
       colors: []
-    }
+    },
+    updating_logo: false
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -232,9 +232,6 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_PRIVATE_PRODUCT_COUNT(state:Record<any,any>, payload:number){
       state.private_product_count = payload;
-    },
-    SET_SEARCH_LOADER(state: Record<any, any>, payload: boolean){
-      state.searchLoader = payload;
     },
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
@@ -1143,6 +1140,9 @@ const ProductAttributes:Module<any, any> = {
       } else {
        state[reset_items] = []
       }
+    },
+    SET_UPDATING_LOGO(state: Record<any, any>, payload: boolean) {
+      state.updating_logo = payload
     }
   },
   getters: {
@@ -1167,9 +1167,6 @@ const ProductAttributes:Module<any, any> = {
     },
     getBackFromRoster: state => {
       return state.back_from_roster;
-    },
-    getSearchLoader: state => {
-      return state.searchLoader
     },
     getIsShareDesign: state => {
       return state.isShareDesign
@@ -1438,11 +1435,11 @@ const ProductAttributes:Module<any, any> = {
         return state.redoItems.pop()
       }
     },
+    getUpdatingLogo(state:Record<any,any>) {
+      return state.updating_logo
+    },
   },
   actions: {
-    setSearchLoader({commit}, payload){
-      commit('SET_SEARCH_LOADER', payload)
-    },
     setLockerroomColors({commit}, payload){
       commit('SET_LOCKER_ROOM_COLORS', payload)
     },

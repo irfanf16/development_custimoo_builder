@@ -124,6 +124,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
     form_data.append('file', logo_file)
     form_data.append('product_id', this.selectedProduct.product_id)
     this.showLoader = true;
+    this.$store.commit('SET_UPDATING_LOGO', true)
     http.post('/customer/upload/logo', form_data).then(async resp => {
       //empty logo_file when file is uploaded
       this.logo_file = null
@@ -159,11 +160,13 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
       inputRef.value = null;
       hideLockerProductSaveBtn()
       this.showLoader = false;
+      this.$store.commit('SET_UPDATING_LOGO', false)
     })
       .catch((error: any) => {
         const inputRef = this.$refs.logoUploadInput as Record<any, any>
         inputRef.value = null;
         this.showLoader = false;
+        this.$store.commit('SET_UPDATING_LOGO', false)
         self.showError(error);
       })
   }
