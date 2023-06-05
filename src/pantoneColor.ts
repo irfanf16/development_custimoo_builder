@@ -2,7 +2,7 @@
 
 import hexRgb, { RgbaObject } from 'hex-rgb'
 import rgbHex from 'rgb-hex';
-import {default as diff, RGBColor} from 'color-diff'
+import {closest,RGBColor} from 'color-diff';
 import {pantonesTcx} from '@/pantonesTcx';
 import {pantonesCoated} from '@/pantonesCoated';
 
@@ -86,7 +86,7 @@ const getClosestColor = (inputHex: string, pantonesArray: Record<any, any>[]= []
   }
   if(colorType !== 'cmyk'){
     const inputRGB = get_rgbObject(inputHex)
-    const nearestColor = diff.closest(inputRGB, RGBList)
+    const nearestColor = closest(inputRGB, RGBList)
     const nearestColorHex = rgbHex(nearestColor.R, nearestColor.G, nearestColor.B)
     const indexInColorList = sample_pantones.findIndex((x: Record<any, any>) => {
       return x.hex.toLowerCase() == `#${nearestColorHex.toLowerCase()}`
