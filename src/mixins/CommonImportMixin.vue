@@ -143,7 +143,9 @@ Vue.use(VueGtag, {
   }
 });
 
-@Component
+@Component<CommonImportMixin>({
+  i18n
+})
 export default class CommonImportMixin extends Vue{
   async mounted () {
     await getCompany();
