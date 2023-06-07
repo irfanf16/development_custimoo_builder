@@ -9,25 +9,65 @@ env_file_name=.env
 #parameters with default values
 build_directory_name="artifacts"
 domain="custimoo-builder.local"
+move_to_nginx=true
 api_url="http://custimoo-v2-backend.local"
 modes=("development")
 build_types=("selfcustomizer")
 protocol="http"
 
-# Define a usage function
+# function starts
+function createFile() {
+      # Check if the directory exists
+      if [[ ! -d "/var/www/$domain" ]]; then
+          # Create the directory if it doesn't exist
+          sudo mkdir "/var/www/$domain"
+      fi
+    # Check if an array argument is provided for dynamic content
+    if [[ $# -gt 0 ]]; then
+        dynamic_content=("$@")
+    else
+        dynamic_content=("<h1>Build link no available </h1>")
+    fi
+
+    # Create the index.html file
+    cat >$build_directory_name/index.html <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Content Example</title>
+</head>
+<body>
+    <div id='dynamic-content'>
+EOF
+
+    # Append each element of the dynamic_content array to the index.html file
+    for content in "${dynamic_content[@]}"; do
+        echo "        <a href='$content'>$content</a><br/>" >> $build_directory_name/index.html
+    done
+
+    # Close the HTML tags
+    echo "    </div>" >> $build_directory_name/index.html
+    echo "</body>" >> $build_directory_name/index.html
+    echo "</html>" >> $build_directory_name/index.html
+
+    echo "index.html file created successfully! at $build_directory_name"
+}
+
+
 function usage {
   #  echo "Usage: $0 [-f|--filename FILENAME] [-s|--size SIZE]" >&2
   echo "Below is the list of accepted parameters"
-  echo "   -b, --builddirectoryname   Set the build directory name (default: $build_directory_name)"
-  echo "   -p, --protocol             Set the protocol. could have any one {http, https} (default: $protocol)"
-  echo "   -d, --domain               Set the domain name/virtual host with which you want to access build (default: $domain)"
-  echo "   -u, --apiurl               Set the build api url (default: $api_url)"
-  echo "   -m, --modes                Possible values are {development,production,serve,staging}. Set modes this could have
-                                      multiple values separated with comma. (default: ${modes[*]})"
-  echo "   -t, --buildtypes           Possible values are {ecommercecustomizer,selfcustomizer,orderdetail}
-                                      Set modes this could have multiple values separated with comma.
-                                      (default: ${build_types[*]})"
-  echo "   -h, --help                 Display this help message"
+  echo "   -b,   --builddirectoryname   Set the build directory name (default: $build_directory_name)"
+  echo "   -mtn  --movetonginx          If true then move builds to nginx path (/var/www) (default: $move_to_nginx)"
+  echo "   -p,   --protocol             Set the protocol. could have any one {http, https} (default: $protocol)"
+  echo "   -d,   --domain               Set the domain name/virtual host with which you want to access build (default: $domain)"
+  echo "   -u,   --apiurl               Set the build api url (default: $api_url)"
+  echo "   -m,   --modes                Possible values are {development,production,serve,staging}. Set modes this could have
+                                          multiple values separated with comma. (default: ${modes[*]})"
+  echo "   -t, --buildtypes             Possible values are {ecommercecustomizer,selfcustomizer,orderdetail}
+                                          Set modes this could have multiple values separated with comma.
+                                          (default: ${build_types[*]})"
+  echo "   -h, --help                   Display this help message"
   exit 1
 }
 # Parse command-line options/parameters
@@ -35,6 +75,10 @@ while [[ "$#" -gt 0 ]]; do
   case $1 in
   -b | --builddirectoryname)
     build_directory_name="$2"
+    shift
+    ;;
+  -mtn | --movetonginx)
+    move_to_nginx="$2"
     shift
     ;;
   -p | --protocol)
@@ -65,9 +109,8 @@ while [[ "$#" -gt 0 ]]; do
   esac
   shift
 done
-
+#function ends
 api_url_escaped=$(echo "$api_url" | sed 's/\//\\\//g')
-
 # If nginx is installed
 if which nginx >/dev/null; then
   echo "********** Nginx is already installed the version is: $(nginx -v) **********"
@@ -148,19 +191,36 @@ if ! $have_serve_mode; then
     done
   done
 
+  if [ "$move_to_nginx" = "true" ]; then
+    build_paths_index=0
+      build_paths=()
+         for mode in "${modes[@]}"; do
+           for build_type in "${build_types[@]}"; do
+             build_paths[build_paths_index]="$protocol://$domain/$build_type/$mode/demo.html"
+           ((build_paths_index++))
+           done
+         done
+    createFile "${build_paths[@]}"
+    sudo rm -rf /var/www/$domain/*
+    sudo mv $build_directory_name/* /var/www/$domain
+  else
+    for mode in "${modes[@]}"; do
+      for build_type in "${build_types[@]}"; do
+        mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
+        echo "$protocol://$domain/$build_type/$mode"
+      done
+    done
+  fi
+
   echo "********** CREATING VIRTUAL HOST  **********"
   # Create virtual host
-  ./setup_domain_v1.sh -d "$domain" -b "$build_directory_name"
+  sudo chmod -R 777 ./setup_domain_v1.sh
+  ./setup_domain_v1.sh -d "$domain" -b "$build_directory_name" -mtn "$move_to_nginx"
   #check if windows hosts file does not have domain then add that domain
     if ! grep -q "$domain" /mnt/c/Windows/System32/drivers/etc/hosts; then
+      sudo chmod -R 777 ./setup_windows_hosts.sh
       ./setup_windows_hosts.sh "$domain"
     fi
   echo "********** CREATING VIRTUAL HOST END  **********"
-
-  for mode in "${modes[@]}"; do
-    for build_type in "${build_types[@]}"; do
-      mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
-      echo "$protocol://$domain/$build_type/$mode"
-    done
-  done
 fi
+git checkout vue.config.js
