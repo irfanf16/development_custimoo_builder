@@ -160,7 +160,9 @@
                             </template>
                           </template>
                           <p> {{ activity_comment.message }} </p>
-
+                          <div class="d-flex justify-content-end">
+                            <span> <small class="text-muted">{{ evaluateRole(activity_comment) }}</small> </span>
+                          </div>
                         </div>
                       </div>
                       <div class="comment-time">
@@ -864,6 +866,29 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.activity_item_info = await this.getOrderItemStatusActivityInfoDefaultObject(activity_item_info)
     this.$modal.show('order-detail');
   }
+  evaluateRole(activity_comment){
+      if(Object.prototype.hasOwnProperty.call(activity_comment, "user")){
+          if(Object.prototype.hasOwnProperty.call(activity_comment.user, "userroles")){
+            if(activity_comment.user.userroles.length > 0){
+              switch(activity_comment.user.userroles[0].name.toLowerCase()){
+                case "factory":
+                  return "Factory";
+                case "admin":
+                  return "Merchant";
+                case "superadmin":
+                  return "Custimoo Admin";    
+              }
+            }
+          }
+          else{
+            return "Customer";
+          }
+          
+      }
+      else{
+        return "Customer"
+      }
+    }
 
 }
 </script>

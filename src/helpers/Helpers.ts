@@ -828,11 +828,11 @@ const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct
 
 const activityStatus = {
   submitted_for_factory_review: {
-    title: "Artwork Created",
-    message: "Waiting for manufacturer review artwork.",
+    title: "Order created",
+    message: "Please review the artwork.",
   },
   order_approve: {
-    title: "Marked to Factory",
+    title: "Order confirmed, pending artwork",
     message: "Order is forwarded to factory.",
   },
   order_cancel: {
@@ -840,12 +840,12 @@ const activityStatus = {
     message: "Your order has been cancelled.",
   },
   factory_approved: {
-    title: "Artwork Approved",
-    message: "Artwork has been approved by the manufacturer. The manufacturer will now produce a sample and upload it here.",
+    title: "Submitted artwork approved,pending test print",
+    message: "You approved the Artwork. You can now upload the design samples here.",
   },
   factory_rejected: {
     title: "Artwork Rejected",
-    message: "Artwork rejected by manufacturer. Please read comments and edit product accordingly.",
+    message: "You rejected the Artwork. Please wait for the customer to edit and submit the artwork again.",
   },
   submitted_for_customer_review: {
     title: "Design Sample Submitted",
@@ -861,7 +861,7 @@ const activityStatus = {
   },
   in_production: {
     title: "In Production",
-    message: "The manufacturer has begun creating the products.",
+    message: "The manufacturer has begun creating the products. PLEASE BE AWARE, NO CHANGES CAN BE MADE TO THIS ORDER",
   },
   shipped: {
     title: "Order Shipped",
