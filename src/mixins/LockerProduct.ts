@@ -1542,6 +1542,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       }else{
         this.showError("No Product Found")
         this.$store.dispatch('setShowLoader', false)
+        this.$store.dispatch('setSearchLoader', false)
       }
     }, (error) => {
       console.error("Error while getting order detail", error?.response?.data?.message)

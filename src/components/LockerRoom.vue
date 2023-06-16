@@ -18,7 +18,6 @@
                 <font-awesome-icon :icon="['fas', 'trash-alt']"/>
               </a>
             </template>
-
             <div class="lockerroom-tabs">
               <div>
                 <b-card no-body>
@@ -262,63 +261,64 @@
         <template #title>
           <span class="btn btn-secondary btn-sm">Collections</span>
         </template>
-        <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
-        <template v-if="getCollections.length > 0">
-          <template v-for="(collection, index) in getCollections">
-          <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
-            <div class="image-holder">
-              <div class="convas_container" :key="collection_product_index"
-                   v-for="(collection_product,collection_product_index) in collection.collection_products">
-                <template v-if="collection_product_index < 3">
-                  <img :src="storageUrl+collection_product.product_locker_room.product_url+'?q='+collection_product.product_locker_room.random_string"
-                       :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'"
-                       alt="">
-                </template>
-              </div>
 
-              <div class="controls" v-if="!getSelectionMode.readonly">
-                <a v-b-tooltip.hover.right title="Delete collection"
-                   @click="deleteCollection(collection.id,index)" class="remove btn">
-                  <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-                </a>
-                <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
-                   class="btn light btn-secondary rounded-circle"><font-awesome-icon
-                  :icon="['fas', 'edit']"/></a>
-                <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
-                          :ref="'share-collection'+index" class="light rounded-circle"
-                          custom-class="share-tooltip"><font-awesome-icon
-                  :icon="['fas', 'share-alt']"/></b-button>
-                <Popper
-                  style="font-size: 12px;"
-                  v-if="$refs['share-collection'+index]"
-                  :is-open="popperID == ('share-collection'+index)"
-                  :anchor-el="$refs['share-collection'+index][0]"
-                  :on-close="hidePopper"
-                  class="share-tooltip">
-                  <aside :id="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
-                    <div class="share-holder">
-                      <h3>Copy link and Share</h3>
-                      <div class="share-form">
-                        <b-form inline>
-                          <b-form-input :ref="'copylink_'+index" @mouseenter="markText"
-                                        :value="collection.shared_url !== 'undefined'   || collection.shared_url != null ?  collection.shared_url : ''"
-                          ></b-form-input>
-                          <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
-                        </b-form>
+        <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
+          <template v-if="getCollections.length > 0">
+            <template v-for="(collection, index) in getCollections">
+            <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
+              <div class="image-holder">
+                <div class="convas_container" :key="collection_product_index"
+                     v-for="(collection_product,collection_product_index) in collection.collection_products">
+                  <template v-if="collection_product_index < 3">
+                    <img :src="storageUrl+collection_product.product_locker_room.product_url+'?q='+collection_product.product_locker_room.random_string"
+                         :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" loading=""
+                         alt="">
+                  </template>
+                </div>
+
+                <div class="controls" v-if="!getSelectionMode.readonly">
+                  <a v-b-tooltip.hover.right title="Delete collection"
+                     @click="deleteCollection(collection.id,index)" class="remove btn">
+                    <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                  </a>
+                  <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
+                     class="btn light btn-secondary rounded-circle"><font-awesome-icon
+                    :icon="['fas', 'edit']"/></a>
+                  <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
+                            :ref="'share-collection'+index" class="light rounded-circle"
+                            custom-class="share-tooltip"><font-awesome-icon
+                    :icon="['fas', 'share-alt']"/></b-button>
+                  <Popper
+                    style="font-size: 12px;"
+                    v-if="$refs['share-collection'+index]"
+                    :is-open="popperID == ('share-collection'+index)"
+                    :anchor-el="$refs['share-collection'+index][0]"
+                    :on-close="hidePopper"
+                    class="share-tooltip">
+                    <aside :id="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                      <div class="share-holder">
+                        <h3>Copy link and Share</h3>
+                        <div class="share-form">
+                          <b-form inline>
+                            <b-form-input :ref="'copylink_'+index" @mouseenter="markText"
+                                          :value="collection.shared_url !== 'undefined'   || collection.shared_url != null ?  collection.shared_url : ''"
+                            ></b-form-input>
+                            <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
+                          </b-form>
+                        </div>
                       </div>
-                    </div>
-                  </aside>
-                </Popper>
+                    </aside>
+                  </Popper>
+                </div>
+              </div>
+              <div class="d-none d-lg-block product-description text-center">
+                <p>{{ collection.name }}</p>
               </div>
             </div>
-            <div class="d-none d-lg-block product-description text-center">
-              <p>{{ collection.name }}</p>
-            </div>
-          </div>
-        </template>
-        </template>
-        <template v-else><p>No Collection Exists</p></template>
-      </div>
+          </template>
+          </template>
+          <template v-else><p>No Collection Exists</p></template>
+        </div>
       </b-tab>
     </b-tabs>
 

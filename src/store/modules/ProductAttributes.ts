@@ -1710,7 +1710,11 @@ const ProductAttributes:Module<any, any> = {
     },
     async updateNewCollection({commit},payload:Record<any, any>){
       let resp =  {status:false,message:""};
-      await http.put(`collection/${payload.collection_id}`, payload).then((res) => {
+      await http.post(`collection/${payload.get('collection_id')}`, payload, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then((res) => {
         if (res.status == 201 || res.status == 200){
           resp = {status:true,message:"Collection updated successfully"};
         }else if (res.status == 404){

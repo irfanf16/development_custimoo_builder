@@ -2021,6 +2021,13 @@ const getSize = (obj): string => {
   return megabytes;
 }
 
+const getCollectionLogoDefaultObj = (values={}): Record<any, any> => {
+  const default_obj =  {
+    id: null, collection_id: null, name: null, size: null, extension: null, file: null, path: null, sort_order: 0
+  }
+  return {...default_obj, ...values}
+}
+
 
 
 export {
@@ -2035,5 +2042,5 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups
+  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj
 };

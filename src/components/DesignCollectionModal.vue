@@ -24,7 +24,18 @@
     </div>
 
     <div class="modal-body">
-      <div class="design-collection-form">
+      <div class="d-flex flex-row-reverse">
+        <div class="position-relative pl-4 ml-4" style="border-left: 1px solid #eee; min-width: 160px;">
+          <template v-for="(collection_logo, clIdx) in collection_logos">
+            <div class="text-left" :key="`collection-logo-uploader-${clIdx}`" :class="{'mt-3': clIdx > 0}">
+            <div class="fs-2 mb-2 font-weight-bolder">Upload Logo {{ clIdx + 1 }}</div>
+            <CollectionLogoUploader :key="clIdx" :collection_logo="collection_logo" :collection_id="collectionItems.id"
+                                    @logo-deleted="handleLogoDeleteEvent"/>
+          </div>
+          </template>
+        </div>
+
+        <div class="design-collection-form">
         <div class="loader" v-if="showLoader" ><img style="width: 100px" src="@assets/images/loading.gif" /></div>
         <b-form inline>
           <b-container fluid>
@@ -85,6 +96,7 @@
           </b-container>
         </b-form>
       </div>
+      </div>
     </div>
 
 
@@ -111,12 +123,15 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
-import {getRandom} from "@/helpers/Helpers";
+import {getCollectionLogoDefaultObj, getRandom} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
+import CollectionLogoUploader from "@/components/Logo/CollectionLogoUploader.vue";
+import {forEach, findIndex} from "lodash";
 
 @Component({
   components: {
     DesignCollectionPdfView,
+    CollectionLogoUploader,
     Scene,
     draggable
   }
@@ -131,11 +146,28 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   public showLoader = false
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
+  public collection_logos: Record<any, any>[] = []
+  public deleted_logos_ids: string[] = []
+  // this variable is used to maintain the collection logos state while adding more products
+  public adding_more_product = false
 
   public async retrievCollectionItems() {
     this.showLoader = true;
     let res: Record<any, any> = await this.$store.dispatch('getCollectionItems')
     let collectionItems: Record<any, any> = res;
+    //check if in collection no new products being added then initialize collection logos from database
+    if(!this.adding_more_product) {
+      this.collection_logos = []
+      this.collection_logos.push(getCollectionLogoDefaultObj({ sort_order: 0}))
+      this.collection_logos.push(getCollectionLogoDefaultObj({ sort_order: 1}))
+    }
+    if(collectionItems.logos && collectionItems.logos.length > 0) {
+      collectionItems.logos.forEach((logo: Record<any, any>) => {
+        if(!this.deleted_logos_ids.includes(logo.id)) {
+          this.collection_logos[logo.sort_order] = getCollectionLogoDefaultObj(logo)
+        }
+      })
+    }
 
     let prevCollection = this.$store.getters.getCollectionItems;
     let collecItemById: any[] = [];
@@ -229,6 +261,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     items.collection_products = collections
     return items
   }
+
+  get selectionMode() {
+    return this.$store.getters.getSelectionMode
+  }
   set collectionItems(val){
     this.$store.commit('SET_COLLECTION_ITEMS',val)
   }
@@ -247,9 +283,11 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     this.retrievCollectionItems();
   }
 
-  public editCollectionModal() {
+   public async editCollectionModal() {
     this.showVModal('collection-modal')
-    this.retrievCollectionItems();
+    await this.retrievCollectionItems();
+    //when more products added to the collection then set it to false
+    this.adding_more_product = false
   }
 
   public deleteLockerProduct(locker_prod_id: number) {
@@ -320,14 +358,27 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   public async saveCollectionForm() {
     this.showLoader = true;
     let collectionItems = this.collectionItems;
-    let formData: Record<any, any> = {};
-
-    formData.name = collectionItems.name;
-    formData.link = collectionItems.link
-    let products: Record<any, any>[] = [];
+    let form_data = new FormData();
+    form_data.append("name", collectionItems.name)
+    form_data.append("link", collectionItems.link)
+    let collection_logos_data: Record<any, any>[] = [];
+    this.collection_logos.forEach( collection_logo => {
+      if(collection_logo.file) {
+        form_data.append('collection_logos[]', collection_logo.file);
+        collection_logos_data.push({
+          'id': collection_logo.id, 'collection_id': collection_logo.collection_id, 'name': collection_logo.name,
+          'size': collection_logo.size, 'extension': collection_logo.extension, file: collection_logo.file, path: collection_logo.path,
+          'sort_order': collection_logo.sort_order})
+      }
+    })
+    if(collection_logos_data.length > 0) {
+      form_data.append('collection_logos_data', JSON.stringify(collection_logos_data))
+    }
+    form_data.append('collection_logos', JSON.stringify(this.collection_logos))
+    form_data.append('deleted_logos_ids', JSON.stringify(this.deleted_logos_ids))
 
     collectionItems.collection_products.forEach(function (item: Record<any, any>, index: number) {
-      products.push({
+      form_data.append('products[]',JSON.stringify({
         "product_nickname": item.product_nickname,
         "product_note": item.product_note,
         "product_price": item.product_price,
@@ -336,23 +387,19 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
         "allow_title": item.allow_title,
         "allow_description": item.allow_description,
         "allow_price": item.allow_price
-      })
+      }))
     })
-    formData.products = products
     let res;
     let content = ''
     if (collectionItems.id == "") {
-      //content = await this.generateCollectionPdf();
-      //formData.data = content
-      res = await this.$store.dispatch('createNewCollection', formData);
+      res = await this.$store.dispatch('createNewCollection', form_data);
       if(res.status){
         await this.$store.dispatch('getCollections')
       }
     } else {
-      //content = await this.generateCollectionPdf();
-      //formData.data = content
-      formData.collection_id = collectionItems.id;
-      res = await this.$store.dispatch('updateNewCollection', formData);
+      form_data.append("_method", 'PUT')
+      form_data.append('collection_id', collectionItems.id)
+      res = await this.$store.dispatch('updateNewCollection', form_data);
       if(res.status){
         await this.$store.dispatch('getCollections')
       }
@@ -374,6 +421,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
 
     this.$emit('showLockerRoomModal');
     if(add_more_status) {
+      this.adding_more_product = true
       this.$store.commit('SET_SELECTION_MODE',{
         readonly:true,
         collectionAddmoreMode:true,
@@ -409,6 +457,17 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       let arr = pdf.split(',');
       return  arr[1];
     })
+  }
+
+  public handleLogoDeleteEvent(sort_order: number): void {
+    let deleted_logo_index = findIndex(this.collection_logos, ['sort_order', sort_order])
+    if(deleted_logo_index != -1) {
+      const deleted_logo: Record<any, any> = this.collection_logos[deleted_logo_index]
+      if(deleted_logo.id) {
+        this.deleted_logos_ids.push(deleted_logo.id)
+      }
+      this.$set(this.collection_logos, deleted_logo_index, getCollectionLogoDefaultObj({sort_order: deleted_logo.sort_order}))
+    }
   }
 
 
