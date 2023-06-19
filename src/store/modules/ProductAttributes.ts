@@ -985,10 +985,6 @@ const ProductAttributes:Module<any, any> = {
       * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
       * reflected in state.last_active_product_data.product_custom_texts
       * */
-      // if('product_custom_textsddddd' in payload) {
-      //   state.last_active_product_data.product_custom_texts = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
-      // }
-      // else {
         for (const [payload_key, payload_value] of Object.entries(payload)) {
           /*
           * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be

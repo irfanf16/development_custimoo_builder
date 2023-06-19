@@ -187,8 +187,6 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
     } else {
       this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
     }
-    // await this.$store.dispatch('setStockCount',response.data.stock_count);
-    // await this.$store.dispatch('setPrivateProductCount',response.data.private_product_count);
 
     const prms = new Promise((resolve) => {
       self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
@@ -199,9 +197,6 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         this.$store.commit('SET_APPLICATION_MOUNTED')
         return false;
       }
-      // await this.$store.dispatch('setProductType', {prd_type: 'customized', value: response.data.customized});
-      // await this.$store.dispatch('setProductType', {prd_type: 'personalized', value: response.data.personalized});
-      // await this.$store.dispatch('setPrivateProduct', response.data.private_product);
       let update_order_product = response_data.update_order_products_data;
       if(product_edit_info_object.type == 'order_product' && update_order_product) {
         let order_products = Object.assign({}, product_edit_info_object.order_product_info, {order_products: update_order_product})
@@ -264,7 +259,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             this.$store.commit('SET_CUSTOM_LOGOS', {
               product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
             })
-            this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
+            //this.$store.commit('SET_GROUP_COLORS', last_active_prod_data.group_colors)
           }
           else {
             let {sync_id, customizer_preview, update_cart} = self.$route.query

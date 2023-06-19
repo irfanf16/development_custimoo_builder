@@ -108,12 +108,8 @@ import colorPicker from '@caohenghu/vue-colorpicker'
 import {LockerProducts} from '../mixins/LockerProduct'
 import ColorsTabMixin from '../mixins/ColorsTabMixin'
 
-import {getClosestColor, pantonesTcx, getColorEncoding} from '@/pantoneColor'
 import {
-  getSelectedProductPantones,
-  getLockerColors,
-  setUndoRedoItems,
-  hideLockerProductSaveBtn
+  getLockerColors
 } from "@/helpers/Helpers";
 
 @Component<ColorAccordion>({
