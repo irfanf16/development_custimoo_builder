@@ -35,8 +35,21 @@
               required
             ></b-form-input>
           </b-form-group>
+
           <b-form-group
-            label="Address1 *"
+            label="Email"
+            label-for="input-1" class="text-left"
+          >
+            <b-form-input
+              type="text"
+              v-model="form.email"
+              placeholder="Email"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            label="Address"
             label-for="input-1" class="text-left"
           >
             <b-form-input
@@ -47,13 +60,13 @@
             ></b-form-input>
           </b-form-group>
           <b-form-group
-            label="Address2"
+            label="Second Address"
             label-for="input-1" class="text-left"
           >
             <b-form-input
               type="text"
               v-model="form.address2"
-              placeholder="Address2"
+              placeholder="Second Address"
               required
             ></b-form-input>
           </b-form-group>
@@ -107,7 +120,31 @@
             ></b-form-select>
           </b-form-group>
 
-          <b-form-group label-for="default" class="text-left">
+          <b-form-group
+            label="Company Name"
+            label-for="input-1" class="text-left"
+          >
+            <b-form-input
+              type="text"
+              v-model="form.company_name"
+              placeholder="Company Name"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group
+            label="State/Province"
+            label-for="input-1" class="text-left"
+          >
+            <b-form-input
+              type="text"
+              v-model="form.state"
+              placeholder="State/Province"
+              required
+            ></b-form-input>
+          </b-form-group>
+
+          <b-form-group label-for="default" class="text-left mt-4">
             <b-form-checkbox
               id="default"
               v-model="form.default"
@@ -120,8 +157,10 @@
           </b-form-group>
 
 
-          <b-button v-if="!isLoading" @click="submitForm" variant="secondary">Save</b-button>
-          <b-button v-else variant="primary" :disabled="isLoading"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></b-button>
+          <div class="grid-span-2">
+            <b-button v-if="!isLoading" @click="submitForm" variant="secondary">Save</b-button>
+            <b-button v-else variant="primary" :disabled="isLoading"><i class="fa fa-spinner fa-spin" style="font-size:24px"></i></b-button>
+          </div>
 
         </b-form>
       </div>
@@ -150,10 +189,13 @@
     public form = {
       first_name: '',
       last_name: '',
+      email: '',
       address1: '',
       address2: '',
       phone_number: '',
       city:'',
+      company_name: '',
+      state:'',
       zip_code:'',
       country:59,
       default:false
@@ -204,10 +246,13 @@
     public clearForm(){
       this.form.first_name = ''
       this.form.last_name= ''
+      this.form.email = ''
       this.form.address1= ''
       this.form.address2= ''
       this.form.phone_number = ''
       this.form.city = ''
+      this.form.company_name = ''
+      this.form.state = ''
       this.form.zip_code = ''
       this.form.country = 59,
       this.form.default = false

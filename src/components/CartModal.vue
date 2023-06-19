@@ -83,14 +83,21 @@
           </div>
           <template v-if="shipping_address">
             <div class="px-2 pt-1 pb-2">
-              <div>{{ shipping_address.first_name }} {{ shipping_address.last_name }}</div>
-              <div>{{ shipping_address.address1 }}</div>
-              <div>{{ shipping_address.address2 }}</div>
-              <div>{{ shipping_address.zip_code }}</div>
-              <div>{{ shipping_address.country.name }} {{ shipping_address.city }}</div>
+              <div>{{ shipping_address.first_name + ' ' + shipping_address.last_name }}</div>
+              <div v-if="shipping_address.phone_number">{{ shipping_address.email }}</div>
+              <div v-if="shipping_address.phone_number">{{ shipping_address.phone_number }}</div>
+              <div v-if="shipping_address.phone_number">{{ shipping_address.company_name }}</div>
+              <div v-if="shipping_address.address1">{{ shipping_address.address1 }}</div>
+              <div v-if="shipping_address.address2">{{ shipping_address.address2 }}</div>
+              <div>{{ shipping_address.city + ' ' + shipping_address.state + ' ' + shipping_address.zip_code }}</div>
+<!--              <div>{{ shipping_address.first_name }} {{ shipping_address.last_name }}</div>-->
+<!--              <div>{{ shipping_address.address1 }}</div>-->
+<!--              <div>{{ shipping_address.address2 }}</div>-->
+<!--              <div>{{ shipping_address.zip_code }}</div>-->
+<!--              <div>{{ shipping_address.country.name }} {{ shipping_address.city }}</div>-->
 
               <div class="d-flex flex-wrap w-100">
-                <div>{{ shipping_address.phone_number }}</div>
+                <div>{{ shipping_address.country.name }}</div>
 
                 <router-link :to="'address?cart=1'" class="btn ml-auto align-self-end btn-dark medium btn-sm my-orders">
                   <span style="font-size: 0.85em">

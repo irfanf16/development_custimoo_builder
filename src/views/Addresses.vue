@@ -44,10 +44,12 @@
                 <tr v-for="address in addresses" :key="address.id">
                   <td class="pl-2">
                     <p class="h6">{{ address.first_name + ' ' + address.last_name }}</p>
+                    <p class="h6" v-if="address.phone_number">{{ address.email }}</p>
+                    <p class="h6" v-if="address.phone_number">{{ address.phone_number }}</p>
+                    <p class="h6" v-if="address.phone_number">{{ address.company_name }}</p>
                     <p class="h6" v-if="address.address1">{{ address.address1 }}</p>
                     <p class="h6" v-if="address.address2">{{ address.address2 }}</p>
-                    <p class="h6" v-if="address.phone_number">{{ address.phone_number }}</p>
-                    <p class="h6">{{ address.city + ' ' + address.zip_code }}</p>
+                    <p class="h6">{{ address.city + ' ' + address.state + ' ' + address.zip_code }}</p>
                     <p class="h6">{{ address.country.name }}</p>
                   </td>
                   <td class="text-center pl-2" style="width: 200px; max-width: 200px; word-wrap: break-word; vertical-align: middle;">
