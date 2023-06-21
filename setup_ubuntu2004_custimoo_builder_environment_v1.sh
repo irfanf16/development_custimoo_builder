@@ -191,25 +191,20 @@ if ! $have_serve_mode; then
     done
   done
 
+  build_paths_index=0
+  build_paths=()
+  for mode in "${modes[@]}"; do
+    for build_type in "${build_types[@]}"; do
+      mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
+      build_paths[build_paths_index]="$protocol://$domain/$build_type/$mode"
+      ((build_paths_index++))
+    done
+  done
+  createFile "${build_paths[@]}"
+
   if [ "$move_to_nginx" = "true" ]; then
-    build_paths_index=0
-      build_paths=()
-         for mode in "${modes[@]}"; do
-           for build_type in "${build_types[@]}"; do
-             build_paths[build_paths_index]="$protocol://$domain/$build_type/$mode/demo.html"
-           ((build_paths_index++))
-           done
-         done
-    createFile "${build_paths[@]}"
     sudo rm -rf /var/www/$domain/*
     sudo mv $build_directory_name/* /var/www/$domain
-  else
-    for mode in "${modes[@]}"; do
-      for build_type in "${build_types[@]}"; do
-        mv "$build_directory_name/$build_type/$mode/demo.html" "$build_directory_name/$build_type/$mode/index.html"
-        echo "$protocol://$domain/$build_type/$mode"
-      done
-    done
   fi
 
   echo "********** CREATING VIRTUAL HOST  **********"
