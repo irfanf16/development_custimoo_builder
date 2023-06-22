@@ -84,12 +84,19 @@
           <template v-if="shipping_address">
             <div class="px-2 pt-1 pb-2">
               <div>{{ shipping_address.first_name + ' ' + shipping_address.last_name }}</div>
-              <div v-if="shipping_address.phone_number">{{ shipping_address.email }}</div>
+              <div v-if="shipping_address.email">{{ shipping_address.email }}</div>
               <div v-if="shipping_address.phone_number">{{ shipping_address.phone_number }}</div>
-              <div v-if="shipping_address.phone_number">{{ shipping_address.company_name }}</div>
+              <div v-if="shipping_address.company_name">{{ shipping_address.company_name }}</div>
               <div v-if="shipping_address.address1">{{ shipping_address.address1 }}</div>
               <div v-if="shipping_address.address2">{{ shipping_address.address2 }}</div>
-              <div>{{ shipping_address.city + ' ' + shipping_address.state + ' ' + shipping_address.zip_code }}</div>
+              <div>
+                <span v-if="shipping_address.city">{{ shipping_address.city }}</span>
+                <span v-if="shipping_address.city">{{ ' ' }}</span>
+                <span v-if="shipping_address.state">{{ shipping_address.state }}</span>
+                <span v-if="shipping_address.state">{{ ' ' }}</span>
+                <span v-if="shipping_address.zip_code">{{ shipping_address.zip_code }}</span>
+                <span v-if="shipping_address.zip_code">{{ ' ' }}</span>
+              </div>
 <!--              <div>{{ shipping_address.first_name }} {{ shipping_address.last_name }}</div>-->
 <!--              <div>{{ shipping_address.address1 }}</div>-->
 <!--              <div>{{ shipping_address.address2 }}</div>-->
