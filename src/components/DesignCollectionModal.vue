@@ -318,43 +318,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     this.$store.commit('SET_COLLECTION_ITEMS_ATTRIBUTE', {index: index, attribute: attribute, value: value})
   }
 
-  public async saveCollectionForm_back() {
-    let collectionItems: Record<any, any> = this.collectionItems;
-    let formData: Record<any, any> = {};
-
-    formData.name = collectionItems.name;
-    formData.link = collectionItems.link
-    let products: Record<any, any>[] = [];
-
-    collectionItems.collection_products.forEach(function (item: Record<any, any>, index: number) {
-      products.push({
-        "product_nickname": item.product_nickname,
-        "product_note": item.product_note,
-        "product_locker_room_id": item.product_locker_room.id,
-        "order_number": (index + 1),
-        "allow_title": item.allow_title,
-        "allow_description": item.allow_description,
-
-      })
-    })
-    formData.products = products
-    let res;
-    if (collectionItems.id == "") {
-      res = await this.$store.dispatch('createNewCollection', formData);
-    } else {
-      formData.collection_id = collectionItems.id;
-      res = await this.$store.dispatch('updateNewCollection', formData);
-    }
-    if (res.status) {
-      this.showToast(res.message, 'success')
-      const payload = {"attribute": "locker_products", "value": []};
-      this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
-      this.hideVModal('collection-modal')
-    } else {
-      this.showErrorArr(res.message)
-    }
-  }
-
   public async saveCollectionForm() {
     this.showLoader = true;
     let collectionItems = this.collectionItems;
@@ -374,7 +337,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     if(collection_logos_data.length > 0) {
       form_data.append('collection_logos_data', JSON.stringify(collection_logos_data))
     }
-    form_data.append('collection_logos', JSON.stringify(this.collection_logos))
+    // form_data.append('collection_logos', JSON.stringify(this.collection_logos))
     form_data.append('deleted_logos_ids', JSON.stringify(this.deleted_logos_ids))
 
     collectionItems.collection_products.forEach(function (item: Record<any, any>, index: number) {
@@ -402,6 +365,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       res = await this.$store.dispatch('updateNewCollection', form_data);
       if(res.status){
         await this.$store.dispatch('getCollections')
+        this.deleted_logos_ids = []
       }
     }
     this.showLoader = false;
