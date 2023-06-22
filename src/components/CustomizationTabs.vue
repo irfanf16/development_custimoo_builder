@@ -55,18 +55,6 @@
             <div class="d-none d-lg-block">
                 <CustomizationText :customTextIndex="customTextIndex" :productColors="productColors" :key="selectedProduct.id" />
             </div>
-<!--            <div class="mobile-text-tabs d-lg-none" v-if="hideTab.textHide">-->
-<!--              <b-tabs>-->
-<!--                <b-tab>-->
-<!--                  <template #title>-->
-<!--                    Player Name-->
-<!--                  </template>-->
-<!--                  <div>-->
-<!--                    <CustomizationText :customTextIndex="customTextIndex" />-->
-<!--                  </div>-->
-<!--                </b-tab>-->
-<!--              </b-tabs>-->
-<!--            </div>-->
           </b-tab>
           <b-tab>
             <button @click="setHideTab('styleHide', !hideTab.styleHide)" class="tab-close-btn d-lg-none"></button>
@@ -108,12 +96,10 @@
 <script lang="ts">
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ColorAccordion from '@/components/ColorAccordion.vue'
-// import LogoPlacementTabs from './LogoPlacementTabs.vue'
 import LogoPlacementTab from '@/components/Logo/LogoPlacementTab.vue'
 import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
-// import UploadLogo from '@/components/UploadLogo.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
 import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
@@ -124,13 +110,11 @@ import {filter} from "lodash"
   components: {
     RecentLogos,
     ColorAccordion,
-    // LogoPlacementTabs,
     LogoPlacementTab,
     CustomizationText,
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,
-    // UploadLogo,
   },
   mounted() {
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});

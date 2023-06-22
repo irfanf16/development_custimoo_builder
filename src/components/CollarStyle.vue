@@ -1,9 +1,9 @@
 <template>
     <b-tabs :class="{'have-scroll': productModels && productModels.length > 5, 'only-style': productModels && productModels.length == 1}">
-        <b-tab v-for="(model, index)  in productModels" :key="'model_' + index + selected_model_index" :id="'model_' + index + selected_model_index" @click.stop="selectModelStyle(index)" :active="index === selected_model_index">
+        <b-tab v-for="(model, index)  in productModels" :key="'model_' + index + selected_model_index" :id="'model_' + index + selected_model_index"
+               @click.stop="index == selected_model_index ? '' : selectModelStyle(index)" :active="index === selected_model_index">
             <template #title>
               <span v-html="model.model_name.replaceAll(' ', '<br>')"></span>
-<!--              <span>{{model.model_name}}</span>-->
               <BIconCheckCircleFill />
             </template>
             <div class="collar-area">
@@ -30,7 +30,8 @@
                           <div :key="i+'collar'" class="text-center">
                             <template v-for="(front_model, index) in style.front_models">
                               <template v-if="index === 0">
-                                <b-button :key="'front_model_' + index" v-if="model.model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
+                                <b-button :key="'front_model_' + index" v-if="model.model_styles.includes(style.id)" :class="{'active': styleIndex === i}"
+                                          variant="outline-light" @click="styleIndex === i ? '' : changeStyleIndex(i)">
                                   <img v-if="style.style_icon_url" :src="storageUrl+style.style_icon_url" alt="Collar" :key="'front_model_style_icon' + index"/>
                                   <img v-else :src="storageUrl+style.front_models[0].file_url" alt="Collar" :key="'front_model_file_url' + index"/>
                                 </b-button>
@@ -57,11 +58,9 @@
 
 <script lang="ts">
 import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
-import {http} from "@/httpCommon";
-import moment from "moment";
 import {findIndex} from "lodash";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
-import {getLockerColors} from "@/helpers/Helpers";
+import {hideLockerProductSaveBtn} from "@/helpers/Helpers";
     @Component<CollarStyle>({
     })
 
@@ -112,6 +111,7 @@ import {getLockerColors} from "@/helpers/Helpers";
             this.changeStyleIndex(newStyleIndex);
           }
         }
+        hideLockerProductSaveBtn()
       }
       public changeStyleIndex(i: number) {
         const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
@@ -151,6 +151,7 @@ import {getLockerColors} from "@/helpers/Helpers";
         this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.selectedProduct.productstyles[i].id,model_index:model_index,
           model_id:model_id, design_index:   design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
         })
+        hideLockerProductSaveBtn()
       }
     }
 </script>
