@@ -125,12 +125,12 @@ Vue.directive('click-outside-custom', {
       }
     };
     const doc = getDomDocument();
-    const outsideEl = doc.querySelector('.page-wrapper') as Record<any, any>
+    const outsideEl = doc.body as Record<any, any>
     outsideEl.addEventListener('click', el.clickOutsideEvent)
   },
   unbind: function (el:Record<any, any>) {
     const doc = getDomDocument();
-    const outsideEl = doc.querySelector('.page-wrapper') as Record<any, any>
+    const outsideEl = doc.body as Record<any, any>
     outsideEl.removeEventListener('click', el.clickOutsideEvent)
   },
 });

@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "test:unit": "vue-cli-service test:unit",
+    "local build with staging S3": "./setup_ubuntu2004_custimoo_builder_environment_v1.sh -m staging -t selfcustomizer -d custimoo-builder.local",
     "build:wc:customizer:ecommerce": "vue-cli-service build --dest ./wordpress_customizer --target wc --name v-customizer ./src/webComponents/Customizer.vue",
     "build:wc:customizer:ecommerce:staging": "vue-cli-service build --mode staging --dest ./wordpress_customizer_staging --target wc --name v-customizer ./src/webComponents/Customizer.vue",
     "build:wc:customizer:self": "vue-cli-service build --dest ./self --target wc --name v-customizer ./src/webComponents/CustomizerAll.vue",

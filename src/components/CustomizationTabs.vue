@@ -119,7 +119,7 @@ import {filter} from "lodash"
   mounted() {
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});
-    (this.$refs['myscroll'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()});
+    (this.$refs['myscroll'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{$event.stopPropagation()}, { passive: true });
     this.$eventBus.$on('handleNonVectorCustomLogosCount',this.notVectorLogosCount);
     this.$store.dispatch('setCustomLogos');
     this.productColorsManipulation();

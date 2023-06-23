@@ -29,7 +29,7 @@
                                  :multiDrag="true" @remove="designMoved"
                                  :forceFallback="true"
                                  handle=".image-holder"
-                                 v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}"
+                                 v-bind="{filter: '.custom-checkbox', animation: 250, delayOnTouchOnly: true, delay: 500}"
                                  @update="lockerProductsChanged($event)">
                         <template v-for="(product, ind) in room.product">
                           <div :key="`${ind}-${product.id}`" class="products-block" :class=" product.disable_style ? 'notactive' : ''" :data-room-id="room.id"
@@ -43,12 +43,15 @@
                                    @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                               <div class="image-holder">
                                 <div>
-                                  <b-form-checkbox  v-if="!getSelectionMode.eventProductMode" :disabled="getDisabled(product.id)"  v-model="selectedCollectionProducts" v-bind:value="product.id"></b-form-checkbox>
+                                  <label class="custom-checkbox" @click="($event)=>$event.stopPropagation()" @dragstart="($event)=>$event.stopPropagation()">
+                                    <input type="checkbox" v-model="selectedCollectionProducts" v-bind:value="product.id">
+                                    <span></span>
+                                  </label>
+
                                   <template v-if="room.active_tab">
                                     <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
                                     <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
                                   </template>
-
                                 </div>
                               </div>
                             </label>
@@ -128,8 +131,9 @@
                             </li>
                           </ul>
 
-                          <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'" v-click-outside-custom="hideRenamePopup"
-                               class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100">
+                          <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'"
+                               class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100" :ref="`rename-locker-${i + ind}${ind}`">
+
                             <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
                             <div class="d-flex">
                               <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
@@ -373,7 +377,7 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {getRandom, classObserver, handleResponseException} from "@/helpers/Helpers";
+import {getRandom, classObserver, handleResponseException, getDomDocument} from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
@@ -395,6 +399,8 @@ import {AxiosError} from "axios";
     draggable
   },
   mounted() {
+    const doc = getDomDocument() as Record<any, any>;
+    doc.addEventListener('click', this.onClickOutside);
     let href: any = location.href;
     href = href.split('#')
     this.collection_base_url = `${href[0]}`
@@ -418,6 +424,10 @@ import {AxiosError} from "axios";
     }
 
     this.$emit('lockerModalOpened', ()=>{this.getLockerProductsRosters()})
+  },
+  beforeDestroy() {
+    const doc = getDomDocument() as Record<any, any>;
+    doc.removeEventListener('click', this.onClickOutside);
   },
   destroyed() {
     const lockerTabs = this.$el.querySelector('.locker-tabs .lockerroom_titles') as Record<any, any>;
@@ -468,7 +478,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public design_moved_to_locker = ''
   public yearly_planner_template_id = null;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
-
+  public renameRef = "";
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
@@ -686,15 +696,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
     this.$store.commit('SET_LOCKER_ACTIVE_INDEX', index)
     this.$store.commit('Change_Locker_Tabs_Index', index)
-  }
-
-  public hideRenamePopup() {
-    console.log('calling it')
-    if(this.renameID != ''){
-      console.log('calling it inside')
-
-      this.renameID = '';
-    }
   }
 
   public showDesignModal(product:Record<any, any>){
@@ -1018,6 +1019,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public setRenameLockerProductID(id: string, product: Record<any, any>){
     if(product){
       this.renameID = id;
+      this.renameRef = `rename-locker-${id}`
       this.current_product_name = product.product_name;
       this.lockerProductInfo.locker_product_info = {id: product.id}
     }
@@ -1268,6 +1270,14 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public showContactPopup(room_id:number, room_index:number){
     this.ref['contactmodal'].showContactPopup(room_id, room_index)
   }
+  public onClickOutside(event) {
+    // Check if the clicked element is outside your target element
+    // return console.log(this.ref[this.renameRef] && event.target)
+    if (this.ref[this.renameRef] && !this.ref[this.renameRef][0].contains(event.target)) {
+      // Clicked outside the element
+      this.renameID = '';
+    }
+  }
 }
 </script>
 
@@ -1402,6 +1412,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           position: absolute;
           z-index: 2;
           background: rgba(0, 0, 0, 0);
+          pointer-events: none;
         }
 
         img{
@@ -1637,6 +1648,53 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   .close-rename{
     background: var(--theme-color-light);
     color: var(--theme-color);
+  }
+}
+
+.custom-checkbox{
+  input{
+    display: none;
+  }
+
+  span{
+    display: block;
+    height: 20px;
+    width: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+
+    &::after, &::before{
+      content: '';
+      display: none;
+      position: absolute;
+      width: 2px;
+      background-color: #fff;
+    }
+
+    &::before {
+      height: 10px;
+      left: 10px;
+      top: 4px;
+      transform: rotate(45deg);
+    }
+
+    &::after {
+      height: 6px;
+      left: 5px;
+      top: 8px;
+      transform: rotate(-45deg);
+    }
+  }
+
+  input:checked + span {
+    background: var(--theme-color);
+    border-color: var(--theme-color);
+
+    &::after, &::before{
+      display: block;
+    }
   }
 }
 </style>
