@@ -47,7 +47,7 @@
             ></b-form-input>
           </b-form-group>
           <b-form-group
-            label="Address"
+            label="Address *"
             label-for="input-1" class="text-left"
           >
             <b-form-input

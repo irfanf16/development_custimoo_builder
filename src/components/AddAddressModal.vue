@@ -49,13 +49,13 @@
           </b-form-group>
 
           <b-form-group
-            label="Address"
+            label="Address *"
             label-for="input-1" class="text-left"
           >
             <b-form-input
               type="text"
               v-model="form.address1"
-              placeholder="Address1"
+              placeholder="Address"
               required
             ></b-form-input>
           </b-form-group>
