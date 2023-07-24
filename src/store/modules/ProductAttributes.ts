@@ -17,6 +17,7 @@ import {
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
 import {eventBus} from "@/event/eventBus";
+const MAX_UNDO_REDO_ITEMS = 3;
 const ProductAttributes:Module<any, any> = {
   state: {
     stock_count:0,
@@ -831,20 +832,34 @@ const ProductAttributes:Module<any, any> = {
       //state.svgGroups = []
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
-      state.undoItems.push(payload)
+      state.undoItems.push(payload); // Add the new item to the array
+      if (state.undoItems.length > MAX_UNDO_REDO_ITEMS) {
+        state.undoItems.shift();
+      }
     },
-    UPDATE_REDO:(state, payload) => state.redoItems.push(payload),
+    UPDATE_REDO:(state, payload) => {
+      state.redoItems.push(payload); // Add the new item to the array
+      if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
+        state.redoItems.shift(); // Remove the oldest item from the array
+      }
+    },
     RESET_UNDO:(state) => state.undoItems = [],
     RESET_REDO:(state) => state.redoItems = [],
     DO_UNDO(state: Record<any, any>) {
       if (state.undoItems.length) {
         const lastUndo = state.undoItems.pop()
         if (lastUndo.action == 'customLogos') {
-          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
+          state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'});
           state.customLogos = lastUndo.data
+          if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.redoItems.shift(); 
+          }
         } else if (lastUndo.action == 'defaultColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
           state.defaultColors = lastUndo.data
+          if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.redoItems.shift(); 
+          }
         } else if (lastUndo.action == 'groupColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
           if(isEmpty(lastUndo.data)){
@@ -852,10 +867,16 @@ const ProductAttributes:Module<any, any> = {
           }else{
             state.groupColors = lastUndo.data
           }
+          if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.redoItems.shift(); 
+          }
 
         } else if (lastUndo.action == 'customTexts') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
+          if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.redoItems.shift(); 
+          }
         }
       }
     },
@@ -865,10 +886,16 @@ const ProductAttributes:Module<any, any> = {
         if(lastUndo.action == 'customLogos') {
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'})
           state.customLogos = lastUndo.data
+          if (state.undoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.undoItems.shift();
+          }
         }
         else if (lastUndo.action == 'defaultColor'){
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
           state.defaultColors = lastUndo.data
+          if (state.undoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.undoItems.shift();
+          }
         }
         else if (lastUndo.action == 'groupColor'){
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
@@ -877,11 +904,17 @@ const ProductAttributes:Module<any, any> = {
           }else{
             state.groupColors = lastUndo.data
           }
+          if (state.undoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.undoItems.shift();
+          }
 
         }
         else if (lastUndo.action == 'customTexts'){
           state.undoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
+          if (state.undoItems.length > MAX_UNDO_REDO_ITEMS) {
+            state.undoItems.shift();
+          }
         }
       }
     },
@@ -1124,6 +1157,9 @@ const ProductAttributes:Module<any, any> = {
     SET_UNDO_REDO_ITEMS(state: Record<any, any>, payload: Record<any, any>) {
       const action = payload.action == 'undo' ? 'undoItems' : 'redoItems'
       state[action].push(payload.data)
+      if (state[action].length > MAX_UNDO_REDO_ITEMS) {
+        state[action].shift();
+      }
     },
     RESET_UNDO_REDO_ITEMS(state: Record<any, any>, payload: string) {
       /*
@@ -1647,6 +1683,9 @@ const ProductAttributes:Module<any, any> = {
     },
     redoAction({commit}, payload){
       commit('DO_REDO', payload)
+    },
+    updateUndo({commit}, payload:Record<any, any>){
+      commit("UPDATE_UNDO",payload);
     },
     async addDesignCollection({commit}, payload){
       commit('ADD_DESIGN_COLLECTION', payload);

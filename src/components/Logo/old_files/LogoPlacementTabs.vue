@@ -1,7 +1,7 @@
 <template>
   <div v-if="selectedProduct">
     <div class="d-flex align-items-center justify-content-between px-1 pt-1" :class="{'rotateArrow': !expandLogoButtons}">
-      <b-button class="light ml-1" v-if="(selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count)"
+      <b-button class="light ml-1" v-if="(selectedProduct.allowed_logos_count == 0 || customLogos && customLogos.length < selectedProduct.allowed_logos_count)"
                 :style="{visibility: expandLogoButtons ? 'visible':'hidden'}" @click="addTab">
         <BIconPlus />
       </b-button>
@@ -93,7 +93,7 @@
         <RecentLogos :logosSetting="logosSetting" :customLogoIndex="ltIdx"/>
       </b-tab>
       <template #tabs-end v-if="!expandLogoButtons">
-        <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
+        <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos && customLogos.length < selectedProduct.allowed_logos_count" @click="addTab">
           <BIconPlus />
         </b-button>
       </template>

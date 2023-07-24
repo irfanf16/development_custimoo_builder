@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="d-flex align-items-center justify-content-between px-1 pt-1" :class="{'rotateArrow': !expand_logos}">
-      <b-button class="light ml-1" v-if="(selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count)"
+      <b-button class="light ml-1" v-if="(selectedProduct.allowed_logos_count == 0 || customLogos && customLogos.length < selectedProduct.allowed_logos_count)"
                 :style="{visibility: expand_logos ? 'visible':'hidden'}" @click="addLogoTab">
         <BIconPlus />
       </b-button>
@@ -44,7 +44,7 @@
         <recent-logos :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]"/>
       </template>
       <template #tabs-end v-if="!expand_logos">
-        <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos.length < selectedProduct.allowed_logos_count"
+        <b-button class="light ml-1" v-if="selectedProduct.allowed_logos_count == 0 || customLogos && customLogos.length < selectedProduct.allowed_logos_count"
           @click="addLogoTab">
           <BIconPlus />
         </b-button>

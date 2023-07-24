@@ -11,6 +11,7 @@ import {parseInt, findIndex, isEmpty} from "lodash";
 import {Canvas} from "fabric/fabric-impl";
 import {eventBus} from "@/event/eventBus"
 import VueRouter from 'vue-router'
+import LZString from 'lz-string';
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
@@ -2029,6 +2030,28 @@ const getCollectionLogoDefaultObj = (values={}): Record<any, any> => {
 }
 
 
+const getKeyItemFromLocalStorage = (key) => {
+  const compressedValue = localStorage.getItem(key)
+  if (compressedValue) {
+    return  LZString.decompressFromUTF16(compressedValue)
+  }
+  return null
+}
+
+const setKeyItemFromLocalStorage = (key,value) => {
+  const compressedValue = LZString.compressToUTF16(value)
+  localStorage.setItem(key, compressedValue)
+}
+
+const removeKeyItemFromLocalStorage = (key) => {
+  localStorage.removeItem(key) 
+}
+
+
+const removeKeyInitialPersitantItems = () => {
+  const custimoo = getKeyItemFromLocalStorage('custimo');
+  console.log(custimoo);
+}
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -2042,5 +2065,6 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj
+  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
+  getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage
 };
