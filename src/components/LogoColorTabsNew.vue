@@ -33,12 +33,14 @@
               <b-form-input
                 :value="activeLogoColor ? activeLogoColor.pantone : 'XX-XXXX'"
                 class="mb-2 mr-sm-2 mb-sm-0"
-                placeholder="XX-XXXX" readonly
+                @input="changeLogoPantoneColor($event,activeLogoColor)"
+                placeholder="XX-XXXX"
               ></b-form-input>
+              <div class="text-danger fs-2" v-if="pantoneMessage != ''">{{pantoneMessage}}</div>
             </b-form>
             <div class="color-holder">
               <div class="color-container color-picker-container">
-                <color-picker @changeColor="updateLogoActiveColor($event, 'color-picker')" theme="light"
+                <color-picker @changeColor="updateLogoActiveColor($event, 'color-picker')" :colors-default="[]" :key="activeLogoColor.hex" :color="activeLogoColor.hex" theme="light"
                               :colors-history="false"/>
               </div>
             </div>
@@ -51,11 +53,12 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Watch, Vue} from 'vue-property-decorator'
+import {Component, Prop, Mixins} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
 
-import {getClosestColor, getColorEncoding} from '@/pantoneColor'
+import {getClosestColor} from '@/pantoneColor'
 import {getSelectedProductPantones, setDefaultColors} from "@/helpers/Helpers";
+import ColorsTabMixin from "@/mixins/ColorsTabMixin";
 
 @Component<LogoColorTabsNew>({
   components: {
@@ -69,7 +72,7 @@ import {getSelectedProductPantones, setDefaultColors} from "@/helpers/Helpers";
     }
   },
 })
-export default class LogoColorTabsNew extends Vue {
+export default class LogoColorTabsNew extends Mixins(ColorsTabMixin) {
   /*
   * props starts
   * */
@@ -170,5 +173,8 @@ export default class LogoColorTabsNew extends Vue {
   }
   .hu-color-picker{box-shadow: none !important;}
 
+  .hu-color-picker .color-show ~ *{
+    display: none !important;
+  }
 }
 </style>

@@ -109,6 +109,20 @@ export default class ColorsTabMixin extends Vue{
     }
   }
 
+  public changeLogoPantoneColor(color_code, color_object) {
+    const pantoneColor = getColorEncoding(color_code, this.getColorType);
+
+    if (pantoneColor) {
+      color_object.hex = pantoneColor?.hex.toUpperCase();
+      color_object.name = pantoneColor?.name;
+      color_object.pantone = pantoneColor?.pantone;
+      this.pantoneMessage = ''
+    }
+    else {
+      this.pantoneMessage = 'Color is not in the list.'
+    }
+  }
+
   public extractExactCode(code:string) {
     let pantone_coated: string|null = null;
     if(this.getColorType === 'pantone-coated'){
