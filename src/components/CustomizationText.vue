@@ -14,7 +14,7 @@
 
       <div :key="`main-${selectedProductId+customTextIndex}`" class="d-flex">
         <b-form-input :ref="`text-customize-${customTextIndex}`" :key="`text-${selectedProductId+customTextIndex}`" class="mb-2 mr-sm-2 mb-sm-0" placeholder="Type Here" :value="product_custom_text.value"
-                      @input="handleCustomTextInputChange($event, customTextIndex)" @focusin="expandTextCustomizer(customTextIndex)"></b-form-input>
+                      @input="handleCustomTextInputChange($event, customTextIndex)" @focusin="expandTextCustomizer(customTextIndex)" @keypress="preventSpace($event, product_custom_text.type)"></b-form-input>
         <button v-b-toggle="`text-accordion-${customTextIndex}`"
                 class="d-flex align-items-center btn btn-secondary light">
           <span class="minus d-flex align-items-center">
@@ -311,6 +311,12 @@ export default class CustomizationText extends Mixins(TextCustomizationTab) {
 
   private expandTextCustomizer(custom_text_index: number){
     (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = true;
+  }
+
+  private preventSpace($event, type){
+    if(type == 'number' && $event.key == ' '){
+      $event.preventDefault();
+    }
   }
 
   private collapseTextCustomizer(updatedVal: Record<any, any>, custom_text_index: number){
