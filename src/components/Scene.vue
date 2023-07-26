@@ -243,7 +243,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   @Prop({ required: false }) readonly carousel !: string
   @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
   @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
-  @Prop({ required: false, default: true }) readonly multipleLogo !: boolean
   @Prop({ required: false }) readonly logosLimit !: number
   @Prop({ required: false }) readonly productColors !: [Record<string, any>];
   @Prop({ required: true, default: 10 }) readonly measurementRatio!: number;
@@ -266,8 +265,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private frontTexture !: any
   private backTexture !: any
   private default_view_port: number[]
-  private clip_path_front !: fabric.Group
-  private clip_path_back !: fabric.Group
+  private front_safe_zone: fabric.Image[] = []
+  private back_safe_zone: fabric.Image[] = []
+  private front_boundary: fabric.Image[] = []
+  private back_boundary: fabric.Image[] = []
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private custom_logo_objects: any[] = []
   private mounted = false
@@ -905,7 +906,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         canvas.requestRenderAll()
 
         if(side == 'front') {
-          this.addClipPath(ImageData.safe_zone_url, side)
+          this.addBoundary([ImageData.safe_zone_url, ImageData.boundary_url], side)
         }
         if (!this.back || (this.back && side == 'back')) {
           if(this.mainPreview) {
@@ -925,7 +926,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             })
           }
 
-          this.addClipPath(ImageData.safe_zone_url, side).then(() => {
+          this.addBoundary([ImageData.safe_zone_url, ImageData.boundary_url], side).then(() => {
             let logos: Record<any, any>[] = []
             if (this.custom_logos && this.logoAllowed) {
               let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
@@ -984,6 +985,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           this.drawLines = false
           this.addToOtherSide(e.target, side)
+          this.applyClipPath(e.target, side)
           this.hideLockerProductUpdateButton()
         })
 
@@ -1082,6 +1084,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             this.addGuideLine(e, canvas, vertical_line, horizontal_line, relativeWidth, relativeHeight)
             this.addGuideForMultipleObjects(canvas, e.target)
           }
+          this.applyClipPath(e.target, side)
         })
 
         canvas.on('object:scaling', (e: Record<any, any>) => {
@@ -1713,7 +1716,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             otherSideObjects[add_index] = objectAdd
           }
           if (side == 'back') {
-            objectAdd.clipPath = this.clip_path_front
+            // objectAdd.clipPath = this.clip_path_front
             this.frontCanvas.add(objectAdd)
             if (this.productType == 'customized') {
               this.front_models.forEach((model: fabric.Image) => {
@@ -1723,7 +1726,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             this.frontCanvas.requestRenderAll()
           } else {
             if (this.back) {
-              objectAdd.clipPath = this.clip_path_back
+              // objectAdd.clipPath = this.clip_path_back
               this.backCanvas.add(objectAdd)
               if (this.productType == 'customized') {
                 this.back_models.forEach((model: fabric.Image) => {
@@ -1845,47 +1848,160 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     })
   }
 
-  public addClipPath(url: string, side: string) {
+  public addBoundary(boundary_images: string[], side: string) {
     return new Promise((resolve, reject) => {
-      if(url) {
-        fabric.loadSVGFromURL(url, (objects: any, options: any) => {
-          options.crossOrigin = 'Anonymous'
-          const img = fabric.util.groupSVGElements(objects) as fabric.Group
-
-          this.frontCanvas.viewportCenterObject(img)
-
-          let texture = this.frontTexture
-          if (side == 'back') {
-            texture = this.backTexture
-          }
-          img.set({
-            scaleX: texture.scaleX,
-            scaleY: texture.scaleY,
-            hasControls: false,
-            selectable: false,
-            evented: false,
-            lockMovementX: true,
-            lockMovementY: true,
-            absolutePositioned: true
-          })
-
-          img.center().setCoords();
-
-          img.inverted = true
-
-          if (side == 'back') {
-            this.clip_path_back = img
-          } else {
-            this.clip_path_front = img
-          }
-
-
-          resolve('done')
-        })
-      } else {
-        resolve('done')
+      let canvas = this.frontCanvas
+      let texture = this.frontTexture
+      if(side == 'back') {
+        canvas = this.backCanvas
+        texture = this.backTexture
       }
+      boundary_images.forEach((url: string, index: number) => {
+        if(url) {
+          fabric.loadSVGFromURL(url, (img: any, options: any) => {
+            options.crossOrigin = 'Anonymous'
+
+            const boundaries_clip = fabric.util.groupSVGElements(img) as fabric.Group
+            canvas.viewportCenterObject(boundaries_clip)
+            boundaries_clip.set({
+              scaleX: texture.scaleX,
+              scaleY: texture.scaleY,
+              hasControls: false,
+              selectable: false,
+              evented: false,
+              lockMovementX: true,
+              lockMovementY: true,
+              absolutePositioned: true,
+              inverted: true,
+            })
+
+            boundaries_clip.center().setCoords();
+
+            if(!index) { // as the first index is always safe zone
+              if (side == 'back') {
+                this.back_safe_zone = boundaries_clip._objects as fabric.Image[]
+              } else {
+                this.front_safe_zone = boundaries_clip._objects as fabric.Image[]
+              }
+            } else {
+              if (side == 'back') {
+                this.back_boundary = boundaries_clip._objects as fabric.Image[]
+              } else {
+                this.front_boundary = boundaries_clip._objects as fabric.Image[]
+              }
+            }
+
+            if(!boundary_images[1] || (boundary_images[1] && index == 1)) {
+              resolve('done')
+            }
+          })
+        } else {
+          if(!boundary_images[1] || (boundary_images[1] && index == 1)) {
+            resolve('done')
+          }
+        }
+      })
     })
+  }
+
+  public async applyClipPath(logo_or_text: fabric.Image|fabric.Group, side: string) {
+    let boundaries = this.front_boundary
+    let safe_zone = this.front_safe_zone
+    let canvas = this.frontCanvas
+    let texture = this.frontTexture
+    let zoom_point = this.front_zoom_point
+    if(side == 'back') {
+      boundaries = this.back_boundary
+      safe_zone = this.back_safe_zone
+      canvas = this.backCanvas
+      texture = this.backTexture
+      zoom_point = this.back_zoom_point
+    }
+
+    let apply_boundary: fabric.Image[] = [];
+    if(safe_zone) {
+      apply_boundary.push(...safe_zone)
+    }
+
+    let zoom = canvas.getZoom();
+    if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+      canvas.zoomToPoint({
+        x: zoom_point.x,
+        y: zoom_point.y
+      }, 1);
+    }
+
+    if(boundaries) {
+      const checkPointX = logo_or_text.left as number
+      const checkPointY = logo_or_text.top as number
+
+      const boundaries_clip = fabric.util.groupSVGElements(boundaries) as fabric.Group
+      canvas.viewportCenterObject(boundaries_clip)
+      boundaries_clip.set({
+        scaleX: texture.scaleX,
+        scaleY: texture.scaleY,
+        hasControls: false,
+        selectable: false,
+        evented: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        absolutePositioned: true,
+        inverted: true,
+      })
+
+      boundaries_clip.center().setCoords();
+
+      const clipped_parts = this.findClippedParts(boundaries_clip._objects as fabric.Image[], canvas, checkPointX, checkPointY);
+      apply_boundary.push(...clipped_parts)
+    }
+
+    if(apply_boundary) {
+      const clip = fabric.util.groupSVGElements(apply_boundary) as fabric.Group
+      canvas.viewportCenterObject(clip)
+      clip.set({
+        scaleX: texture.scaleX,
+        scaleY: texture.scaleY,
+        hasControls: false,
+        selectable: false,
+        evented: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        absolutePositioned: true,
+        inverted: true,
+      })
+
+      clip.center().setCoords();
+      logo_or_text.clipPath = clip
+
+      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+        canvas.zoomToPoint({
+          x: zoom_point.x,
+          y: zoom_point.y
+        }, zoom);
+      }
+    }
+  }
+
+  private findClippedParts(boundaries: fabric.Image[], canvas: fabric.Canvas, checkPointX: number, checkPointY: number, max_call = 60) {
+    let apply_boundary: fabric.Image[] = []
+    let found_excluded = false
+    boundaries.forEach((boundary: fabric.Image) => {
+      if (found_excluded || canvas.isTargetTransparent(boundary, checkPointX, checkPointY)) {
+        apply_boundary.push(boundary);
+      } else {
+        found_excluded = true
+      }
+    });
+    if(!found_excluded && max_call) { // at least one part must fonde as excluded where logo or text should show otherwise call findClippedParts function again with change of x point
+      if(checkPointX < this.canvasWidth/2) {
+        checkPointX++
+      } else {
+        checkPointX--
+      }
+      apply_boundary = this.findClippedParts(boundaries, canvas, checkPointX, checkPointY, --max_call)
+    }
+
+    return apply_boundary;
   }
 
   public addSvgLogos(logo: Record<any, any>) {
@@ -1981,12 +2097,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             type: "logo",
           })
 
-          if(logo.side == 'back') {
-            img.clipPath = this.clip_path_back
-          } else {
-            img.clipPath = this.clip_path_front
-          }
-
           if (logo.scaleX && logo.scaleY) {
             img.scaleX = this.canvasWidth / this.mainCanvasWidth * logo.scaleX
             img.scaleY = this.canvasHeight / this.mainCanvasHeight * logo.scaleY
@@ -2012,6 +2122,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             mt: false,
             mtr: false
           })
+
+          await this.applyClipPath(img, logo.side);
 
           Object.assign(img, {
             logo_index: logo.logo_index,
@@ -2272,11 +2384,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     text_index: custom_text_index,
                     manually_added: custom_text.manually_added
                   })
-                  if(custom_text_item.placement == 'Back' && self.backCanvas) {
-                    fabric_text.clipPath = this.clip_path_back
-                  } else {
-                    fabric_text.clipPath = this.clip_path_front
-                  }
+                  // if(custom_text_item.placement == 'Back' && self.backCanvas) {
+                  //   fabric_text.clipPath = this.clip_path_back
+                  // } else {
+                  //   fabric_text.clipPath = this.clip_path_front
+                  // }
+                  this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
 
                   if (custom_text_item.scaleX && custom_text_item.scaleY) {
                     fabric_text.scaleX = custom_text_item.scaleX
@@ -2355,7 +2468,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 side: custom_text_item.placement,
                 text_index: custom_text_index,
                 manually_added: custom_text.manually_added
-              } as Record<any, any>)
+              } as fabric.TextOptions)
               fabric_text.scaleToHeight(custom_text_item.height as number)
               if (custom_text_item.scaleX && custom_text_item.scaleY) {
                 fabric_text.scaleX = custom_text_item.scaleX
@@ -2369,11 +2482,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
               self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
-              if(custom_text_item.placement == 'Back' && self.backCanvas) {
-                fabric_text.clipPath = this.clip_path_back
-              } else {
-                fabric_text.clipPath = this.clip_path_front
-              }
+              this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
 
               if (custom_text_item.placement == 'Front') {
                 self.frontCanvas.add(fabric_text)

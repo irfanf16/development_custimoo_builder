@@ -321,16 +321,17 @@
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                                  :front="{
-                                           textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                           safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                           models: selectedProduct.productstyles[styleIndex].front_models
-                                         }"
-
+                                    textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                    safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                    boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                    models: selectedProduct.productstyles[styleIndex].front_models
+                                 }"
                                  :back="{
-                                          textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
-                                          safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
-                                          models: selectedProduct.productstyles[styleIndex].back_models
-                                        }"
+                                    textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
+                                    safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                    boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
+                                    models: selectedProduct.productstyles[styleIndex].back_models
+                                 }"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
                                  :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                                  :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
@@ -340,10 +341,11 @@
 
                           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
                                  :front="{
-                                            textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                            safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                            models: selectedProduct.productstyles[styleIndex].front_models
-                                        }"
+                                    textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                    safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                    boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                    models: selectedProduct.productstyles[styleIndex].front_models
+                                 }"
                                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
                                  :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"

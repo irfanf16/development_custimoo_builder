@@ -6,9 +6,13 @@
         <a ref="products" v-on:click="productDesigns(index)" :class="{'selected_item': selectedItemIndex == index}" :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
           <template v-for="design in product.productstyles[0].productdesigns.filter(product_design => product_design.is_default)">
             <div class="image-holder" :key="'front'+design.id">
-              <Scene v-bind:multipleLogo="multipleLogo" canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio" :key="`scene${product.id}`"
-                     :front="{textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                      models: product.productstyles[0].front_models}"
+              <Scene canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio" :key="`scene${product.id}`"
+                     :front="{
+                        textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
+                        safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                        boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                        models: product.productstyles[0].front_models
+                      }"
                      :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                      :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
                      :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index" :products_fonts="products_fonts"/>
@@ -45,7 +49,6 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
-  public multipleLogo = false;
   public has_more_products = false;
   public number_of_slides = 4;
   get showLoader() {

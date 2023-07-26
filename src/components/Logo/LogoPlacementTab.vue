@@ -183,7 +183,11 @@ export default class LogoPlacementTab extends Vue {
     this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
       custom_logo.logo_index = customLogoIndex
     })
-    self.$eventBus.$emit("customLogoResetAndAdd") // as logo can be removed in between so index of logos are changed, just reset and all logos in canvas
+    if(logo_index == this.customLogos.length) {
+      await self.$eventBus.$emit("customLogoRemoved", logo_index)
+    } else {
+      self.$eventBus.$emit("customLogoResetAndAdd") // as logo is removed in between so index of logos are changed, just reset and add all logos in canvas
+    }
     this.custom_logo_tab_index = logo_index - 1
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }
