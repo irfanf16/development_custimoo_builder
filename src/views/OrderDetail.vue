@@ -420,6 +420,8 @@ import Vue from 'vue'
 import {Component, Mixins, Prop} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import $ from 'jquery'
+import ZoomOnHover from "vue-zoom-on-hover";
+Vue.use(ZoomOnHover);
 import {
   handleResponseException,
   logData,
@@ -876,14 +878,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
                 case "admin":
                   return "Merchant";
                 case "superadmin":
-                  return "Custimoo Admin";    
+                  return "Custimoo Admin";
               }
             }
           }
           else{
             return "Customer";
           }
-          
+
       }
       else{
         return "Customer"
