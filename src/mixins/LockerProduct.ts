@@ -461,7 +461,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         product_index = 0
         if(product_index >= 0) {
           model_index = findIndex(retrieved_products[product_index].productmodels,(product_model:Record<any,any>) => {
-              return product_model.id === style_id;
+              return product_model.id === model_id;
           });
           style_index = findIndex(retrieved_products[product_index].productstyles, (product_style: Record<any, any>) => {
             return product_style.id == style_id;
