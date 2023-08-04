@@ -107,17 +107,17 @@ const getClosestColor = (inputHex: string, pantonesArray: Record<any, any>[]= []
 
 }
 
-const getColorEncoding = (inputEncoding: string,colorType= 'pantone') => {
+const getColorEncoding = (inputEncoding: string, colorType= 'pantone') => {
   let colorEncoding:Record<any, any> | undefined = {pantone : null, name: null, hex: null};
   switch(colorType){
     case 'pantone-coated':
-      colorEncoding = pantonesCoated.find((color, index) => {
-        return inputEncoding == color.pantone
+      colorEncoding = pantonesCoated.find((color) => {
+        return inputEncoding.toLowerCase() == color.pantone.toLowerCase()
       });
       break;
     case 'pantone-tcx':
       colorEncoding = pantonesTcx.find((color, index) => {
-        return inputEncoding == color.pantone
+        return inputEncoding.toLowerCase() == color.pantone.toLowerCase()
       });
       break;
     case 'cmyk':
