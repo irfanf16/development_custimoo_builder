@@ -33,8 +33,8 @@
                   </div>
                   <div v-else style="opacity: 0">N /A</div>
                   <div class="image-holder" id="both-svg" style="text-align: center;">
-                    <img :src="product.product_locker_room.front_url" alt="">
-                    <img :src="product.product_locker_room.back_url" alt="">
+                    <img :src="storageUrl+product.product_locker_room.front_url+'?q='+product.product_locker_room.random_string" alt="">
+                    <img :src="storageUrl+product.product_locker_room.back_url+'?q='+product.product_locker_room.random_string" alt="">
                   </div>
 
                   <div class="pdf_description" v-if="product.product_locker_room.model_description   && product.allow_description" v-html="'<strong>Product Info: </strong>'+ product.product_locker_room.model_description.product_model_description"></div>

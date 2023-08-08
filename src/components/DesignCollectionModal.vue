@@ -245,15 +245,8 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   }
 
   get collectionItems(){
-    let main_product_id = this.$store.getters.getEditProductId;
     let items = this.$store.getters.getCollectionItems
     let collections = this.$store.getters.getCollectionItems.collection_products.map((item: Record<any, any>) => {
-        if (item.product_locker_room.id == main_product_id){
-          let random = getRandom()
-          item.product_locker_room.front_url = `${item.product_locker_room.front_url}?${random}`
-          item.product_locker_room.back_url = `${item.product_locker_room.back_url}?${random}`
-        }
-
         item.allow_title = false;
         item.allow_description = false;
         return item
@@ -262,20 +255,12 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     return items
   }
 
-  get selectionMode() {
-    return this.$store.getters.getSelectionMode
-  }
-  set collectionItems(val){
-    this.$store.commit('SET_COLLECTION_ITEMS',val)
-  }
-
   public hideCollectionModal() {
     this.hideVModal('collection-modal')
     this.$emit('showLockerRoomModal')
   }
 
   public showCollectionModal() {
-
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "collection_id", "value": 0})
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
     this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})

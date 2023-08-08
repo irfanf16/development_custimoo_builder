@@ -33,13 +33,11 @@
 <script lang="ts">
 import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import LockerRoom from '@/components/LockerRoom.vue'
-import DesignCollection from '@/components/DesignCollection.vue'
 import ModalAction from '@/mixins/ModalAction'
 
 @Component({
   components: {
-    LockerRoom,
-    DesignCollection,
+    LockerRoom
   }
 })
 export default class LockerRoomModal extends Mixins(ModalAction){
