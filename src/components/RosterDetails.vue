@@ -473,18 +473,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     self.syncRosterWithCustomText("number", first_roster_item.number)
   }
 
-  public removeIndex(ind: number) {
-    if (this.customText.length > 0) {
-      if (this.customText[0]) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: 0, on_all: true, attribute: 'text', value: '' })
-      }
-      if (this.customText[1]) {
-        this.$store.dispatch('updateCustomTextAttribute', { index: 1, on_all: true, attribute: 'text', value: '' })
-      }
-    }
-    this.$store.dispatch('removeRoster', ind);
-  }
-
   public fontsColorsManipulation() {
     this.selectedProduct.namecolors.forEach((colors: any, key: number) => {
       let finalColor = { color_text: [] }

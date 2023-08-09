@@ -675,7 +675,7 @@ Vue.filter('formatDate', function(value:string) {
       })
       this.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
       await this.$eventBus.$on('cancelLocker', ()=>{
-        this.cancelEdit()
+        this.cancelLocker()
       })
       await this.$eventBus.$on('cancelCart', ()=>{
         this.cancelCart()
@@ -1376,12 +1376,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  private async  cancelEdit() {
+  private async cancelEdit() {
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
     const categories_promise = this.fetchCategories();
     categories_promise.then(() => {
       this.retrieveProducts();
     });
+  }
+
+  private async cancelLocker() {
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
   }
 
   public async getLockers(share_url = false, show_add_to_locker_modal = false,resolve:any = null,back_to_locker = false){
