@@ -1910,7 +1910,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let canvas = this.frontCanvas
     let texture = this.frontTexture
     let zoom_point = this.front_zoom_point
-    if(side == 'back') {
+    if(side.toLowerCase() == 'back') {
       boundaries = this.back_boundary
       safe_zone = this.back_safe_zone
       canvas = this.backCanvas
