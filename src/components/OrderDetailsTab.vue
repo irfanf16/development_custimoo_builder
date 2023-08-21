@@ -426,14 +426,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
     const product_design_id = selectedDesign[0].id;
 
-    let product_models = this.$store.getters.getProductModels;
-    let selected_model_index = this.$store.getters.getSelectedModelIndex;
-
-    let product_model_id = 0;
-    if(product_models.length > 0) {
-      const selected_model = product_models[selected_model_index];
-      product_model_id = selected_model.id;
-    }
     let form_data = new FormData();
     if(self.production_file_obj.url) {
       form_data.append('production_cutting_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "production_cutting_file.svg", {
@@ -443,7 +435,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     form_data.append("product_id", product_id);
     form_data.append("product_style_id", product_style_id);
     form_data.append("product_design_id", product_design_id);
-    form_data.append("product_model_id", product_model_id.toString());
     let order_detail = await self.getOrderDetail();
     this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
     this.canvasImage.scene.backCanvas?.discardActiveObject().renderAll()

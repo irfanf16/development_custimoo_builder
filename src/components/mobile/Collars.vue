@@ -1,26 +1,11 @@
 <template>
-  <div :class="{'single-model-mobile': productModels.length === 1}">
-    <div class="font-weight-bold fs-2 title">Choose Product</div>
-    <div class="fade-right products">
-      <div class="d-flex align-items-center gap-1 pt-1 pb-2 hide-scroll" v-if="productModels" style="overflow-x: auto;">
-        <label class="button_radio" v-for="(item, index) in productModels" :key="index" :class="{'mr-4': index == (productModels.length)-1}">
-          <input checked type="radio" name="style" />
-          <span>
-              <BIconCheckCircleFill />
-              <span>{{ item.model_name }}</span>
-            </span>
-        </label>
-      </div>
-    </div>
-
+  <div>
     <div>
-      <template>
         <div>
-          <div><span class="font-weight-bold fs-2">{{ productModels[currentStyle].model_name }}</span> <span class="read_more" @click="toggle_read(currentStyle)" :data-index="currentStyle"><BIconChevronDown /></span></div>
-          <div style="display: none" v-html="productModels[currentStyle].product_model_description">
+          <div><span class="font-weight-bold fs-2">{{ selectedProduct.display_name }}</span> <span class="read_more" @click="toggle_read(currentStyle)" :data-index="currentStyle"><BIconChevronDown /></span></div>
+          <div style="display: none" v-html="sku_information.description">
           </div>
         </div>
-      </template>
     </div>
 
     <div class="choose-collar mb-3">
@@ -31,7 +16,7 @@
         <div class="collar-designs">
           <template v-for="(style, i) in selectedProduct.productstyles">
             <template v-if="selectedProduct.productstyles.length > 1">
-              <b-button :key="i"  v-if="productModels[currentStyle].model_styles.includes(style.id)" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
+              <b-button :key="i" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
                 <template v-if="style.front_models.length > 0">
                   <img :src="storageUrl+style.front_models[0].file_url " height="100" />
                </template>
@@ -42,12 +27,11 @@
       </div>
     </div>
 
-    <div class="pt-1 mt-1" style="border-top: 1px solid #eee" v-if="productModels[currentStyle].addons">
+    <div class="pt-1 mt-1" style="border-top: 1px solid #eee" v-if="selectedProduct.addons">
       <div class="font-weight-bold fs-2">Choose Stuff</div>
       <div class="fade-right">
         <div class="pt-1 d-flex align-items-center gap-1 hide-scroll" style="overflow-x: auto">
-          <label v-for="(item, i) in productModels[currentStyle].addons" :key="i">
-            <img :src="storageUrl+style.front.file_url " />
+          <label v-for="(item, i) in selectedProduct.addons" :key="i">
             <input type="checkbox" name="style"/>
             <span>
               <BIconCheckCircleFill/>
@@ -68,14 +52,11 @@ import {http} from "@/httpCommon";
 import {default as $} from "jquery";
 
 @Component<Collars>({
-  mounted() {
-    console.log('productModels', this.productModels)
-  }
 })
 
 export default class Collars extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  @Prop({required: true}) productModels!: any
+  private currentStyle = 0;
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
@@ -83,25 +64,15 @@ export default class Collars extends Vue {
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex;
   }
-
-  private currentStyle = 0;
+  get sku_information(){
+    return this.$store.getters.getSkuInformation
+  }
 
   private toggle_read(index:number){
     $(`.read_more:eq(${index})`).toggleClass('flip_vertical')
     $(`.read_more:eq(${index})`).parent("div").next("div").slideToggle('fast')
   }
 
-  public selectModelStyle(modelIndex: number) {
-    this.$store.commit('SET_SELECTED_MODEL_INDEX', modelIndex)
-    for (let styleIndex = 0; styleIndex < this.selectedProduct.productstyles.length; styleIndex++) {
-      if (this.productModels[modelIndex].model_styles.includes(this.selectedProduct.productstyles[styleIndex].id)) {
-        if(styleIndex != this.styleIndex) {
-          this.changeStyleIndex(styleIndex)
-          break;
-        }
-      }
-    }
-  }
   public changeStyleIndex(i: number) {
     (this.$parent!.$parent as Record<any, any>).isFront = true
 
@@ -111,7 +82,7 @@ export default class Collars extends Vue {
     if(currentDesign.length){
       const design_name = currentDesign[0].design_name
       let designFound = false;
-      const newDesign = this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
+      this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
         if(item.design_name.toLowerCase() == design_name.toLowerCase()) {
           designFound  = true
           Vue.set(item, 'design_show', 1)
@@ -156,12 +127,6 @@ export default class Collars extends Vue {
   background: transparent;
   display: inline-block;
   box-shadow: 0px 1px 5px rgba(0,0,0,0.4);
-}
-
-.single-model-mobile{
-  .title,.products{
-    display: none;
-  }
 }
 
 .collar-designs{

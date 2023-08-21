@@ -34,7 +34,7 @@
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
       <div class="mt-2"></div>
 
-      <Collars :productModels="productModels"/>
+      <Collars/>
     </div>
     <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-show="this.$store.getters.getActiveTab === 4">
 <!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
@@ -376,17 +376,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
     this.showOtherTab = value
   }
 
-  // public setColor(color: Record<any, any>) {
-  //   this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.groupColors)), action: 'groupColor' })
-  //   this.$store.dispatch('updateGroupColors',
-  //     {
-  //       index: this.svgGroups[this.selectAccordionIndex].id,
-  //       color: color.value,
-  //       pantone: color.pantone,
-  //       name: color.name
-  //     })
-  // }
-
   private resizeTab(idx: number){
     return (e:Record<any, any>) => {
       let cursorPosition = e.changedTouches && e.changedTouches[0].clientY;
@@ -396,12 +385,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
         cursorPosition = window.screen.availHeight - 190
       }
       this.playersDataHeight = cursorPosition;
-      // if (cursorPosition < this.oldCursor) {
-      //   this.direction = "up"
-      // } else if (cursorPosition > this.oldCursor) {
-      //   this.direction = "down"
-      // }
-      // this.tabTop = cursorPosition;
       const main_doc = getDomDocument() as Record<any, any>
       let element = main_doc.querySelector('.customize_controls') as Record<any, any>;
       if(!element){
@@ -451,9 +434,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
   get getColorType(){
     return this.$store.getters.getSetting('color_type');
   }
-  // public showColor(index: number) {
-  //   this.selectAccordionIndex = index
-  // }
 
   @Watch('lockerColors', {
     deep: false
@@ -463,42 +443,18 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
     this.productColorsManipulation()
   }
 
-  // public showLoader = false
-  // @Prop({required: false, default:0}) tabIndexNew!: number
-  // @Prop({required: false, default:0}) activeTab!: number
-  // public fontOptions: Record<any, any>[] = []
-  //
-  // get manageComponents(): Record<any, any> {
-  //   return this.$store.getters.getManageComponents
-  // }
-  //
-  //
-  get productModels(): Record<any, any> {
-    return this.$store.getters.getProductModels;
-  }
-  //
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts
   }
-  //
+
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
   }
-  //
+
   get logoColors(): [] {
     return this.$store.getters.getLogosColors
   }
-  //
-  // public tabIndex = 0
-  //
-  // public productColors: any[] = []
-  // public fontsColors: any[] = []
-  // public firstColor!: Record<any, any>
-  // public secondColor!: Record<any, any>
-  //
-  // get hideTab(): Record<any, any> {
-  //   return this.$store.getters.getHideTab
-  // }
+
   get lockerColors(){
     return this.$store.getters.getLockerColors
   }

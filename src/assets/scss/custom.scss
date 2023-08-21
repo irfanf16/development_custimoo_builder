@@ -1719,17 +1719,6 @@ button {
             max-width: inherit;
         }
 
-        .only-style{
-            &>div{
-                padding: 0 !important;
-                margin: 0 !important;
-
-                .nav-tabs{
-                    display: none;
-                }
-            }
-        }
-
         .nav-tabs {
             padding: 0;
             border: none;

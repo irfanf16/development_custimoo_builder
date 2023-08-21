@@ -49,7 +49,7 @@
           </a>
 
           <div class="text-center fs-2 fw-bold toggle_pdf">
-            {{ collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.model_name : '' }}
+            {{ collectionItem.product_locker_room.display_name }}
             <a class="toggle_icon btn btn-secondary light" v-b-tooltip.hover.bottom="(collectionItem.allow_title ? 'Hide title' : 'Show title') + ' on pdf'" @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
           </div>
           <div class="mt-2 d-block gap-1">
@@ -71,10 +71,10 @@
               alt=""></div>
           </div>
 
-          <div class="mt-3 toggle_pdf" v-if="collectionItem.product_locker_room.model_description">
+          <div class="mt-3 toggle_pdf" v-if="collectionItem.product_locker_room.description">
             <div class="product-description">
               <a class="toggle_icon btn btn-secondary light" @click="clickEyeIcon('description',index)" style="cursor: default" v-b-tooltip.hover.bottom="(collectionItem.allow_description ? 'Hide description' : 'Show description') + ' on pdf'"><font-awesome-icon v-model="collectionItem.allow_description"  :icon="['fas', collectionItem.allow_description === true ? 'eye' : 'eye-slash' ]"/></a>
-              <div :class="collectionItem.allow_description ? '' : 'inactive'" v-html="collectionItem.product_locker_room.model_description ? collectionItem.product_locker_room.model_description.product_model_description: ''"></div>
+              <div :class="collectionItem.allow_description ? '' : 'inactive'" v-html="collectionItem.product_locker_room.description"></div>
             </div>
           </div>
 
@@ -257,7 +257,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
 
   public hideCollectionModal() {
     this.hideVModal('collection-modal')
-    this.$emit('showLockerRoomModal')
+    this.$emit('showLockerRoomModal', this.collectionItems.id? 1 : 0)
+    const payload = {"attribute": "locker_products", "value": []};
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
+    this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
   }
 
   public showCollectionModal() {

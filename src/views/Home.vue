@@ -143,8 +143,8 @@
                   </div>
 
                   <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute" style="left: 0; right: 0; top: 15px;" v-if="MSRP">
-                    <template v-if="MSRP.pivot.price">
-                      MSRP: {{MSRP.pivot.price + " " + MSRP.code}}
+                    <template v-if="MSRP.price">
+                      MSRP: {{MSRP.price + " " + MSRP.code}}
                     </template>
                   </div>
 
@@ -308,8 +308,8 @@
 
             <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
               <div v-if="mobileScreen && MSRP" class="w-100 fs-1 font-weight-bolder text-center">
-                <template v-if="MSRP.pivot.price">
-                  MSRP: {{MSRP.pivot.price + " " + MSRP.code}}
+                <template v-if="MSRP.price">
+                  MSRP: {{MSRP.price + " " + MSRP.code}}
                 </template>
               </div>
 
@@ -812,8 +812,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getMainTotalTabs;
   }
 
-  get modelIndex(){
-    return this.$store.getters.getSelectedModelIndex;
+  get sku_information(){
+    return this.$store.getters.getSkuInformation
   }
 
   get MSRP(){
@@ -823,14 +823,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       show_msrp = true
     }
     let msrp_currency = null;
-    if(this.selectedProduct && show_msrp && this.modelIndex > -1 && this.selectedProduct.productmodels[this.modelIndex]){
-       let skucurrency = this.selectedProduct.productmodels[this.modelIndex].sku.skucurrency;
-      if(skucurrency){
-        let currencyIndex = skucurrency.findIndex((cur)=> {
-          return cur.code.toLowerCase() === currency.id.toLowerCase();
-        });
-        msrp_currency = skucurrency[currencyIndex];
-      }
+    if(this.selectedProduct && this.sku_information){
+      msrp_currency = this.sku_information.prices[0];
     }
 
     return msrp_currency;
@@ -862,10 +856,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  private showLockerRoomModal() {
+  private showLockerRoomModal(open_locker_tab = 1) {
     this.showVModal('locker-modal');
     setTimeout(()=>{
-      console.log('locker', this.ref['lockerModal'].$refs['lockerRoom'].main_locker_tabs = 1)
+      console.log('locker', this.ref['lockerModal'].$refs['lockerRoom'].main_locker_tabs = open_locker_tab)
     }, 500)
   }
 

@@ -18,7 +18,7 @@
                      :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index" :products_fonts="products_fonts"/>
             </div>
           </template>
-          <h3 class="text-center" :title="product.product_name">{{ product.product_name }}</h3>
+          <h3 class="text-center" :title="product.product_name">{{ product.display_name }}</h3>
         </a>
       </template>
     </slither-slider>
@@ -78,24 +78,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     const response = await this.editModeConfirmation();
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
-    let model_index = this.products[index].productmodels.findIndex((product_model) => {
-      return product_model.is_default == 1;
-    });
-    if(model_index < 0){
-        model_index = 0;
-    }
-    let style_id = this.products[index].productmodels[model_index].model_style[0];
-    if(style_id && style_id > -1){
-      style_index = this.products[index].productstyles.findIndex(product_style => {
-          return product_style.id === style_id;
-      });
-      if(style_index < 0){
-        style_index = 0;
-      }
-    }
-    this.$store.dispatch("getModels", this.products[index].product_id);
-    // this.$store.commit('SET_SELECTED_MODEL_INDEX', model_index);
-    // this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+    this.$store.dispatch("getSkuInformation", this.products[index].product_id);
     this.$store.dispatch('setColorSectionVisibility')
     this.$emit('setRosterOpen', false);
     this.hideLockerProductUpdateButton()
@@ -118,7 +101,6 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     if(self.getProductEditInfoObject.type == "locker_product" && self.getProductEditInfoObject.locker_product_info.product_id != this.selectedProduct.id) {
       await this.exitFromEditMode()
     }
-    this.$store.commit('SET_SELECTED_MODEL_INDEX', model_index);
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
     this.$store.commit('SET_SETTING', factory_setting)

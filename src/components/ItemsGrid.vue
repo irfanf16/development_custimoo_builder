@@ -55,7 +55,7 @@ export default class ItemsGrid extends Vue {
 
   productDesigns(index: number) {
     this.$store.commit('CHANGE_STYLE_INDEX', 0);
-    this.$store.dispatch("getModels", this.products[index].product_id);
+    this.$store.dispatch("getSkuInformation", this.products[index].product_id);
     this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
     this.$store.dispatch('setColorSectionVisibility')
   }

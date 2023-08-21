@@ -59,16 +59,14 @@
         </b-card-header>
         <b-collapse id="accordion-3" accordion="my-accordion" role="tabpanel">
           <b-card-body class="border-top">
-            <div class="order-collar-style d-flex flex-wrap align-items-center text-left"
-                 v-for="(model, index)  in productModels" :key="index">
-              <div class="image-holder"
-                   v-if="model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
+            <div class="order-collar-style d-flex flex-wrap align-items-center text-left">
+              <div class="image-holder">
                 <template v-if="selectedProduct.productstyles[styleIndex].front_models.length > 0">
                   <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front_models[0].file_url " alt="Collar"/>
                 </template>
               </div>
               <div class="collar-details">
-                <strong>{{ model.model_name }}</strong>
+                <strong>{{ selectedProduct.display_name }}</strong>
                 <div class="d-flex flex-wrap align-items-center" v-for="(item, i) in selectedProduct.addons" :key="i">
                   <div class="category mr-3">{{ item.addon.name }}</div>
                   <div class="price">+${{ item.addon.price }}</div>
@@ -143,10 +141,6 @@ export default class OrderAccordion extends Vue {
 
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex
-  }
-
-  get productModels(): Record<any, any> {
-    return this.$store.getters.getProductModels
   }
 
 }

@@ -163,9 +163,6 @@ import { Canvas } from 'fabric/fabric-impl'
       get groupColors() : [Record<any, any>] {
         return this.$store.getters.getGroupColors
       }
-      get productModels(): Record<any, any> {
-        return this.$store.getters.getProductModels;
-      }
       get productRosterDetail(): [Record<any, any>] {
         return this.$store.getters.getProductRosters()
       }
@@ -194,7 +191,6 @@ import { Canvas } from 'fabric/fabric-impl'
       public async saveToLocker(){
         syncGroupColorsWithSvgGroups()
         this.showLoader = true
-        const modelIndex = this.$store.getters.getSelectedModelIndex
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
@@ -221,7 +217,6 @@ import { Canvas } from 'fabric/fabric-impl'
             roster_url: this.rosterUrl,
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
-            model_id: this.productModels[modelIndex].id,
             product_name: this.product_name,
             style_id: this.selectedProduct.productstyles[this.styleIndex].id,
             design_id: currentDesign[0].id,
@@ -245,7 +240,7 @@ import { Canvas } from 'fabric/fabric-impl'
 
             this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
               editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
-              locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id, model_id:locker.model_id,
+              locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id,
                 design_id: locker.design_id},
               cart_product_info: null, order_product_info: null
             })
@@ -283,7 +278,6 @@ import { Canvas } from 'fabric/fabric-impl'
         this.$store.commit('setIsShareDesign', false);
       }
       public async shareDesignUrl(product:Record<any,any>){
-        const modelIndex = this.$store.getters.getSelectedModelIndex
         const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
         })
@@ -305,7 +299,6 @@ import { Canvas } from 'fabric/fabric-impl'
             roster_url: this.rosterUrl,
             room_id: null,
             product_id: this.selectedProduct.product_id,
-            model_id: this.productModels[modelIndex].id,
             product_name: this.product_name,
             style_id: this.selectedProduct.productstyles[this.styleIndex].id,
             design_id: currentDesign[0].id,

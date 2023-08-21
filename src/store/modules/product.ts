@@ -4,13 +4,12 @@ import {Vue} from "vue-property-decorator";
 import {logoColorInfoDefaultObject} from "@/helpers/Helpers";
 const Product:Module<any, any> = {
   state:{
-    Product_Models:[],
+    sku_information: {},
     locker_products:[],
     lockers:[],
     logoColors:[],
     logoUrl:'',
     eyeIndex: 0,
-    selectedModelIndex: 0,
     initialExtractedColors:[],
     active_locker_index:0,
     main_products_info: {
@@ -27,11 +26,8 @@ const Product:Module<any, any> = {
     factory_settings:[]
   },
   getters:{
-    getProductModels(state:Record<any, any>){
-      return state.Product_Models;
-    },
-    getSelectedModelIndex(state:Record<any, any>) {
-      return state.selectedModelIndex
+    getSkuInformation(state:Record<any, any>){
+      return state.sku_information
     },
     getLockerProducts(state:Record<any, any>){
       return state.locker_products
@@ -78,13 +74,10 @@ const Product:Module<any, any> = {
     }
   },
   mutations:{
-    SET_MODELS(state:Record<any, any>, paylod:Record<any, any>){
-      state.Product_Models = paylod;
+    SET_SKU_INFORMATION(state: Record<any, any>, paylod: Record<any, any>){
+      state.sku_information = paylod;
     },
-    SET_SELECTED_MODEL_INDEX(state:Record<any, any>, selectedModelIndex: number) {
-      state.selectedModelIndex = selectedModelIndex;
-    },
-    SET_LOCKER_PRODUCTS(state:Record<any, any>, payload:Record<any, any>){
+    SET_LOCKER_PRODUCTS(state: Record<any, any>, payload: Record<any, any>){
       if(payload.locker_index >= 0) {
         Vue.set(state.locker_products[payload.locker_index], 'product', payload.products)
       } else {
@@ -154,9 +147,9 @@ const Product:Module<any, any> = {
     }
   },
   actions: {
-    async getModels({commit}, paylod:number){
-      await http.get("style/information/"+paylod).then((res:any)=>{
-        commit('SET_MODELS', res.data);
+    async getSkuInformation({commit}, product_id: number) {
+      await http.get("product-sku/information/"+product_id).then((res:any)=> {
+        commit('SET_SKU_INFORMATION', res.data);
       });
     },
     async SAVE_TO_LOCKER({commit}, payload){

@@ -70,10 +70,8 @@
         </b-card-header>
         <b-collapse id="accordion-3" accordion="my-accordion" role="tabpanel">
           <b-card-body class="border-top">
-            <div class="order-collar-style d-flex flex-wrap align-items-center text-left"
-                 v-for="(model, index)  in productModels" :key="index">
-              <div class="image-holder"
-                   v-if="selectedProduct.productstyles[styleIndex] && model.model_styles.includes(selectedProduct.productstyles[styleIndex].id)">
+            <div class="order-collar-style d-flex flex-wrap align-items-center text-left">
+              <div class="image-holder" v-if="selectedProduct.productstyles[styleIndex]">
                 <template v-if="selectedProduct.productstyles[styleIndex].front_models.length > 0">
                   <img :src="storageUrl+selectedProduct.productstyles[styleIndex].front_models[0].file_url" alt="Collar"/>
                 </template>
@@ -86,9 +84,9 @@
                 </div>
               </div>
             </div>
-            <div class="order-collar-style d-flex flex-column text-left mt-2" v-if="productModels[modelIndex]">
-              <strong style="font-weight: bold;">{{productModels[modelIndex].model_name}}</strong>
-              <div v-html="productModels[modelIndex].product_model_description" style="font-size: small;" class="my-1"></div>
+            <div class="order-collar-style d-flex flex-column text-left mt-2">
+              <strong style="font-weight: bold;">{{ selectedProduct.display_name }}</strong>
+              <div v-html="sku_information.description" style="font-size: small;" class="my-1"></div>
             </div>
           </b-card-body>
         </b-collapse>
@@ -215,13 +213,8 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal, Modal
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex
   }
-
-  get productModels(): Record<any, any> {
-    return this.$store.getters.getProductModels
-  }
-
-  get modelIndex(): Record<any,any>{
-    return this.$store.getters.getSelectedModelIndex;
+  get sku_information(){
+    return this.$store.getters.getSkuInformation
   }
 
   get vectorImageConstraint():boolean{

@@ -28,10 +28,10 @@
           </div>
         </div>
       <div class="ml-auto" :class="{'mr-2': !!(selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1) && rosterDetails && rosterDetails.length > 0)}">
-        <template v-if="parseInt(modelIndex) > -1">
-          <a v-if="productModels && productModels.length > 0 && productModels[modelIndex] && Object.prototype.hasOwnProperty.call(productModels[modelIndex],'image_url') && productModels[modelIndex].image_url" class="btn btn-secondary fs-3 btn-sm"
+        <template v-if="sku_information">
+          <a v-if="sku_information.image_url" class="btn btn-secondary fs-3 btn-sm"
              title="Size Guide"
-             :href="`${storage_url}${productModels[modelIndex].image_url}`"
+             :href="`${storage_url}${sku_information.image_url}`"
              target="_blank"
           >
             <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet">
@@ -309,12 +309,8 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getProductEditInfoObject;
   }
 
-  get productModels() {
-    return this.$store.getters.getProductModels;
-  }
-
-  get modelIndex(): Record<any,any>{
-    return this.$store.getters.getSelectedModelIndex;
+  get sku_information(){
+    return this.$store.getters.getSkuInformation
   }
 
   get vectorImageConstraint():boolean{

@@ -1434,8 +1434,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       zoom_point = this.back_zoom_point
     }
     let zoom = canvas.getZoom();
-
-    if (zoom_point != undefined && zoom_point.x && zoom_point.y) {
+    if (zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
       canvas.zoomToPoint({
         x: zoom_point.x,
         y: zoom_point.y
@@ -1556,7 +1555,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
 
       let zoom = canvas.getZoom();
-      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+      if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
         canvas.zoomToPoint({
           x: zoom_point.x,
           y: zoom_point.y
@@ -1653,7 +1652,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           addTop = target.top
         }
 
-        if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+        if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
           canvas.zoomToPoint({
             x: zoom_point.x,
             y: zoom_point.y
@@ -1738,7 +1737,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       } else {
-        if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+        if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
           canvas.zoomToPoint({
             x: zoom_point.x,
             y: zoom_point.y
@@ -1924,7 +1923,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
 
     let zoom = canvas.getZoom();
-    if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+    if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
       canvas.zoomToPoint({
         x: zoom_point.x,
         y: zoom_point.y
@@ -1973,7 +1972,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       clip.center().setCoords();
       logo_or_text.clipPath = clip
 
-      if(zoom_point != undefined && zoom_point.x && zoom_point.y) {
+      if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
         canvas.zoomToPoint({
           x: zoom_point.x,
           y: zoom_point.y
@@ -2318,8 +2317,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public async addTextsNew(custom_text_info: Record<any, any>, from_load = false) {
-    if(!this.selectedProduct.preview_custom_texts)
+    if(!this.selectedProduct.preview_custom_texts) {
       return false
+    }
     if(this.mounted || from_load) {
       const self: Record<any, any> = this
       await this.syncCustomTextsWithCustomTextsObjects()
@@ -2344,152 +2344,150 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
         if (Object.keys(custom_text).length && custom_text.value) {
           custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
-            let fabric_text: fabric.Text | fabric.Group | Record<any, any>
-            if (this.mainPreview && this.selectedProductId == this.product_id) {
-              const font = this.products_fonts[custom_text.font_family]
-              if (font) {
-                const path = font.opentype_font.getPath(custom_text.value, 0, 0, 72, {features: { liga: true, rlig: true }})
+            if ((custom_text_item.placement == 'Back' && self.backCanvas) || custom_text_item.placement == 'Front') {
+              let fabric_text: fabric.Text | fabric.Group | Record<any, any>
+              if (this.mainPreview && this.selectedProductId == this.product_id) {
+                const font = this.products_fonts[custom_text.font_family]
+                if (font) {
+                  const path = font.opentype_font.getPath(custom_text.value, 0, 0, 72, {features: { liga: true, rlig: true }})
 
-                let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
-                  '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
-                textSvg += path.toSVG()
-                textSvg += '\n</svg>'
+                  let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
+                    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
+                  textSvg += path.toSVG()
+                  textSvg += '\n</svg>'
 
-                fabric.loadSVGFromString(textSvg, (objects: any) => {
-                  fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group | Record<any, any>
-                  fabric_text.scaleToHeight(custom_text_item.height as number)
-                  fabric_text.set({
-                    left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
-                    top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-                    angle: custom_text_item.rotation < 0? 360 - custom_text_item.rotation : custom_text_item.rotation  as number,
-                    centeredScaling: true,
-                    selectable: this.canvasSelection,
-                    hasControls: true,
-                    hasBorders: false,
-                    evented: true,
-                    globalCompositeOperation: 'source-atop',
-                    fill: custom_text_item.color,
-                    stroke: custom_text_item.outline_color,
-                    strokeWidth: parseInt(custom_text_item.outline_width),
-                    paintFirst: 'stroke',
-                    lockScalingFlip: true,
-                    padding: 15,
-                    cornerSize: 30,
-                    placement: custom_text_item.placement,
-                    visible: custom_text_item.selected,
-                    custom_text_index: custom_text_index,
-                    custom_text_item_index: customTextItemIndex,
-                    type: "text",
-                    side: custom_text_item.placement,
-                    text_index: custom_text_index,
-                    manually_added: custom_text.manually_added
+                  fabric.loadSVGFromString(textSvg, (objects: any) => {
+                    fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group | Record<any, any>
+                    fabric_text.scaleToHeight(custom_text_item.height as number)
+                    fabric_text.set({
+                      left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+                      top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
+                      angle: custom_text_item.rotation < 0? 360 - custom_text_item.rotation : custom_text_item.rotation  as number,
+                      centeredScaling: true,
+                      selectable: this.canvasSelection,
+                      hasControls: true,
+                      hasBorders: false,
+                      evented: true,
+                      globalCompositeOperation: 'source-atop',
+                      fill: custom_text_item.color,
+                      stroke: custom_text_item.outline_color,
+                      strokeWidth: parseInt(custom_text_item.outline_width),
+                      paintFirst: 'stroke',
+                      lockScalingFlip: true,
+                      padding: 15,
+                      cornerSize: 30,
+                      placement: custom_text_item.placement,
+                      visible: custom_text_item.selected,
+                      custom_text_index: custom_text_index,
+                      custom_text_item_index: customTextItemIndex,
+                      type: "text",
+                      side: custom_text_item.placement,
+                      text_index: custom_text_index,
+                      manually_added: custom_text.manually_added
+                    })
+
+                    this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
+
+                    if (custom_text_item.scaleX && custom_text_item.scaleY) {
+                      fabric_text.scaleX = custom_text_item.scaleX
+                      fabric_text.scaleY = custom_text_item.scaleY
+                    } else {
+                      custom_text_item.scaleX = fabric_text.scaleX
+                      custom_text_item.scaleY = fabric_text.scaleY
+                      custom_text_item.width = fabric_text.width
+                      custom_text_item.height = fabric_text.height
+                    }
+                    if(this.product_id == this.selectedProductId) {
+                      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: this.product_custom_texts[custom_text_index].items }})
+                    }
+                    fabric_text.setControlsVisibility(fabric_control_visibility)
+                    if (!self.product_custom_text_objects[custom_text_index]) {
+                      self.product_custom_text_objects[custom_text_index] = [];
+                      self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
+                    }
+                    self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+                    if (custom_text_item.placement == 'Front') {
+                      self.frontCanvas.add(fabric_text)
+                      fabric_text.bringToFront()
+                      render_front_canvas = true
+                      fabric_text.on('selected', (e: Record<any, any>) => {
+                        this.showDimensions(e, self.dimTextFront)
+                      })
+                      self.frontCanvas.on('selection:cleared', () => {
+                        self.dimTextFront.set({
+                          visible: false
+                        })
+                      })
+                    } else {
+                      self.backCanvas.add(fabric_text)
+                      fabric_text.bringToFront()
+                      render_back_canvas = true
+                      fabric_text.on('selected', (e: Record<any, any>) => {
+                        this.showDimensions(e, self.dimTextBack)
+                      })
+                      self.backCanvas.on('selection:cleared', () => {
+                        self.dimTextBack.set({
+                          visible: false
+                        })
+                      })
+                    }
+                    this.frontCanvas.renderAll()
+                    if(this.back) {
+                      this.backCanvas.renderAll()
+                    }
+                    this.addToOtherSide(fabric_text, custom_text_item.placement, true)
                   })
-                  // if(custom_text_item.placement == 'Back' && self.backCanvas) {
-                  //   fabric_text.clipPath = this.clip_path_back
-                  // } else {
-                  //   fabric_text.clipPath = this.clip_path_front
-                  // }
+                }
+              }
+              else {
+                fabric_text = new fabric.Text(custom_text.value, {
+                  left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
+                  top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
+                  angle: custom_text_item.rotation < 0? 360 - custom_text_item.rotation : custom_text_item.rotation  as number,
+                  centeredScaling: true,
+                  selectable: this.canvasSelection,
+                  hasControls: true,
+                  hasBorders: false,
+                  evented: true,
+                  globalCompositeOperation: 'source-atop',
+                  fontFamily: custom_text_item.font_family,
+                  fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
+                  fill: custom_text_item.color,
+                  paintFirst: 'stroke',
+                  lockScalingFlip: true,
+                  padding: 15,
+                  cornerSize: 30,
+                  _fontSizeMult: .835,
+                  placement: custom_text_item.placement,
+                  visible: custom_text_item.selected,
+                  custom_text_index: custom_text_index,
+                  custom_text_item_index: customTextItemIndex,
+                  side: custom_text_item.placement,
+                  text_index: custom_text_index,
+                  manually_added: custom_text.manually_added
+                } as fabric.TextOptions)
+                fabric_text.scaleToHeight(custom_text_item.height as number)
+                if (custom_text_item.scaleX && custom_text_item.scaleY) {
+                  fabric_text.scaleX = custom_text_item.scaleX
+                  fabric_text.scaleY = custom_text_item.scaleY
+                }
+
+                fabric_text.setControlsVisibility(fabric_control_visibility)
+                if (!self.product_custom_text_objects[custom_text_index]) {
+                  self.product_custom_text_objects[custom_text_index] = [];
+                  self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
+                }
+                self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+
+                if (custom_text_item.placement == 'Front') {
+                  self.frontCanvas.add(fabric_text)
+                  render_front_canvas = true
                   this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
-
-                  if (custom_text_item.scaleX && custom_text_item.scaleY) {
-                    fabric_text.scaleX = custom_text_item.scaleX
-                    fabric_text.scaleY = custom_text_item.scaleY
-                  } else {
-                    custom_text_item.scaleX = fabric_text.scaleX
-                    custom_text_item.scaleY = fabric_text.scaleY
-                    custom_text_item.width = fabric_text.width
-                    custom_text_item.height = fabric_text.height
-                  }
-                  if(this.product_id == this.selectedProductId) {
-                    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: this.product_custom_texts[custom_text_index].items }})
-                  }
-                  fabric_text.setControlsVisibility(fabric_control_visibility)
-                  if (!self.product_custom_text_objects[custom_text_index]) {
-                    self.product_custom_text_objects[custom_text_index] = [];
-                    self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
-                  }
-                  self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-                  if (custom_text_item.placement == 'Front') {
-                    self.frontCanvas.add(fabric_text)
-                    fabric_text.bringToFront()
-                    render_front_canvas = true
-                    fabric_text.on('selected', (e: Record<any, any>) => {
-                      this.showDimensions(e, self.dimTextFront)
-                    })
-                    self.frontCanvas.on('selection:cleared', () => {
-                      self.dimTextFront.set({
-                        visible: false
-                      })
-                    })
-                  } else if (custom_text_item.placement == 'Back' && self.backCanvas) {
-                    self.backCanvas.add(fabric_text)
-                    fabric_text.bringToFront()
-                    render_back_canvas = true
-                    fabric_text.on('selected', (e: Record<any, any>) => {
-                      this.showDimensions(e, self.dimTextBack)
-                    })
-                    self.backCanvas.on('selection:cleared', () => {
-                      self.dimTextBack.set({
-                        visible: false
-                      })
-                    })
-                  }
-                  this.frontCanvas.renderAll()
-                  if(this.back) {
-                    this.backCanvas.renderAll()
-                  }
-                  this.addToOtherSide(fabric_text, custom_text_item.placement, true)
-                })
-              }
-            }
-            else {
-              fabric_text = new fabric.Text(custom_text.value, {
-                left: self.canvasWidth / self.mainCanvasWidth * custom_text_item.x_axis,
-                top: self.canvasHeight / self.mainCanvasHeight * custom_text_item.y_axis,
-                angle: custom_text_item.rotation < 0? 360 - custom_text_item.rotation : custom_text_item.rotation  as number,
-                centeredScaling: true,
-                selectable: this.canvasSelection,
-                hasControls: true,
-                hasBorders: false,
-                evented: true,
-                globalCompositeOperation: 'source-atop',
-                fontFamily: custom_text_item.font_family,
-                fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
-                fill: custom_text_item.color,
-                paintFirst: 'stroke',
-                lockScalingFlip: true,
-                padding: 15,
-                cornerSize: 30,
-                _fontSizeMult: .835,
-                placement: custom_text_item.placement,
-                visible: custom_text_item.selected,
-                custom_text_index: custom_text_index,
-                custom_text_item_index: customTextItemIndex,
-                side: custom_text_item.placement,
-                text_index: custom_text_index,
-                manually_added: custom_text.manually_added
-              } as fabric.TextOptions)
-              fabric_text.scaleToHeight(custom_text_item.height as number)
-              if (custom_text_item.scaleX && custom_text_item.scaleY) {
-                fabric_text.scaleX = custom_text_item.scaleX
-                fabric_text.scaleY = custom_text_item.scaleY
-              }
-
-              fabric_text.setControlsVisibility(fabric_control_visibility)
-              if (!self.product_custom_text_objects[custom_text_index]) {
-                self.product_custom_text_objects[custom_text_index] = [];
-                self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
-              }
-              self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-
-              this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
-
-              if (custom_text_item.placement == 'Front') {
-                self.frontCanvas.add(fabric_text)
-                render_front_canvas = true
-              } else if (custom_text_item.placement == 'Back' && self.backCanvas) {
-                self.backCanvas.add(fabric_text)
-                render_back_canvas = true
+                } else {
+                  self.backCanvas.add(fabric_text)
+                  render_back_canvas = true
+                  this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
+                }
               }
             }
           })

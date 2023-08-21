@@ -626,7 +626,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const style_index = Store.getters.getCurrentStyleIndex;
       const product_style = selected_product.productstyles[style_index];
       const productEditInfo = Store.getters.getProductEditInfoObject;
-      let product_name = selected_product.product_name
+      let product_name = selected_product.display_name
       //selected_design will always return array having single object
       const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
 
@@ -636,8 +636,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           design_name = lockerEditProduct.locker_product_name
       }
       product_name = `${product_name} - ${design_name}`;
-      const product_models = Store.getters.getProductModels;
-      const selected_model_index = Store.getters.getSelectedModelIndex;
+      const sku_information = Store.getters.getSkuInformation;
       const back_image = getImageFromCanvas('back')
       const front_image = getImageFromCanvas('front')
       const custom_logos_original = Store.getters.getCustomLogos();
@@ -658,14 +657,11 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         front_image: front_image,
         groupcolors: Store.getters.getGroupColors,
         logo_colors: Store.getters.getLogosColors,
-        model_id: product_models[selected_model_index].id,
-        model_name: product_models[selected_model_index].model_name,
-        model_description: product_models[selected_model_index].product_model_description,
-        sku_id: product_models[selected_model_index].sku_id,
-        sku_number: product_models[selected_model_index].sku_number,
-        sizechart_reference: product_models[selected_model_index].sizechart_reference,
-        minimum_order_quantity: product_models[selected_model_index].minimum_order_quantity,
-        minimum_order_quantity_type: product_models[selected_model_index].minimum_order_quantity_type,
+        model_description: sku_information.product_model_description,
+        sku_number: sku_information.sku_number,
+        sizechart_reference: sku_information.sizechart_reference,
+        minimum_order_quantity: sku_information.minimum_order_quantity,
+        minimum_order_quantity_type: sku_information.minimum_order_quantity_type,
         product_id: selected_product.product_id,
         ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
         ecommerce_variant_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_variant_id:'',
@@ -1537,7 +1533,7 @@ const authenticateUser = async (token: string) => {
 
 const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   const default_obj = {
-    category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, model_id:null, model_index: 0, style_index: 0, style_id: null,
+    category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
     roster_detail: [], products_rosters: {}
   }
@@ -1695,8 +1691,6 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
   const product_style = selected_product.productstyles[style_index];
   const design_index = findIndex(product_style.productdesigns, (design: Record<any, any>) => design.design_show == 1)
   const selected_design = product_style.productdesigns[design_index]
-  const product_models = Store.getters.getProductModels;
-  const selected_model_index = Store.getters.getSelectedModelIndex;
   const categories = Store.getters.getCategories
   let category_id = null
   let category_index = 0
@@ -1723,9 +1717,6 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
     design_index: design_index,
     design_id: selected_design.id,
     logo_colors: Store.getters.getLogosColors,
-    model_id: product_models[selected_model_index].id,
-    model_index:selected_model_index,
-    model_name: product_models[selected_model_index].model_name,
     product_id: selected_product.product_id,
     ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
     sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
@@ -2044,7 +2035,7 @@ const setKeyItemFromLocalStorage = (key,value) => {
 }
 
 const removeKeyItemFromLocalStorage = (key) => {
-  localStorage.removeItem(key) 
+  localStorage.removeItem(key)
 }
 
 

@@ -33,11 +33,11 @@
             <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
               <td>
                 <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
-                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name + '-' + factory_product.model_name }}</span>
+                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
                 </template>
                 <template v-else="">
                   <a style="cursor:pointer;color:blue;text-decoration: underline"
-                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name + '-' + factory_product.model_name }}</a>
+                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
                 </template>
               </td>
               <td>
@@ -143,7 +143,7 @@
               <template v-for="(cart_item) in cartItems">
                 <tr :key="factory_product.id" v-for="(factory_product) in filterCartItemsForMOQSummary(cart_item.factory_products)">
                   <td>
-                      <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.model_name }}</span>
+                      <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
                   </td>
                   <td>
                       <span>{{ factory_product.minimum_order_quantity == null ? "N/A" : factory_product.minimum_order_quantity }}</span>
@@ -383,7 +383,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
         editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
-          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, model_id: cart_item_product.model_id, ecommerce_cart_id, shopify_line_item
+          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item
         },
         order_product_info: null
       })

@@ -67,8 +67,7 @@
               </a>
             </template>
             <div class="collar-section p-4" v-if="hideTab.styleHide">
-              <h2 v-if="productModels.length > 1" class="fw-bold fz-18">Choose Product</h2>
-              <CollarStyle :productModels="productModels"/>
+              <CollarStyle/>
             </div>
           </b-tab>
           <b-tab>
@@ -168,10 +167,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, Custo
     return this.$store.getters.getCustomLogos()
   }
 
-  get productModels(): Record<any, any> {
-    return this.$store.getters.getProductModels;
-  }
-
   get customTexts(): [Record<any, any>] {
     return this.$store.getters.getCustomTexts()
   }
@@ -252,10 +247,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, Custo
 
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
-  }
-
-  public async getModels() {
-    await this.$store.dispatch("getModels", this.selectedProduct.product_id);
   }
 
   public setHideTab(index: string, value: boolean) {
