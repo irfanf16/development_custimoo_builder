@@ -447,6 +447,10 @@ table.order-listing{
     background: #B997C6;
     color: #fff;
   }
+  &.pending_for_factory_assignment{
+    background: #B997C6;
+    color: #fff;
+  }
   &.factory_approved{
     background: #57A2AC;
     color: #fff;

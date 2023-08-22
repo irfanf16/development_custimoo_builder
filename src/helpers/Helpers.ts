@@ -408,6 +408,7 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
 }
 
 const CustimooOrderFlowStatuses : Record<any, any> = {
+  pending_for_factory_assignment: 'Submitted for Factory Review',
   submitted_for_factory_review: 'Submitted for Factory Review',
   order_approve: 'Marked to Factory',
   order_cancel: 'Cancelled',
