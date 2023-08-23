@@ -1,5 +1,5 @@
 <template>
-  <div class="card card-body">
+  <div class="card card-body align-items-center justify-content-center" style="min-height: 85vh;">
     <div class="text-danger fs-10">
       <b-icon-exclamation-triangle></b-icon-exclamation-triangle>
     </div>

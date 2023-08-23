@@ -18,14 +18,7 @@ import CommonImportMixin from '@/mixins/CommonImportMixin.vue'
     Header,
     Navbar
   },
-  mounted(){
-    console.log(this.company)
-  },
   mixins: [CommonImportMixin],
 })
-export default class App extends Vue {
-  get company(){
-    return this.$store.getters.getCompany
-  }
-}
+export default class App extends Vue {}
 </script>

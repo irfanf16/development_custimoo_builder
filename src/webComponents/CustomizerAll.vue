@@ -2,7 +2,7 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
     <Header />
-    <Navbar />
+    <Navbar v-if="company.status" />
     <router-view/>
   </div>
 </template>
