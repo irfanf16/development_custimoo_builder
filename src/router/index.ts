@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
-import store from '@/store'
 import {persistToken,fetchCustomer,setVueVersion} from "@/helpers/Helpers";
+import {checkCompanyStatus} from '../../middleware/checkCompany'
 
 const Home = ()=> import('../views/Home.vue')
 const Addresses = ()=> import('../views/Addresses.vue')
@@ -15,6 +15,7 @@ const CollectionViewPDF = ()=> import('@/views/CollectionViewPDF.vue')
 const OrderListing = ()=> import("@/views/OrderListing.vue")
 const Dashboard = ()=> import("@/views/Dashboard.vue")
 const Thankyou = ()=> import("@/views/Thankyou.vue")
+const Deactive = ()=> import("@/views/Deactive.vue")
 
 
 Vue.use(VueRouter)
@@ -89,6 +90,11 @@ const routes: Array<RouteConfig> = [
     path:'/admin/login',
     name:'LoginAsAdmin',
     component: Home,
+  },
+  {
+    path:'/deactive',
+    name:'Deactive',
+    component: Deactive,
   }
 ]
 
@@ -97,11 +103,9 @@ const router = new VueRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-
   await setVueVersion();
   const jwtToken:string|null = persistToken(to,from);
   await fetchCustomer(jwtToken as string);
-
 
   // remove ! sign from url that cause to customizer not load on page refresh mainly on evolution
   let lastUrl = location.href;
@@ -113,7 +117,8 @@ router.beforeEach(async (to, from, next) => {
     }
   }).observe(document, {subtree: true, childList: true});
 
-  next()
+  checkCompanyStatus(to, from, next)
+  next();
 })
 
 router.afterEach((to, from) => {

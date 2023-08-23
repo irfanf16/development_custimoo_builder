@@ -145,7 +145,6 @@ Vue.use(VueGtag, {
 })
 export default class CommonImportMixin extends Vue{
   async mounted () {
-    await getCompany();
     const iframe = getCustomizerIframe()
     /*
     * this condition checks if customizer is loaded in iframe. If it's loaded inside iframe then vue router won't work
@@ -229,11 +228,14 @@ export default class CommonImportMixin extends Vue{
     };
     doc?.head.appendChild(s);
 
-
-    await getCompany().then(function (){
+    if(this.company.id){
       const current_locale = i18n.locale;
-      i18n.setLocaleMessage(current_locale, store.getters.getCompany.translations[current_locale]);
-    });
+      i18n.setLocaleMessage(current_locale, this.company.translations[current_locale]);
+    }
+  }
+
+  get company():Record<any, any> {
+    return store.getters.getCompany
   }
 
   get isCustomerAuthenticated(): boolean {

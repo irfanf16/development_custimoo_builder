@@ -442,7 +442,6 @@ import {getCompany} from "@/helpers/Helpers";
   async mounted() {
     this.activity_item_info = this.getOrderItemStatusActivityInfoDefaultObject()
     this.api_url = `${process.env.VUE_APP_API_BASE_URL}/api`
-    await getCompany();
 
     let self = this;
     let comment_id = null;

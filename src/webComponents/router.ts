@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import store from '@/store'
 import {persistToken,fetchCustomer,setVueVersion} from "@/helpers/Helpers";
+import {checkCompanyStatus} from "../../middleware/checkCompany";
 
 const Home = ()=> import('../views/Home.vue')
 const ShareRoster = ()=> import('../views/ShareRoster.vue')
@@ -56,6 +57,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }).observe(document, {subtree: true, childList: true});
 
+  checkCompanyStatus(to, from, next)
   next()
 })
 
