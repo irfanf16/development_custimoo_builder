@@ -878,6 +878,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
                   return "Merchant";
                 case "superadmin":
                   return "Custimoo Admin";
+                case "customer":
+                  return "Customer";
               }
             }
           }
