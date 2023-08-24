@@ -614,9 +614,6 @@ Vue.filter('formatDate', function(value:string) {
 
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
-    // await this.retrieveProducts()
-    await this.getFillColors()
-
 
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch("getLockers");
@@ -1315,18 +1312,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.$store.dispatch('addedToCart', false)
     }, 300)
   }
-
-  getFillColors() {
-    const url = '/product/colors?default_color=1'
-    http.get(url).then((response: any) => {
-      if (response.data.length) {
-        this.colors = JSON.parse(response.data.json_data)
-      }
-    }).catch((e: any) => {
-      console.log(e)
-    });
-  }
-
 
   async deleteCartItem(item: Record<any, any>) {
     const response = await this.ref['delete-cart-item'].showConfirm();
