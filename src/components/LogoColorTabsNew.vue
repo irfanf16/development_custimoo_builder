@@ -33,7 +33,7 @@
               <b-form-input
                 :value="activeLogoColor ? activeLogoColor.pantone : 'XX-XXXX'"
                 class="mb-2 mr-sm-2 mb-sm-0"
-                @input="changeLogoPantoneColor($event,activeLogoColor)"
+                @input="setLogoPantoneColor($event,activeLogoColor)"
                 placeholder="XX-XXXX"
               ></b-form-input>
               <div class="text-danger fs-2" v-if="pantoneMessage != ''">{{pantoneMessage}}</div>
@@ -133,7 +133,13 @@ export default class LogoColorTabsNew extends Mixins(ColorsTabMixin) {
   /*
   * methods starts
   * */
-  public updateLogoActiveColor(selected_color: Record<any, any>, emitter=null) {
+  public setLogoPantoneColor($event, color_object){
+    const logo_color = this.changeLogoPantoneColor($event, color_object);
+    if(logo_color){
+      this.updateLogoActiveColor(this.activeLogoColor, 'color-picker')
+    }
+  }
+  public updateLogoActiveColor(selected_color: Record<any, any>, emitter='') {
     let self: Record<any, any> = this;
     const selectProductPantonesList = getSelectedProductPantones()
     const color_value = emitter == 'color-picker' ? selected_color.hex : selected_color.value

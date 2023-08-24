@@ -68,7 +68,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
   }
 
   public selectLogoColor(logo_color?: Record<any, any>, logo_color_index?: number) {
-    console.log('asd', typeof logo_color_index, logo_color_index)
     if(this.active_logo_color_index == logo_color_index) {
       this.active_logo_color_index = -1
     }

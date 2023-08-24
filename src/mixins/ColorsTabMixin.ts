@@ -117,9 +117,11 @@ export default class ColorsTabMixin extends Vue{
       color_object.name = pantoneColor?.name;
       color_object.pantone = pantoneColor?.pantone;
       this.pantoneMessage = ''
+      return true
     }
     else {
       this.pantoneMessage = 'Color is not in the list.'
+      return false
     }
   }
 
