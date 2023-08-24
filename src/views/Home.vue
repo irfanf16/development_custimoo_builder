@@ -817,13 +817,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get MSRP(){
-    let currency = this.$store.getters.getSetting('currency');
+    let currency = this.$store.getters.getSetting('currencies');
     let show_msrp = false
     if(currency && currency.visible) {
       show_msrp = true
     }
     let msrp_currency = null;
-    if(this.selectedProduct && this.sku_information){
+    if(show_msrp && this.selectedProduct && this.sku_information){
       msrp_currency = this.sku_information.prices[0];
     }
 
