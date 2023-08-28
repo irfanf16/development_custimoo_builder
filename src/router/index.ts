@@ -117,7 +117,7 @@ router.beforeEach(async (to, from, next) => {
     }
   }).observe(document, {subtree: true, childList: true});
 
-  checkCompanyStatus(to, from, next)
+  await checkCompanyStatus(to, from, next)
   next();
 })
 
