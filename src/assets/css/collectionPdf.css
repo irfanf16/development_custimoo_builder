@@ -393,13 +393,14 @@ img{
 
 .pdf_cover .pdf_collection h1{
     color: #fff;
+    width: 100% !important;
+    text-align: center !important;
     text-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 .pdf_page{
     background-size: cover !important;
     width: 100%;
-    min-height: 100vh;
     /*page-break-after: always !important;*/
     page-break-inside: avoid !important;
     page-break-after: avoid !important;
@@ -419,7 +420,7 @@ img{
 }
 
 .pdf_page .print-table tr:first-child td{
-    padding-bottom: 0.3in;
+    padding-bottom: 0.01in;
 }
 .pdf_page .print-table tr,
 .pdf_page .print-table td{
@@ -448,6 +449,11 @@ img{
     border: 1px solid #999;
     text-align: left;
     margin-top: 0.1in;
+}
+.pdf_page .pdf_description,
+.pdf_page .pdf_price,
+.pdf_page .pdf_description strong,
+.pdf_page .pdf_price strong{
     color: #333;
 }
 
@@ -482,7 +488,7 @@ img{
     position: absolute;
 }
 .images-holder{
-    margin-top: 0.3in;
+    margin-top: 0.01in;
     width: 100%;
     table-layout: fixed;
 }
@@ -499,14 +505,31 @@ img{
     padding: 0;
     height: 40px;
     width: 40px;
+    max-width: 40px;
     align-items: center;
     justify-content: center;
     display: flex;
-    position: fixed;
+    align-items: center;
+    justify-content: start;
+    overflow: hidden;
+    padding: 0 9px;
+    gap: 10px;
+    position: absolute;
     right: 20px;
     top: 20px;
     z-index: 100;
+    border-radius: 40px;
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.download-pdf span{
+    white-space: nowrap;
+}
+
+.download-pdf:hover{
+    width: auto;
+    max-width: 300px;
+    padding: 0 12px;
 }
 
 .download-design > a{
@@ -548,14 +571,14 @@ img{
 }
 
 .collection_logos > div{
-    background: #fff;
     padding: 15px;
-    border: 1px solid var(--theme-color)
+    max-width: min(290px, 25%);
+    max-height: min(290px, 25%);
 }
 
 .collection_logos > div > img{
     width: auto;
     height: auto;
-    max-width: 150px;
-    max-height: 150px;
+    max-height: 100%;
+    max-width: 100%;
 }
