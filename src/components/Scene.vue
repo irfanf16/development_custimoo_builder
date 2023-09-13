@@ -38,19 +38,13 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
-import { fabric } from 'fabric'
-import { getClosestColor } from '@/pantoneColor'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
+import {fabric} from 'fabric'
+import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
-import {
-  getRandom,
-  getSelectedProductPantones,
-  setLogoSettings,
-  setUndoRedoItems,
-  unitConversion
-} from '@/helpers/Helpers'
-import {find} from "lodash";
-import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
+import {getRandom, getSelectedProductPantones, setUndoRedoItems, unitConversion} from '@/helpers/Helpers'
+import {find, unset} from "lodash";
+import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
 
 @Component<Scene>({
@@ -985,7 +979,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           this.drawLines = false
           this.addToOtherSide(e.target, side)
-          this.applyClipPath(e.target, side)
           this.hideLockerProductUpdateButton()
         })
 
@@ -1736,6 +1729,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
         }
+        this.applyClipPath(otherSideObjects[add_index], side == 'back'? 'front' : 'back', target.excluded_clip_id)
       } else {
         if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
           canvas.zoomToPoint({
@@ -1903,7 +1897,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     })
   }
 
-  public async applyClipPath(logo_or_text: fabric.Image|fabric.Group, side: string) {
+  public async applyClipPath(logo_or_text: fabric.Image|fabric.Group, side: string, excluded_clip_id = '') {
     let boundaries = this.front_boundary
     let safe_zone = this.front_safe_zone
     let canvas = this.frontCanvas
@@ -1950,7 +1944,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
       boundaries_clip.center().setCoords();
 
-      const clipped_parts = this.findClippedParts(boundaries_clip._objects as fabric.Image[], canvas, checkPointX, checkPointY);
+      let clipped_parts
+      if(excluded_clip_id) {
+        clipped_parts = boundaries_clip._objects.filter((boundary) => {
+          const boundary_id = boundary['id'].substring(0, boundary['id'].indexOf('_'))
+          return excluded_clip_id != boundary_id
+        })
+      } else {
+        clipped_parts = this.findClippedParts(logo_or_text, boundaries_clip._objects as fabric.Image[], canvas, checkPointX, checkPointY);
+      }
       apply_boundary.push(...clipped_parts)
     }
 
@@ -1981,13 +1983,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  private findClippedParts(boundaries: fabric.Image[], canvas: fabric.Canvas, checkPointX: number, checkPointY: number, max_call = 60) {
+  private findClippedParts(logo_or_text: fabric.Image|fabric.Group, boundaries: fabric.Image[], canvas: fabric.Canvas, checkPointX: number, checkPointY: number, max_call = 60) {
     let apply_boundary: fabric.Image[] = []
     let found_excluded = false
     boundaries.forEach((boundary: fabric.Image) => {
       if (found_excluded || canvas.isTargetTransparent(boundary, checkPointX, checkPointY)) {
         apply_boundary.push(boundary);
       } else {
+        Vue.set(logo_or_text, 'excluded_clip_id', boundary['id'].substring(0, boundary['id'].indexOf('_')))
         found_excluded = true
       }
     });
@@ -1997,7 +2000,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       } else {
         checkPointX--
       }
-      apply_boundary = this.findClippedParts(boundaries, canvas, checkPointX, checkPointY, --max_call)
+      apply_boundary = this.findClippedParts(logo_or_text, boundaries, canvas, checkPointX, checkPointY, --max_call)
     }
 
     return apply_boundary;
