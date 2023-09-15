@@ -1465,6 +1465,7 @@ const unitConversion = (value:number) => {
       }
     }
   }
+  return {value: '0', unit: ''};
 }
 
 const transformUnit = (dimension_px:number,unit_value:string) => {

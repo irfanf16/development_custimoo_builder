@@ -2238,6 +2238,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (width != 0 || height != 0) {
       const converted_width = unitConversion(width)
       const converted_height = unitConversion(height)
+      if(object.type == 'text') {
+        const stroke_width = object.strokeWidth * object.scaleX * this.measurementRatio
+        converted_width.value = (parseFloat(converted_width.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
+        converted_height.value = (parseFloat(converted_height.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
+      }
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
