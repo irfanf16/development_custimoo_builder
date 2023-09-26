@@ -852,13 +852,13 @@ const ProductAttributes:Module<any, any> = {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customLogos)), action: 'customLogos'});
           state.customLogos = lastUndo.data
           if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
-            state.redoItems.shift(); 
+            state.redoItems.shift();
           }
         } else if (lastUndo.action == 'defaultColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.defaultColors)), action: 'defaultColor'})
           state.defaultColors = lastUndo.data
           if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
-            state.redoItems.shift(); 
+            state.redoItems.shift();
           }
         } else if (lastUndo.action == 'groupColor') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.groupColors)), action: 'groupColor'})
@@ -868,14 +868,14 @@ const ProductAttributes:Module<any, any> = {
             state.groupColors = lastUndo.data
           }
           if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
-            state.redoItems.shift(); 
+            state.redoItems.shift();
           }
 
         } else if (lastUndo.action == 'customTexts') {
           state.redoItems.push({ data: JSON.parse(JSON.stringify(state.customTexts)), action: 'customTexts'})
           state.customTexts = lastUndo.data
           if (state.redoItems.length > MAX_UNDO_REDO_ITEMS) {
-            state.redoItems.shift(); 
+            state.redoItems.shift();
           }
         }
       }
@@ -1107,11 +1107,11 @@ const ProductAttributes:Module<any, any> = {
         const products_rosters: Record<any, any> = {}
         if(state.products.length > 0) {
           const last_products_rosters = state.last_active_product_data.products_rosters
-          const default_roster_item = rosterDefaultItem()
           state.products.forEach((product: Record<any, any>) => {
             if(last_products_rosters && last_products_rosters[product.id]) {
               products_rosters[product.id] = last_products_rosters[product.id]
             } else {
+              const default_roster_item = rosterDefaultItem()
               const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
               const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
               products_rosters[product.id] = [roster_item]
