@@ -25,17 +25,18 @@
 
     <div class="modal-body">
       <div class="d-flex flex-row-reverse">
-        <div class="position-relative pl-4 ml-4" style="border-left: 1px solid #eee; min-width: 160px;">
+        <div class="position-relative pl-4 ml-4" style="border-left: 1px solid #eee; flex-basis: 20%; min-width: 160px; flex-grow: 0">
+          <h2 class="fs-2 mb-2 font-weight-bolder">Upload Collection Logos</h2>
           <template v-for="(collection_logo, clIdx) in collection_logos">
             <div class="text-left" :key="`collection-logo-uploader-${clIdx}`" :class="{'mt-3': clIdx > 0}">
-            <div class="fs-2 mb-2 font-weight-bolder">Upload Logo {{ clIdx + 1 }}</div>
-            <CollectionLogoUploader :key="clIdx" :collection_logo="collection_logo" :collection_id="collectionItems.id"
-                                    @logo-deleted="handleLogoDeleteEvent"/>
-          </div>
+              <div class="fs-2 mb-0">Logo {{ clIdx + 1 }}</div>
+              <CollectionLogoUploader :key="clIdx" :logoIndex="clIdx" :collection_logo="collection_logo" :collection_id="collectionItems.id"
+                                      @logo-deleted="handleLogoDeleteEvent" :currentUploader="currentUploader" @setCurrentUploader="setCurrentUploader"/>
+            </div>
           </template>
         </div>
 
-        <div class="design-collection-form">
+        <div class="design-collection-form" style="flex-basis: 80%">
         <div class="loader" v-if="showLoader" ><img style="width: 100px" src="@assets/images/loading.gif" /></div>
         <b-form inline>
           <b-container fluid>
@@ -50,7 +51,10 @@
 
           <div class="text-center fs-2 fw-bold toggle_pdf">
             {{ collectionItem.product_locker_room.display_name }}
-            <a class="toggle_icon btn btn-secondary light" v-b-tooltip.hover.bottom="(collectionItem.allow_title ? 'Hide title' : 'Show title') + ' on pdf'" @click="clickEyeIcon('title',index)" style="cursor: default"><font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/></a>
+            <a class="toggle_icon btn btn-secondary light" v-b-tooltip.hover.bottom="(collectionItem.allow_title ? 'Hide title' : 'Show title') + ' on pdf'"
+               @click="clickEyeIcon('title',index)" style="cursor: default">
+              <font-awesome-icon v-model="collectionItem.allow_title"  :icon="['fas', collectionItem.allow_title === true ? 'eye' : 'eye-slash' ]"/>
+            </a>
           </div>
           <div class="mt-2 d-block gap-1">
             <div>
@@ -127,6 +131,7 @@ import {getCollectionLogoDefaultObj, getRandom} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import CollectionLogoUploader from "@/components/Logo/CollectionLogoUploader.vue";
 import {forEach, findIndex} from "lodash";
+import {log} from "fabric/fabric-impl";
 
 @Component({
   components: {
@@ -150,6 +155,12 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   public deleted_logos_ids: string[] = []
   // this variable is used to maintain the collection logos state while adding more products
   public adding_more_product = false
+  public currentUploader = -1;
+
+  public setCurrentUploader(current){
+    this.currentUploader = -1
+    this.currentUploader = current
+  }
 
   public async retrievCollectionItems() {
     this.showLoader = true;
@@ -316,14 +327,23 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     this.collection_logos.forEach( collection_logo => {
       if(collection_logo.file) {
         form_data.append('collection_logos[]', collection_logo.file);
-        collection_logos_data.push({
-          'id': collection_logo.id, 'collection_id': collection_logo.collection_id, 'name': collection_logo.name,
-          'size': collection_logo.size, 'extension': collection_logo.extension, file: collection_logo.file, path: collection_logo.path,
-          'sort_order': collection_logo.sort_order})
       }
+      collection_logos_data.push({
+        'id': collection_logo.id, 'collection_id': collection_logo.collection_id, 'name': collection_logo.name,
+        'size': collection_logo.size, 'extension': collection_logo.extension, file: collection_logo.file, path: collection_logo.path,
+        'sort_order': collection_logo.sort_order, 'is_recent_logo': collection_logo.is_recent_logo})
     })
+    let collection_logos_payload:Record<any, any> = []
+    if(this.deleted_logos_ids.length){
+      collection_logos_payload = collection_logos_data.filter((item, index)=>{
+        return item.id !== this.deleted_logos_ids[index]
+      })
+    }else{
+      collection_logos_payload = collection_logos_data;
+    }
+
     if(collection_logos_data.length > 0) {
-      form_data.append('collection_logos_data', JSON.stringify(collection_logos_data))
+      form_data.append('collection_logos_data', JSON.stringify(collection_logos_payload))
     }
     // form_data.append('collection_logos', JSON.stringify(this.collection_logos))
     form_data.append('deleted_logos_ids', JSON.stringify(this.deleted_logos_ids))

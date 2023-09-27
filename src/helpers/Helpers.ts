@@ -2017,7 +2017,7 @@ const getSize = (obj): string => {
 
 const getCollectionLogoDefaultObj = (values={}): Record<any, any> => {
   const default_obj =  {
-    id: null, collection_id: null, name: null, size: null, extension: null, file: null, path: null, sort_order: 0
+    id: null, collection_id: null, name: null, size: null, extension: null, file: null, path: null, sort_order: 0, is_recent_logo: false
   }
   return {...default_obj, ...values}
 }

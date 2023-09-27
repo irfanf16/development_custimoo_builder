@@ -12,10 +12,10 @@
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('locker-modal')"><BIconX /></span>
       </div>
       <div class="modal-content lockerroom-modal">
-        <div id="modal-center-lockerroom" class="modal-body">
+        <div id="modal-center-lockerroom" class="modal-body" ref="locker-modal-body">
           <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideVModal('locker-modal')"
                       @showCollectionModal="showCollectionModal" @lockerModalOpened="lockerModalOpened"
-                      @editCollectionModal="editCollectionModal"
+                      @editCollectionModal="editCollectionModal" :lockerModalBody="$refs['locker-modal-body']"
                       />
         </div>
       </div>

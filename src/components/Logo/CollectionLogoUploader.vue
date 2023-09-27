@@ -1,38 +1,55 @@
 <template>
-  <div class="position-relative" v-if="collection_logo">
-    <div class="loader relative" v-if="show_loader">
-      <img src="@assets/images/loading.gif" style="max-width: 50%" />
-    </div>
-    <div v-if="collection_logo.path" class="position-relative">
-      <a class="btn remove position-absolute" style="right: -5px; top: 5px; padding: 0; height: 24px; width: 24px" @click="removeLogo" v-if="!show_loader">
-        <b-icon-x></b-icon-x>
-      </a>
-      <img :src="`${collection_logo.path}`" class="border" style="max-height: 130px; margin-top: 20px; object-fit: contain; width: 100%; border-radius: 7px"/>
-    </div>
-    <div style="padding-bottom: 10px" class="upload-logo-opener" v-else>
-      <div class="btn btn-secondary modal-handler">
-        <div class="upload-box position-relative" :class="{'pulse-animation': true}"
-             :style="{overflow: false ? 'visible' : 'hidden'}">
-          <div class="uploaded-logo-holder" v-if="collection_logo.path">
-            <img :src="`${storage_url}${collection_logo.path}`"/>
-          </div>
-          <div v-else>
-            <div class="icon-holder">
-              <font-awesome-icon :icon="['fas', 'image']"/>
+  <div>
+    <div class="position-relative" v-if="collection_logo">
+      <div class="loader relative" v-if="show_loader">
+        <img src="@assets/images/loading.gif" style="max-width: 50%" />
+      </div>
+      <div v-if="collection_logo.path" class="position-relative">
+        <a class="btn remove position-absolute" style="right: -5px; top: 5px; padding: 0; height: 24px; width: 24px" @click="removeLogo" v-if="!show_loader">
+          <b-icon-x></b-icon-x>
+        </a>
+        <img v-if="recent_logo_preview !==''" :src="`${recent_logo_preview}`" :alt="collection_logo.name" class="border"
+             style="max-height: 130px; border-color: #ccc; background-color: #ddd; margin-top: 20px; object-fit: contain; padding: 10px; width: 100%; border-radius: 7px"/>
+        <img v-else :src="`${collection_logo.path}`" :alt="collection_logo.name" class="border"
+             style="max-height: 130px; border-color: #ccc; background-color: #ddd; margin-top: 20px; object-fit: contain; padding: 10px; width: 100%; border-radius: 7px"/>
+      </div>
+      <div style="padding-bottom: 10px" class="upload-logo-opener" v-else>
+        <div class="btn btn-secondary modal-handler">
+          <div class="upload-box position-relative" :class="{'pulse-animation': true}"
+               :style="{overflow: false ? 'visible' : 'hidden'}">
+            <div class="uploaded-logo-holder" v-if="collection_logo.path">
+              <img :src="`${storage_url}${collection_logo.path}`"/>
             </div>
-            <slot name="upload_text">Upload Logo</slot>
+            <div v-else>
+              <div class="icon-holder">
+                <font-awesome-icon :icon="['fas', 'image']"/>
+              </div>
+              <slot name="upload_text">Upload Logo</slot>
+            </div>
+            <template>
+              <input @change="handleFileChange($event)" ref="logoUploader"
+                     type="file"
+                     name="logos"
+                     class="fileLoader">
+            </template>
           </div>
-          <template>
-            <input @change="handleFileChange($event)" ref="logoUploader"
-                   type="file"
-                   name="logos"
-                   class="fileLoader">
-          </template>
         </div>
       </div>
     </div>
-  </div>
 
+    <div class="text-right cursor-pointer" v-if="currentUploader == logoIndex" @click="$emit('setCurrentUploader', -1)">Recent Logos <b-icon-dash /></div>
+    <div class="text-right cursor-pointer" v-else @click="$emit('setCurrentUploader', logoIndex)">Recent Logos <b-icon-plus /></div>
+    <div v-if="recentLogos.length && currentUploader == logoIndex" class="grid grid-3 mt-2" style="max-width: 100%; gap: 10px">
+      <div :key="recentLogoIndex" class="h-100 w-100 d-flex align-items-center justify-content-center"
+           v-for="(recent_logo, recentLogoIndex) in recentLogos"
+           style="border: 1px solid #ccc; background-color: #ddd; padding: 5px"
+      >
+        <img @click="handleLogoChange(recent_logo)" style="height: auto; width: auto; max-width: 100%; cursor: pointer; max-height: 100%"
+             :src="storageUrl+recent_logo.logo_url+'?nocache=1'" alt="not working"
+        />
+      </div>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -51,9 +68,13 @@ import {getCollectionLogoDefaultObj} from "@/helpers/Helpers";
 export default class CollectionLogoUploader extends Mixins(ErrorMessages, ModalAction) {
   @Prop({required: true}) collection_logo!: Record<any, any>
   @Prop({required: true}) collection_id!: number
+  @Prop({required: false}) logoIndex!: number
+  @Prop({required: true}) currentUploader!: number
 
   private storage_url = process.env.VUE_APP_STORAGE_URL
   public show_loader = false
+  public recent_logo_preview = ''
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
 
   public handleFileChange(event: Event) {
     const file_input = event.target as HTMLInputElement;
@@ -76,6 +97,17 @@ export default class CollectionLogoUploader extends Mixins(ErrorMessages, ModalA
    // this.addRemoveLogo()
   }
 
+  public async handleLogoChange(recent_logo){
+    await this.removeLogo()
+    this.collection_logo.path = recent_logo.logo_url
+    this.collection_logo.extension = recent_logo.logo_url.split('.').pop()
+    this.collection_logo.name = recent_logo.logo_name
+    this.collection_logo.size = 0
+    this.collection_logo.is_recent_logo = true
+    this.collection_logo.collection_id = this.collection_id
+    this.recent_logo_preview = this.storage_url + recent_logo.logo_url
+  }
+
   public validateLogo(): boolean {
     const file_extension = this.collection_logo.file.name.split('.').pop()?.toLowerCase() as string;
     const valid_extension = ['jpg','gif','png','jpeg', 'svg'].includes(file_extension)
@@ -83,6 +115,11 @@ export default class CollectionLogoUploader extends Mixins(ErrorMessages, ModalA
       this.showError(`Can not upload load with extension ${file_extension}. Allowed extensions are (jpg, gif, png, jpeg, svg)`)
     }
     return valid_extension
+  }
+
+
+  get recentLogos() {
+    return this.$store.getters.getRecentLogos
   }
 
   public removeLogo() {
@@ -157,6 +194,7 @@ export default class CollectionLogoUploader extends Mixins(ErrorMessages, ModalA
     //overflow: hidden;
     position: relative;
     background: rgb(205, 205, 205);
+    width: 100%;
     @media only screen and (min-width: 992px) {
       //width: 64px;
       //height: 64px;

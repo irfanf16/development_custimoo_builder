@@ -298,8 +298,9 @@
                     :is-open="popperID == ('share-collection'+index)"
                     :anchor-el="$refs['share-collection'+index][0]"
                     :on-close="hidePopper"
+                    :on-create="isElementOverflowingContainer('popper-content'+index, lockerModalBody && lockerModalBody, popperID == 'share-collection'+index)"
                     class="share-tooltip">
-                    <aside :id="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                    <aside :id="'popper-content'+index" :ref="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
                       <div class="share-holder">
                         <h3>Copy link and Share</h3>
                         <div class="share-form">
@@ -455,6 +456,7 @@ import {AxiosError} from "axios";
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode) {
+  @Prop({required: true}) lockerModalBody:Record<any, any>
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private baseUrl = location.host + "/#/"
@@ -534,6 +536,29 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         }
       }, 500);
     }
+  }
+
+  public isElementOverflowingContainer(elementRef:string, container:Record<any, any>, isCurrent:boolean) {
+    setTimeout(()=>{
+      const element = this.ref[elementRef][0];
+      if(isCurrent && element && container){
+        const elementRect = element.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+
+        const isOverflowingHorizontally = elementRect.right > containerRect.right || elementRect.left < containerRect.left;
+        const isOverflowingVertically = elementRect.bottom > containerRect.bottom || elementRect.top < containerRect.top;
+
+        const overflowInfo = {
+          horizontal: isOverflowingHorizontally,
+          vertical: isOverflowingVertically,
+        };
+
+        let horizontalDifference = elementRect.right - containerRect.right + 15
+        if(overflowInfo.horizontal){
+          element.style.transform = `translateX(${horizontalDifference * -1}px)`
+        }
+      }
+    }, 10)
   }
 
   public locker_with_rosters(id:any) {
