@@ -375,7 +375,9 @@
                         </b-button>
                       </template>
                     </template>
-                    <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel" v-if="!cartLoading">Cancel</b-button>
+                    <b-button @click="cancelCart" class="mx-2 light px-5" variant="secondary" aria-label="Cancel" v-if="!cartLoading">
+                      Cancel
+                    </b-button>
                   </template>
 
                   <b-button :key="'Next'" @click="changeTabs(tabIndex+1)" class="mx-2 px-5" variant="secondary"
@@ -437,7 +439,9 @@
                      </template>
                   </template>
 
-                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'cart_product'">Cancel</b-button>
+                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'cart_product'">
+                    Cancel
+                  </b-button>
                 </div>
               </div>
             </div>
@@ -542,7 +546,7 @@ import {
   santaClone,
   getCustomizerIframe,
   getLockerColors,
-  getDomDocument, processColorsCustom
+  getDomDocument, processColorsCustom, exitFromEditMode
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1358,6 +1362,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async cancelEdit() {
+    exitFromEditMode()
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
     const categories_promise = this.fetchCategories();
     categories_promise.then(() => {
@@ -1765,7 +1770,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self: Record<any, any> = this;
     // await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
     // await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-    this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null })
+    exitFromEditMode()
     const categories_promise = this.fetchCategories();
     categories_promise.then(async (response) => {
       if(response){
