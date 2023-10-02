@@ -555,7 +555,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
         let horizontalDifference = elementRect.right - containerRect.right + 15
         if(overflowInfo.horizontal){
-          element.style.transform = `translateX(${horizontalDifference * -1}px)`
+          element.style.marginLeft = `${horizontalDifference * -1}px`
+        }else{
+          element.style.marginLeft = ''
         }
       }
     }, 10)
