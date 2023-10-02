@@ -1861,10 +1861,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       `item_id=${order_products_info_obj.item_id}`, `activity_id=${order_products_info_obj.activity_id}`,
       `style_id=${next_prev_factory_product.style_id}`,`design_id=${next_prev_factory_product.design_id}`,
       `factory_product_active_index=${factory_product_updated_index}`,'paginate=false'
-
     ];
-    console.log('query_params', query_params)
-
     await self.retrieveProducts(query_params);
   }
 

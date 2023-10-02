@@ -165,6 +165,11 @@ const fileToBase64 =  (file: any) => {
 const processColorsCustom = (colors: any, logos_count=4) => {
   const imageColors: any[] = []
   const uniqueColors: string[] = []
+  if(colors && colors.length > 0) {
+    if(colors[0] && colors[0].constructor.name == "Object") {
+      return colors
+    }
+  }
   colors.forEach((color: number[]) => {
     const hex = rgbHex(color[0], color[1], color[2])
     if ((!uniqueColors.includes(hex))) {

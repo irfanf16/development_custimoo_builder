@@ -849,6 +849,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   updateOrderProducts(order_item: Record<any, any>, order_item_status_activity: number) {
+    this.$store.dispatch('resetStore')
     const first_factory_product = order_item.factory_products[0];
     let self:Record<any, any> = this;
     let query_param_obj: Record<any, any> = {

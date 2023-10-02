@@ -260,7 +260,10 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             this.$store.commit('SET_CUSTOM_LOGOS', {
               product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
             })
-            const logo_colors = last_active_prod_data.custom_logos[0].logo_colors
+            let logo_colors = last_active_prod_data.custom_logos[0].logo_colors
+            if(logo_colors && logo_colors.length > 0) {
+              logo_colors = processColorsCustom(logo_colors)
+            }
             if(logo_colors && logo_colors.length > 0) {
               this.$store.commit('SET_LOGO_COLORS_INFO', {data: {...logoColorInfoDefaultObject(), ...{extracted_colors: logo_colors, colors: logo_colors}}})
             }

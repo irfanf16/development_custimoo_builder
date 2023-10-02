@@ -817,6 +817,7 @@ const ProductAttributes:Module<any, any> = {
 
       state.selectedIndex = 0;
       state.styleIndex = 0 ;
+      state.categories = []
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.product_custom_texts = {}
