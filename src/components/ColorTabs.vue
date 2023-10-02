@@ -138,7 +138,7 @@ export default class ColorTabs extends Mixins(ModalAction) {
     }
     else {
       this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.getGroupColors)), action: 'groupColor' })
-      this.$store.dispatch('updateGroupColors', { index: this.svgGroups[this.selectTabIndex].id, color: color.value, pantone: color.name })
+      this.$store.commit('UPDATE_GROUP_COLORS', { index: this.svgGroups[this.selectTabIndex].id, color: color.value, pantone: color.name })
     }
     if(this.modalRef){
       this.hideVModal(this.modalRef)

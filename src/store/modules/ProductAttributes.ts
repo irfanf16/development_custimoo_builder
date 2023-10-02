@@ -114,8 +114,8 @@ const ProductAttributes:Module<any, any> = {
     revertRosterBool:false,
     hideSaveLockerButton: true,
     product_custom_texts: {},
-    //could be locker_product, cart_product, order_product
-    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null},
+    //could be locker_product, cart_product, order_product, reorder_product
+    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null, reorder_product_info: null},
     last_active_product_data: {}, //it's default value is being set from Home.vue mounted method through commit 'SET_LAST_ACTIVE_PRODUCT_DATA'
     editing_roster_player_index: 0,
     selectedCategories:[],
@@ -137,7 +137,7 @@ const ProductAttributes:Module<any, any> = {
       extracted_colors: [],
       colors: []
     },
-    updating_logo: false
+    updating_logo: false,
   },
   mutations: {
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
@@ -705,15 +705,18 @@ const ProductAttributes:Module<any, any> = {
       state.products.push(payload);
     },
     OVERRIDE_LOGOS(state: Record<any, any>, payload) {
-      const locker_logos = JSON.parse(payload.custom_logos)
+      let custom_logos = payload.custom_logos
+      if(custom_logos && custom_logos.constructor.name == 'String') {
+        custom_logos = JSON.parse(payload.custom_logos)
+      }
       const products = state.products
       products.forEach((product: Record<any, any>) => {
         if(product.id == payload.product_id) {
-          Vue.set(state.customLogos, product.id, locker_logos)
+          Vue.set(state.customLogos, product.id, custom_logos)
         }
         else {
           const logo_setting = getLogoSettings(0,false, product.id)
-          const final_logo = {...locker_logos[0], ...logo_setting}
+          const final_logo = {...custom_logos[0], ...logo_setting}
           delete final_logo.scaleX
           delete final_logo.scaleY
           Vue.set(state.customLogos, product.id,[final_logo])
@@ -995,15 +998,6 @@ const ProductAttributes:Module<any, any> = {
       state.revertRosterBool = payload;
     },
     SET_PRODUCT_EDIT_INFO_OBJECT(state:Record<any, any>, payload) {
-      const updated_product_info_obj: Record<any, any> = {}
-      for(const [edit_info_obj_key, edit_info_obj_value] of Object.entries(state.product_edit_info_object)) {
-        if(payload[edit_info_obj_key]) {
-          updated_product_info_obj[edit_info_obj_key] =  edit_info_obj_value
-        } else {
-          updated_product_info_obj[edit_info_obj_key] =  null
-        }
-      }
-
       const updated_payload: Record<any, any> = {};
       for(const [payload_key, payload_value] of Object.entries(payload)) {
         updated_payload[payload_key] = payload_value
@@ -1040,9 +1034,6 @@ const ProductAttributes:Module<any, any> = {
       state.editing_roster_player_index = payload;
     },
     SET_PRODUCT_CUSTOM_TEXTS(state:Record<any, any>, payload) {
-      if('hey' in payload) {
-        console.log('before', payload)
-      }
       if(payload.append) {
         //in case of append payload contains the custom texts of all retrieved products. It will contain arrays custom texts of all products
         const products_custom_texts = payload.value;

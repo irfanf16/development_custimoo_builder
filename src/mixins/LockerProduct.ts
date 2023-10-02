@@ -3,9 +3,20 @@ import {Component, Mixins, Vue} from 'vue-property-decorator'
 import {findIndex} from 'lodash';
 
 import {
-  getActiveProductData, getRandom, handleResponseException, processColorsCustom,
-  setRetrievedProductsCustomTexts, resetLastActiveProductData, lastActiveProductDefaultObject,
-  initCustomLogosNew, exitFromEditMode, getUrlParameter
+  getActiveProductData,
+  getRandom,
+  handleResponseException,
+  processColorsCustom,
+  setRetrievedProductsCustomTexts,
+  resetLastActiveProductData,
+  lastActiveProductDefaultObject,
+  initCustomLogosNew,
+  exitFromEditMode,
+  getUrlParameter,
+  getReOrderInfoObject,
+  checkIsEmpty,
+  getEditModeDefaultObj,
+  getDefaultColorsObject, logoColorInfoDefaultObject
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -41,7 +52,9 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
           cart_product_info: null, order_product_info: null
         })
 
-        let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${product_id}&category_id=${selected_category.category_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product`;
+        let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}`;
+          url += `&active_product_id=${product_id}&category_id=${selected_category.category_id}&locker_product_id=${room_product_id}&active_product_type=locker_product`
+          url += `&style_id=${room_product.style_id}&design_id=${room_product.design_id}`;
         if(share_url) {
           url += `?share_url=${share_url}`;
         }
@@ -133,7 +146,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
       const categories_promise = this.fetchCategories(null,  room_product.product_id);
       categories_promise.then((response) => {
       let is_private:Boolean = this.$store.getters.getPrivateProduct;
-      let url = `list/products?private=${is_private}&active_product_id=${product_id}&active_product_child_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
+      let url = `list/products?private=${is_private}&active_product_id=${product_id}&locker_product_id=${room_product_id}&active_product_type=locker_product&single=1&collection_type=true`;
         const handle_product = new Promise((resolve, reject) => {
           http.get(url).then(async (response: Record<any, any>) => {
             let active_product_detail = response.data.editing_product_detail;
@@ -170,16 +183,176 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
   get getLastActiveProductData() {
     return this.$store.getters.getLastActiveProductData
   }
+
   public async handleMainProducts(response: Record<any, any>){
+    let self: Record<any, any> = this;
+    let product_edit_info_object = self.$store.getters.getProductEditInfoObject
+    let response_data: Record<any, any> = response.data;
+    let {
+      active_product_id, active_product_index, active_style_id, active_style_index, active_design_id, active_design_index,
+      active_product_detail, products: response_products_obj, products: { data: retrieved_products },
+      products: {next_page_url: next_page_url}, products: {current_page: current_page},
+    } = response_data;
+    let active_product: Record<any, any> = retrieved_products[active_product_index]
+    let append_products: boolean =  response_products_obj.current_page > 1;
+    this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", next_page_url ? current_page + 1 : null)
+
+    const prms = new Promise((resolve) => {
+      self.$eventBus.$emit('initProductsFonts', retrieved_products, resolve)
+    })
+    prms.then(async () => {
+      if(append_products) {
+        await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
+        this.$store.commit('SET_APPLICATION_MOUNTED')
+        return false;
+      }
+      //todo need to look in to it
+      let active_index = 0;
+
+      this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
+      await this.$store.dispatch("getSkuInformation", active_product_id);
+      await this.$store.dispatch('setSelectedIndex', {selectedIndex: active_product_index, selected_id: active_product_id});
+      this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
+      let last_active_prod_data = self.$store.getters.getLastActiveProductData;
+      if(active_product_detail) {
+        const { factory_product_active_index, factory_products } = active_product_detail
+        let active_factory_product = factory_products[factory_product_active_index]
+
+        let customLogos = self.$store.getters.getCustomLogoObject
+        if(!customLogos[active_product_id]) {
+          await this.$store.dispatch('setCustomObj', active_product_id)
+        }
+
+        this.$store.commit('RESET_CUSTOM_TEXTS')
+        this.$store.commit('RESET_CUSTOM_LOGOS')
+        this.$store.commit('RESET_ALL_COLORS')
+
+        if(product_edit_info_object.type == "order_product") {
+          let order_products = Object.assign({}, product_edit_info_object.order_product_info, { order_products: active_product_detail })
+          self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: active_product_detail })
+        }
+        let product_custom_texts: Record<any, any>[] = active_factory_product.product_custom_texts.length > 0 ? active_factory_product.product_custom_texts : active_product.product_custom_texts
+        let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail } = active_factory_product
+        let customizer_data: Record<any, any> = {
+          active_product_id: active_product_id, custom_logos:custom_logos, product_custom_texts:product_custom_texts,
+          default_colors:default_colors, group_colors:group_colors,
+        }
+        await this.setCustomizerData(customizer_data)
+        let first_factory_product: Record<any, any> = factory_products[0]
+        await this.setCustomizerData({active_product_id: active_product_id, product_roster_detail: first_factory_product.product_roster_detail})
+        this.$store.commit('RESET_UNDO');
+        this.$store.commit('RESET_REDO');
+      }
+      else {
+        if(last_active_prod_data.product_id) {
+          ({
+            product_id: active_product_id, product_index: active_product_index, style_id: active_style_id, style_index: active_style_index,
+            design_id: active_design_id, design_index: active_design_index
+          } = last_active_prod_data)
+
+          if(last_active_prod_data.custom_logos.length > 0) {
+            this.$store.commit('SET_CUSTOM_LOGOS', {
+              product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
+            })
+            const logo_colors = last_active_prod_data.custom_logos[0].logo_colors
+            if(logo_colors && logo_colors.length > 0) {
+              this.$store.commit('SET_LOGO_COLORS_INFO', {data: {...logoColorInfoDefaultObject(), ...{extracted_colors: logo_colors, colors: logo_colors}}})
+            }
+          }
+          let product_roster_detail =  last_active_prod_data.product_roster_detail
+          this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors, product_roster_detail: product_roster_detail})
+        }
+        else {
+          //todo need to update category
+          let category_index = 0
+          let category_id = null
+          if(last_active_prod_data.category_id) {
+            category_index = last_active_prod_data.category_index
+            category_id = last_active_prod_data.category_id
+          }
+          let last_active_obj_updated_values = {
+            category_index: category_index, category_id: category_id, product_index: active_product_index, product_id: active_product_id,
+            style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
+            search_products: self.search_products, customized: this.$store.getters.getCustomized,
+            personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
+            products_rosters: this.$store.getters.getProductRosters('all')
+          }
+          let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
+          self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
+          this.$store.dispatch("setProductsRosters");
+        }
+        setRetrievedProductsCustomTexts(retrieved_products)
+        await initCustomLogosNew(retrieved_products)
+
+        this.$store.dispatch('setColorSectionVisibility')
+      }
+      self.$root.$emit('sliderEvent', active_product_index);
+      active_product.productstyles[active_style_index].productdesigns.forEach((item: Record<any, any>) => {
+        if (item.id == active_design_id) {
+          Vue.set(item, 'design_show', 1)
+          this.$store.dispatch('setSelectedProductDesignID', item.id)
+        } else {
+          Vue.set(item, 'design_show', 0)
+        }
+      })
+      if(active_product.factory_id) {
+        const factory_setting = this.$store.getters.getFactorySettings(active_product.factory_id);
+        this.$store.commit('SET_SETTING', factory_setting)
+      }
+      this.$store.commit('SET_APPLICATION_MOUNTED')
+    })
+  }
+
+  public async setCustomizerData(customizer_data) {
+    let self: Record<any, any> = this;
+    let {active_product_id, custom_logos, product_custom_texts, default_colors, group_colors, product_roster_detail} = customizer_data
+    if(custom_logos && custom_logos.length > 0) {
+      await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', {product_id: active_product_id, custom_logos: custom_logos});
+      this.setProductTeamLogoColors(custom_logos)
+    }
+    if(product_custom_texts && product_custom_texts.length > 0) {
+      this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: product_custom_texts});
+      product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+        self.$eventBus.$emit("customTextUpdated", {
+          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+        });
+      })
+    }
+    let emit_color_change_event = false;
+    if(default_colors && default_colors.length > 0) {
+      emit_color_change_event = true
+      await this.$store.dispatch('overRideDefaultColors', default_colors);
+      this.$store.commit('SET_LOGO_COLORS_INFO', {
+        data: {using_logo_colors: false,  is_shuffled: false,  colors: default_colors }
+      })
+    }
+   if(group_colors && !checkIsEmpty(group_colors)) {
+     emit_color_change_event = true
+     await this.$store.dispatch('overRideGroupColors', group_colors);
+   }
+   if(emit_color_change_event) {
+     self.$eventBus.$emit("changeColors")
+   }
+   if(active_product_id) {
+     if( product_roster_detail && product_roster_detail.length > 0) {
+       this.$store.dispatch("setProductsRosters", {product_id: active_product_id, roster_data: product_roster_detail});
+     }
+   }
+  }
+
+  public async handleMainProducts_old(response: Record<any, any>){
     let self: Record<any, any> = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject
     let response_data = response.data;
     let response_products_obj = response_data.products;
     let retrieved_products = response_products_obj.data;
     let append_products =  response_products_obj.current_page > 1;
+    let reorder_info_obj = this.$store.getters.getReorderInfoObj
+    const is_reorder = reorder_info_obj.is_reorder
     if(response_products_obj.next_page_url) {
       this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", response_products_obj.current_page + 1)
-    } else {
+    }
+    else {
       this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
     }
 
@@ -200,11 +373,14 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         })
         product_edit_info_object.order_product_info = order_products
       }
-      let product_id = null;
-      let product_index = 0;
-      let style_index = 0;
-      let design_id = null;
+      let product_id = response_data.active_product_id;
+      let product_index = response_data.active_product_index;
+      let style_id = response_data.active_style_id;
+      let style_index = response_data.active_style_index;
+      let design_id = response_data.active_design_id;
+      let design_index = response_data.active_design_index;
       let editing_product_detail = response_data.editing_product_detail
+      let reorder_product_data = response_data.reorder_product_data
       let active_index = 0;
 
       /*
@@ -214,6 +390,27 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
       let is_editing = product_edit_info_object.editing /*&& response_data.active_product_index >= 0*/
       if(is_editing) {
         ({product_index, style_index, design_id, active_index} = await this.handleEditMode(retrieved_products));
+      }
+      else if(is_reorder) {
+        this.$store.commit('SET_REORDER_INFO_OBJECT', {
+          active_style_id: reorder_product_data.active_style_id, active_design_id: reorder_product_data.active_design_id,
+          reorder_product: reorder_product_data.factory_product
+        })
+        product_id =  reorder_product_data.factory_product.product_id
+        product_index =  0
+        if(product_index >= 0) {
+          style_index = findIndex(retrieved_products[product_index].productstyles,
+            (product_style: Record<any, any>): boolean => product_style.id == reorder_product_data.active_style_id
+          );
+          if(style_index < 0) {
+            console.log('style index less than 0')
+            style_index = 0
+          }
+        }
+        design_id = reorder_product_data.active_design_id;
+        /*  this.$store.commit('SET_CUSTOM_LOGOS', {
+            product_id: product_id, custom_logos: reorder_product_data.factory_product.custom_logos
+          })*/
       }
       else {
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
@@ -228,7 +425,8 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             if(product_index >= 0) {
               style_index = retrieved_products[product_index].productstyles[last_active_prod_data.style_index]? last_active_prod_data.style_index : 0;
               design_id = last_active_prod_data.design_id
-            } else {
+            }
+            else {
               product_index = 0
               style_index = 0
               let design_index = findIndex(retrieved_products[product_index].productstyles[style_index].productdesigns, (product_design: Record<any, any>) => {
@@ -246,7 +444,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             if(sync_id) {
               product_index = retrieved_products.findIndex((retrieved_product: Record<any, any>) => {
                 if(retrieved_product.ecommerceproduct.length > 0)
-                    return retrieved_product.ecommerceproduct[0].sync_id == sync_id;
+                  return retrieved_product.ecommerceproduct[0].sync_id == sync_id;
               });
               product_index = product_index >=0 ? product_index : 0;
               product_id = retrieved_products[product_index].id
@@ -282,7 +480,6 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
           }
         }
       }
-      let style_id = 0;
       if(retrieved_products[product_index].productstyles.length > 0 && retrieved_products[product_index].productstyles[style_index]){
         style_id = retrieved_products[product_index].productstyles[style_index].id;
       }
@@ -307,19 +504,20 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
 
       //If we are editing locker product then set the locker product data and return
       if(self.is_shared_product  || product_edit_info_object.type == "locker_product") {
-       if(self.is_shared_product) {
-         if(editing_product_detail.product_roster_detail) {
-           self.$store.dispatch('setProductsRosters', {product_id: editing_product_detail.product_id, roster_data: editing_product_detail.product_roster_detail })
-         } else {
-           this.$store.dispatch("setProductsRosters");
-         }
-       }
+        if(self.is_shared_product) {
+          if(editing_product_detail.product_roster_detail) {
+            self.$store.dispatch('setProductsRosters', {product_id: editing_product_detail.product_id, roster_data: editing_product_detail.product_roster_detail })
+          } else {
+            this.$store.dispatch("setProductsRosters");
+          }
+        }
         //if editing product detail not found then probably that locker product has been deleted or not found for some reason
         if(editing_product_detail) {
           await self.setLockerProductData(editing_product_detail)
           self.$eventBus.$emit("customLogoResetAndAdd")
           self.$eventBus.$emit("changeColors")
-        } else {
+        }
+        else {
           self.exitFromEditMode();
           const categories_promise = this.fetchCategories();
           categories_promise.then(  async(response) => {
@@ -347,10 +545,40 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         this.$store.commit('SET_APPLICATION_MOUNTED')
         return false;
       }
+      if(is_reorder) {
+        await this.$store.commit('RESET_CUSTOM_TEXTS')
+        await this.$store.commit('RESET_CUSTOM_LOGOS')
+        await this.$store.commit('RESET_ALL_COLORS')
+        let reordered_product =  retrieved_products[0]
+        let reordered_factory_product =  reorder_product_data.factory_product
+        this.$store.dispatch("getSkuInformation", reordered_product.id);
+        let logos = {
+          custom_logos: JSON.stringify(reordered_factory_product.custom_logos),
+          product_id: reordered_factory_product.product_id
+        }
+        let texts = {
+          text: JSON.stringify(reordered_factory_product.custom_texts),
+          product_id: reordered_factory_product.product_id
+        }
+        await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', logos);
+        this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { value: reordered_factory_product.product_custom_texts })
+        reordered_factory_product.product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+          self.$eventBus.$emit("customTextUpdated", {
+            emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+          });
+        })
+        await this.$store.dispatch('overRideDefaultColors', reordered_factory_product.defaultcolors);
+        await this.$store.dispatch('overRideGroupColors', reordered_factory_product.groupcolors);
+        self.$eventBus.$emit("changeColors")
+        this.$store.dispatch('setProductsRosters', {product_id: reordered_factory_product.product_id, roster_data: reordered_factory_product.product_roster_detail })
+      }
 
       let selected_product = this.$store.getters.getSelectedProduct;
+      let is_shareable_product = false
       await initCustomLogosNew(retrieved_products)
-      this.$store.dispatch("setProductsRosters");
+      if(!is_reorder) {
+        this.$store.dispatch("setProductsRosters");
+      }
 
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {products_rosters: this.$store.getters.getProductRosters('all')})
       let customLogos = this.$store.getters.getCustomLogoObject
@@ -360,11 +588,14 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         }
       }
       let last_active_product_data = self.$store.getters.getLastActiveProductData;
-      if(last_active_product_data.product_id){
-        await this.$store.commit('CHANGE_STYLE_INDEX', last_active_product_data.style_index);
-      }else{
-        await this.$store.commit('CHANGE_STYLE_INDEX', 0); // as default style will always come to first
+      if(!is_reorder) {
+        if(last_active_product_data.product_id){
+          await this.$store.commit('CHANGE_STYLE_INDEX', last_active_product_data.style_index);
+        }else{
+          await this.$store.commit('CHANGE_STYLE_INDEX', 0); // as default style will always come to first
+        }
       }
+
       this.$store.dispatch('setColorSectionVisibility')
       //this.$store.dispatch("getSkuInformation", selected_product.product_id);
       const factory_setting = this.$store.getters.getFactorySettings(selected_product.factory_id);
@@ -443,35 +674,33 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
       })
     })
   }
-
-  public async beforeSetDataValidateActiveProductData(retrieved_products: Record<any, any>[]) {
+  public async beforeSetDataValidateActiveProductData(response_data: Record<any, any>) {
     let self: Record<any, any> = this;
+    let retrieved_products: Record<any, any>[] = response_data.products.data
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject;
-    let product_index = -1;
-    let style_index = -1;
-    let design_id = null;
+    let active_product_id = response_data.active_product_id;
     let edit_type = product_edit_info_object.type;
     let validated = false;
     let message: string = ''
     if(product_edit_info_object.editing) {
       switch (edit_type) {
         case "locker_product":
-          product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
+         /* product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
             return retrieved_product.id == product_edit_info_object.locker_product_info.product_id
-          });
-          if(product_index < 0) {
+          });*/
+          if(product_edit_info_object.locker_product_info.product_id == active_product_id) {
+            validated = true
+          } else {
             validated = false
             message = "Can not find locker product to edit. So exiting edit mode"
             //if product not found then exit from edit mode
             self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
               editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
             })
-          } else {
-            validated = true
           }
           break;
         case "cart_product": //in case of editing cart product only one product shown
-          if(retrieved_products[0].id == product_edit_info_object.cart_product_info.cart_item_product.product_id) {
+          if(active_product_id == product_edit_info_object.cart_product_info.cart_item_product.product_id) {
             validated = true;
           } else {
             validated = false;
@@ -481,10 +710,24 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             })
           }
           break;
+          //todo need to look in to it
         case "order_product": //in case of editing order product only one product shown
           //on First time load we do not have product id that's why this check is added
           if(product_edit_info_object.cart_product_info && product_edit_info_object.cart_product_info.product_id) {
             if(retrieved_products[0].id == product_edit_info_object.cart_product_info.product_id) {
+              validated  = true
+            } else {
+              validated = false
+              message = "Can not find order product to edit. So exiting edit mode"
+            }
+          } else {
+            validated = true
+          }
+          break;
+          case "reorder_product": //in case of editing order product only one product shown
+          //on First time load we do not have product id that's why this check is added
+          if(product_edit_info_object.reorder_product_info && product_edit_info_object.cart_product_info.active_product_id) {
+            if(retrieved_products[0].id == product_edit_info_object.cart_product_info.active_product_id) {
               validated  = true
             } else {
               validated = false
@@ -504,16 +747,16 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
     else {
       let last_active_product_data = self.$store.getters.getLastActiveProductData;
       if(last_active_product_data.product_id) {
-        product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
+        /*product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
           return retrieved_product.id == last_active_product_data.product_id
-        });
-        if(product_index < 0 ) {
+        });*/
+        if(last_active_product_data.product_id == active_product_id ) {
           validated = true
+        } else {
+          validated = false
           message = "Did not find last active product data"
           //if last active product not found then reset the last active product data object
-          resetLastActiveProductData()
-        } else {
-          validated = true
+          await resetLastActiveProductData()
         }
       } else {
         validated = true
@@ -524,9 +767,9 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
       validated: validated, message: message
     }
   }
-
-  public async handleEditMode(retrieved_products: Record<any, any>[]) {
+  public async handleEditMode(response_data: Record<any, any>) {
     let self = this;
+    let retrieved_products: Record<any, any>[] = response_data.products.data
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject;
     let product_index = 0;
     let style_index = 0;
@@ -562,7 +805,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         design_id =  product_edit_info_object.cart_product_info.cart_item_product.design_id;
         break;
       case "order_product": //in case of editing order product only one product shown. So product index will always be 0
-        active_index = product_edit_info_object.order_product_info.order_products.active_index;
+        active_index = product_edit_info_object.order_product_info.order_products.factory_product_active_index;
         let order_edit_product = product_edit_info_object.order_product_info.order_products.factory_products[active_index]
         let product_roster_detail = order_edit_product.product_roster_detail;
         style_index = findIndex(retrieved_products[0].productstyles, (product_style: Record<any, any>) => {
@@ -689,6 +932,32 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
     return colors
   }
 
+ /* public async setReorderProductData(reordered_product: Record<any, any>) {
+    let reorder_info_obj = this.$store.getters.getReorderInfoObj
+    let styleIndex = 0;
+    let selected_product = self.$store.getters.getSelectedProduct;
+    styleIndex = selected_product.productstyles.findIndex((product_style)=> {
+      return product_style.id === reorder_info_obj.style_id;
+    });
+    if(styleIndex <  0){
+      styleIndex = 0;
+      console.error("Error while getting style of selected product")
+    }
+    await this.$store.commit('CHANGE_STYLE_INDEX', styleIndex);
+    await this.$store.commit('RESET_CUSTOM_TEXTS')
+    await this.$store.commit('RESET_CUSTOM_LOGOS')
+    await this.$store.commit('RESET_ALL_COLORS')
+
+    await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', reordered_product);
+
+    this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: active_product_detail.text});
+    active_product_detail.text.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+      });
+    })
+  }*/
+
   public async setLockerProductData(active_product_detail:Record<any, any>) {
     let self: Record<any, any> = this;
     let styleIndex = 0;
@@ -752,14 +1021,16 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
     }
   }
 
-  public setProductTeamLogoColors(custom_logos) {
+  public setProductTeamLogoColors(custom_logos: any) {
     const custom_logos_type = custom_logos.constructor.name
     custom_logos = custom_logos_type == 'String' ? JSON.parse(custom_logos) : custom_logos
     if(custom_logos.length > 0) {
-      let logo_colors = this.getLogoColors(custom_logos[0].logo_colors)
-      this.$store.commit('SET_LOGO_COLORS_INFO', {
-        data: { using_logo_colors: false,  is_shuffled: false,  colors: logo_colors,  extracted_colors: logo_colors }
-      })
+      if(custom_logos[0].logo_colors && custom_logos[0].logo_colors.length > 0) {
+        let logo_colors = this.getLogoColors(custom_logos[0].logo_colors)
+        this.$store.commit('SET_LOGO_COLORS_INFO', {
+          data: { using_logo_colors: false,  is_shuffled: false,  colors: logo_colors,  extracted_colors: logo_colors }
+        })
+      }
     }
   }
 
@@ -875,24 +1146,32 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
 @Component
 export class ProductsQueryParamsMixin extends Vue {
 
-  public async setQueryParams() {
+  public async setQueryParams_old() {
     let self: Record<any, any> = this;
-    let {sync_id, customizer_preview, update_cart} = self.$route.query
+    let {sync_id, update_cart, update_item} = self.$route.query
     let query_params: string[] = [];
+    let url_query_params: null | string = getUrlParameter()
     const selected_category = self.$store.getters.getSelectedCategory;
+    const route_query_object: Record<any, any> = this.$route.query
+    if(route_query_object.is_reorder) {
+      let edit_mode_default_obj = getEditModeDefaultObj()
+      edit_mode_default_obj.editing = true
+      edit_mode_default_obj.type = "reorder_product"
+      edit_mode_default_obj.reorder_product_info = {...edit_mode_default_obj.reorder_product_info, ...route_query_object}
+      this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', edit_mode_default_obj)
+    }
     if(sync_id) {
       query_params.push(`sync_id=${sync_id}`, 'paginate=false')
       query_params.push(`category_id=${selected_category.category_id}`)
       if(update_cart) {
-        query_params.push(`active_product_type=cart_product`, 'paginate=false')
+        query_params.push(`active_product_type=cart_product`, 'paginate=false', `item_id=${update_cart}`, `factory_product_id=${update_item}`)
       }
     }
     else {
-      const shared_url = getUrlParameter()
-      if (shared_url?.includes('share')) {
+      if (url_query_params?.includes('share')) {
         let selected_category = self.$store.getters.getSelectedCategory;
         query_params = [
-          `shared_url=${shared_url}`, "active_product_type=share_product", 'paginate=false'
+          `shared_url=${url_query_params}`, "active_product_type=share_product", 'paginate=false'
         ];
         if(selected_category.category_id){
           query_params.push(`category_id=${selected_category.category_id}`)
@@ -901,73 +1180,93 @@ export class ProductsQueryParamsMixin extends Vue {
         exitFromEditMode()
       }
       else {
-        //if route have update_order_product query parameter then it means the order edit product changed so we need to exit from existing edit mode and re set order edit mode
-        if(self.$route.query.update_order_product) {
+        let edit_mode_default_obj = getEditModeDefaultObj()
+
+        if(self.$route.query.active_product_type == "order_product") {
           self.exitFromEditMode()
-        }
-        //if self.getProductEditInfoObject.order_product_info is null then it means user came for order detail page and we need to set the edit order data
-        if(self.$route.query.update_order_product && self.getProductEditInfoObject.order_product_info == null) {
-          self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-            editing: true, type: "order_product", filters: null, locker_product_info: null, cart_product_info: null, order_product_info: {
-              order_item_id:  self.$route.query.order_item_id, activity_id: self.$route.query.activity_id
-            }
-          })
+          if(!self.getProductEditInfoObject.order_product_info) {
+            edit_mode_default_obj.editing = true
+            edit_mode_default_obj.type = "order_product"
+            edit_mode_default_obj.order_product_info = {...edit_mode_default_obj.order_product_info, ...route_query_object}
+            self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", edit_mode_default_obj)
+          }
         }
         if(self.getProductEditInfoObject.editing) {
           if(self.getProductEditInfoObject.type == "locker_product") {
             query_params = [
               `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
-              `private=${self.getProductEditInfoObject.filters.private_product?true:false}`,
+              `private=${self.getProductEditInfoObject.filters.private_product ? true : false}`,
               `title=${self.getProductEditInfoObject.filters.search_products}`, `active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}`,
-              `active_product_child_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
+              `style_id=${self.getProductEditInfoObject.locker_product_info.style_id}`,`design_id=${self.getProductEditInfoObject.locker_product_info.design_id}`,
+              `locker_product_id=${self.getProductEditInfoObject.locker_product_info.locker_product_id}`,
               `active_product_type=${self.getProductEditInfoObject.type}`,
               `category_id=${selected_category.category_id}`,
               'paginate=false'
             ];
           }
           else if(self.getProductEditInfoObject.type == "cart_product") {
+            let cart_product_info =self.getProductEditInfoObject.cart_product_info
+            let cart_item_factory_product = cart_product_info.cart_item_product
             query_params = [
-              `customized=${self.getProductEditInfoObject.filters.customized}`, `personalized=${self.getProductEditInfoObject.filters.personalized}`,
-              `personalized=${self.getProductEditInfoObject.filters.private_product}`,
-              `active_product_id=${self.getProductEditInfoObject.cart_product_info.cart_item_product.product_id}`,
-              `active_product_type=${self.getProductEditInfoObject.type}`,  'paginate=false'
+              `item_id=${cart_product_info.cart_item_id}`,`factory_product_id=${cart_item_factory_product.id}`,
+              `active_product_id=${cart_item_factory_product.product_id}`, `style_id=${cart_item_factory_product.style_id}`,
+              `design_id=${cart_item_factory_product.design_id}`, `active_product_type=${self.getProductEditInfoObject.type}`,
+              'paginate=false'
             ];
           }
           else if(self.getProductEditInfoObject.type == "order_product") {
             let order_product_info = self.getProductEditInfoObject.order_product_info
             query_params = [
-              `customized=${true}`, `personalized=${true}`, `order_item_id=${self.$route.query.order_item_id}`,  'paginate=false'
+              `customized=${true}`, `personalized=${true}`, `active_product_type=order_product`,
+              `item_id=${order_product_info.item_id}`,`activity_id=${order_product_info.activity_id}`, `style_id=${order_product_info.style_id}`,
+              `design_id=${order_product_info.design_id}`, 'paginate=false'
             ];
+
             if(order_product_info.order_products) {
-              let active_index = order_product_info.order_products.active_index
-              let product_id = order_product_info.order_products.factory_products[active_index].product_id;
-              query_params.push(`update_order_product_id=${product_id}`);
+              let factory_product_active_index = order_product_info.order_products.factory_product_active_index
+              let product_id = order_product_info.order_products.factory_products[factory_product_active_index].product_id;
+              query_params.push(`active_product_id=${product_id}`, `factory_product_active_index=${factory_product_active_index}`);
             } else {
-              query_params.push(`activity_id=${self.$route.query.activity_id}`, 'active_product_type=order_product')
+              query_params.push(`active_product_id=${self.$route.query.active_product_id}`, `factory_product_active_index=0`)
             }
-            if(self.$route.query.activity_id) {
-              let route_query_params = Object.assign({}, self.$route.query);
-              delete route_query_params.update_order_product;
-              delete route_query_params.activity_id;
-              self.$router.replace({ route_query_params });
-            }
+            // if(self.$route.query.activity_id) {
+            //   let route_query_params = Object.assign({}, self.$route.query);
+            //   delete route_query_params.update_order_product;
+            //   delete route_query_params.activity_id;
+            //   self.$router.replace({ route_query_params });
+            // }
+          }
+          else if(self.getProductEditInfoObject.type == "reorder_product") {
+            let reorder_product_info_obj: Record<any, any> = self.getProductEditInfoObject.reorder_product_info
+            query_params = [
+              'is_reorder=true', 'active_product_type=reorder_product', `item_id=${reorder_product_info_obj.order_item_id}`, `factory_product_id=${reorder_product_info_obj.factory_product_id}`,
+              `active_product_id=${reorder_product_info_obj.active_product_id}`,`style_id=${reorder_product_info_obj.style_id}`,
+              `design_id=${reorder_product_info_obj.design_id}`,
+            ];
           }
         }
         else {
-          query_params = [
-            `customized=${self.getLastActiveProductData.customized}`, `personalized=${self.getLastActiveProductData.personalized}`,
-            `private=${self.getLastActiveProductData.private_product}`
-          ];
-          if(self.getLastActiveProductData.product_id) {
-            query_params.push(`active_product_id=${self.getLastActiveProductData.product_id}`, 'paginate=false')
-          }
+          let last_active_product_data = self.getLastActiveProductData;
+          if(last_active_product_data.product_id) {
+            query_params.push(
+              `customized=${last_active_product_data.customized}`, `personalized=${last_active_product_data.personalized}`,
+              `private=${last_active_product_data.private_product}`, `active_product_id=${last_active_product_data.product_id}`,
+              `style_id=${last_active_product_data.style_id}`, `design_id=${last_active_product_data.design_id}`, 'paginate=false'
+            )
+            if(last_active_product_data.search_products) {
+              query_params.push(`title=${last_active_product_data.search_products}`)
+            }
 
-          if(self.getLastActiveProductData.search_products) {
-            query_params.push(`title=${self.getLastActiveProductData.search_products}`)
-          }
-
-          if(self.getLastActiveProductData.category_id) {
-            query_params.push(`category_id=${self.getLastActiveProductData.category_id}`)
+            if(last_active_product_data.category_id) {
+              query_params.push(`category_id=${last_active_product_data.category_id}`)
+            } else {
+              const categories = this.$store.getters.getCategories;
+              if(categories.length > 0) {
+                let category = categories[0]
+                query_params.push(`category_id=${category.id}`)
+                self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
+              }
+            }
           } else {
             const categories = this.$store.getters.getCategories;
             if(categories.length > 0) {
@@ -979,6 +1278,139 @@ export class ProductsQueryParamsMixin extends Vue {
         }
       }
     }
+    return query_params
+  }
+
+  public async setQueryParams() {
+    let self: Record<any, any> = this;
+    let query_params: string[] = await this.handleUrlQueryParams();
+    const selected_category = self.$store.getters.getSelectedCategory;
+    let edit_product_info_obj = self.$store.getters.getProductEditInfoObject
+    if(edit_product_info_obj.editing) {
+      const active_product_type = edit_product_info_obj.type;
+      if(active_product_type == "order_product") {
+        let {order_product_info, factory_product_active_index} = edit_product_info_obj
+        query_params.push("customized=true", "personalized=true", `active_product_type=order_product`, `item_id=${edit_product_info_obj.item_id}`,
+          `activity_id=${edit_product_info_obj.activity_id}`, `style_id=${edit_product_info_obj.style_id}`, `design_id=${edit_product_info_obj.design_id}`,
+          `factory_product_active_index=${factory_product_active_index}`, `paginate=false`)
+        if(order_product_info.factory_products.length > 0) {
+          let product_id = order_product_info.factory_products[factory_product_active_index].product_id;
+          query_params.push(`active_product_id=${product_id}`);
+        } else {
+          query_params.push(`active_product_id=${edit_product_info_obj.active_product_id}`)
+        }
+      } else if(active_product_type == "locker_product") {
+        query_params = [
+          `customized=${edit_product_info_obj.filters.customized}`, `personalized=${edit_product_info_obj.filters.personalized}`,
+          `private=${edit_product_info_obj.filters.private_product ? true : false}`,
+          `title=${edit_product_info_obj.filters.search_products}`, `active_product_id=${edit_product_info_obj.locker_product_info.product_id}`,
+          `style_id=${edit_product_info_obj.locker_product_info.style_id}`,`design_id=${edit_product_info_obj.locker_product_info.design_id}`,
+          `locker_product_id=${edit_product_info_obj.locker_product_info.locker_product_id}`, `active_product_type=${edit_product_info_obj.type}`,
+          `category_id=${selected_category.category_id}`, 'paginate=false'
+        ];
+      } else if(active_product_type == "cart_product") {
+        let cart_item_factory_product = edit_product_info_obj.cart_item_product
+        query_params = [
+          `item_id=${edit_product_info_obj.cart_item_id}`,`factory_product_id=${cart_item_factory_product.id}`,
+          `active_product_id=${cart_item_factory_product.product_id}`, `style_id=${cart_item_factory_product.style_id}`,
+          `design_id=${cart_item_factory_product.design_id}`, `active_product_type=${self.getProductEditInfoObject.type}`,
+          'paginate=false'
+        ];
+
+      } else if(active_product_type == "reorder_product") {
+        console.log('reorder_product')
+        let reorder_product_info_obj: Record<any, any> = edit_product_info_obj.reorder_product_info
+        query_params = [
+          'is_reorder=true', 'active_product_type=reorder_product', `item_id=${reorder_product_info_obj.order_item_id}`,
+          `factory_product_id=${reorder_product_info_obj.factory_product_id}`, `active_product_id=${reorder_product_info_obj.active_product_id}`,
+          `style_id=${reorder_product_info_obj.style_id}`, `design_id=${reorder_product_info_obj.design_id}`, 'paginate=false',
+        ];
+      }
+    } else {
+      console.log('elsee')
+      let last_active_product_data = self.getLastActiveProductData;
+      if(last_active_product_data.product_id) {
+        query_params.push(
+          `customized=${last_active_product_data.customized}`, `personalized=${last_active_product_data.personalized}`,
+          `private=${last_active_product_data.private_product}`, `active_product_id=${last_active_product_data.product_id}`,
+          `style_id=${last_active_product_data.style_id}`, `design_id=${last_active_product_data.design_id}`, 'paginate=false'
+        )
+        if(last_active_product_data.search_products) {
+          query_params.push(`title=${last_active_product_data.search_products}`)
+        }
+
+        if(last_active_product_data.category_id) {
+          query_params.push(`category_id=${last_active_product_data.category_id}`)
+        } else {
+          const categories = this.$store.getters.getCategories;
+          if(categories.length > 0) {
+            let category = categories[0]
+            query_params.push(`category_id=${category.id}`)
+            self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
+          }
+        }
+      } else {
+        const categories = this.$store.getters.getCategories;
+        if(categories.length > 0) {
+          let category = categories[0]
+          query_params.push(`category_id=${category.id}`)
+          self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: 0, category_id: category.id})
+        }
+      }
+    }
+    console.log('query_params22', query_params)
+    return query_params
+  }
+
+  public async handleUrlQueryParams() {
+    let self: Record<any, any> = this
+    let url_query_string: null | string = getUrlParameter()
+    let query_params: string[] = [];
+    const selected_category = this.$store.getters.getSelectedCategory;
+    const route_query_object: Record<any, any> = JSON.parse(JSON.stringify(this.$route.query))
+
+    if(route_query_object.is_reorder) {
+      let edit_mode_default_obj = getEditModeDefaultObj()
+      edit_mode_default_obj.editing = true
+      edit_mode_default_obj.type = "reorder_product"
+      edit_mode_default_obj.reorder_product_info = {...edit_mode_default_obj.reorder_product_info, ...route_query_object}
+      this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', edit_mode_default_obj)
+    }
+
+    if(route_query_object.sync_id) {
+      query_params.push(`sync_id=${route_query_object.sync_id}`)
+      if(route_query_object.update_cart) {
+        query_params.push(`active_product_type=cart_product`, 'paginate=false')
+      } else {
+        query_params.push(`category_id=${selected_category.category_id}`)
+      }
+    }
+
+    if (url_query_string?.includes('share')) {
+      query_params.push(`shared_url=${url_query_string}`, "active_product_type=share_product")
+      resetLastActiveProductData()
+      exitFromEditMode()
+    }
+
+    if(route_query_object.active_product_type == "order_product") {
+      console.log('inside ordr product')
+      self.exitFromEditMode()
+      let edit_mode_default_obj = getEditModeDefaultObj()
+      edit_mode_default_obj.editing = true
+      edit_mode_default_obj.type = "order_product"
+      edit_mode_default_obj.order_product_info = {...edit_mode_default_obj.order_product_info, ...route_query_object}
+      console.log('query url', route_query_object)
+      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", edit_mode_default_obj)
+      // Get the current route
+     /* const currentRoute = { ...this.$route };
+      // Remove all query parameters
+      currentRoute.query = {};
+      // Update the route without any query parameters
+      self.$router.push({ path: currentRoute.path, query: currentRoute.query });*/
+      console.log('query url after', edit_mode_default_obj.order_product_info)
+
+    }
+    console.log('handle url', query_params)
     return query_params
   }
 }
@@ -997,7 +1429,9 @@ export class exitEditMode extends Mixins(ErrorMessages) {
       if (self.$store.getters.getProductEditInfoObject.editing) {
         switch (self.$store.getters.getProductEditInfoObject.type) {
           case 'locker_product':
+            console.log('inside locker product case', self.$store.getters.getHideSaveLockerButton)
             if (self.$store.getters.getHideSaveLockerButton === false) {
+              console.log('show modal')
               self.$santaModal.show({
                 icon: 'confirm', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Save', cancel_text: 'Cancel',
               },self).then((confirmation) => {

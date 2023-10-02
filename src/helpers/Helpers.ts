@@ -162,7 +162,7 @@ const fileToBase64 =  (file: any) => {
 
 }
 
-const processColorsCustom = (colors: [], logos_count=4) => {
+const processColorsCustom = (colors: any, logos_count=4) => {
   const imageColors: any[] = []
   const uniqueColors: string[] = []
   colors.forEach((color: number[]) => {
@@ -446,6 +446,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const roster_details = Store.getters.getProductRosters()
       const roster_texts : Record<any, any> = {}
       const common : Record<any, any>[] = []
+      const product_edit_info_obj = Store.getters.getProductEditInfoObject
 
       if(roster_details){
         for(let roster_index = 0; roster_index < roster_details.length; roster_index++) {
@@ -644,6 +645,19 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const custom_logos_filtered = custom_logos_original.filter(custom_logo => {
         return custom_logo && 'id' in custom_logo
       })
+      const reorder_info_obj = Store.getters.getReorderInfoObj;
+      let reorder_data: Record<any, any>|null = {}
+      if(product_edit_info_obj&& product_edit_info_obj.type == "reorder_product") {
+        reorder_data.order_id = product_edit_info_obj.reorder_product_info.order_id
+        reorder_data.order_number = product_edit_info_obj.reorder_product_info.order_number
+        reorder_data.order_item_id = product_edit_info_obj.reorder_product_info.order_item_id
+        reorder_data.factory_product_id = product_edit_info_obj.reorder_product_info.active_product_id
+        reorder_data.changes = []
+        reorder_data.roster_change = false
+        reorder_data.design_change = false
+      } else {
+        reorder_data = null
+      }
 
       const post_data: Record<any, any> = {
         back_image: back_image,
@@ -677,7 +691,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         style_name: product_style.name,
         addons : selected_product.addons !== null ? selected_product.addons.join(', ') : '',
         svg_groups: Store.getters.getSvgGroups,
-        ecommerce_cart_id:null
+        ecommerce_cart_id:null,
+        reorder_data
       }
       const svg_content = await fetchUrlContent(post_data.production_url);
       const production_file = await parseSvgStringFile(svg_content, post_data);
@@ -690,10 +705,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 }
 
 const syncGroupColorsWithSvgGroups = async() => {
-  let groupColors = Store.getters.getGroupColors
-  let svgGroups = Store.getters.getSvgGroups
+  const groupColors = Store.getters.getGroupColors
+  const svgGroups = Store.getters.getSvgGroups
 
-  let group_ids: string[] = []
+  const group_ids: string[] = []
   svgGroups.forEach((svgGroup: Record<any, any>) => {
     group_ids.push(svgGroup.id)
     if(!groupColors[svgGroup.id]) {
@@ -948,34 +963,22 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
   })
 
 }
-
-const getEditModeDefaultObjFor = (type:string, for_all_edit_modes= false) => {
-  if(for_all_edit_modes) {
-    return { editing: false, type: null,
-      filters: { customized: true, personalized: false, search_products: '' },
-      locker_product_info: { product_id: null, locker_product_id: null, style_id: null, design_id: null },
-      cart_product_info: { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null },
-      order_product_info: { order_item_id:  null, activity_id: null, order_products: null}
+//type could be locker_product, cart_product, order_product, reorder_product
+const getEditModeDefaultObj = () => {
+  return {
+    editing: false, type: '',
+    filters: { customized: true, personalized: false, search_products: '' },
+    locker_product_info: { product_id: null, locker_product_id: null, style_id: null, design_id: null },
+    cart_product_info: { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null },
+    order_product_info: {
+      activity_items: [], factory_id: null, factory_products: [], active_product_id: null, item_id: null, activity_id: null,
+      style_id :null, design_id : null, factory_product_active_index : 0, paginate: false
+    },
+    reorder_product_info: {
+      order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null, active_style_id: null,
+      design_id: null, active_design_id: null, reorder_product: null
     }
   }
-  let response_obj:Record<any, any> = {};
-  switch (type) {
-    case "filters":
-      response_obj = { customized: true, personalized: false, search_products: '' }
-      break;
-    case "locker_product":
-      response_obj = { product_id: null, locker_product_id: null, style_id: null, design_id: null }
-      break;
-    case "cart_product":
-      response_obj = { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null }
-      break;
-    case "order_product":
-      response_obj = { order_item_id:  null, activity_id: null, order_products: null}
-    break;
-    default:
-      console.error(`Error while getting edit mode default object. Expecting value (filters, locker_product, cart_product, order_product) while (${type}) is given `)
-  }
-  return response_obj;
 }
 
 const INCH_TO_CENTIMETER = 2.54;
@@ -1536,7 +1539,7 @@ const authenticateUser = async (token: string) => {
 const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   const default_obj = {
     category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
-    page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: [], logo_colors: [],
+    page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: [], default_colors: [], group_colors: {}, logo_colors: [],
     roster_detail: [], products_rosters: {}
   }
   return {...default_obj, ...keys_default_values}
@@ -1873,12 +1876,18 @@ const showError = (err) => {
 }
 
 const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
-  return {
+  const updated_props: Record<any, any> = {
     id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
     transparent_logo: updated_logo.transparent_logo_url, smart_transparent_logo: updated_logo.smart_transparent_logo_url,
     is_smart_transparent: updated_logo.is_smart_transparent ? true : false, is_vector: updated_logo.is_vector ? true : false,
     logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success ? true : false
   }
+  if(updated_logo.logo_colors) {
+    updated_props.logo_colors = updated_logo.logo_colors
+  } else {
+    delete updated_props.logo_colors
+  }
+  return updated_props
 }
 
 const getSantaModalConfig = () => {
@@ -2046,12 +2055,43 @@ const removeKeyInitialPersitantItems = () => {
   console.log(custimoo);
 }
 
+const getReOrderInfoObject = (default_value= {}): Record<any, any> => {
+  //reorder_product will contain the factory product from order_items table that will be reordered
+  const default_object = {
+    is_reorder: false, order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null, active_style_id: null,
+    design_id: null, active_design_id: null, reorder_product: null
+  }
+  return   {...default_object, ...default_value}
+}
+
+const resetReorderInfoObject = (): void => {
+  Store.commit('SET_REORDER_INFO_OBJECT', getReOrderInfoObject())
+}
+
+const checkIsEmpty = (obj: any) => {
+  const obj_type = obj.constructor.name
+  if(obj) {
+    if(obj_type == "Array") {
+      return obj.length == 0
+    } else if(obj_type == "Object") {
+      return Object.keys(obj).length == 0
+    } else {
+      return true
+    }
+  } else {
+    return true;
+  }
+
+
+  return Object.keys(obj).length == 0
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
   getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
-  getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObjFor, fetchUrlContent,
+  getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObj, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
@@ -2059,5 +2099,5 @@ export {
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
-  getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage
+  getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty
 };

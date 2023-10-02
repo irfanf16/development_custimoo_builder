@@ -35,10 +35,10 @@ export default new Vuex.Store({
     paths: [
       'ProductAttributes.selectedIndex',
       'ProductAttributes.selectedPrdId',
-      'ProductAttributes.customLogos',
+      // 'ProductAttributes.customLogos',
       // 'ProductAttributes.product_custom_texts',
-      'ProductAttributes.defaultColors',
-      'ProductAttributes.groupColors',
+      // 'ProductAttributes.defaultColors',
+      // 'ProductAttributes.groupColors',
       'ProductAttributes.selectedDesignId',
       'ProductAttributes.products_rosters',
       'ProductAttributes.using_logo_colors',
@@ -50,7 +50,7 @@ export default new Vuex.Store({
       'Auth.platform',
       'ProductAttributes.product_edit_info_object',
       'ProductAttributes.last_active_product_data',
-      'ProductAttributes.logo_colors_info',
+      // 'ProductAttributes.logo_colors_info',
      ],
      storage: {
       getItem: (key) => {
@@ -65,7 +65,7 @@ export default new Vuex.Store({
         localStorage.setItem(key, compressedValue)
       },
       removeItem: (key) => {
-        localStorage.removeItem(key) 
+        localStorage.removeItem(key)
       },
     }
     })]

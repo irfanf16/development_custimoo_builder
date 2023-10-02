@@ -16,6 +16,16 @@
             {{ 'Factory ' + parseInt(order_item_index + 1) }}
           </template>
 
+          <div>
+            <div v-for="(factory_product, factory_product_idx) in order_item.factory_products" :key="factory_product_idx"  class="product-item">
+              <label for="product1">
+                <img :src="`${storage_url}${factory_product.front_image}`" :class="{ 'selected': selectedReorderImage === (`${factory_product_idx}${order_item.id}`), 'disabled': !factory_product.can_reorder }"
+                     @click="selectReorderProduct(factory_product, `${factory_product_idx}${order_item.id}` )" alt="Product 1" />
+              </label>
+            </div>
+            <button @click="reorder(order_item.id)" class="reorder-button">Reorder</button>
+          </div>
+
           <OrderFlowStatusLine :item_status="order_item.status" />
 
           <div class="order-activities">
@@ -73,7 +83,7 @@
 
                     <template v-if="item_status_activity_index==0">
                       <div class="actions" v-if="item_status_activity.status == FACTORYREJECTED">
-                        <button class="btn btn-secondary" @click="updateOrderProducts(order_item.id, item_status_activity.id)">Edit Products</button>
+                        <button class="btn btn-secondary" @click="updateOrderProducts(order_item, item_status_activity.id)">Edit Products</button>
                       </div>
 
                       <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
@@ -530,6 +540,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public activityStatus = activityStatus
   public showLoader = false
   public isWebComponent = false
+  public reorder_product:Record<any,any> = {};
+  public selectedReorderImage = null;
 
   // -------- Order Status Constants
   public FACTORYREVIEW = "submitted_for_factory_review"
@@ -639,7 +651,17 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     self.$set(activity_item.comments, activity_item_comment_index, event_data)
   }
 
-
+  selectReorderProduct(factory_product, img_index) {
+    if(factory_product.can_reorder) {
+      console.log(img_index)
+      this.reorder_product = factory_product;
+      this.selectedReorderImage = img_index;
+    }
+  }
+  reorder(order_item_id) {
+    console.log(order_item_id);
+    console.log(this.reorder_product);
+  }
 
 
 
@@ -799,13 +821,19 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   }
 
-  updateOrderProducts(order_item_id: number, order_item_status_activity: number) {
+  updateOrderProducts(order_item: Record<any, any>, order_item_status_activity: number) {
+    const first_factory_product = order_item.factory_products[0];
     let self:Record<any, any> = this;
-    if(this.company.platform == "wordpress") {
-      let query_string = `update_order_product=true&order_item_id=${order_item_id}&activity_id=${order_item_status_activity}`
+    let query_param_obj: Record<any, any> = {
+      customized:true, personalized:true, active_product_type: 'order_product', active_product_id: first_factory_product.product_id,
+      item_id: order_item.id, activity_id: order_item_status_activity, style_id :first_factory_product.style_id,
+      design_id : first_factory_product.design_id, factory_product_active_index : 0, paginate: false
+    }
+    if(this.company.platform == "wordpress" || this.company.platfrom == "shopify") {
+      const query_string = new URLSearchParams(query_param_obj).toString();
       window.location.href = `${this.company.company_domain}/customizer/#/?${query_string}`;
-    } else{
-      self.$router.push({path: "/", query: {update_order_product: true, order_item_id: order_item_id, activity_id: order_item_status_activity}});
+    } else {
+      self.$router.push({ path: "/", query: query_param_obj });
     }
   }
 
@@ -1219,6 +1247,34 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     color: #555;
     font-size: 1rem;
     padding-top: 7px;
+  }
+  /* Reorder css */
+  .product-item {
+    display: inline-block;
+    margin-right: 20px; /* Adjust spacing between product items */
+  }
+  .product-item label {
+    cursor: pointer;
+  }
+  .product-item img {
+    width: 100px; /* Adjust image width as needed */
+    height: 100px; /* Adjust image height as needed */
+    border: 2px solid transparent;
+  }
+  .product-item img.selected {
+    border-color: blue; /* Adjust border color as needed */
+  }
+  .product-item img.selected {
+    border-color: blue; /* Adjust border color as needed */
+  }
+  .product-item img.disabled {
+    cursor: not-allowed;
+    opacity: 0.5; /* Adjust the opacity for disabled images as needed */
+  }
+  .reorder-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
   }
 }
 </style>

@@ -100,11 +100,18 @@
                             <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                             <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                             <td>{{ product.roster_quantity }}</td>
-                            <td><span class="factory_status" :class="product.status">{{ product.status | Status }}</span></td>
+                            <td>
+                              <span class="factory_status" :class="product.status">{{ product.status | Status }}</span>
+                             <template v-if="product.can_reorder">
+                               <span class="btn btn-dark mx-xxl-2" @click="reorderItem(order, item.id, product)">Reorder</span>
+                             </template>
+                              <template v-else>
+                                <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
+                              </template>
+                            </td>
                           </tr>
                         </template>
                       </table>
-
                     </div>
                   </template>
                 </td>
@@ -137,8 +144,9 @@ import {Component, Mixins, Vue} from "vue-property-decorator";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {http} from "@/httpCommon";
 import moment from "moment";
-import {CustimooOrderFlowStatuses} from '@/helpers/Helpers';
+import {CustimooOrderFlowStatuses, exitFromEditMode, resetLastActiveProductData} from '@/helpers/Helpers';
 import Search from '@/components/Search.vue';
+import {query} from "vue-gtag";
 
 Vue.filter('orderDate', function(value:string) {
   if (value) {
@@ -270,6 +278,28 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
       params = '';
     }
     this.getOrders(params);
+  }
+  public reorderItem(order: Record<any, any>,order_item_id: string, factory_product: Record<any, any>) {
+    http.post(`product/${factory_product.product_id}/can_reorder`).then(async (res:Record<any, any>) => {
+      const res_result = res.data.result
+      if(res_result.can_reorder) {
+        exitFromEditMode()
+        resetLastActiveProductData()
+        await this.$store.commit('SET_PRODUCTS', { products: [] });
+        this.$router.push({
+          name: 'Home',
+          query: {
+            is_reorder: 'true', order_id: order.id, order_number: order.order_no , order_item_id: order_item_id, factory_product_id:  factory_product.id, active_product_id:  factory_product.product_id,
+            style_id: factory_product.style_id, design_id: factory_product.design_id,
+          }
+        });
+      } else {
+        this.showError(res.data.message)
+      }
+    }).catch((e:any) => {
+      this.showError(e.response.data.message)
+    })
+
   }
 
 }

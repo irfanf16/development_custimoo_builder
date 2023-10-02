@@ -154,10 +154,6 @@
       </template>
     </div>
 
-<!--    <div>is editing {{ getProductEditInfoObject.editing}}</div>-->
-<!--    <div>from locker {{ getProductEditInfoObject.type == 'locker_product'}}</div>-->
-<!--    <div>from lockerroster {{ isEditingFromRoster}}</div>-->
-
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
       <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker')">

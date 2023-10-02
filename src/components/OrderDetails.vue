@@ -45,13 +45,6 @@
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
-
-<!--    <div class="d-none">
-      <canvas width="600" height="600" ref="pdfFront" style="text-align: center; display: block">
-      </canvas>
-      <canvas width="600" height="600" ref="pdfBack" style="text-align: center; display: block">
-      </canvas>
-    </div>-->
   </div>
 </template>
 

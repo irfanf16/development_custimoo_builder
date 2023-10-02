@@ -83,26 +83,6 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public logo_allowed_extensions = ['jpg','gif','png','jpeg','pdf','eps','ai']
-
-  /*
-  * data props ends here
-  * */
-
-  /*
-  * computed props starts
-  * */
-
-  /*
-  * computed props ends
-  * */
-
-  /*
-  * methods starts
-  * */
-
-  /*
-  * methods ends
-  * */
 }
 
 </script>

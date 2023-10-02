@@ -14,6 +14,10 @@ export default class ColorsTabMixin extends Vue{
   public gradient_index: number|undefined = 0
 
 
+  get lastActiveProductData() {
+    return this. $store.getters.getLastActiveProductData
+  }
+
   get svgGroups() {
     return this.$store.getters.getSvgGroups
   }
@@ -79,7 +83,7 @@ export default class ColorsTabMixin extends Vue{
     await setUndoRedoItems('groupColors','updated')
     hideLockerProductSaveBtn()
     if (color.value){
-      this.$store.dispatch('updateGroupColors',
+      this.$store.commit('UPDATE_GROUP_COLORS',
         {
           index: this.svgGroups[this.selectAccordionIndex].id,
           gradient_index: this.gradient_index,
@@ -88,6 +92,9 @@ export default class ColorsTabMixin extends Vue{
           name: color.name
         })
       self.$eventBus.$emit("changeGroupColors")
+      if(this.lastActiveProductData && !this.lastActiveProductData.editing ) {
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {group_colors: this.$store.getters.getGroupColors})
+      }
     }
   }
 

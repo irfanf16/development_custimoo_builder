@@ -138,6 +138,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
           this.$store.commit('SET_LOGO_COLORS_INFO', {
             data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
           })
+          logo_data.logo_colors = logo_colors
           await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
           const custom_logos_updated_props = getLogoUpdatedProps(logo_data)

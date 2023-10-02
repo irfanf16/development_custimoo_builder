@@ -84,15 +84,18 @@
 
                     <template v-if="getProductEditInfoObject.type == 'order_product'">
                       <b-button @click="loadOrderItemProduct('previous')" variant="outline-secondary"
-                                v-if="getProductEditInfoObject.order_product_info.order_products.active_index != 0">Previous</b-button>
+                                v-if="getProductEditInfoObject.order_product_info.factory_product_active_index != 0">Previous</b-button>
                       <b-button  @click="loadOrderItemProduct('next')"  variant="outline-secondary"
-                                 v-if="getProductEditInfoObject.order_product_info.order_products.active_index != (getProductEditInfoObject.order_product_info.order_products.factory_products.length - 1)">Next</b-button>
+                                 v-if="getProductEditInfoObject.order_product_info.factory_product_active_index != (getProductEditInfoObject.order_product_info.factory_products.length - 1)">Next</b-button>
                       <b-button  @click="UpdateOrderProducts" variant="outline-secondary"
-                                 v-if="getProductEditInfoObject.order_product_info.order_products.active_index == (getProductEditInfoObject.order_product_info.order_products.factory_products.length - 1)">Update Products</b-button>
+                                 v-if="getProductEditInfoObject.order_product_info.factory_product_active_index == (getProductEditInfoObject.order_product_info.factory_products.length - 1)">Update Products</b-button>
                       <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
-                      <modal name="product-rejection-info-modal">
-                        <h1>{{getProductEditInfoObject.order_product_info.order_products.activity_items[getProductEditInfoObject.order_product_info.order_products.active_index].message}}</h1>
-                        <template v-for="(activity_file, activity_file_index) in getProductEditInfoObject.order_product_info.order_products.activity_items[getProductEditInfoObject.order_product_info.order_products.active_index].activity_files">
+                      <modal name="product-rejection-info-modal" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
+                        <h1>
+                          {{logData(getProductEditInfoObject.order_product_info.activity_items, getProductEditInfoObject.order_product_info.factory_product_active_index)}}
+                          {{getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].message}}
+                        </h1>
+                        <template v-for="(activity_file, activity_file_index) in getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].activity_files">
                           <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
                         </template>
                       </modal>
@@ -399,7 +402,7 @@
                             </span>
 
                             <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
-                              <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+                              <b-button @click="addToCart(null)" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
                                 Finalize Design
                               </b-button>
                             </span>
@@ -1794,7 +1797,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     url = url_obj.pathname + url_obj.search;
     http.get(url).then(async (response: Record<any, any>) => {
       if (response.data.products.data.length > 0) {
-        const validate_data = await self.beforeSetDataValidateActiveProductData(response.data.products.data)
+        const validate_data = await self.beforeSetDataValidateActiveProductData(response.data)
         if (validate_data.validated) {
           await self.handleMainProducts(response);
           if (self["showLoader"]) {
@@ -1835,15 +1838,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (updated_product == null) {
       return false;
     }
-    let order_products_info_obj = self.getProductEditInfoObject.order_product_info
-    let order_product_active_index = order_products_info_obj.order_products.active_index;
-    let order_product_updated_index = (action == "next") ? order_product_active_index + 1 : order_product_active_index - 1;
-    let next_prev_product_id = order_products_info_obj.order_products.factory_products[order_product_updated_index].product_id
+    let order_products_info_obj = this.getProductEditInfoObject.order_product_info
+    let factory_product_active_index = order_products_info_obj.factory_product_active_index;
+    let factory_product_updated_index = (action == "next") ? parseInt(factory_product_active_index) + 1 : parseInt(factory_product_active_index) - 1;
+    const next_prev_product_id = order_products_info_obj.factory_products[factory_product_updated_index].product_id
 
-    updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;
+    let next_prev_factory_product = order_products_info_obj.factory_products[factory_product_updated_index];
+
+
+    updated_product["id"] = order_products_info_obj.factory_products[factory_product_active_index].id;
     updated_product["status"] = "submitted_for_factory_review";
-    order_products_info_obj.order_products.factory_products[order_product_active_index] = updated_product
-    order_products_info_obj.order_products.active_index = order_product_updated_index
+    order_products_info_obj.factory_products[factory_product_active_index] = updated_product
+    order_products_info_obj.factory_product_active_index = factory_product_updated_index
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
       editing: true,
       type: "order_product",
@@ -1852,9 +1858,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       cart_product_info: null,
       order_product_info: order_products_info_obj
     })
+    console.log('shaha', order_products_info_obj.activity_items, next_prev_product_id)
     let query_params = [
-      `customized=${true}`, `personalized=${true}`, `order_item_id=${this.$route.query.order_item_id}`,
-      `activity_id=${this.$route.query.activity_id}`, 'active_product_type=order_product', `update_order_product_id=${next_prev_product_id}`
+      `customized=${true}`, `personalized=${true}`, 'active_product_type=order_product', `active_product_id=${next_prev_factory_product.product_id}`,
+      `item_id=${order_products_info_obj.id}`, `activity_id=${order_products_info_obj.activity_id}`,
+      `style_id=${next_prev_factory_product.style_id}`,`design_id=${next_prev_factory_product.design_id}`,
+      `factory_product_active_index=${factory_product_updated_index}`,'paginate=false'
+
     ];
     self.showLoader = true;
     const categories_promise = this.fetchCategories();
@@ -1872,7 +1882,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
-    let order_product_active_index = order_products_info_obj.order_products.active_index;
+    let order_product_active_index = order_products_info_obj.order_products.factory_product_active_index;
     updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;
     let order_item_id = order_products_info_obj.order_item_id;
     // updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;

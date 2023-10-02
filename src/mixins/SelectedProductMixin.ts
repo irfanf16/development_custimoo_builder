@@ -91,16 +91,18 @@ export class FetchCategories extends Vue {
     const self: Record<any, any> = this
     return new Promise((resolve,reject) => {
       let categories_promise;
+      let query_params_obj = self.$route.query
       if(!product_filter){
         const getProductEditInfoObject = this.$store.getters.getProductEditInfoObject;
         const last_active_product_obj = this.$store.getters.getLastActiveProductData;
-        let {sync_id} = self.$route.query
+        const {sync_id} = self.$route.query
         const shared_url = getUrlParameter()
         if (shared_url?.includes('share')) {
           categories_promise = this.$store.dispatch('setCategories',{
             query_params:`share_url=${encodeURIComponent(shared_url)}`
           });
         } else if(getProductEditInfoObject.editing && !product_id){
+
           switch(getProductEditInfoObject.type)
           {
             case "locker_product":
@@ -115,9 +117,23 @@ export class FetchCategories extends Vue {
               });
               break;
             case "order_product":
+            {
+              let active_product_id = '';
+              if(query_params_obj.active_product_id) {
+                active_product_id = query_params_obj.active_product_id
+              } else {
+                active_product_id = getProductEditInfoObject.order_product_info.active_product_id
+              }
               categories_promise = this.$store.dispatch('setCategories',{
-                query_params:`product_id=${getProductEditInfoObject.order_product_info.order_products.factory_products[0].product_id}`
+                query_params:`product_id=${active_product_id}`
               });
+            }
+            break;
+            case "reorder_product":
+              categories_promise = this.$store.dispatch('setCategories',{
+                query_params:`product_id=${getProductEditInfoObject.reorder_product_info.active_product_id}`
+              });
+              break;
           }
         } else{
           if(sync_id) {

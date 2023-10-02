@@ -1,6 +1,12 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
-import {authenticateUser, getCompany, getCustomizerIframe, getUrlParameter, routerPush} from '@/helpers/Helpers'
+import {
+  authenticateUser,
+  getCompany,
+  getCustomizerIframe,
+  getUrlParameter,
+  routerPush
+} from '@/helpers/Helpers'
 import { i18n } from '@/i18n'
 import store from '@/store'
 
@@ -147,6 +153,14 @@ Vue.use(VueGtag, {
 })
 export default class CommonImportMixin extends Vue{
   async mounted () {
+    /*
+    * Initialize store state default values starts
+    * */
+
+    /*
+    * Initialize store state default values ends
+    * */
+
     const iframe = getCustomizerIframe()
     /*
     * this condition checks if customizer is loaded in iframe. If it's loaded inside iframe then vue router won't work

@@ -30,48 +30,51 @@
         </thead>
         <tbody>
           <template v-for="(cart_item, cart_item_index) in cartItems">
-            <tr :key="factory_product.id" v-for="(factory_product, factory_product_index) in cart_item.factory_products">
-              <td>
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
-                  <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
-                </template>
-                <template v-else="">
-                  <a style="cursor:pointer;color:blue;text-decoration: underline"
-                     @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
-                </template>
-              </td>
-              <td>
-                <div class="d-inline-flex gap-1">
-                  <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.front_image"
-                         alt="Front Design"></b-img>
-                  <b-img v-if="factory_product.back_image" style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
-                         alt="Back Design"></b-img>
-                </div>
-              </td>
-              <td>
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
+            <template v-for="(factory_product, factory_product_index) in cart_item.factory_products">
+              <tr :key="factory_product.id" >
+                <td>
+                  <template v-if="editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
+                    <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
+                  </template>
+                  <template v-else="">
+                    <a style="cursor:pointer;color:blue;text-decoration: underline"
+                       @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
+                  </template>
+                </td>
+                <td>
+                  <div class="d-inline-flex gap-1">
+                    <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.front_image"
+                           alt="Front Design"></b-img>
+                    <b-img v-if="factory_product.back_image" style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
+                           alt="Back Design"></b-img>
+                  </div>
+                </td>
+                <td>
+                  <template v-if="editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
                   <span title="Editing This Product" style="cursor:pointer;">
                     {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
                   </span>
-                </template>
-                <template v-else="">
-                  <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, false)">
-                    {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
-                  </a>
-                </template>
+                  </template>
+                  <template v-else="">
+                    <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, false)">
+                      {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
+                    </a>
+                  </template>
 
-              </td>
-              <td class="cursor-pointer">
-                <template v-if="editingCartProductInfo && editingCartProductInfo.cart_item_product.id == factory_product.id">
-                  Editing
-                </template>
-                <template v-else="">
-                  <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)">
-                    <font-awesome-icon :icon="['fas', 'trash-alt']" />
-                  </a>
-                </template>
-              </td>
-            </tr>
+                </td>
+                <td class="cursor-pointer">
+                  <template v-if="editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
+                    Editing
+                  </template>
+                  <template v-else="">
+                    <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)">
+                      <font-awesome-icon :icon="['fas', 'trash-alt']" />
+                    </a>
+                  </template>
+                </td>
+              </tr>
+            </template>
+
           </template>
         </tbody>
       </table>
@@ -97,12 +100,6 @@
                 <span v-if="shipping_address.zip_code">{{ shipping_address.zip_code }}</span>
                 <span v-if="shipping_address.zip_code">{{ ' ' }}</span>
               </div>
-<!--              <div>{{ shipping_address.first_name }} {{ shipping_address.last_name }}</div>-->
-<!--              <div>{{ shipping_address.address1 }}</div>-->
-<!--              <div>{{ shipping_address.address2 }}</div>-->
-<!--              <div>{{ shipping_address.zip_code }}</div>-->
-<!--              <div>{{ shipping_address.country.name }} {{ shipping_address.city }}</div>-->
-
               <div class="d-flex flex-wrap w-100">
                 <div>{{ shipping_address.country.name }}</div>
 
@@ -181,7 +178,7 @@ import {
   getActiveProductData,
   getReminderOptions,
   getSelectedProductData,
-  lastActiveProductDefaultObject,
+  lastActiveProductDefaultObject, logData,
   processColorsCustom
 } from "@/helpers/Helpers";
 import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
@@ -189,6 +186,7 @@ import { findIndex } from "lodash";
 import ModalAction from "@/mixins/ModalAction";
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
 @Component<CartModal>({
+  methods: {logData},
   components: {},
   filters: {
     itemQtyCount: (value: Record<any, any>) => {
@@ -225,8 +223,6 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
             }
 
           } );
-
-          console.log('this.$route.query.roster',this.$route.query.roster)
 
           if(cart_items[cart_item_index].factory_products[factory_item_index]){
             if(this.$route.query.roster){
@@ -292,7 +288,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     return this.$store.getters.getCustomerPermissions
   }
   get editingCartProductInfo() {
-    return this.$store.getters.getProductEditInfoObject['cart_product_info']
+    return this.$store.getters.getProductEditInfoObject
   }
   get mainTotalTabs(){
     return this.$store.getters.getMainTotalTabs;
@@ -374,7 +370,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       let is_personalized = this.$store.getters.getPersonalized;
 
       //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
-      console.log('edit1', edit)
       let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
       let shopify_line_item = (self.$route.query.line)?self.$route.query.line:null;
       if(ecommerce_cart_id){
@@ -392,6 +387,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
       this.$root.$emit('rostershared', '')
       let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product`;
+      let query_string = `item_id=${cart_item.id}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product&paginate=false`
+      query_string += `&factory_product_id=${cart_item_product.id}&style_id=${cart_item_product.style_id}&design_id=${cart_item_product.design_id}`
+      url = `list/products?${query_string}`;
       self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
       await http.get(url).then(async (response: Record<any, any>) => {
         await (this as Record<any, any>).handleMainProducts(response);

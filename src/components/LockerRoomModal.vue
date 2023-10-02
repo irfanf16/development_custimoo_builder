@@ -52,7 +52,6 @@ export default class LockerRoomModal extends Mixins(ModalAction){
 
   private lockerModalOpened(callback:() => any){
     const locker_modal = this.$refs['locker-modal'] as Record<any, any>
-    console.log('opened', locker_modal)
     locker_modal.open(callback())
   }
 
