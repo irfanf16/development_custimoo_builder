@@ -206,8 +206,6 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         this.$store.commit('SET_APPLICATION_MOUNTED')
         return false;
       }
-      //todo need to look in to it
-      let active_index = 0;
 
       this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
       await this.$store.dispatch("getSkuInformation", active_product_id);
@@ -229,17 +227,25 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
 
         if(product_edit_info_object.type == "order_product") {
           let order_products = Object.assign({}, product_edit_info_object.order_product_info, { order_products: active_product_detail })
-          self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: active_product_detail })
+          let order_product_info_data = getEditModeDefaultObj('order_product_info')
+          order_product_info_data.activity_items = active_product_detail.activity_items
+          order_product_info_data.factory_id = active_product_detail.factory_id
+          order_product_info_data.factory_products = active_product_detail.factory_products
+          order_product_info_data.active_product_id = active_product_id
+          order_product_info_data.item_id = active_product_detail.id
+          order_product_info_data.activity_id = active_product_detail.activity_id
+          order_product_info_data.style_id = active_style_id
+          order_product_info_data.design_id = active_design_id
+          order_product_info_data.factory_product_active_index = active_product_detail.factory_product_active_index
+          self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_product_info_data })
         }
         let product_custom_texts: Record<any, any>[] = active_factory_product.product_custom_texts.length > 0 ? active_factory_product.product_custom_texts : active_product.product_custom_texts
         let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail } = active_factory_product
         let customizer_data: Record<any, any> = {
           active_product_id: active_product_id, custom_logos:custom_logos, product_custom_texts:product_custom_texts,
-          default_colors:default_colors, group_colors:group_colors,
+          default_colors:default_colors, group_colors:group_colors, product_roster_detail: product_roster_detail
         }
         await this.setCustomizerData(customizer_data)
-        let first_factory_product: Record<any, any> = factory_products[0]
-        await this.setCustomizerData({active_product_id: active_product_id, product_roster_detail: first_factory_product.product_roster_detail})
         this.$store.commit('RESET_UNDO');
         this.$store.commit('RESET_REDO');
       }
@@ -1284,21 +1290,15 @@ export class ProductsQueryParamsMixin extends Vue {
   public async setQueryParams() {
     let self: Record<any, any> = this;
     let query_params: string[] = await this.handleUrlQueryParams();
-    const selected_category = self.$store.getters.getSelectedCategory;
-    let edit_product_info_obj = self.$store.getters.getProductEditInfoObject
+    const selected_category = this.$store.getters.getSelectedCategory;
+    let edit_product_info_obj = this.$store.getters.getProductEditInfoObject
     if(edit_product_info_obj.editing) {
       const active_product_type = edit_product_info_obj.type;
       if(active_product_type == "order_product") {
-        let {order_product_info, factory_product_active_index} = edit_product_info_obj
-        query_params.push("customized=true", "personalized=true", `active_product_type=order_product`, `item_id=${edit_product_info_obj.item_id}`,
-          `activity_id=${edit_product_info_obj.activity_id}`, `style_id=${edit_product_info_obj.style_id}`, `design_id=${edit_product_info_obj.design_id}`,
-          `factory_product_active_index=${factory_product_active_index}`, `paginate=false`)
-        if(order_product_info.factory_products.length > 0) {
-          let product_id = order_product_info.factory_products[factory_product_active_index].product_id;
-          query_params.push(`active_product_id=${product_id}`);
-        } else {
-          query_params.push(`active_product_id=${edit_product_info_obj.active_product_id}`)
-        }
+        let { order_product_info, order_product_info: { factory_product_active_index }, order_product_info: { active_product_id } } = edit_product_info_obj
+        query_params.push("customized=true", "personalized=true", `active_product_type=order_product`, `active_product_id=${active_product_id}`,
+          `item_id=${order_product_info.item_id}`, `activity_id=${order_product_info.activity_id}`, `style_id=${order_product_info.style_id}`,
+          `design_id=${order_product_info.design_id}`, `factory_product_active_index=${factory_product_active_index}`, `paginate=false`)
       } else if(active_product_type == "locker_product") {
         query_params = [
           `customized=${edit_product_info_obj.filters.customized}`, `personalized=${edit_product_info_obj.filters.personalized}`,
@@ -1309,16 +1309,16 @@ export class ProductsQueryParamsMixin extends Vue {
           `category_id=${selected_category.category_id}`, 'paginate=false'
         ];
       } else if(active_product_type == "cart_product") {
-        let cart_item_factory_product = edit_product_info_obj.cart_item_product
+        const cart_product_info = edit_product_info_obj.cart_product_info
+        const cart_item_factory_product = cart_product_info.cart_item_product
         query_params = [
-          `item_id=${edit_product_info_obj.cart_item_id}`,`factory_product_id=${cart_item_factory_product.id}`,
+          `item_id=${cart_product_info.cart_item_id}`,`factory_product_id=${cart_item_factory_product.id}`,
           `active_product_id=${cart_item_factory_product.product_id}`, `style_id=${cart_item_factory_product.style_id}`,
           `design_id=${cart_item_factory_product.design_id}`, `active_product_type=${self.getProductEditInfoObject.type}`,
           'paginate=false'
         ];
 
       } else if(active_product_type == "reorder_product") {
-        console.log('reorder_product')
         let reorder_product_info_obj: Record<any, any> = edit_product_info_obj.reorder_product_info
         query_params = [
           'is_reorder=true', 'active_product_type=reorder_product', `item_id=${reorder_product_info_obj.order_item_id}`,
@@ -1327,7 +1327,6 @@ export class ProductsQueryParamsMixin extends Vue {
         ];
       }
     } else {
-      console.log('elsee')
       let last_active_product_data = self.getLastActiveProductData;
       if(last_active_product_data.product_id) {
         query_params.push(
@@ -1358,7 +1357,6 @@ export class ProductsQueryParamsMixin extends Vue {
         }
       }
     }
-    console.log('query_params22', query_params)
     return query_params
   }
 
@@ -1399,24 +1397,20 @@ export class ProductsQueryParamsMixin extends Vue {
     }
 
     if(route_query_object.active_product_type == "order_product") {
-      console.log('inside ordr product')
-      self.exitFromEditMode()
+      exitFromEditMode()
       let edit_mode_default_obj = getEditModeDefaultObj()
       edit_mode_default_obj.editing = true
       edit_mode_default_obj.type = "order_product"
       edit_mode_default_obj.order_product_info = {...edit_mode_default_obj.order_product_info, ...route_query_object}
-      console.log('query url', route_query_object)
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", edit_mode_default_obj)
       // Get the current route
-     /* const currentRoute = { ...this.$route };
+      const currentRoute = { ...this.$route };
       // Remove all query parameters
       currentRoute.query = {};
       // Update the route without any query parameters
-      self.$router.push({ path: currentRoute.path, query: currentRoute.query });*/
-      console.log('query url after', edit_mode_default_obj.order_product_info)
+      self.$router.push({ path: currentRoute.path, query: currentRoute.query });
 
     }
-    console.log('handle url', query_params)
     return query_params
   }
 }

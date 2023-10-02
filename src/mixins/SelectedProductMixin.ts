@@ -176,8 +176,6 @@ export class FetchCategories extends Vue {
       }
       categories_promise.then((no_product_found) => {
         if(no_product_found) {
-          exitFromEditMode();
-          resetLastActiveProductData();
           self.showError('Product is no more available, loading all products')
         }
         resolve(true);

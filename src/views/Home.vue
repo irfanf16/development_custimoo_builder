@@ -92,7 +92,6 @@
                       <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
                       <modal name="product-rejection-info-modal" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
                         <h1>
-                          {{logData(getProductEditInfoObject.order_product_info.activity_items, getProductEditInfoObject.order_product_info.factory_product_active_index)}}
                           {{getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].message}}
                         </h1>
                         <template v-for="(activity_file, activity_file_index) in getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].activity_files">
@@ -1834,6 +1833,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   async loadOrderItemProduct(action: string) {
     let self = this;
+    self.showLoader = true;
     let updated_product = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if (updated_product == null) {
       return false;
@@ -1850,29 +1850,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     updated_product["status"] = "submitted_for_factory_review";
     order_products_info_obj.factory_products[factory_product_active_index] = updated_product
     order_products_info_obj.factory_product_active_index = factory_product_updated_index
-    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true,
-      type: "order_product",
-      filters: null,
-      locker_product_info: null,
-      cart_product_info: null,
-      order_product_info: order_products_info_obj
-    })
-    console.log('shaha', order_products_info_obj.activity_items, next_prev_product_id)
+    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_products_info_obj })
     let query_params = [
-      `customized=${true}`, `personalized=${true}`, 'active_product_type=order_product', `active_product_id=${next_prev_factory_product.product_id}`,
-      `item_id=${order_products_info_obj.id}`, `activity_id=${order_products_info_obj.activity_id}`,
+      `customized=${true}`, `personalized=${true}`, 'active_product_type=order_product', `active_product_id=${next_prev_product_id}`,
+      `item_id=${order_products_info_obj.item_id}`, `activity_id=${order_products_info_obj.activity_id}`,
       `style_id=${next_prev_factory_product.style_id}`,`design_id=${next_prev_factory_product.design_id}`,
       `factory_product_active_index=${factory_product_updated_index}`,'paginate=false'
 
     ];
-    self.showLoader = true;
-    const categories_promise = this.fetchCategories();
-    categories_promise.then(async (response) => {
-      if(response){
-        await self.retrieveProducts(query_params);
-      }
-    });
+    console.log('query_params', query_params)
+
+    await self.retrieveProducts(query_params);
   }
 
   async UpdateOrderProducts(resolve:any= null) {

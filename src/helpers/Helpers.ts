@@ -480,6 +480,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                 items: [] as Record<any, any>[]
               }
               const font = products_fonts[custom_text.font_family]
+
               let path: Record<any, any> = {}
               let text_for_test_char = '';
               if(custom_text.is_first_name) {
@@ -964,20 +965,24 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
 
 }
 //type could be locker_product, cart_product, order_product, reorder_product
-const getEditModeDefaultObj = () => {
-  return {
-    editing: false, type: '',
-    filters: { customized: true, personalized: false, search_products: '' },
-    locker_product_info: { product_id: null, locker_product_id: null, style_id: null, design_id: null },
-    cart_product_info: { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null },
-    order_product_info: {
-      activity_items: [], factory_id: null, factory_products: [], active_product_id: null, item_id: null, activity_id: null,
-      style_id :null, design_id : null, factory_product_active_index : 0, paginate: false
-    },
-    reorder_product_info: {
-      order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null, active_style_id: null,
-      design_id: null, active_design_id: null, reorder_product: null
-    }
+const getEditModeDefaultObj = (prop='') => {
+  const cart_product_info = { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null }
+  const order_product_info =  {
+    activity_items: [], factory_id: null, factory_products: [], active_product_id: null, item_id: null, activity_id: null,
+    style_id :null, design_id : null, factory_product_active_index : 0, paginate: false
+  }
+  const reorder_product_info = {
+    order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null, active_style_id: null,
+    design_id: null, active_design_id: null, reorder_product: null
+  }
+  const default_obj = { editing: false, type: '', filters: { customized: true, personalized: false, search_products: '' },
+    locker_product_info: { product_id: null, locker_product_id: null, style_id: null, design_id: null }, cart_product_info: cart_product_info,
+    order_product_info: order_product_info, reorder_product_info: reorder_product_info
+  }
+  if(prop) {
+    return default_obj[prop] ? default_obj[prop] : null
+  } else {
+    return default_obj
   }
 }
 
@@ -1551,7 +1556,7 @@ const resetLastActiveProductData = async () => {
 }
 
 const exitFromEditMode = () => {
-  Store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null })
+  Store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", getEditModeDefaultObj())
 }
 
 const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
