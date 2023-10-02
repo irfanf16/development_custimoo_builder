@@ -127,13 +127,15 @@ Vue.directive('click-outside-custom', {
         vnode.context[binding.expression](event);
       }
     };
-    const isLocalPlatform = this.company.platform == 'self'
+    const company = vnode.context.$store.getters.getCompany as Record<any, any>
+    const isLocalPlatform = company.platform == 'self'
     const doc = getDomDocument(isLocalPlatform);
     const outsideEl = doc.body as Record<any, any>
     outsideEl.addEventListener('click', el.clickOutsideEvent)
   },
-  unbind: function (el:Record<any, any>) {
-    const isLocalPlatform = this.company.platform == 'self'
+  unbind: function (el:Record<any, any>, binding:Record<any, any>, vnode:Record<any, any>) {
+    const company = vnode.context.$store.getters.getCompany as Record<any, any>
+    const isLocalPlatform = company.platform == 'self'
     const doc = getDomDocument(isLocalPlatform);
     const outsideEl = doc.body as Record<any, any>
     outsideEl.removeEventListener('click', el.clickOutsideEvent)
