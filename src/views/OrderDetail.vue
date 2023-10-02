@@ -16,15 +16,15 @@
             {{ 'Factory ' + parseInt(order_item_index + 1) }}
           </template>
 
-          <div>
+          <template v-if="company.platform == 'wordpress' || company.platform == 'shopify'" >
             <div v-for="(factory_product, factory_product_idx) in order_item.factory_products" :key="factory_product_idx"  class="product-item">
               <label for="product1">
                 <img :src="`${storage_url}${factory_product.front_image}`" :class="{ 'selected': selectedReorderImage === (`${factory_product_idx}${order_item.id}`), 'disabled': !factory_product.can_reorder }"
                      @click="selectReorderProduct(factory_product, `${factory_product_idx}${order_item.id}` )" alt="Product 1" />
               </label>
             </div>
-            <button @click="reorder(order_item.id)" class="reorder-button">Reorder</button>
-          </div>
+            <button @click="reorder(order,order_item.id)" class="reorder-button">Reorder</button>
+          </template>
 
           <OrderFlowStatusLine :item_status="order_item.status" />
 
@@ -77,6 +77,9 @@
                         <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no)" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else>
                           <div class="feedback-text" :key="`afd-${activity_item_index}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
+                        </template>
+                        <template v-if="item_status_activity.status == FACTORYREVIEW">
+                          <span>{{makeReorderMessage(activity_item.factory_product_id, order_item.factory_products)}}</span>
                         </template>
                       </div>
                     </div>
@@ -653,17 +656,41 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   selectReorderProduct(factory_product, img_index) {
     if(factory_product.can_reorder) {
-      console.log(img_index)
       this.reorder_product = factory_product;
       this.selectedReorderImage = img_index;
     }
   }
-  reorder(order_item_id) {
-    console.log(order_item_id);
-    console.log(this.reorder_product);
+  reorder(order, order_item_id) {
+
+    let redirect_url = (this.company.customizer_page_url) ? `${this.company.company_domain}/${this.company.customizer_page_url}/#/?` :  `${this.company.company_domain}/#/?` ;
+    redirect_url += `is_reorder=true&order_id=${order.id}&order_number=${order.order_no}&order_item_id=${order_item_id}&`
+    redirect_url += `factory_product_id=${this.reorder_product.id}&active_product_id=${this.reorder_product.product_id}&`
+    redirect_url += `style_id=${this.reorder_product.style_id}&design_id=${this.reorder_product.design_id}`;
+
+    window.location.href = redirect_url;
   }
 
+  makeReorderMessage(factory_product_id, factory_products) {
+    let factory_product = factory_products.find(item => item.id == factory_product_id);
+    let message = '';
+    if(factory_product) {
+      if(factory_product.reorder_data) {
+        const reorder_data = factory_product.reorder_data;
+        message = `Note: Reorder of order #${reorder_data.order_number} `;
+        if(reorder_data.roster_change == true && reorder_data.design_change == true) {
+          message += 'with design and roster changes.';
+        } else if(reorder_data.roster_change == true && reorder_data.design_change == false) {
+          message += 'with roster changes.';
+        } else if(reorder_data.roster_change == false && reorder_data.design_change == true) {
+          message += 'with design changes.';
+        } else {
+          message += 'with no modifications';
+        }
+      }
+    }
 
+    return message;
+  }
 
   ///////////////// Activity Methods
 
@@ -1248,33 +1275,35 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     font-size: 1rem;
     padding-top: 7px;
   }
-  /* Reorder css */
-  .product-item {
-    display: inline-block;
-    margin-right: 20px; /* Adjust spacing between product items */
-  }
-  .product-item label {
-    cursor: pointer;
-  }
-  .product-item img {
-    width: 100px; /* Adjust image width as needed */
-    height: 100px; /* Adjust image height as needed */
-    border: 2px solid transparent;
-  }
-  .product-item img.selected {
-    border-color: blue; /* Adjust border color as needed */
-  }
-  .product-item img.selected {
-    border-color: blue; /* Adjust border color as needed */
-  }
-  .product-item img.disabled {
-    cursor: not-allowed;
-    opacity: 0.5; /* Adjust the opacity for disabled images as needed */
-  }
-  .reorder-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-  }
+
+}
+
+/* Reorder css */
+.product-item {
+  display: inline-block;
+  margin-right: 20px; /* Adjust spacing between product items */
+}
+.product-item label {
+  cursor: pointer;
+}
+.product-item img {
+  width: 100px; /* Adjust image width as needed */
+  height: 100px; /* Adjust image height as needed */
+  border: 2px solid transparent;
+}
+.product-item img.selected {
+  border-color: blue; /* Adjust border color as needed */
+}
+.product-item img.selected {
+  border-color: blue; /* Adjust border color as needed */
+}
+.product-item img.disabled {
+  cursor: not-allowed;
+  opacity: 0.5; /* Adjust the opacity for disabled images as needed */
+}
+.reorder-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
 }
 </style>

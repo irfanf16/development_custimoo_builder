@@ -651,7 +651,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         reorder_data.order_id = product_edit_info_obj.reorder_product_info.order_id
         reorder_data.order_number = product_edit_info_obj.reorder_product_info.order_number
         reorder_data.order_item_id = product_edit_info_obj.reorder_product_info.order_item_id
-        reorder_data.factory_product_id = product_edit_info_obj.reorder_product_info.active_product_id
+        reorder_data.factory_product_id = product_edit_info_obj.reorder_product_info.factory_product_id
         reorder_data.changes = []
         reorder_data.roster_change = false
         reorder_data.design_change = false

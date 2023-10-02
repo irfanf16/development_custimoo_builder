@@ -1375,6 +1375,12 @@ export class ProductsQueryParamsMixin extends Vue {
       edit_mode_default_obj.type = "reorder_product"
       edit_mode_default_obj.reorder_product_info = {...edit_mode_default_obj.reorder_product_info, ...route_query_object}
       this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', edit_mode_default_obj)
+
+      const currentRoute = { ...this.$route };
+      // Remove all query parameters
+      currentRoute.query = {};
+      // Update the route without any query parameters
+      self.$router.push({ path: currentRoute.path, query: currentRoute.query });
     }
 
     if(route_query_object.sync_id) {
