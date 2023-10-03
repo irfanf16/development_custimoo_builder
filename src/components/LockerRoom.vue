@@ -292,15 +292,8 @@
                             :ref="'share-collection'+index" class="light rounded-circle"
                             custom-class="share-tooltip"><font-awesome-icon
                     :icon="['fas', 'share-alt']"/></b-button>
-                  <Popper
-                    style="font-size: 12px;"
-                    v-if="$refs['share-collection'+index]"
-                    :is-open="popperID == ('share-collection'+index)"
-                    :anchor-el="$refs['share-collection'+index][0]"
-                    :on-close="hidePopper"
-                    :on-create="isElementOverflowingContainer('popper-content'+index, lockerModalBody && lockerModalBody, popperID == 'share-collection'+index)"
-                    class="share-tooltip">
-                    <aside :id="'popper-content'+index" :ref="'popper-content'+index" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
+                    <aside :id="'popper-content'+index" v-if="popperID == 'share-collection'+index" :ref="'popper-content'+index" style="opacity: 0"
+                           v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip">
                       <div class="share-holder">
                         <h3>Copy link and Share</h3>
                         <div class="share-form">
@@ -313,7 +306,6 @@
                         </div>
                       </div>
                     </aside>
-                  </Popper>
                 </div>
               </div>
               <div class="d-none d-lg-block product-description text-center">
@@ -538,12 +530,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public isElementOverflowingContainer(elementRef:string, container:Record<any, any>, isCurrent:boolean) {
+  public isElementOverflowingContainer(elementRef:string) {
     setTimeout(()=>{
       const element = this.ref[elementRef][0];
-      if(isCurrent && element && container){
+      if(element && this.lockerModalBody){
         const elementRect = element.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
+        const containerRect = this.lockerModalBody.getBoundingClientRect();
 
         const isOverflowingHorizontally = elementRect.right > containerRect.right || elementRect.left < containerRect.left;
         const isOverflowingVertically = elementRect.bottom > containerRect.bottom || elementRect.top < containerRect.top;
@@ -556,11 +548,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         let horizontalDifference = elementRect.right - containerRect.right + 15
         if(overflowInfo.horizontal){
           element.style.marginLeft = `${horizontalDifference * -1}px`
+          element.style.opacity = '1'
         }else{
           element.style.marginLeft = ''
+          element.style.opacity = '1'
         }
       }
-    }, 10)
+    }, 550)
   }
 
   public locker_with_rosters(id:any) {
@@ -860,6 +854,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           Vue.set(this.getCollections[index], 'shared_url', shared_url)
         }
         this.showPopper('share-collection'+index)
+        this.isElementOverflowingContainer('popper-content'+index)
       }
     } catch (error) {
       console.log(error)

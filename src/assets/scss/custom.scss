@@ -6752,6 +6752,15 @@ $fontSize: 0.5;
     display: none !important;
 }
 
+.share-collection-tooltip{
+    left: -30px;
+    top: 110px;
+}
+
+#modal-center-lockerroom.modal-body{
+    overflow-x: hidden;
+}
+
 .cartAnim{
     position: absolute;
     opacity: 0;
