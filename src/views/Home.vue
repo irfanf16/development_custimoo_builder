@@ -603,11 +603,6 @@ Vue.filter('formatDate', function(value:string) {
       await this.initProductsFonts(products, resolve)
     })
 
-    const shared_url = getUrlParameter()
-    if (shared_url?.includes('share')) {
-      this.is_shared_product = true
-    }
-
     await http.get(`/get-settings`).then((res) => {
       this.$store.commit('SET_SETTING', res.data.result.settings)
       this.$store.commit('SET_FACTORY_SETTING', res.data.result.factory_settings)
@@ -630,13 +625,13 @@ Vue.filter('formatDate', function(value:string) {
     if(sync_id) {
       await resetLastActiveProductData()
     }
-    // await this.$store.dispatch('setCategories', {
-    //   query_params: `customized=${last_active_product_obj.customized}&personalized=${last_active_product_obj.personalized}&private=${last_active_product_obj.private_product}`
-    // })
+
     const categories_promise = this.fetchCategories();
     categories_promise.then(async (response) => {
       let query_params = await this.setQueryParams()
       await this.retrieveProducts(query_params)
+
+      const shared_url = getUrlParameter()
       if (shared_url?.includes('share')) {
         routerPush(this.$router,'Home');
       }
@@ -772,7 +767,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
     </svg>`,
   ]
-  public is_shared_product = false;
   public is_admin_token = localStorage.getItem('adminToken');
   public pulse_info: Record<any, any> = {
     use_original_colors: true, shuffle: true, use_logo_colors: true
@@ -1717,14 +1711,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.search_products = '';
         (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
+        await self.$eventBus.$emit('useProductOriginalColors')
+        await this.$store.dispatch('resetStore')
         const categories_promise = this.fetchCategories();
         categories_promise.then(async (response) => {
           if (response) {
             await this.exitFromEditMode()
             this.hideLockerProductUpdateButton()
             this.updateOrderItemProducts = null;
-            await self.$eventBus.$emit('useProductOriginalColors')
-            await this.$store.dispatch('resetStore')
             this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
             await self.$eventBus.$emit('resetTextsCanvas')
             await self.$eventBus.$emit('resetLogosCanvas')
