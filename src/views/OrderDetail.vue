@@ -660,14 +660,17 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       this.selectedReorderImage = img_index;
     }
   }
+
   reorder(order, order_item_id) {
-
-    let redirect_url = (this.company.customizer_page_url) ? `${this.company.company_domain}/${this.company.customizer_page_url}/#/?` :  `${this.company.company_domain}/#/?` ;
-    redirect_url += `is_reorder=true&order_id=${order.id}&order_number=${order.order_no}&order_item_id=${order_item_id}&`
-    redirect_url += `factory_product_id=${this.reorder_product.id}&active_product_id=${this.reorder_product.product_id}&`
-    redirect_url += `style_id=${this.reorder_product.style_id}&design_id=${this.reorder_product.design_id}`;
-
-    window.location.href = redirect_url;
+    if(this.reorder_product && this.reorder_product.product_id) {
+      let redirect_url = (this.company.customizer_page_url) ? `${this.company.company_domain}/${this.company.customizer_page_url}/#/?` :  `${this.company.company_domain}/#/?` ;
+      redirect_url += `is_reorder=true&order_id=${order.id}&order_number=${order.order_no}&order_item_id=${order_item_id}&`
+      redirect_url += `factory_product_id=${this.reorder_product.id}&active_product_id=${this.reorder_product.product_id}&`
+      redirect_url += `style_id=${this.reorder_product.style_id}&design_id=${this.reorder_product.design_id}`;
+      window.location.href = redirect_url;
+    } else {
+      this.showToast('Please select product.', 'error');
+    }
   }
 
   makeReorderMessage(factory_product_id, factory_products) {

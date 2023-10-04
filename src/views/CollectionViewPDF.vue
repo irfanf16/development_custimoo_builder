@@ -78,7 +78,7 @@
                     <template v-if="isAuthenticated">
                       <template v-if="company.platform !== 'self'  || (company.platform == 'self' && company.id !== 1)
                                 || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-                        <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs" @click="addToCart(collection_product,idxs)">
+                        <button  class="btn btn-secondary" style="width:30%" v-if="active_product_index !== idxs" @click="addToCart(collection_product,idxs)">
                         Purchase
                       </button>
                         <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
@@ -88,7 +88,7 @@
                     </template>
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
-                        <button  class="btn btn-secondary" style="width:30%" v-if="selectedItemIndex !== idxs"  @click="setActionBeforeLogin('addToCart',collection_product,idxs)">
+                        <button  class="btn btn-secondary" style="width:30%" v-if="active_product_index !== idxs"  @click="setActionBeforeLogin('addToCart',collection_product,idxs)">
                           Purchase
                         </button>
                         <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
@@ -123,7 +123,6 @@
                @opened="$emit('setRosterOpen', true)"
                name="rostermodal" class="roster-modal" size="xl"
                footer-class="hide-modal-footer d-none"
-               @closed="close"
         >
           <div class="modal-header d-flex justify-content-between">
             <span class="fs-5 font-weight-bolder">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span>
@@ -131,7 +130,7 @@
           </div>
           <div class="modal-body">
             <div class="d-flex flex-wrap justify-content-between">
-              <RosterDetails ref="rosterDetailsModal" :productSizes="sizeOptions"  :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts"/>
+              <RosterDetails ref="rosterDetailsModal" :productSizes="product_sizes"  :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts"/>
               <div class="roster-preview-area">
                 <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts"/>
               </div>
@@ -203,8 +202,7 @@
         this.hide();
       });
       this.$root.$on('closeCollectionView', () => {
-        this.selectedItemIndex = null;
-        this.current_index = null;
+       this.close()
       });
 
       function getCoords(elem) {
@@ -255,10 +253,10 @@
     public collection:Record<any, any> = [];
     public ref = this.$refs as Record<any, any>
     public products_roster: Record<any, any>[] = []
-    public sizeOptions: Record<any, any>[] = []
+    public product_sizes: Record<any, any>[] = []
     private screenWidth = (window.screen.availWidth - 100);
     public designsIndex = 0
-    public selectedItemIndex: number|null  = null;
+    public active_product_index: number|null  = null;
     public room_products:Record<any, any> = [];
     public room_product_index = 0;
     public current_product = {};
@@ -318,12 +316,6 @@
       }
       this.$store.commit("ACTION_BEFORE_LOGIN", '');
     }
-
-
-    // @Watch('productSizes')
-    // productSizeChanged(){
-    //   this.setProductSizes();
-    // }
 
     public loadFont(url: string) {
       return new Promise((resolve) => {
@@ -394,7 +386,7 @@
 
     public hide(){
       this.hideVModal('rostermodal')
-      this.selectedItemIndex = null;
+      this.active_product_index = null;
       this.current_index = 0;
     }
 
@@ -402,20 +394,8 @@
       const self = this;
       this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
       self.$modal.hide('rostermodal')
-      this.selectedItemIndex = null;
+      this.active_product_index = null;
       this.current_index = 0;
-    }
-
-    public setProductSizes() {
-      if(this.show_roster){
-        this.sizeOptions = [];
-        this.productSizes.forEach((size: any, key: number) => {
-          let sizes = {value: size.name, text: size.name}
-          this.sizeOptions = this.sizeOptions.concat([sizes])
-        })
-      }else{
-        this.sizeOptions = [];
-      }
     }
 
     get cartItems() {
@@ -429,7 +409,6 @@
     getCollection(): void {
       this.showLoader = true
       const collection_file_name = this.$route.params.collection_file_name;
-      console.log('collection_file_name', collection_file_name)
       http.get(`/collection/view?collection_file_name=${encodeURIComponent(collection_file_name)}`).then(async (response: any) => {
           this.collection = response.data.result.collection
           this.showLoader = false
@@ -451,20 +430,42 @@
 
 
     async addToCart(room_product:Record<any,any>,idxs:number){
-      var self = this;
-      this.selectedItemIndex = idxs;
-
-      if(self.isAuthenticated){
-        const product_collection_view_promise =  self.fetchProductForCollectionView(room_product.product_locker_room.room_id,room_product.product_locker_room);
-        product_collection_view_promise.then(() => {
-          self.ref['rosterDetailsModal'].fontsColorsManipulation();
-          self.ref['rosterDetailsModal'].fontsList();
-        });
-        self.room_product_index = self.room_product_index + 1 ;
+      this.active_product_index = idxs;
+      if(this.isAuthenticated){
+        this.getCollectionProductData(room_product.product_locker_room);
+        this.room_product_index = this.room_product_index + 1 ;
       }
       else{
         this.ref['loginModal'].show();
       }
+    }
+
+    getCollectionProductData(room_product: Record<any, any>) {
+      let room_product_id = room_product.id;
+      let product_id = room_product.product_id;
+      let url = 'list/products'
+      let is_private:boolean = this.$store.getters.getPrivateProduct;
+      let url_query_string = `private=${is_private}&active_product_id=${product_id}&locker_product_id=${room_product_id}&active_product_type=locker_product&is_share_collection=true`
+      url = `${url}?${url_query_string}`
+      http.get(url).then(async (response: Record<any, any>) => {
+        this.handleMainProducts(response).then(async (response_data) => {
+          const selected_product = this.$store.getters.getSelectedProduct
+          this.product_sizes = this.formatProductSizes(selected_product.sizes[0].json_data)
+          this.show_roster = true;
+          await this.show();
+        })
+
+      }, (error:Record<any, any>) => {
+        console.error("Error while retrieving products",error)
+      })
+    }
+
+    formatProductSizes(product_sizes: Record<any, any>[]): Record<any, any>[] {
+      let product_sizes_formatted: Record<any, any>[] = []
+      product_sizes.forEach((size) => {
+        product_sizes_formatted.push({value: size.name, text: size.name})
+      })
+      return product_sizes_formatted
     }
 
     async deleteCartItem(item:Record<any,any>){
