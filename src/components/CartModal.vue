@@ -363,12 +363,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index];
 
-    const categories_promise = this.fetchCategories(null, cart_item_product.product_id);
-    categories_promise.then( async (response) => {
       let is_private = this.$store.getters.getPrivateProduct;
-      let is_customized = this.$store.getters.getCustomized;
-      let is_personalized = this.$store.getters.getPersonalized;
-
       //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
       let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
       let shopify_line_item = (self.$route.query.line)?self.$route.query.line:null;
@@ -377,7 +372,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       }
 
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-        editing: true,  type: "cart_product", filters: {customized: is_customized, personalized: is_personalized, search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
+        editing: true,  type: "cart_product", filters: {search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
           cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item
         },
         order_product_info: null
@@ -386,7 +381,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
       //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
       this.$root.$emit('rostershared', '')
-      let url = `list/products?customized=${is_customized}&personalized=${is_personalized}&private=${is_private}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product`;
+      let url = `list/products?private=${is_private}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product`;
       let query_string = `item_id=${cart_item.id}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product&paginate=false`
       query_string += `&factory_product_id=${cart_item_product.id}&style_id=${cart_item_product.style_id}&design_id=${cart_item_product.design_id}`
       url = `list/products?${query_string}`;
@@ -408,7 +403,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
           this.showVModal('rostermodal');
         },500)
       }
-    })
   }
 
   public async setLastActiveProductData() {

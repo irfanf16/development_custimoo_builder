@@ -847,7 +847,7 @@ export class ProductsQueryParamsMixin extends Vue {
       const active_product_type = edit_product_info_obj.type;
       if(active_product_type == "order_product") {
         let { order_product_info, order_product_info: { factory_product_active_index }, order_product_info: { active_product_id } } = edit_product_info_obj
-        query_params.push("customized=true", "personalized=true", `active_product_type=order_product`, `active_product_id=${active_product_id}`,
+        query_params.push(`active_product_type=order_product`, `active_product_id=${active_product_id}`,
           `item_id=${order_product_info.item_id}`, `activity_id=${order_product_info.activity_id}`, `style_id=${order_product_info.style_id}`,
           `design_id=${order_product_info.design_id}`, `factory_product_active_index=${factory_product_active_index}`, `paginate=false`)
       } else if(active_product_type == "locker_product") {

@@ -626,44 +626,25 @@ Vue.filter('formatDate', function(value:string) {
       await resetLastActiveProductData()
     }
 
-    const categories_promise = this.fetchCategories();
-    categories_promise.then(async (response) => {
-      let query_params = await this.setQueryParams()
-      await this.retrieveProducts(query_params)
+    let sendCategoryCall = true;
+    let active_product_type = this.$route.query.active_product_type;
+    let product_edit_info_object = self.$store.getters.getProductEditInfoObject
+    if(product_edit_info_object.editing && product_edit_info_object.type != 'locker_product') {
+        sendCategoryCall = false;
+    }else if(this.$route.query.is_reorder || this.$route.query.update_cart ||
+      (active_product_type && active_product_type != 'locker_product')) {
+      sendCategoryCall = false;
+    }
 
-      const shared_url = getUrlParameter()
-      if (shared_url?.includes('share')) {
-        routerPush(this.$router,'Home');
-      }
+    if(sendCategoryCall) {
+      const categories_promise = this.fetchCategories();
+      categories_promise.then(async (response) => {
+        this.afterCategoriesCallOnMounted();
+      });
+    } else {
+      this.afterCategoriesCallOnMounted();
+    }
 
-      this.jwtToken = localStorage.getItem('jwtToken') as string
-      // await this.$store.dispatch('setJwtToken')
-      if(!localStorage.getItem('browserToken')){
-        await this.$store.dispatch('setBrowserToken')
-      }
-
-      if (this.isCustomerAuthenticated){
-        await this.$store.dispatch('getNotifications')
-        await  getPermissions()
-        let show_cart = await this.$store.getters.getShowCart
-        if(show_cart){
-          this.showVModal('cart-modal');
-        }
-        this.prevRoute = null
-      }else{
-
-        if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
-          setTimeout( () => {
-            this.gotoLogin();
-          },5000)
-        }
-
-      }
-
-      if(this.$route.query.tabIdx){
-        this.$store.dispatch('setTabMain',{value: parseInt(this.$route.query.tabIdx)})
-      }
-    });
 
       await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
         await this.getLockers(false,false,resolve);
@@ -770,6 +751,46 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public is_admin_token = localStorage.getItem('adminToken');
   public pulse_info: Record<any, any> = {
     use_original_colors: true, shuffle: true, use_logo_colors: true
+  }
+
+  private async afterCategoriesCallOnMounted() {
+
+    let query_params = await this.setQueryParams()
+    await this.retrieveProducts(query_params)
+
+    const shared_url = getUrlParameter()
+    if (shared_url?.includes('share')) {
+      routerPush(this.$router,'Home');
+    }
+
+    this.jwtToken = localStorage.getItem('jwtToken') as string
+    // await this.$store.dispatch('setJwtToken')
+    if(!localStorage.getItem('browserToken')){
+      await this.$store.dispatch('setBrowserToken')
+    }
+
+    if (this.isCustomerAuthenticated){
+      await this.$store.dispatch('getNotifications')
+      await  getPermissions()
+      let show_cart = await this.$store.getters.getShowCart
+      if(show_cart){
+        this.showVModal('cart-modal');
+      }
+      this.prevRoute = {}
+    }else{
+
+      if(this.prevRoute && this.prevRoute.name == 'OrderDetail'){
+        setTimeout( () => {
+          this.gotoLogin();
+        },5000)
+      }
+
+    }
+
+    if(this.$route.query.tabIdx){
+      let tabIdx: any = this.$route.query.tabIdx;
+      this.$store.dispatch('setTabMain',{value: parseInt(tabIdx)})
+    }
   }
 
   private setRosterOpen(val: boolean) {
@@ -1782,7 +1803,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
-    let url = `/list/products?customized=${this.$store.getters.getCustomized}&personalized=${this.$store.getters.getPersonalized}&private=${this.$store.getters.getPrivateProduct}`;
+    let url = `/list/products?private=${this.$store.getters.getPrivateProduct}`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
