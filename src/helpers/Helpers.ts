@@ -484,7 +484,11 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                 font_family: '',
                 items: [] as Record<any, any>[]
               }
-              const font = products_fonts[custom_text.font_family]
+              //todo there are some cases where font does not found then load first font. sometime custom text font family is null or font does not exists
+              let font = products_fonts[custom_text.font_family]
+              if(!font) {
+                font = products_fonts[Object.keys(products_fonts)[0]]
+              }
 
               let path: Record<any, any> = {}
               let text_for_test_char = '';

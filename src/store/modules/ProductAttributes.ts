@@ -1186,6 +1186,9 @@ const ProductAttributes:Module<any, any> = {
         return state.product_custom_texts[product_id];
       }
     },
+    allProductsCustomTexts: state => {
+      return state.product_custom_texts
+    },
     getEditRosterFromLocker: state => {
       return state.edit_roster_from_locker;
     },

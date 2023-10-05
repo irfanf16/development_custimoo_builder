@@ -748,6 +748,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       <path fill-rule="evenodd" d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"/>
     </svg>`,
   ]
+  private order_update_data:Record<any, any>[]= []
   public is_admin_token = localStorage.getItem('adminToken');
   public pulse_info: Record<any, any> = {
     use_original_colors: true, shuffle: true, use_logo_colors: true
@@ -1867,8 +1868,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
 
     updated_product["id"] = order_products_info_obj.factory_products[factory_product_active_index].id;
-    updated_product["status"] = "submitted_for_factory_review";
-    order_products_info_obj.factory_products[factory_product_active_index] = updated_product
+    updated_product["status"] = "order_approve";
+    this.order_update_data[factory_product_active_index] = updated_product
+    // order_products_info_obj.factory_products[factory_product_active_index] = updated_product
     order_products_info_obj.factory_product_active_index = factory_product_updated_index
     self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_products_info_obj })
     let query_params = [
@@ -1887,24 +1889,25 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
-    let order_product_active_index = order_products_info_obj.order_products.factory_product_active_index;
-    updated_product["id"] = order_products_info_obj.order_products.factory_products[order_product_active_index].id;
+    let factory_product_active_index = order_products_info_obj.order_products.factory_product_active_index;
+    updated_product["id"] = order_products_info_obj.order_products.factory_products[factory_product_active_index].id;
     let order_item_id = order_products_info_obj.order_item_id;
     // updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "order_approve";
-    order_products_info_obj.order_products.factory_products[order_product_active_index] = updated_product
-    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-      editing: true,
-      type: "order_product",
-      filters: null,
-      locker_product_info: null,
-      cart_product_info: null,
-      order_product_info: order_products_info_obj
-    })
+    this.order_update_data[factory_product_active_index] = updated_product
+    // order_products_info_obj.order_products.factory_products[order_product_active_index] = updated_product
+    // self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+    //   editing: true,
+    //   type: "order_product",
+    //   filters: null,
+    //   locker_product_info: null,
+    //   cart_product_info: null,
+    //   order_product_info: order_products_info_obj
+    // })
     // self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
     let url = `order_item/${order_item_id}/update/products`;
     this.showLoader = true
-    http.post(url, {factory_products: order_products_info_obj.order_products.factory_products}).then(async (res: any) => {
+    http.post(url, {factory_products: this.order_update_data}).then(async (res: any) => {
       await self.exitFromEditMode()
       this.showLoader = false
       if (res.data.success == true) {

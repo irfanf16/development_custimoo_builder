@@ -190,8 +190,10 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
           this.$store.commit('RESET_CUSTOM_LOGOS')
           this.$store.commit('RESET_ALL_COLORS')
 
+          let product_custom_texts: Record<any, any>[] = active_factory_product.product_custom_texts.length > 0 ? active_factory_product.product_custom_texts : active_product.product_custom_texts
+          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail } = active_factory_product
+
           if(product_edit_info_object.type == "order_product") {
-            let order_products = Object.assign({}, product_edit_info_object.order_product_info, { order_products: active_product_detail })
             let order_product_info_data = getEditModeDefaultObj('order_product_info')
             order_product_info_data.activity_items = active_product_detail.activity_items
             order_product_info_data.factory_id = active_product_detail.factory_id
@@ -201,11 +203,32 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             order_product_info_data.activity_id = active_product_detail.activity_id
             order_product_info_data.style_id = active_style_id
             order_product_info_data.design_id = active_design_id
-            order_product_info_data.factory_product_active_index = active_product_detail.factory_product_active_index
+            order_product_info_data.factory_product_active_index = factory_product_active_index
             self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_product_info_data })
+
+            if(self.order_update_data && self.order_update_data.length > 0 && self.order_update_data[factory_product_active_index]) {
+              let order_update_active_product = self.order_update_data[factory_product_active_index]
+              custom_logos = order_update_active_product.custom_logos
+              default_colors = order_update_active_product.defaultcolors
+              group_colors = order_update_active_product.groupcolors
+              product_roster_detail = order_update_active_product.product_roster_detail
+              product_custom_texts = order_update_active_product.product_custom_texts
+              active_style_id = order_update_active_product.style_id
+              active_design_id = order_update_active_product.design_id
+              const active_product_styles = active_product.productstyles
+              active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
+                return style.id == active_style_id
+              })
+              this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
+              console.log('active_style_index', active_style_id, active_style_index)
+              const active_style_designs = active_product_styles[active_style_index].productdesigns
+              active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
+                return design.id == active_design_id
+              })
+              console.log('inside order', active_design_id, active_design_index)
+            }
           }
-          let product_custom_texts: Record<any, any>[] = active_factory_product.product_custom_texts.length > 0 ? active_factory_product.product_custom_texts : active_product.product_custom_texts
-          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail } = active_factory_product
+
           let customizer_data: Record<any, any> = {
             active_product_id: active_product_id, custom_logos:custom_logos, product_custom_texts:product_custom_texts,
             default_colors:default_colors, group_colors:group_colors, product_roster_detail: product_roster_detail
@@ -234,7 +257,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
               }
             }
             let product_roster_detail =  last_active_prod_data.product_roster_detail
-            this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors, product_roster_detail: product_roster_detail})
+            await this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors, product_roster_detail: product_roster_detail})
           }
           else {
             //todo need to update category
@@ -287,10 +310,10 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
       this.setProductTeamLogoColors(custom_logos)
     }
     if(product_custom_texts && product_custom_texts.length > 0) {
-      this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {index_type: 'product', value: product_custom_texts});
+      this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {product_id: active_product_id, value: product_custom_texts});
       product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
         self.$eventBus.$emit("customTextUpdated", {
-          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text, name: 'shahzaib'
         });
       })
     }
@@ -302,7 +325,10 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
         data: {using_logo_colors: false,  is_shuffled: false,  colors: default_colors }
       })
     }
-   if(group_colors && !checkIsEmpty(group_colors)) {
+   if(group_colors) {
+     if(group_colors.constructor.name == "Array" && group_colors.length == 0) {
+       group_colors = {}
+     }
      emit_color_change_event = true
      await this.$store.dispatch('overRideGroupColors', group_colors);
    }
@@ -846,10 +872,20 @@ export class ProductsQueryParamsMixin extends Vue {
     if(edit_product_info_obj.editing) {
       const active_product_type = edit_product_info_obj.type;
       if(active_product_type == "order_product") {
-        let { order_product_info, order_product_info: { factory_product_active_index }, order_product_info: { active_product_id } } = edit_product_info_obj
-        query_params.push(`active_product_type=order_product`, `active_product_id=${active_product_id}`,
-          `item_id=${order_product_info.item_id}`, `activity_id=${order_product_info.activity_id}`, `style_id=${order_product_info.style_id}`,
-          `design_id=${order_product_info.design_id}`, `factory_product_active_index=${factory_product_active_index}`, `paginate=false`)
+        let { order_product_info } = edit_product_info_obj
+        // on page refresh load first order product
+        if(order_product_info.factory_products.length > 0) {
+          let first_factory_product = order_product_info.factory_products[0]
+          order_product_info.factory_product_active_index = 0
+          order_product_info.active_product_id = first_factory_product.product_id
+          order_product_info.active_style_id = first_factory_product.style_id
+          order_product_info.active_design_id = first_factory_product.design_id
+          this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {order_product_info: order_product_info})
+        }
+        const { active_product_id, item_id, activity_id, style_id, design_id, factory_product_active_index } = order_product_info
+        query_params.push(`active_product_type=order_product`, `active_product_id=${active_product_id}`, `item_id=${item_id}`,
+          `activity_id=${activity_id}`, `style_id=${style_id}`, `design_id=${design_id}`, `factory_product_active_index=${factory_product_active_index}`,
+          `paginate=false`)
       } else if(active_product_type == "locker_product") {
         query_params = [
           `customized=${edit_product_info_obj.filters.customized}`, `personalized=${edit_product_info_obj.filters.personalized}`,
