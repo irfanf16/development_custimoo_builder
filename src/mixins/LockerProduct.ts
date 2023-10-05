@@ -220,12 +220,10 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
                 return style.id == active_style_id
               })
               this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
-              console.log('active_style_index', active_style_id, active_style_index)
               const active_style_designs = active_product_styles[active_style_index].productdesigns
               active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
                 return design.id == active_design_id
               })
-              console.log('inside order', active_design_id, active_design_index)
             }
           }
 
@@ -878,8 +876,8 @@ export class ProductsQueryParamsMixin extends Vue {
           let first_factory_product = order_product_info.factory_products[0]
           order_product_info.factory_product_active_index = 0
           order_product_info.active_product_id = first_factory_product.product_id
-          order_product_info.active_style_id = first_factory_product.style_id
-          order_product_info.active_design_id = first_factory_product.design_id
+          order_product_info.style_id = first_factory_product.style_id
+          order_product_info.design_id = first_factory_product.design_id
           this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {order_product_info: order_product_info})
         }
         const { active_product_id, item_id, activity_id, style_id, design_id, factory_product_active_index } = order_product_info
@@ -1016,9 +1014,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
       if (self.$store.getters.getProductEditInfoObject.editing) {
         switch (self.$store.getters.getProductEditInfoObject.type) {
           case 'locker_product':
-            console.log('inside locker product case', self.$store.getters.getHideSaveLockerButton)
             if (self.$store.getters.getHideSaveLockerButton === false) {
-              console.log('show modal')
               self.$santaModal.show({
                 icon: 'confirm', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Save', cancel_text: 'Cancel',
               },self).then((confirmation) => {
@@ -1351,7 +1347,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                  shopify_cart_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
                }
 
-              // console.log(shopify_cart_data);
               self.$store.dispatch('setCartLoading',true);
               http.post(ecom_url, shopify_cart_data).then((res: any) => {
                self.$store.dispatch('setCartLoading',false);

@@ -87,7 +87,7 @@
                                 v-if="getProductEditInfoObject.order_product_info.factory_product_active_index != 0">Previous</b-button>
                       <b-button  @click="loadOrderItemProduct('next')"  variant="outline-secondary"
                                  v-if="getProductEditInfoObject.order_product_info.factory_product_active_index != (getProductEditInfoObject.order_product_info.factory_products.length - 1)">Next</b-button>
-                      <b-button  @click="UpdateOrderProducts" variant="outline-secondary"
+                      <b-button  @click="UpdateOrderProducts()" variant="outline-secondary"
                                  v-if="getProductEditInfoObject.order_product_info.factory_product_active_index == (getProductEditInfoObject.order_product_info.factory_products.length - 1)">Update Products</b-button>
                       <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
                       <modal name="product-rejection-info-modal" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
@@ -639,10 +639,10 @@ Vue.filter('formatDate', function(value:string) {
     if(sendCategoryCall) {
       const categories_promise = this.fetchCategories();
       categories_promise.then(async (response) => {
-        this.afterCategoriesCallOnMounted();
+        await this.afterCategoriesCallOnMounted();
       });
     } else {
-      this.afterCategoriesCallOnMounted();
+      await this.afterCategoriesCallOnMounted();
     }
 
 
@@ -663,7 +663,7 @@ Vue.filter('formatDate', function(value:string) {
         await this.addToCart(resolve);
       })
       await this.$eventBus.$on('updateOrder', async (resolve: any) => {
-        await this.UpdateOrderProducts(false,false,resolve);
+        await this.UpdateOrderProducts(resolve);
       });
   },
   async beforeRouteEnter(to, from, next) {
@@ -1889,9 +1889,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
-    let factory_product_active_index = order_products_info_obj.order_products.factory_product_active_index;
-    updated_product["id"] = order_products_info_obj.order_products.factory_products[factory_product_active_index].id;
-    let order_item_id = order_products_info_obj.order_item_id;
+    let factory_product_active_index = order_products_info_obj.factory_product_active_index;
+    updated_product["id"] = order_products_info_obj.factory_products[factory_product_active_index].id;
+    let order_item_id = order_products_info_obj.item_id;
     // updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "order_approve";
     this.order_update_data[factory_product_active_index] = updated_product
@@ -1916,6 +1916,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         } else {
           self.$router.push({name: "OrderDetail", params: {order_id: order_item_id}});
         }
+      } else {
+        this.showErrorArr(res.data.errors)
       }
       if(resolve){
         resolve(true);
@@ -2050,7 +2052,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.downloadPdfFile(res.data.pdf, res.data.name);
       this.pdf_generation_loading = false
     }).catch(err => {
-      console.log('errerrerr', err)
       this.showToast('Something went wrong', 'error');
       this.pdf_generation_loading = false
     });
