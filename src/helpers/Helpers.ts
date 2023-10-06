@@ -657,7 +657,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       })
       const reorder_info_obj = Store.getters.getReorderInfoObj;
       let reorder_data: Record<any, any>|null = {}
-      if(product_edit_info_obj&& product_edit_info_obj.type == "reorder_product") {
+      if(product_edit_info_obj && product_edit_info_obj.type == "reorder_product") {
         reorder_data.order_id = product_edit_info_obj.reorder_product_info.order_id
         reorder_data.order_number = product_edit_info_obj.reorder_product_info.order_number
         reorder_data.order_item_id = product_edit_info_obj.reorder_product_info.order_item_id
@@ -665,6 +665,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         reorder_data.changes = []
         reorder_data.roster_change = false
         reorder_data.design_change = false
+      } else if(product_edit_info_obj && product_edit_info_obj.type == "cart_product" && product_edit_info_obj.cart_product_info.reorder_data) {
+        reorder_data =  product_edit_info_obj.cart_product_info.reorder_data;
       } else {
         reorder_data = null
       }
@@ -2083,8 +2085,8 @@ const resetReorderInfoObject = (): void => {
 }
 
 const checkIsEmpty = (obj: any) => {
-  const obj_type = obj.constructor.name
   if(obj) {
+    const obj_type = obj.constructor.name
     if(obj_type == "Array") {
       return obj.length == 0
     } else if(obj_type == "Object") {
@@ -2095,9 +2097,6 @@ const checkIsEmpty = (obj: any) => {
   } else {
     return true;
   }
-
-
-  return Object.keys(obj).length == 0
 }
 
 export {

@@ -192,6 +192,9 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
 
           let product_custom_texts: Record<any, any>[] = active_factory_product.product_custom_texts.length > 0 ? active_factory_product.product_custom_texts : active_product.product_custom_texts
           let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail } = active_factory_product
+         if(product_edit_info_object.type == "cart_product" && active_product_detail.factory_products[0].reorder_data) {
+           this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', { cart_product_info : {...product_edit_info_object.cart_product_info, reorder_data : active_product_detail.factory_products[0].reorder_data} })
+          }
 
           if(product_edit_info_object.type == "order_product") {
             let order_product_info_data = getEditModeDefaultObj('order_product_info')
@@ -241,7 +244,7 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
               product_id: active_product_id, product_index: active_product_index, style_id: active_style_id, style_index: active_style_index,
               design_id: active_design_id, design_index: active_design_index
             } = last_active_prod_data)
-
+            console.log('last product logos', last_active_prod_data.custom_logos)
             if(last_active_prod_data.custom_logos.length > 0) {
               this.$store.commit('SET_CUSTOM_LOGOS', {
                 product_id: last_active_prod_data.product_id, custom_logos: last_active_prod_data.custom_logos
@@ -258,15 +261,8 @@ export class handleMainProducts extends Mixins(FetchCategories,HideUpdateLockerB
             await this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors, product_roster_detail: product_roster_detail})
           }
           else {
-            //todo need to update category
-            let category_index = 0
-            let category_id = null
-            if(last_active_prod_data.category_id) {
-              category_index = last_active_prod_data.category_index
-              category_id = last_active_prod_data.category_id
-            }
             let last_active_obj_updated_values = {
-              category_index: category_index, category_id: category_id, product_index: active_product_index, product_id: active_product_id,
+              product_index: active_product_index, product_id: active_product_id,
               style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
               search_products: self.search_products, customized: this.$store.getters.getCustomized,
               personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
@@ -933,7 +929,10 @@ export class ProductsQueryParamsMixin extends Vue {
           query_params.push(`title=${last_active_product_data.search_products}`)
         }
       }
-      query_params.push(`category_id=${selected_category.category_id}`)
+      if(selected_category.category_id) {
+        query_params.push(`category_id=${selected_category.category_id}`)
+      }
+      query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
     }
     return query_params
   }
@@ -1026,19 +1025,19 @@ export class exitEditMode extends Mixins(ErrorMessages) {
                     })
                     prms.then(() => {
                       self.showToast('Your settings saved successfully', 'success');
-                      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                      exitFromEditMode()
                       resolve(true);
                     });
                   }
                   else{
                     self.showToast('Changes Discarded, Exiting from Editing State', 'error');
-                    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                    exitFromEditMode()
                     resolve(false)
                   }
               });
             }
             else{
-              self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+              exitFromEditMode()
               resolve(false);
             }
             break;
@@ -1054,13 +1053,13 @@ export class exitEditMode extends Mixins(ErrorMessages) {
                 })
                 prms.then(() => {
                   self.showToast('Your settings saved successfully', 'success');
-                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                  exitFromEditMode()
                   resolve(true)
                 });
               }
               else{
                 self.showToast('Changes Discarded, Exiting from Editing State', 'error');
-                self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                exitFromEditMode()
                 resolve(false)
               }
             });
@@ -1077,13 +1076,13 @@ export class exitEditMode extends Mixins(ErrorMessages) {
                 })
                 prms.then(() => {
                   self.showToast('Your settings saved successfully', 'success');
-                  self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                  exitFromEditMode()
                   resolve(true)
                 });
               }
               else{
                 self.showToast('Changes Discarded, Exiting from Editing State', 'error');
-                self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null});
+                exitFromEditMode()
                 resolve(false)
               }
             });

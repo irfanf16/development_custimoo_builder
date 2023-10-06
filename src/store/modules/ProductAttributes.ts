@@ -322,8 +322,10 @@ const ProductAttributes:Module<any, any> = {
           state.customLogos[product_id][custom_logo_index] = {...product_custom_logo, ...payload.data}
         }
         else {
-          const custom_logos: Record<any,any> = state.customLogos[product_id];
-          state.customLogos[product_id] = {...custom_logos, ...payload.data}
+          //todo need to discuss with yasir
+          // const custom_logos: Record<any,any> = state.customLogos[product_id];
+          // state.customLogos[product_id] = {...custom_logos, ...payload.data}
+          state.customLogos[product_id] = payload.data
 
         }
       }

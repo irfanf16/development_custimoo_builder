@@ -1378,12 +1378,24 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async cancelEdit() {
-    exitFromEditMode()
-    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0})
+    let self: Record<any, any> = this;
+    this.showLoader = true;
+    await this.handleCancelEditMode();
     const categories_promise = this.fetchCategories();
-    categories_promise.then(() => {
-      this.retrieveProducts();
-    });
+    categories_promise.then(async (response) => {
+      if (response) {
+        let query_params = await this.setQueryParams()
+        await this.retrieveProducts(query_params)
+        if (this.mobileScreen) {
+          this.showDesign()
+          this.switchTabs(0, true)
+        }
+        this.isRosterOpened = false
+        this.showLoader = false
+      } else {
+        this.showLoader = false
+      }
+    })
   }
 
   private async cancelLocker() {
@@ -1747,7 +1759,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             await this.$store.dispatch('setTabMain', {value: 0});
             (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
             await this.$store.dispatch('SET_LOGO_COLORS', [])
-            await this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+            this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
             await this.$store.dispatch("setProductsRosters")
             let query_params = await this.setQueryParams()
             await this.retrieveProducts(query_params)
@@ -1761,6 +1773,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         })
       } else {
         if (response === true || response === false) {
+          await self.$eventBus.$emit('useProductOriginalColors')
+          await this.$store.dispatch('resetStore')
           const categories_promise = this.fetchCategories();
           categories_promise.then(async (response) => {
             let query_params = await this.setQueryParams()
@@ -1781,30 +1795,44 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
+  private async handleCancelEditMode() {
+    let self: Record<any, any> = this;
+    await this.exitFromEditMode()
+    this.search_products = '';
+    (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
+    await self.$eventBus.$emit('useProductOriginalColors')
+    this.hideLockerProductUpdateButton();
+    this.updateOrderItemProducts = null;
+    this.$store.commit('RESET_CUSTOM_TEXTS');
+    this.$store.commit('RESET_CUSTOM_LOGOS');
+    this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true});
+    await self.$eventBus.$emit('resetTextsCanvas');
+    await self.$eventBus.$emit('resetLogosCanvas');
+    (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+    await this.$store.dispatch('setTabMain', {value: 0});
+    await this.$store.dispatch("setProductsRosters");
+  }
+
 
   private async cancelCart() {
     let self: Record<any, any> = this;
-    // await this.$store.dispatch('setEditCart', {key:'cartId',value:0});
-    // await this.$store.dispatch('setEditCart', {key:'cartItemId',value:0});
-    exitFromEditMode()
+    this.showLoader = true;
+    await this.handleCancelEditMode();
     const categories_promise = this.fetchCategories();
-    categories_promise.then(async (response) => {
-      if(response){
-        let query_params = await this.setQueryParams()
-        await this.retrieveProducts(query_params);
-        if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && this.company.platform != 'shopify') {
-          await this.showVModal('cart-modal')
-        } else if ((this.company.platform === 'wordpress' || this.company.platform === 'shopify') && !this.isCollectionView) {
-          window.location.href = this.company.company_domain + '/cart'
-        }
+    categories_promise.then(async (category_res) => {
+      let query_params = await self.setQueryParams()
+      await this.retrieveProducts(query_params)
+      if(['wordpress', 'shopify'].includes(this.company.platform)) {
+        await this.showVModal('cart-modal')
+      } else {
+        window.location.href = this.company.company_domain + '/cart'
       }
     })
-
   }
 
   public async retrieveProducts(query_params: string[] = []) {
     let self = this;
-    let url = `/list/products?private=${this.$store.getters.getPrivateProduct}`;
+    let url = `/list/products`;
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
@@ -1832,18 +1860,28 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           resetLastActiveProductData();
           const categories_promise = this.fetchCategories('customized');
           categories_promise.then(async (response) => {
-            await self.retrieveProducts()
+            await self.retrieveProducts(query_params)
           });
           return false;
         }
       } else {
-        this.showError("No Product Found")
         self.showLoader = false
+        this.showError("No Product Found")
         this.exitFromEditMode();
         resetLastActiveProductData();
         const categories_promise = this.fetchCategories('customized');
         categories_promise.then(async (response) => {
-          await self.retrieveProducts()
+          query_params = []
+          this.search_products = '';
+          (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
+          const selected_category = this.$store.getters.getSelectedCategory;
+          if(selected_category.category_id) {
+            query_params.push(`category_id=${selected_category.category_id}`)
+          }
+          query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
+          query_params.push(`private=${this.$store.getters.getPrivateProduct}`)
+          console.log('shah', query_params)
+          await self.retrieveProducts(query_params)
         });
 
       }

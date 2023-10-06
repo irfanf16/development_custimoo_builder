@@ -220,7 +220,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   public async searchProducts(isClear:boolean) {
-    let self = this;
+    let self: Record<any, any> = this;
     const response = await this.editModeConfirmation();
     if(isClear)
     {
@@ -238,8 +238,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         product_filter = `title=${self.search_products}`;
       }
       const categories_promise =  this.fetchCategories(product_filter);
+      let query_params: string[] = [];
+      query_params.push(`customized=${self.$store.getters.getCustomized}`, `personalized=${self.$store.getters.getPersonalized}`)
       categories_promise.then(() => {
-        let query_params: string[] = [];
         if(this.getSelectedCategory && this.getSelectedCategory.category_id){
           query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
         }
@@ -309,6 +310,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
           if(self.search_products){
             query_params.push(`title=${self.search_products}`)
           }
+          query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
           this.$emit('retrieveProducts', query_params)
         }
       }
