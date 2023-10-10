@@ -29,7 +29,7 @@
 import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import {http} from "@/httpCommon"
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {LockerProducts} from "@/mixins/LockerProduct";
+import {LockerProducts, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {
   hideLockerProductSaveBtn,
@@ -48,7 +48,7 @@ import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 })
 
 
-export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, CustomLogosMixin) {
+export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, CustomLogosMixin, ProductsQueryParamsMixin) {
 
   /*
   * props starts

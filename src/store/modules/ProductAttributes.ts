@@ -12,7 +12,12 @@ import {
   logData,
   lastActiveProductDefaultObject,
   recentLogoDefaultObject,
-  getLogoSettingsObject, logoColorInfoDefaultObject, getDefaultColorsObject, setDefaultColors, santaClone
+  getLogoSettingsObject,
+  logoColorInfoDefaultObject,
+  getDefaultColorsObject,
+  setDefaultColors,
+  santaClone,
+  updateLastActiveProductData
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
@@ -164,9 +169,6 @@ const ProductAttributes:Module<any, any> = {
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
       state.lockerActiveTabIndex = payload
     },
-    setActiveLockerProduct(state:Record<any, any>, payload) {
-      state.activeLockerProduct = payload
-    },
     Change_Locker_Tabs_Index(state:Record<any, any>, payload) {
       state.lockerTabsIndex = payload
     },
@@ -248,16 +250,8 @@ const ProductAttributes:Module<any, any> = {
     SET_PRIVATE_PRODUCT(state:Record<any,any>, payload:Record<any,any>){
       state.private_product = payload
     },
-    // SET_EDIT_CART(state: Record<any, any>, payload: Record<any, any>){
-    //   Vue.set(state.editCart,payload.key,payload.value)
-    // },
     SET_SELECTED_PRODUCT_DESIGN_ID(state: Record<any, any>, payload: Record<any, any>){
       state.selectedDesignId = payload;
-    },
-    SET_SELECTED_PRODUCT_CUSTOM_LOGO(state: Record<any, any>,payload:any) {
-      if(state.products[state.selectedIndex]) {
-        state.products[state.selectedIndex].customLogos = payload;
-      }
     },
     async categories(state: Record<any, any>, categories: Record<any, any>) {
       if(categories){
@@ -304,10 +298,12 @@ const ProductAttributes:Module<any, any> = {
                })
              }
            }
-         } else {
+         }
+         else {
            Vue.set(state.customLogos[state.selectedPrdId], state.customLogos[state.selectedPrdId].length, customLogo.custom_logo)
          }
        }
+      updateLastActiveProductData({ custom_logos: state.customLogos})
     },
     SET_PRODUCT_CUSTOM_LOGOS(state: Record<any, any>, payload: Record<any, any> ) {
       if('append' in payload) {
@@ -322,23 +318,26 @@ const ProductAttributes:Module<any, any> = {
           state.customLogos[product_id][custom_logo_index] = {...product_custom_logo, ...payload.data}
         }
         else {
-          //todo need to discuss with yasir
-          // const custom_logos: Record<any,any> = state.customLogos[product_id];
-          // state.customLogos[product_id] = {...custom_logos, ...payload.data}
           state.customLogos[product_id] = payload.data
-
         }
       }
+      updateLastActiveProductData({ custom_logos: state.customLogos})
     },
     SET_CUSTOM_LOGOS(state: Record<any, any>,payload = []) {
       const product_id = payload.product_id ? payload.product_id : state.selectedPrdId
       const logo_index = payload.logo_index
-      if(logo_index >= 0) {
-        Vue.set(state.customLogos[product_id], logo_index, payload.custom_logos)
+      const set_all = payload.set_all ? payload.set_all : false;
+      if(set_all) {
+        state.customLogos = payload.custom_logos
+      } else {
+        if(logo_index >= 0) {
+          Vue.set(state.customLogos[product_id], logo_index, payload.custom_logos)
+        }
+        else {
+          Vue.set(state.customLogos, product_id, payload.custom_logos)
+        }
       }
-      else {
-        Vue.set(state.customLogos, product_id, payload.custom_logos)
-      }
+      updateLastActiveProductData({ custom_logos: state.customLogos})
     },
     SET_RECENT_LOGOS(state: Record<any, any>, payload: Record<any, any>) {
       if(payload) {
@@ -645,8 +644,8 @@ const ProductAttributes:Module<any, any> = {
         }else{
           state.groupColors = groupColors
         }
-
       }
+      updateLastActiveProductData({ group_colors: state.groupColors })
     },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
@@ -727,9 +726,11 @@ const ProductAttributes:Module<any, any> = {
     },
     OVERRIDE_PRODUCT_CUSTOM_TEXT(state:Record<any, any>, payload) {
      Vue.set(state.product_custom_texts, state.selectedPrdId, payload)
+      updateLastActiveProductData({product_custom_texts: state.product_custom_texts})
     },
     OVERRIDE_DEFAULT_COLOR(state:Record<any, any>, payload){
       state.defaultColors = payload;
+      updateLastActiveProductData({ default_colors: state.defaultColors })
     },
     OVERRIDE_GROUP_COLORS(state:Record<any, any>, payload){
       if(isEmpty(payload)){
@@ -834,8 +835,6 @@ const ProductAttributes:Module<any, any> = {
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
-     // state.groupColors = {}
-      //state.svgGroups = []
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload); // Add the new item to the array
@@ -1048,77 +1047,92 @@ const ProductAttributes:Module<any, any> = {
         })
         return false;
       }
-      /*
-       * By default we consider active product id to change custom text.If user wants to update custom text other than
-       *  selected product then we get that product id
-     * */
-      const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
-      if("index" in payload) {
+      const set_all = payload.set_all ? payload.set_all : false
+      if(set_all) {
+        state.product_custom_texts = payload.value
+      } else {
         /*
-        * This if condition checks it the custom text exists in given index or not. If not then we push custom text.
-        * This is usually case when user manually add custom text by clicking add new text button
-        * */
-        if(state.product_custom_texts[product_id][payload.index] == undefined) {
-          state.product_custom_texts[product_id].push(payload.value)
-          return false
-        }
-        else {
+       * By default we consider active product id to change custom text.If user wants to update custom text other than
+       * selected product then we get that product id
+       *  * */
+        const product_id: number = payload.product_id ? payload.product_id : state.selectedPrdId;
+        if("index" in payload) {
           /*
-          * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
-          * if index_type = "product_text" then it means we want to update product specific custom_text of product
+          * This if condition checks it the custom text exists in given index or not. If not then we push custom text.
+          * This is usually case when user manually add custom text by clicking add new text button
           * */
-          const index_type: string = payload.index_type ? payload.index_type : 'product_text';
-          //if index_type = "product" then we will update all custom texts of product
-          if(index_type == "product") {
-            Vue.set(state.product_custom_texts, product_id, payload.value)
+          if(state.product_custom_texts[product_id][payload.index] == undefined) {
+            state.product_custom_texts[product_id].push(payload.value)
+            return false
           }
           else {
-            let product_custom_text = state.product_custom_texts[product_id][payload.index];
-            product_custom_text = {...product_custom_text, ...payload.value}
-            Vue.set(state.product_custom_texts[product_id], payload.index, product_custom_text)
+            /*
+            * the index type should be one of "product", "product_text". if index_type = "product" then it means we want to update all custom texts of specific product.
+            * if index_type = "product_text" then it means we want to update product specific custom_text of product
+            * */
+            const index_type: string = payload.index_type ? payload.index_type : 'product_text';
+            //if index_type = "product" then we will update all custom texts of product
+            if(index_type == "product") {
+              Vue.set(state.product_custom_texts, product_id, payload.value)
+            }
+            else {
+              let product_custom_text = state.product_custom_texts[product_id][payload.index];
+              product_custom_text = {...product_custom_text, ...payload.value}
+              Vue.set(state.product_custom_texts[product_id], payload.index, product_custom_text)
+            }
           }
+        } else {
+          Vue.set(state.product_custom_texts, product_id, payload.value)
         }
-      } else {
-        Vue.set(state.product_custom_texts, product_id, payload.value)
       }
+      updateLastActiveProductData({product_custom_texts: state.product_custom_texts})
     },
     REMOVE_CUSTOM_TEXT(state: Record<any, any>, payload) {
       state.product_custom_texts[state.selectedPrdId].splice(payload, 1)
+      updateLastActiveProductData({product_custom_texts: state.product_custom_texts})
     },
     SET_PRODUCTS_NEXT_PAGE_NO(state:Record<any, any>, payload){
       state.products_next_page_no = payload;
     },
     SET_PRODUCTS_ROSTERS(state:Record<any, any>, payload: Record<any, any>){
-      if(payload && 'product_id' in payload) {
-        if('roster_index' in payload) {
-          let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
-          product_roster_item = Object.assign(product_roster_item, payload.roster_data)
-          Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
-        } else {
-          Vue.set(state.products_rosters, payload.product_id, payload.roster_data)
-        }
+      const set_all = (payload && payload.set_all) ? payload.set_all : false;
+      if(set_all) {
+        state.products_rosters = payload.roster_data
       } else {
-        const products_rosters: Record<any, any> = {}
-        if(state.products.length > 0) {
-          const last_products_rosters = state.last_active_product_data.products_rosters
-          state.products.forEach((product: Record<any, any>) => {
-            if(last_products_rosters && last_products_rosters[product.id]) {
-              products_rosters[product.id] = last_products_rosters[product.id]
-            } else {
-              const default_roster_item = rosterDefaultItem()
-              const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
-              const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
-              products_rosters[product.id] = [roster_item]
-            }
-          })
-          state.products_rosters = products_rosters;
-        } else {
-          console.info("No products found. So can't set products roster information")
+        if(payload && 'product_id' in payload) {
+          if('roster_index' in payload) {
+            let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
+            product_roster_item = Object.assign(product_roster_item, payload.roster_data)
+            Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
+          } else {
+            Vue.set(state.products_rosters, payload.product_id, payload.roster_data)
+          }
+        }
+        else {
+          const products_rosters: Record<any, any> = {}
+          if(state.products.length > 0) {
+            const last_products_rosters = state.last_active_product_data.products_rosters
+            state.products.forEach((product: Record<any, any>) => {
+              if(last_products_rosters && last_products_rosters[product.id]) {
+                products_rosters[product.id] = last_products_rosters[product.id]
+              } else {
+                const default_roster_item = rosterDefaultItem()
+                const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
+                const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
+                products_rosters[product.id] = [roster_item]
+              }
+            })
+            state.products_rosters = products_rosters;
+          } else {
+            console.info("No products found. So can't set products roster information")
+          }
         }
       }
+      updateLastActiveProductData({products_rosters: state.products_rosters})
     },
     REMOVE_ROSTER_ITEM(state:Record<any, any>, payload: number) {
       state.products_rosters[state.selectedPrdId].splice(payload, 1)
+      updateLastActiveProductData({products_rosters: state.products_rosters})
     },
     SET_SHOW_LOADER(state:Record<any,any>,payload){
       state.showLoader = payload;
@@ -1131,6 +1145,7 @@ const ProductAttributes:Module<any, any> = {
       if('reset' in payload) {
         state.logo_colors_info = logoColorInfoDefaultObject()
         state.defaultColors = default_colors_object
+        updateLastActiveProductData({ default_colors: state.defaultColors })
       }
       else {
         if('colors' in payload.data) {
@@ -1147,6 +1162,7 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_DEFAULT_COLORS(state: Record<any, any>, payload: Record<any, any>) {
       state.defaultColors = payload
+      updateLastActiveProductData({ default_colors: state.defaultColors })
     },
     SET_UNDO_REDO_ITEMS(state: Record<any, any>, payload: Record<any, any>) {
       const action = payload.action == 'undo' ? 'undoItems' : 'redoItems'
@@ -1199,9 +1215,6 @@ const ProductAttributes:Module<any, any> = {
     },
     getIsShareDesign: state => {
       return state.isShareDesign
-    },
-    getActiveLockerProduct: state => {
-      return state.activeLockerProduct
     },
     getEditLockerProduct: state => {
       return state.editLockerProduct
@@ -1521,15 +1534,15 @@ const ProductAttributes:Module<any, any> = {
               });
             }
 
-            await commit('categories', response.data.data)
-            await commit('SET_PRIVATE_PRODUCT', response.data.private_product);
-            await commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
-            await commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: response.data.personalized})
-            await commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
-            await commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
-            await commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
+            commit('categories', response.data.data)
+            commit('SET_PRIVATE_PRODUCT', response.data.private_product);
+            commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
+            commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: response.data.personalized})
+            commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
+            commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
+            commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
             if(categories && categories.length) {
-              await commit("SET_SELECTED_CATEGORY", {
+              commit("SET_SELECTED_CATEGORY", {
                 category_id: response.data.product_category_id,
                 category_index: category_index
               });
@@ -1628,9 +1641,6 @@ const ProductAttributes:Module<any, any> = {
     },
     async setSelectedProductAndStyle({commit}){
       await commit('SET_SELECTED_PRODUCT_AND_STYLE');
-    },
-    async setSelectedProductCustomLogo({commit},payload){
-      await commit('SET_SELECTED_PRODUCT_CUSTOM_LOGO',payload);
     },
     async ADD_CUSTOMIZED_PRODUCT({commit}, payload:number){
       let done = false;
@@ -1825,10 +1835,6 @@ const ProductAttributes:Module<any, any> = {
           reject(errors);
         });
       });
-    },
-    setLastActiveProductData({commit}, payload) {
-      commit('SET_LAST_ACTIVE_PRODUCT_DATA', payload)
-
     },
     setProductsRosters({commit}, payload) {
       commit('SET_PRODUCTS_ROSTERS', payload)

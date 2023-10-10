@@ -144,7 +144,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
           const custom_logos_updated_props = getLogoUpdatedProps(logo_data)
           delete customLogo!.scaleX
           delete customLogo!.scaleY
-          await this.$store.commit('SET_CUSTOM_LOGOS', {
+          this.$store.commit('SET_CUSTOM_LOGOS', {
             logo_index: customLogoIndex, custom_logos: {...customLogo, ...custom_logos_updated_props}
           })
         }

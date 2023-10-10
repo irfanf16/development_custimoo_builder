@@ -149,7 +149,7 @@
   import {http} from "@/httpCommon";
   import ErrorMessages from "@/mixins/ErrorMessages";
   import LoginForm from '@/components/LoginForm.vue'
-  import {LockerProducts,handleMainProducts} from "@/mixins/LockerProduct"
+  import {LockerProducts,handleMainProducts, ProductsQueryParamsMixin} from "@/mixins/LockerProduct"
   import {getDomDocument, getPermissions, getRandom, getRosterDetailDefaultObject} from '@/helpers/Helpers'
   import ModalAction from "@/mixins/ModalAction";
   import CustomizationPreview from '@/components/CustomizationPreview.vue'

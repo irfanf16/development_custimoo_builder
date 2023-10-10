@@ -77,10 +77,6 @@ export class HideUpdateLockerButton extends Vue {
       if(product_edit_info_obj.type == 'locker_product' && hide_locker_update_btn == true) {
         this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
       }
-      // else {
-      //   if(hide_locker_update_btn == false)
-      //     this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true);
-      // }
     }
   }
 }
@@ -101,7 +97,8 @@ export class FetchCategories extends Vue {
           categories_promise = this.$store.dispatch('setCategories',{
             query_params:`share_url=${encodeURIComponent(shared_url)}`
           });
-        } else if(getProductEditInfoObject.editing && !product_id){
+        }
+        else if(getProductEditInfoObject.editing && !product_id){
 
           switch(getProductEditInfoObject.type)
           {

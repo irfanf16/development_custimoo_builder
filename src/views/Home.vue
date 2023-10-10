@@ -252,23 +252,6 @@
                           </span>
                         </template>
                     </template>
-<!--                    <template v-else>-->
-<!--                      <template v-if="isCustomerAuthenticated">-->
-<!--                        <template v-if="$store.getters.getUpdateOrderItemProducts == null">-->
-<!--                          <button v-if="!$root.$refs.Order_Details.isLoading" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">-->
-<!--                            <b-icon-cart />-->
-<!--                          </button>-->
-<!--                          <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">-->
-<!--                            <i class="fa fa-spinner fa-spin"></i>-->
-<!--                          </button>-->
-<!--                        </template>-->
-<!--                      </template>-->
-<!--                      <template v-else>-->
-<!--                        <button v-b-modal.modal-login @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">-->
-<!--                          <b-icon-cart />-->
-<!--                        </button>-->
-<!--                      </template>-->
-<!--                    </template>-->
 
                     <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
 
@@ -487,7 +470,7 @@
 
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
             <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen"
-                             @hideAll="hideAll" :categories="categories" @retrieveProducts="retrieveProducts" @setRosterOpen="setRosterOpen"
+                             @hideAll="hideAll" :categories="categories" @setRosterOpen="setRosterOpen"
                              v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
           </b-col>
         </template>
@@ -546,7 +529,7 @@ import {
   santaClone,
   getCustomizerIframe,
   getLockerColors,
-  getDomDocument, processColorsCustom, exitFromEditMode
+  getDomDocument, processColorsCustom, exitFromEditMode, hideLockerProductUpdateButton
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -589,16 +572,6 @@ Vue.filter('formatDate', function(value:string) {
     this.$gtag.pageview(this.$route)
     this.$gtag.event(this.$route)
     let self: Record<any, any> = this;
-    const last_active_product_default_obj = lastActiveProductDefaultObject()
-    let last_active_product_obj = this.$store.getters.getLastActiveProductData
-    /*
-    * if last_active_product_default_obj keys length is not equal to the store property getLastActiveProductData then it means
-    * we need to initialize the last_active_product_data property of store. This will only triggers once
-    * */
-    if(Object.keys(last_active_product_default_obj).length !== Object.keys(last_active_product_obj).length) {
-      last_active_product_obj = last_active_product_default_obj
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', last_active_product_default_obj)
-    }
     await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
       await this.initProductsFonts(products, resolve)
     })
@@ -662,9 +635,6 @@ Vue.filter('formatDate', function(value:string) {
       await this.$eventBus.$on('updateCart', async (resolve: any) => {
         await this.addToCart(resolve);
       })
-      await this.$eventBus.$on('updateOrder', async (resolve: any) => {
-        await this.UpdateOrderProducts(resolve);
-      });
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {
@@ -674,13 +644,10 @@ Vue.filter('formatDate', function(value:string) {
   directives: {
     ClickOutside
   }
-  //  destroyed() {
-  //   this.$store.dispatch("updateOrderItemProducts", null);
-  // }
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
-  ProductsQueryParamsMixin, exitEditMode, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories, CustomLogosMixin) {
+  ProductsQueryParamsMixin, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories, CustomLogosMixin) {
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
@@ -710,8 +677,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private showOtherTab = false
   public showOtherColors = false
   private playersDataHeight = 0
-  public updated_order_products: Record<any, any>[] = []
-  public updateOrderItemProducts: Record<any, any> | null = null;
   private sideTabIndex = 0
   private maximized = true
   private isRosterOpened = false
@@ -757,7 +722,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private async afterCategoriesCallOnMounted() {
 
     let query_params = await this.setQueryParams()
-    await this.retrieveProducts(query_params)
+    await this.retrieveProductsNew(query_params)
 
     const shared_url = getUrlParameter()
     if (shared_url?.includes('share')) {
@@ -1385,7 +1350,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     categories_promise.then(async (response) => {
       if (response) {
         let query_params = await this.setQueryParams()
-        await this.retrieveProducts(query_params)
+        await this.retrieveProductsNew(query_params)
         if (this.mobileScreen) {
           this.showDesign()
           this.switchTabs(0, true)
@@ -1459,15 +1424,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         let toast_type = "success"
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
-        this.hideLockerProductUpdateButton(true);
+        hideLockerProductUpdateButton(true);
         if(back_to_locker){
           await this.getLockerRoomProducts(null)
           await self.hideVModal('rostermodal')
           await self.showVModal('locker-modal')
         }
-        // this.exitFromEditMode();
-        // let query_params = await self.setQueryParams()
-        // self.retrieveProducts(query_params)
         if(resolve){
           resolve(true);
         }
@@ -1477,7 +1439,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         const categories_promise = this.fetchCategories();
         categories_promise.then(async (response)=> {
           let query_params = await self.setQueryParams()
-          self.retrieveProducts(query_params)
+          self.retrieveProductsNew(query_params)
           if(resolve){
             resolve(false);
           }
@@ -1751,8 +1713,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         categories_promise.then(async (response) => {
           if (response) {
             await this.exitFromEditMode()
-            this.hideLockerProductUpdateButton()
-            this.updateOrderItemProducts = null;
+            hideLockerProductUpdateButton()
             this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
             await self.$eventBus.$emit('resetTextsCanvas')
             await self.$eventBus.$emit('resetLogosCanvas')
@@ -1762,7 +1723,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
             await this.$store.dispatch("setProductsRosters")
             let query_params = await this.setQueryParams()
-            await this.retrieveProducts(query_params)
+            await this.retrieveProductsNew(query_params)
             if (this.mobileScreen) {
               this.showDesign()
               this.switchTabs(0, true)
@@ -1778,7 +1739,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           const categories_promise = this.fetchCategories();
           categories_promise.then(async (response) => {
             let query_params = await this.setQueryParams()
-            await this.retrieveProducts(query_params)
+            await this.retrieveProductsNew(query_params)
           });
         }
       }
@@ -1795,24 +1756,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  private async handleCancelEditMode() {
-    let self: Record<any, any> = this;
-    await this.exitFromEditMode()
-    this.search_products = '';
-    (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
-    await self.$eventBus.$emit('useProductOriginalColors')
-    this.hideLockerProductUpdateButton();
-    this.updateOrderItemProducts = null;
-    this.$store.commit('RESET_CUSTOM_TEXTS');
-    this.$store.commit('RESET_CUSTOM_LOGOS');
-    this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true});
-    await self.$eventBus.$emit('resetTextsCanvas');
-    await self.$eventBus.$emit('resetLogosCanvas');
-    (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
-    await this.$store.dispatch('setTabMain', {value: 0});
-    await this.$store.dispatch("setProductsRosters");
-  }
-
 
   private async cancelCart() {
     let self: Record<any, any> = this;
@@ -1821,7 +1764,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const categories_promise = this.fetchCategories();
     categories_promise.then(async (category_res) => {
       let query_params = await self.setQueryParams()
-      await this.retrieveProducts(query_params)
+      await this.retrieveProductsNew(query_params)
       if(['wordpress', 'shopify'].includes(this.company.platform)) {
         await this.showVModal('cart-modal')
       } else {
@@ -1830,69 +1773,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     })
   }
 
-  public async retrieveProducts(query_params: string[] = []) {
-    let self = this;
-    let url = `/list/products`;
-    let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
-    query_params.forEach((query_param: string) => {
-      let query_param_array = query_param.split("=");
-      if (url_obj.searchParams.has(query_param_array[0])) {
-        url_obj.searchParams.set(query_param_array[0], query_param_array[1])
-      } else {
-        url_obj.searchParams.append(query_param_array[0], query_param_array[1])
-      }
-    })
-    url = url_obj.pathname + url_obj.search;
-    http.get(url).then(async (response: Record<any, any>) => {
-      if (response.data.products.data.length > 0) {
-        const validate_data = await self.beforeSetDataValidateActiveProductData(response.data)
-        if (validate_data.validated) {
-          await self.handleMainProducts(response);
-          if (self["showLoader"]) {
-            self.showLoader = false;
-          }
-        } else {
-          this.showError(validate_data.message)
-          if (self["showLoader"]) {
-            self.showLoader = false;
-          }
-          this.exitFromEditMode();
-          resetLastActiveProductData();
-          const categories_promise = this.fetchCategories('customized');
-          categories_promise.then(async (response) => {
-            await self.retrieveProducts(query_params)
-          });
-          return false;
-        }
-      } else {
-        self.showLoader = false
-        this.showError("No Product Found")
-        this.exitFromEditMode();
-        resetLastActiveProductData();
-        const categories_promise = this.fetchCategories('customized');
-        categories_promise.then(async (response) => {
-          query_params = []
-          this.search_products = '';
-          (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
-          const selected_category = this.$store.getters.getSelectedCategory;
-          if(selected_category.category_id) {
-            query_params.push(`category_id=${selected_category.category_id}`)
-          }
-          query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
-          query_params.push(`private=${this.$store.getters.getPrivateProduct}`)
-          console.log('shah', query_params)
-          await self.retrieveProducts(query_params)
-        });
-
-      }
-    }, (error) => {
-      console.error("Error while getting order detail", error?.response?.data?.message)
-    })
-  }
-
   async loadOrderItemProduct(action: string) {
-    let self = this;
-    self.showLoader = true;
+    this.showLoader = true;
     let updated_product = await getActiveProductData(this.products_fonts) as Record<any, any>;
     if (updated_product == null) {
       return false;
@@ -1910,14 +1792,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.order_update_data[factory_product_active_index] = updated_product
     // order_products_info_obj.factory_products[factory_product_active_index] = updated_product
     order_products_info_obj.factory_product_active_index = factory_product_updated_index
-    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_products_info_obj })
+    this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_products_info_obj })
     let query_params = [
       `customized=${true}`, `personalized=${true}`, 'active_product_type=order_product', `active_product_id=${next_prev_product_id}`,
       `item_id=${order_products_info_obj.item_id}`, `activity_id=${order_products_info_obj.activity_id}`,
       `style_id=${next_prev_factory_product.style_id}`,`design_id=${next_prev_factory_product.design_id}`,
       `factory_product_active_index=${factory_product_updated_index}`,'paginate=false'
     ];
-    await self.retrieveProducts(query_params);
+    await this.retrieveProductsNew(query_params);
   }
 
   async UpdateOrderProducts(resolve:any= null) {
@@ -1930,19 +1812,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let factory_product_active_index = order_products_info_obj.factory_product_active_index;
     updated_product["id"] = order_products_info_obj.factory_products[factory_product_active_index].id;
     let order_item_id = order_products_info_obj.item_id;
-    // updated_product["id"] = self.updateOrderItemProducts.factory_products[order_product_active_index].id;
     updated_product["status"] = "order_approve";
     this.order_update_data[factory_product_active_index] = updated_product
-    // order_products_info_obj.order_products.factory_products[order_product_active_index] = updated_product
-    // self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-    //   editing: true,
-    //   type: "order_product",
-    //   filters: null,
-    //   locker_product_info: null,
-    //   cart_product_info: null,
-    //   order_product_info: order_products_info_obj
-    // })
-    // self.updateOrderItemProducts.factory_products[order_product_active_index] = updated_product;
     let url = `order_item/${order_item_id}/update/products`;
     this.showLoader = true
     http.post(url, {factory_products: this.order_update_data}).then(async (res: any) => {

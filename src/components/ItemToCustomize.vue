@@ -134,7 +134,8 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
   import ItemsGrid from "@/components/ItemsGrid.vue";
   import { dragscroll } from 'vue-dragscroll'
   import { resetLastActiveProductData } from '@/helpers/Helpers'
-  import {ProductsQueryParamsMixin, exitEditMode} from "@/mixins/LockerProduct";
+import {ProductsQueryParamsMixin, exitEditMode, handleMainProducts} from "@/mixins/LockerProduct";
+
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
 @Component<ItemToCustomize>({
@@ -149,9 +150,14 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
     dragscroll
   },
   mounted() {
+    let self: Record<any, any> = this;
     if(this.mobileScreen){
       this.$emit('switchTabs')
     }
+
+    this.$on('update:search', (search_val: string) => {
+      self.search = search_val ? search_val : ''
+    })
 
     let ecommerce_update_id = this.$route.query.update_item;
     if(!ecommerce_update_id && this.categories.length) {
@@ -162,7 +168,7 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
 })
 
 
-export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, FetchCategories) {
+export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, FetchCategories, handleMainProducts) {
   // @Prop({required: true}) categories!: any;
   @Prop({required: true}) uploaderOpened!: any;
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
@@ -221,35 +227,33 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   public async searchProducts(isClear:boolean) {
     let self: Record<any, any> = this;
-    const response = await this.editModeConfirmation();
-    if(isClear)
-    {
-      self.search = "";
+    await this.editModeConfirmation();
+    if(isClear) {
+      this.search = "";
       this.$emit('update:search_products', self.search)
-
     }
     await resetLastActiveProductData()
-    await this.exitFromEditMode()
-    if(this.timeout) clearTimeout(this.timeout);
+    if(this.timeout) {
+      clearTimeout(this.timeout)
+    }
     this.timeout = setTimeout(async () => {
       self.showLoader = true;
       let product_filter : string | null = null;
-      if(self.search_products){
+      if(self.search_products) {
         product_filter = `title=${self.search_products}`;
       }
       const categories_promise =  this.fetchCategories(product_filter);
       let query_params: string[] = [];
       query_params.push(`customized=${self.$store.getters.getCustomized}`, `personalized=${self.$store.getters.getPersonalized}`)
-      categories_promise.then(() => {
+      categories_promise.then(async () => {
         if(this.getSelectedCategory && this.getSelectedCategory.category_id){
           query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
         }
-        if(self.search_products){
-          query_params.push(`title=${self.search_products}`)
+        if(product_filter){
+          query_params.push(product_filter)
         }
-        this.$emit('retrieveProducts', query_params)
+        await self.retrieveProductsNew(query_params)
       });
-
     }, 700);
   }
 
@@ -260,9 +264,8 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     let customized = this.$store.getters.getCustomized
     let personalized = this.$store.getters.getPersonalized
     let private_product = this.$store.getters.getPrivateProduct
-    const itemCarousel = this.$refs['itemsCarousel'] as Record<any, any>
     let retrieve_products = false;
-    const response = await this.editModeConfirmation();
+    await this.editModeConfirmation();
 
     let check = ()=>{
       if(prd_type == "customized"){
@@ -298,40 +301,34 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       check()
       categories_promise = this.fetchCategories('private_product');
     }
-    categories_promise.then( async(response) => {
-      if(response){
-        if(retrieve_products) {
-          await resetLastActiveProductData()
-          await this.exitFromEditMode()
-          let query_params: string[] = [];
-          if(this.getSelectedCategory && this.getSelectedCategory.category_id){
-            query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
-          }
-          if(self.search_products){
-            query_params.push(`title=${self.search_products}`)
-          }
-          query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
-          this.$emit('retrieveProducts', query_params)
+    categories_promise.then( async (response) => {
+      if(response && retrieve_products) {
+        await this.handleCancelEditMode()
+        let query_params: string[] = [];
+        if(this.getSelectedCategory && this.getSelectedCategory.category_id) {
+          query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
         }
+        query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
+        await self.retrieveProductsNew(query_params)
+
       }
     });
   }
 
-  public async handleCategoryUpdate(category_index:number){
-    let self: Record<any, any> = this;
-    const response = await this.editModeConfirmation();
-    let selected_category = self.categories[category_index]
-      await resetLastActiveProductData()
-      self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {category_index: category_index, category_id: selected_category.id});
-      await this.$store.commit('SET_SELECTED_CATEGORY', {category_id:selected_category.id, category_index: category_index })
-        let query_params: string[] = [];
-       if (selected_category && selected_category.id){
-         query_params.push(`category_id=${selected_category.id}`);
-        }
-        if(self.search_products){
-          query_params.push(`title=${self.search_products}`);
-        }
-        this.$emit('retrieveProducts', query_params)
+  public async handleCategoryUpdate(category_index:number) {
+    await this.editModeConfirmation();
+    let selected_category = this.categories[category_index]
+    await resetLastActiveProductData()
+    this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { category_index: category_index, category_id: selected_category.id });
+    this.$store.commit('SET_SELECTED_CATEGORY', { category_id:selected_category.id, category_index: category_index })
+    let query_params: string[] = [];
+    if (selected_category && selected_category.id){
+      query_params.push(`category_id=${selected_category.id}`);
+    }
+    if(this.search_products){
+      query_params.push(`title=${this.search_products}`);
+    }
+    await this.retrieveProductsNew(query_params)
   }
 
   /* getters/computed props starts */

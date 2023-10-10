@@ -2566,7 +2566,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       const converted_width = unitConversion(width)
       const converted_height = unitConversion(height)
 
-      await this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+      this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
         custom_logo_index: fabric_object.get("logo_index"),
         data: {
           x_axis: fabric_object.get("left"),

@@ -372,7 +372,7 @@ import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {getRandom, classObserver, handleResponseException, getDomDocument} from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
-import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
@@ -447,7 +447,7 @@ import {AxiosError} from "axios";
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin) {
   @Prop({required: true}) lockerModalBody:Record<any, any>
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)

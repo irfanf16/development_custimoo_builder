@@ -22,9 +22,6 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
           CustomizationPreview,
           OrderDetailsTab,
           SaveDesignModal
-        },
-        mounted() {
-            // this.retrieveProducts()
         }
     })
 
@@ -49,23 +46,6 @@ import {Component, Prop, Vue} from 'vue-property-decorator'
       get manageComponents(): Record<any, any> {
         return this.$store.getters.getManageComponents
       }
-
-        retrieveProducts(): void {
-            this.product_id = '1'
-            this.company_id = '1'
-            let param = '?product_id='+this.product_id+'&company_id='+this.company_id
-            http.get(param)
-            .then((response: any) => {
-                this.products = response.data.products.data;
-            })
-            .catch((e: any) => {
-                console.log(e)
-            });
-        }
-
-        public changeProduct(designsIndex :number){
-            this.designsIndex = designsIndex
-        }
 
       public async getLockers(){
         await this.$store.dispatch("getLockers");

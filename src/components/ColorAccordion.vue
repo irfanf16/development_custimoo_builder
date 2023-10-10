@@ -105,7 +105,7 @@
 <script lang="ts">
 import {Component, Prop, Watch, Mixins} from 'vue-property-decorator'
 import colorPicker from '@caohenghu/vue-colorpicker'
-import {LockerProducts} from '../mixins/LockerProduct'
+import {LockerProducts, ProductsQueryParamsMixin} from '../mixins/LockerProduct'
 import ColorsTabMixin from '../mixins/ColorsTabMixin'
 
 import {
@@ -131,7 +131,7 @@ import {
     this.showColor(this.selectAccordionIndex, undefined)
   }
 })
-export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixin) {
+export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixin, ProductsQueryParamsMixin) {
   @Prop({required: true}) productColors!: Record<any, any>[]
   @Prop({required: true}) tabIndex!: any
 

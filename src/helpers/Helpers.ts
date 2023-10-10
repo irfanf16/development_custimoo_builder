@@ -822,7 +822,8 @@ const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
     * As selected product custom logos are being passed by reference. So any change in the custom logos of selected product
     * will automatically be reflected in last active product data custom_logos
     * */
-    Store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { custom_logos: selected_product_custom_logos})
+    // await updateLastActiveProductData({ custom_logos: selected_product_custom_logos})
+    // Store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { custom_logos: selected_product_custom_logos})
   }
   eventBus.$emit('handleNonVectorCustomLogosCount')
 }
@@ -965,14 +966,14 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
   * For commit {SET_LAST_ACTIVE_PRODUCT_CUSTOM_TEXTS} the custom text is being passed by reference so any change in custom text will also be reflected in
   * state.last_active_product_data
    */
-  retrieved_products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
-    const product_id = product_custom_texts && product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
-    if(product_id) {
-      Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-        product_custom_texts: {[product_id]: product_custom_texts}
-      });
-    }
-  })
+  // retrieved_products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
+  //   const product_id = product_custom_texts && product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
+  //   if(product_id) {
+  //     Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+  //       product_custom_texts: {[product_id]: product_custom_texts}
+  //     });
+  //   }
+  // })
 
 }
 //type could be locker_product, cart_product, order_product, reorder_product
@@ -986,8 +987,10 @@ const getEditModeDefaultObj = (prop='') => {
     order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null, active_style_id: null,
     design_id: null, active_design_id: null, reorder_product: null
   }
-  const default_obj = { editing: false, type: '', filters: { customized: true, personalized: false, search_products: '' },
-    locker_product_info: { product_id: null, locker_product_id: null, style_id: null, design_id: null }, cart_product_info: cart_product_info,
+  const locker_product_info = { product_id: null, locker_product_id: null, style_id: null, design_id: null }
+  const filters =  { customized: true, personalized: false, search_products: '' }
+  const default_obj = {
+    editing: false, type: '', filters: filters, locker_product_info: locker_product_info, cart_product_info: cart_product_info,
     order_product_info: order_product_info, reorder_product_info: reorder_product_info
   }
   if(prop) {
@@ -1562,8 +1565,7 @@ const lastActiveProductDefaultObject = (keys_default_values = {}) => {
 }
 
 const resetLastActiveProductData = async () => {
-  const last_active_product_default_object = lastActiveProductDefaultObject()
-  Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_default_object)
+  Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", lastActiveProductDefaultObject())
 }
 
 const exitFromEditMode = () => {
@@ -2099,6 +2101,28 @@ const checkIsEmpty = (obj: any) => {
   }
 }
 
+const hideLockerProductUpdateButton = async (hide_update_btn: boolean|undefined = undefined) => {
+  if(hide_update_btn != undefined) {
+    Store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', hide_update_btn);
+  }
+  else {
+    const product_edit_info_obj = Store.getters.getProductEditInfoObject
+    const hide_locker_update_btn = Store.getters.getHideSaveLockerButton
+    if(product_edit_info_obj.type == 'locker_product' && hide_locker_update_btn == true) {
+      Store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false);
+    }
+  }
+}
+
+const updateLastActiveProductData = async (updated_data={}) => {
+  const edit_product_info_obj = Store.getters.getProductEditInfoObject
+  if(!edit_product_info_obj.editing) {
+    const last_active_product_data = Store.getters.getLastActiveProductData
+    const updated_last_active_data = JSON.parse(JSON.stringify({...last_active_product_data, ...updated_data}))
+    Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", updated_last_active_data)
+  }
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2112,5 +2136,6 @@ export {
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
-  getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty
+  getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
+  updateLastActiveProductData
 };

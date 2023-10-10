@@ -196,6 +196,7 @@ export default class LogoPlacementTab extends Vue {
     let self: Record<any, any> = this;
     await setUndoRedoItems('customLogos', 'placement_updated')
     this.customLogos[custom_logo_index].side = updated_value
+    this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: custom_logo_index, custom_logos:  this.customLogos[custom_logo_index]})
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
   }
 

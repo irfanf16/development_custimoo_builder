@@ -162,9 +162,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-  // get editCart(): Record<any, any> {
-  //   return this.$store.getters.getEditCart
-  // }
 
   get rosterDetails(): [Record<any, any>] {
     return this.$store.getters.getRosterDetails()
@@ -341,8 +338,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
                 const categories_promise = this.fetchCategories();
                 categories_promise.then(async (response) => {
                   if(response){
-                    let query_params = await self.setQueryParams
-                    self.retrieveProducts(query_params)
+                    let query_params = await this.setQueryParams()
+                    await this.retrieveProductsNew(query_params)
                   }
                 });
               }
@@ -357,8 +354,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
               const categories_promise = this.fetchCategories();
               categories_promise.then(async (response) => {
                 if(response){
-                  let query_params = await self.setQueryParams
-                  self.retrieveProducts(query_params)
+                  let query_params = await this.setQueryParams()
+                  await this.retrieveProductsNew(query_params)
                 }
               })
 
@@ -375,8 +372,8 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             const categories_promise = this.fetchCategories();
             categories_promise.then(async (response) => {
               if(response){
-                let query_params = await self.setQueryParams
-                self.retrieveProducts(query_params)
+                let query_params = await this.setQueryParams()
+                await this.retrieveProductsNew(query_params)
               }
             })
           }
@@ -387,32 +384,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       console.error('error in add to cart', e)
       self.isLoading = false
     }
-  }
-
-  public async retrieveProducts() {
-    let self = this;
-
-    let url = `/list/products?customized=${this.getLastActiveProductData.customized}&personalized=${this.getLastActiveProductData.personalized}&private=${this.getLastActiveProductData.private_product}`;
-    if(this.getLastActiveProductData.search_products) {
-      url +=` &title=${this.getLastActiveProductData.search_products}`
-    }
-    http.get(url).then(async (response: Record<any, any>) => {
-      if(response.data.products.data.length > 0 ){
-        await self.handleMainProducts(response);
-        if(self.updateOrderItemProducts) {
-          await self.updateFactoryProduct(self.updateOrderItemProducts.factory_products[self.updateOrderItemProducts.active_index]);
-        }
-
-        if(self["showLoader"]) {
-          self.showLoader = false;
-        }
-      }else{
-        this.showError("No Product Found")
-        self.showLoader = false
-      }
-    }, (error) => {
-      console.error("Error while getting order detail", error?.response?.data?.message)
-    })
   }
 
    public async  generateProductionPdf() {

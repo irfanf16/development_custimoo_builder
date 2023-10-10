@@ -19,11 +19,7 @@
           <b-button style="white-space: nowrap" v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
           <span class="btn btn-secondary light add_new_locker_btn" @click="showVModal('create-modal')">Add <BIconPlus /></span>
         </div>
-<!--            <div class="add_new_locker">-->
-<!--              -->
-<!--            </div>-->
-<!--                <b-button class="create-btn" variant="secondary" ><span>Create New </span>+</b-button>-->
-            <CreateLockerRoomModal @lockerAdded="lockerAdded" />
+        <CreateLockerRoomModal @lockerAdded="lockerAdded" />
       </div>
 
       <div class="d-flex gap-4 flex-wrap flex-row-reverse">
@@ -271,7 +267,6 @@ import { Canvas } from 'fabric/fabric-impl'
           this.showError("please login first");
           return
         }
-          this.$store.commit('setActiveLockerProduct', (this.productData.length - 1));
           if(this.$store.getters.getIsShareDesign){
             (this.$parent as Record<any, any>).shareDesign();
           }

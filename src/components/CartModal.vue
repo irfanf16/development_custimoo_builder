@@ -181,7 +181,7 @@ import {
   lastActiveProductDefaultObject, logData,
   processColorsCustom
 } from "@/helpers/Helpers";
-import {LockerProducts, handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import { findIndex } from "lodash";
 import ModalAction from "@/mixins/ModalAction";
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
@@ -237,7 +237,7 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
   }
 })
-export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, FetchCategories) {
+export default class CartModal extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, FetchCategories, ProductsQueryParamsMixin) {
   public viewLoader = false;
   private userData = this.$store.getters.getCustomer;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
