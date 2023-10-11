@@ -1758,9 +1758,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       let query_params = await self.setQueryParams()
       await this.retrieveProductsNew(query_params)
       if(['wordpress', 'shopify'].includes(this.company.platform)) {
-        await this.showVModal('cart-modal')
-      } else {
         window.location.href = this.company.company_domain + '/cart'
+      } else {
+        await this.showVModal('cart-modal')
       }
     })
   }
