@@ -14,7 +14,7 @@ import {
   exitFromEditMode,
   getUrlParameter,
   getEditModeDefaultObj,
-  logoColorInfoDefaultObject, hideLockerProductUpdateButton
+  logoColorInfoDefaultObject, hideLockerProductUpdateButton, checkIsEmpty
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -266,16 +266,21 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         }
         else {
           if(last_active_prod_data.product_id) {
-      /*      ({
-              product_id: active_product_id, product_index: active_product_index, style_id: active_style_id, style_index: active_style_index,
-              design_id: active_design_id, design_index: active_design_index
-            } = last_active_prod_data);*/
             let custom_logos = last_active_prod_data.custom_logos;
-        /*    console.log('active_style_index', active_style_index)
-            this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);*/
-            this.$store.commit('SET_CUSTOM_LOGOS', { set_all: true,  custom_logos: custom_logos })
-            const active_product_team_logo = custom_logos[active_product_id].length > 0 ? custom_logos[active_product_id][0] : null
-            if(active_product_team_logo) {
+            let active_product_team_logo:Record<any, any> = {};
+            let custom_logos_type = custom_logos.constructor.name;
+            if(!checkIsEmpty(custom_logos)) {
+              // array check is for handling old data. From now it always will be object
+              if(custom_logos_type == "Array") {
+                this.$store.commit('SET_CUSTOM_LOGOS', { custom_logos: custom_logos })
+                active_product_team_logo = custom_logos[0]
+              }
+              if(custom_logos_type == "Object") {
+                this.$store.commit('SET_CUSTOM_LOGOS', { set_all: true,  custom_logos: custom_logos })
+                active_product_team_logo =  checkIsEmpty(custom_logos[active_product_id]) ? {} : custom_logos[active_product_id][0]
+              }
+            }
+            if(!checkIsEmpty(active_product_team_logo)) {
               let logo_colors = active_product_team_logo.logo_colors
               if(logo_colors && logo_colors.length > 0) {
                 logo_colors = processColorsCustom(logo_colors)
