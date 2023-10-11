@@ -336,11 +336,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
               if (cart_edit_mode) {
                 await self.exitFromEditMode()
                 const categories_promise = this.fetchCategories();
-                categories_promise.then(async (response) => {
-                  if(response){
-                    let query_params = await this.setQueryParams()
-                    await this.retrieveProductsNew(query_params)
-                  }
+                categories_promise.then(async (cat_response) => {
+                  let query_params = await this.setQueryParams()
+                  await this.retrieveProductsNew(query_params)
                 });
               }
             }
@@ -352,11 +350,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
             if (cart_edit_mode) {
               await self.exitFromEditMode()
               const categories_promise = this.fetchCategories();
-              categories_promise.then(async (response) => {
-                if(response){
-                  let query_params = await this.setQueryParams()
-                  await this.retrieveProductsNew(query_params)
-                }
+              categories_promise.then(async (cat_response) => {
+                let query_params = await this.setQueryParams()
+                await this.retrieveProductsNew(query_params)
               })
 
             }
@@ -370,11 +366,9 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
           if (cart_edit_mode) {
             await self.exitFromEditMode()
             const categories_promise = this.fetchCategories();
-            categories_promise.then(async (response) => {
-              if(response){
-                let query_params = await this.setQueryParams()
-                await this.retrieveProductsNew(query_params)
-              }
+            categories_promise.then(async (cat_response) => {
+              let query_params = await this.setQueryParams()
+              await this.retrieveProductsNew(query_params)
             })
           }
         })

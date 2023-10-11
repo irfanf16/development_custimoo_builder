@@ -171,11 +171,11 @@ export class FetchCategories extends Vue {
           query_params: params
         });
       }
-      categories_promise.then((no_product_found) => {
-        if(no_product_found) {
+      categories_promise.then((cat_response: Record<any, any>) => {
+        if(cat_response.no_product_found) {
           self.showError('Product is no more available, loading all products')
         }
-        resolve(true);
+        resolve(cat_response);
       })
     })
   }

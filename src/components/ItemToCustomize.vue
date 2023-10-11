@@ -245,14 +245,20 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       const categories_promise =  this.fetchCategories(product_filter);
       let query_params: string[] = [];
       query_params.push(`customized=${self.$store.getters.getCustomized}`, `personalized=${self.$store.getters.getPersonalized}`)
-      categories_promise.then(async () => {
-        if(this.getSelectedCategory && this.getSelectedCategory.category_id){
-          query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
+      categories_promise.then(async (cat_response: Record<any, any>) => {
+        if(cat_response.no_search_product_found) {
+          this.showError('No product found against your search')
         }
-        if(product_filter){
-          query_params.push(product_filter)
+        else {
+          if(this.getSelectedCategory && this.getSelectedCategory.category_id){
+            query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
+          }
+          if(product_filter){
+            query_params.push(product_filter)
+          }
+          await self.retrieveProductsNew(query_params)
+
         }
-        await self.retrieveProductsNew(query_params)
       });
     }, 700);
   }
@@ -301,8 +307,8 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       check()
       categories_promise = this.fetchCategories('private_product');
     }
-    categories_promise.then( async (response) => {
-      if(response && retrieve_products) {
+    categories_promise.then( async (cat_response) => {
+      if(retrieve_products) {
         await this.handleCancelEditMode()
         let query_params: string[] = [];
         if(this.getSelectedCategory && this.getSelectedCategory.category_id) {

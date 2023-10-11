@@ -611,7 +611,7 @@ Vue.filter('formatDate', function(value:string) {
 
     if(sendCategoryCall) {
       const categories_promise = this.fetchCategories();
-      categories_promise.then(async (response) => {
+      categories_promise.then(async (cat_response) => {
         await this.afterCategoriesCallOnMounted();
       });
     } else {
@@ -1343,23 +1343,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async cancelEdit() {
-    let self: Record<any, any> = this;
     this.showLoader = true;
     await this.handleCancelEditMode();
     const categories_promise = this.fetchCategories();
-    categories_promise.then(async (response) => {
-      if (response) {
-        let query_params = await this.setQueryParams()
-        await this.retrieveProductsNew(query_params)
-        if (this.mobileScreen) {
-          this.showDesign()
-          this.switchTabs(0, true)
-        }
-        this.isRosterOpened = false
-        this.showLoader = false
-      } else {
-        this.showLoader = false
+    categories_promise.then(async (cat_response) => {
+      let query_params = await this.setQueryParams()
+      await this.retrieveProductsNew(query_params)
+      if (this.mobileScreen) {
+        this.showDesign()
+        this.switchTabs(0, true)
       }
+      this.isRosterOpened = false
+      this.showLoader = false
     })
   }
 
@@ -1437,7 +1432,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         handleResponseException(errorResponse)
         self.exitFromEditMode();
         const categories_promise = this.fetchCategories();
-        categories_promise.then(async (response)=> {
+        categories_promise.then(async (cat_response)=> {
           let query_params = await self.setQueryParams()
           self.retrieveProductsNew(query_params)
           if(resolve){
@@ -1710,34 +1705,31 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         await self.$eventBus.$emit('useProductOriginalColors')
         await this.$store.dispatch('resetStore')
         const categories_promise = this.fetchCategories();
-        categories_promise.then(async (response) => {
-          if (response) {
-            await this.exitFromEditMode()
-            hideLockerProductUpdateButton()
-            this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
-            await self.$eventBus.$emit('resetTextsCanvas')
-            await self.$eventBus.$emit('resetLogosCanvas')
-            await this.$store.dispatch('setTabMain', {value: 0});
-            (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
-            await this.$store.dispatch('SET_LOGO_COLORS', [])
-            this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-            await this.$store.dispatch("setProductsRosters")
-            let query_params = await this.setQueryParams()
-            await this.retrieveProductsNew(query_params)
-            if (this.mobileScreen) {
-              this.showDesign()
-              this.switchTabs(0, true)
-            }
-
-            this.isRosterOpened = false
+        categories_promise.then(async (cat_response) => {
+          await this.exitFromEditMode()
+          hideLockerProductUpdateButton()
+          this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
+          await self.$eventBus.$emit('resetTextsCanvas')
+          await self.$eventBus.$emit('resetLogosCanvas')
+          await this.$store.dispatch('setTabMain', {value: 0});
+          (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+          await this.$store.dispatch('SET_LOGO_COLORS', [])
+          this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+          await this.$store.dispatch("setProductsRosters")
+          let query_params = await this.setQueryParams()
+          await this.retrieveProductsNew(query_params)
+          if (this.mobileScreen) {
+            this.showDesign()
+            this.switchTabs(0, true)
           }
+          this.isRosterOpened = false
         })
       } else {
         if (response === true || response === false) {
           await self.$eventBus.$emit('useProductOriginalColors')
           await this.$store.dispatch('resetStore')
           const categories_promise = this.fetchCategories();
-          categories_promise.then(async (response) => {
+          categories_promise.then(async (cat_response) => {
             let query_params = await this.setQueryParams()
             await this.retrieveProductsNew(query_params)
           });
@@ -1762,7 +1754,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.showLoader = true;
     await this.handleCancelEditMode();
     const categories_promise = this.fetchCategories();
-    categories_promise.then(async (category_res) => {
+    categories_promise.then(async (cat_response) => {
       let query_params = await self.setQueryParams()
       await this.retrieveProductsNew(query_params)
       if(['wordpress', 'shopify'].includes(this.company.platform)) {

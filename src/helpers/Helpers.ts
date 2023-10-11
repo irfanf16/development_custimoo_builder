@@ -208,13 +208,6 @@ const getSelectedProductPantones = (product_id: null|number = null) => {
   return product_pantones;
 }
 
-const getProductById = (product_id: number) => {
-  const products = Store.getters.getProducts;
-  const selected_product = products.find((product: Record<any, any>) => product.id == product_id)
-   return selected_product
-}
-
-
 const sortTextsArray = (product_names: any) => {
   return product_names.sort((a:any,b:any)=> (a.type > b.type ? 1 : -1));
 
@@ -2123,6 +2116,13 @@ const updateLastActiveProductData = async (updated_data={}) => {
   }
 }
 
+const getProductById = async (product_id: number, products: Record<any, any>[]) => {
+  if(products.length == 0) {
+    products = Store.getters.getProducts;
+  }
+  return products.find((product: Record<any, any>) => product.id == product_id)
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2137,5 +2137,5 @@ export {
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
-  updateLastActiveProductData
+  updateLastActiveProductData, getProductById
 };

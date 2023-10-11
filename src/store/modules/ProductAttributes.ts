@@ -1547,7 +1547,7 @@ const ProductAttributes:Module<any, any> = {
                 category_index: category_index
               });
             }
-            resolve(response.data.no_product_found);
+            resolve(response.data);
           }
         }).catch((e: any) => {
           console.error('error while getting categories',e)

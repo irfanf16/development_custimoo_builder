@@ -14,7 +14,7 @@ import {
   exitFromEditMode,
   getUrlParameter,
   getEditModeDefaultObj,
-  logoColorInfoDefaultObject, hideLockerProductUpdateButton, checkIsEmpty
+  logoColorInfoDefaultObject, hideLockerProductUpdateButton, checkIsEmpty, getProductById
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -109,15 +109,16 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     url = url_obj.pathname + url_obj.search;
     http.get(url).then(async (response: Record<any, any>) => {
       const response_data = response.data;
-      if(response_data.products.data.length > 0) {
-        const validate_data = await this.beforeSetDataValidateActiveProductData(response.data)
-        if (validate_data.validated) {
+      const {active_product_id, products: {data: retrieved_products}} = response_data
+      if(retrieved_products.length > 0) {
+        const is_active_product_valid = await getProductById(active_product_id, retrieved_products)
+        if (is_active_product_valid) {
           await this.handleMainProducts(response);
           if (self["showLoader"]) {
             self.showLoader = false;
           }
         } else {
-          this.showError(validate_data.message);
+          this.showError("Product no more exists.");
           await this.handleProductNotFound()
         }
       } else {
@@ -411,111 +412,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
      if(product_roster_detail.constructor.name == "Object" && Object.keys(product_roster_detail).length > 0) {
        this.$store.dispatch("setProductsRosters", {set_all: true, roster_data: product_roster_detail});
      }
-
    }
-   /*if(products_rosters && products_rosters.constructor.name == "Array" && products_rosters.length > 0) {
-     this.$store.dispatch("setProductsRosters", {product_id: active_product_id, roster_data: products_rosters});
-   }*/
-  }
-
-  public async beforeSetDataValidateActiveProductData(response_data: Record<any, any>) {
-    let self: Record<any, any> = this;
-    let retrieved_products: Record<any, any>[] = response_data.products.data
-    let product_edit_info_object = self.$store.getters.getProductEditInfoObject;
-    let active_product_id = response_data.active_product_id;
-    let edit_type = product_edit_info_object.type;
-    let validated = false;
-    let message: string = ''
-    if(product_edit_info_object.editing) {
-      let { active_product_detail } = response_data
-      let active_factory_product = active_product_detail.factory_products[active_product_detail.factory_product_active_index]
-
-      switch (edit_type) {
-        case "locker_product":
-         /* product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
-            return retrieved_product.id == product_edit_info_object.locker_product_info.product_id
-          });*/
-          if(product_edit_info_object.locker_product_info.product_id == active_product_id) {
-            validated = true
-          } else {
-            validated = false
-            message = "Can not find locker product to edit. So exiting edit mode"
-            //if product not found then exit from edit mode
-            self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-              editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
-            })
-          }
-          break;
-        case "cart_product": //in case of editing cart product only one product shown
-          let cart_data = JSON.parse(JSON.stringify(product_edit_info_object))
-          cart_data.cart_product_info.cart_item_product = active_factory_product
-          this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', cart_data)
-          if(active_product_id == cart_data.cart_product_info.cart_item_product.product_id) {
-            validated = true;
-          } else {
-            validated = false;
-            message = "Can not find cart product to edit. So exiting edit mode"
-            self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-              editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null
-            })
-          }
-          break;
-          //todo need to look in to it
-        case "order_product": //in case of editing order product only one product shown
-          //on First time load we do not have product id that's why this check is added
-          if(product_edit_info_object.cart_product_info && product_edit_info_object.cart_product_info.product_id) {
-            if(retrieved_products[0].id == product_edit_info_object.cart_product_info.product_id) {
-              validated  = true
-            } else {
-              validated = false
-              message = "Can not find order product to edit. So exiting edit mode"
-            }
-          } else {
-            validated = true
-          }
-          break;
-          case "reorder_product": //in case of editing order product only one product shown
-          //on First time load we do not have product id that's why this check is added
-          if(product_edit_info_object.reorder_product_info && product_edit_info_object.cart_product_info.active_product_id) {
-            if(retrieved_products[0].id == product_edit_info_object.cart_product_info.active_product_id) {
-              validated  = true
-            } else {
-              validated = false
-              message = "Can not find order product to edit. So exiting edit mode"
-            }
-          } else {
-            validated = true
-          }
-          break;
-        default: {
-          validated = false
-          message = "Invalid edit mode. So exiting edit mode"
-          console.info("beforeSetDataValidateActiveProductData invalid edit mode")
-        }
-      }
-    }
-    else {
-      let last_active_product_data = self.$store.getters.getLastActiveProductData;
-      if(last_active_product_data.product_id) {
-        /*product_index = findIndex(retrieved_products, (retrieved_product: Record<any, any>) => {
-          return retrieved_product.id == last_active_product_data.product_id
-        });*/
-        if(last_active_product_data.product_id == active_product_id ) {
-          validated = true
-        } else {
-          validated = false
-          message = "Did not find last active product data"
-          //if last active product not found then reset the last active product data object
-          await resetLastActiveProductData()
-        }
-      } else {
-        validated = true
-      }
-
-    }
-    return {
-      validated: validated, message: message
-    }
   }
 
   public async setLastActiveProductData(response_products_obj: Record<any, any>) {
@@ -1131,11 +1028,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               if(cart_edit_mode) {
                 await self.exitFromEditMode()
                 const categories_promise = this.fetchCategories();
-                categories_promise.then(async (response) => {
-                  if(response){
-                    let query_params = await self.setQueryParams()
-                    self.retrieveProductsNew(query_params);
-                  }
+                categories_promise.then(async (cat_response) => {
+                  let query_params = await self.setQueryParams()
+                  self.retrieveProductsNew(query_params);
                 })
 
               }
@@ -1151,11 +1046,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             if(cart_edit_mode) {
               await self.exitFromEditMode()
               const categories_promise = this.fetchCategories();
-              categories_promise.then(async (response) => {
-                if(response){
-                  let query_params = await self.setQueryParams()
-                  self.retrieveProductsNew(query_params);
-                };
+              categories_promise.then(async (cat_response) => {
+                let query_params = await self.setQueryParams()
+                self.retrieveProductsNew(query_params);
               })
             }
 
@@ -1177,7 +1070,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           if(cart_edit_mode) {
             await self.exitFromEditMode()
             const categories_promise = this.fetchCategories();
-            categories_promise.then(async (response) => {
+            categories_promise.then(async (cat_response) => {
               let query_params = await self.setQueryParams()
               self.retrieveProductsNew(query_params);
               self.hideVModal('rostermodal');
