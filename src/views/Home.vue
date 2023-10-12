@@ -611,8 +611,12 @@ Vue.filter('formatDate', function(value:string) {
 
     if(sendCategoryCall) {
       const categories_promise = this.fetchCategories();
-      categories_promise.then(async (cat_response) => {
-        await this.afterCategoriesCallOnMounted();
+      categories_promise.then(async (cat_response: Record<any, any>) => {
+        if(cat_response.no_product_found || cat_response.no_search_product_found) {
+          this.noProductFoundAction()
+        } else {
+          await this.afterCategoriesCallOnMounted();
+        }
       });
     } else {
       await this.afterCategoriesCallOnMounted();
@@ -1735,6 +1739,23 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           });
         }
       }
+    })
+  }
+
+  public async noProductFoundAction() {
+    this.search_products = '';
+    this.$store.commit('RESET_LAST_ACTIVE_DATA')
+    await this.$store.dispatch('resetStore')
+    await this.exitFromEditMode()
+    const categories_promise = this.fetchCategories();
+    categories_promise.then(async (cat_response) => {
+      hideLockerProductUpdateButton()
+      this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
+      await this.$store.dispatch('SET_LOGO_COLORS', [])
+      this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+      await this.$store.dispatch("setProductsRosters")
+      let query_params = await this.setQueryParams()
+      await this.retrieveProductsNew(query_params)
     })
   }
 

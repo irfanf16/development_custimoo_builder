@@ -33,7 +33,10 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
     const product_id  = locker_product.product_id;
     const locker_product_id  = locker_product.id;
     this.$emit('update:search')
-    this.fetchCategories(null, product_id).then(async (cat_response) => {
+    this.fetchCategories(null, product_id).then(async (cat_response: Record<any, any>) => {
+      if(cat_response.no_product_found) {
+        return;
+      }
       let edit_product_info_obj = getEditModeDefaultObj()
       edit_product_info_obj.editing = true;
       edit_product_info_obj.type = 'locker_product';
@@ -339,13 +342,12 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       const custom_logos_type = custom_logos.constructor.name
       if(custom_logos_type == "Array" && custom_logos.length > 0) {
         await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', {product_id: active_product_id, custom_logos: custom_logos});
-        this.setProductTeamLogoColors(custom_logos)
-        self.$eventBus.$emit("customLogoResetAndAdd")
+        await this.setProductTeamLogoColors(custom_logos)
       }
       if(custom_logos_type == "Object" && custom_logos.length > 0) {
-        this.$store.commit("SET_CUSTOM_LOGOS", {set_all: true, custom_logos: custom_logos})
+        await this.$store.commit("SET_CUSTOM_LOGOS", {set_all: true, custom_logos: custom_logos})
         if(custom_logos[active_product_id]) {
-          this.setProductTeamLogoColors(custom_logos[active_product_id])
+          await this.setProductTeamLogoColors(custom_logos[active_product_id])
         }
       }
       self.$eventBus.$emit("customLogoResetAndAdd")

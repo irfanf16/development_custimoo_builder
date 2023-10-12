@@ -173,7 +173,7 @@ export class FetchCategories extends Vue {
       }
       categories_promise.then((cat_response: Record<any, any>) => {
         if(cat_response.no_product_found) {
-          self.showError('Product is no more available, loading all products')
+          self.showError('Product is no more available')
         }
         resolve(cat_response);
       })
