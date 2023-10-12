@@ -1,6 +1,6 @@
 <template>
   <span>
-    <b-tabs class="main-locker-tabs" ref="main-locker-tabs" v-model="main_locker_tabs">
+    <b-tabs class="main-locker-tabs" @input="hidePopper" ref="main-locker-tabs" v-model="main_locker_tabs">
       <b-tab>
         <template #title>
           <span class="btn btn-secondary btn-sm">Locker Rooms</span>
@@ -74,34 +74,27 @@
                               <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product, ind)" @mouseleave="hideTooltip"
                                  @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                             </li>
-                            <li v-if="!getSelectionMode.readonly">
+                            <li v-if="!getSelectionMode.readonly" class="position-relative" style="z-index: 20;">
                               <b-button style="font-size: 12px;" data-title="Share design" :ref="'share'+i+''+ind" :id="'share'+i+''+ind"
                                         @click.stop="shareProduct(product, ind, i)"><font-awesome-icon
                                 :icon="['fas', 'share-alt']"/>
                               </b-button>
 
-                              <Popper
-                                v-if="$refs['share'+i+''+ind]"
-                                style="font-size: 12px;"
-                                :is-open="popperID == ('share'+i+''+ind)"
-                                :anchor-el="$refs['share'+i+''+ind][0]"
-                                :on-close="hidePopper"
-                              >
-                                <aside id="popper-content" v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip">
-                                  <div class="share-holder">
-                                    <h3>Copy link and Share</h3>
-                                    <div class="share-form">
-                                      <b-form inline>
-                                        <b-form-input @mouseenter="markText" :ref="'copylink_product_'+i +''+ind"
-                                                      :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+                              <aside :id="'share-popper-content'+i+''+ind" v-if="popperID == ('share'+i+''+ind)" :ref="'share-popper-content'+i+''+ind" style="opacity: 0"
+                                     v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-product-tooltip">
+                                <div class="share-holder">
+                                  <h3>Copy link and Share</h3>
+                                  <div class="share-form">
+                                    <b-form inline>
+                                      <b-form-input @mouseenter="markText" :ref="'copylink_product_'+i +''+ind"
+                                                    :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
-                                        ></b-form-input>
-                                        <button @click="copyLink(i, ind)" class="btn" type="button">Copy Link</button>
-                                      </b-form>
-                                    </div>
+                                      ></b-form-input>
+                                      <button @click="copyLink(i, ind)" class="btn" type="button">Copy Link</button>
+                                    </b-form>
                                   </div>
-                                </aside>
-                              </Popper>
+                                </div>
+                              </aside>
                             </li>
                             <li v-if="!getSelectionMode.readonly">
                               <a style="font-size: 12px;"  @click="showDesignModal(product)">
@@ -548,11 +541,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         let horizontalDifference = elementRect.right - containerRect.right + 15
         if(overflowInfo.horizontal){
           element.style.marginLeft = `${horizontalDifference * -1}px`
-          element.style.opacity = '1'
-        }else{
-          element.style.marginLeft = ''
-          element.style.opacity = '1'
         }
+        element.style.opacity = '1'
       }
     }, 550)
   }
@@ -830,8 +820,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
             shared_url += res.data.url;
             Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
           }
-
         this.showPopper('share'+lockerIndex+''+ind);
+        this.isElementOverflowingContainer(`share-popper-content${lockerIndex}${ind}`)
       }
     } catch (error) {
       console.log(error)

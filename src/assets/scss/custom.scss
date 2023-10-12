@@ -6752,9 +6752,15 @@ $fontSize: 0.5;
     display: none !important;
 }
 
-.share-collection-tooltip{
-    left: -30px;
+.share-collection-tooltip,
+.share-product-tooltip{
+    left: -70px;
     top: 110px;
+    z-index: 100;
+}
+
+.share-product-tooltip{
+    top: 35px;
 }
 
 #modal-center-lockerroom.modal-body{
