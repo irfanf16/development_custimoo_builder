@@ -629,12 +629,14 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.defaultColors[color.index], 'pantone', color.pantone)
         Vue.set(state.defaultColors[color.index], 'name', color.name)
       }
+      updateLastActiveProductData({ default_colors: state.defaultColors })
     },
 
     removeDefaultColor (state: Record<any, any>, removeIndex: number) {
       Vue.set(state.defaultColors[removeIndex], 'color', '')
       Vue.set(state.defaultColors[removeIndex], 'pantone', '')
       Vue.set(state.defaultColors[removeIndex], 'name', '')
+      updateLastActiveProductData({ default_colors: state.defaultColors })
     },
 
     SET_GROUP_COLORS (state: Record<any, any>, groupColors: Record<any, any>) {
@@ -835,6 +837,7 @@ const ProductAttributes:Module<any, any> = {
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
       state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
+      updateLastActiveProductData({ default_colors: state.defaultColors })
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
       state.undoItems.push(payload); // Add the new item to the array
@@ -1005,28 +1008,18 @@ const ProductAttributes:Module<any, any> = {
         updated_payload[payload_key] = payload_value
       }
       state.product_edit_info_object = Object.assign({}, state.product_edit_info_object, updated_payload);
-      // state.product_edit_info_object = payload;
     },
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
       const updated_payload: Record<any, any> = {};
-      /*
-      * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
-      * reflected in state.last_active_product_data.product_custom_texts
-      * */
-        for (const [payload_key, payload_value] of Object.entries(payload)) {
-          /*
-          * As product custom texts value is being passed by reference so whenever there is change in product_custom_text then that change will be
-          * reflected in state.last_active_product_data.product_custom_texts
-          * */
-          if(payload_key == 'product_custom_texts') {
-            updated_payload[payload_key] = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
-          } else {
-            updated_payload[payload_key] = payload_value
-          }
+      for (const [payload_key, payload_value] of Object.entries(payload)) {
+        if(payload_key == 'product_custom_texts') {
+          updated_payload[payload_key] = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
+        } else {
+          updated_payload[payload_key] = payload_value
         }
-        state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
-      // }
+      }
+      state.last_active_product_data = Object.assign({}, state.last_active_product_data, updated_payload);
     },
     RESET_LAST_ACTIVE_DATA(state: Record<any, any>)
     {
@@ -1145,7 +1138,6 @@ const ProductAttributes:Module<any, any> = {
       if('reset' in payload) {
         state.logo_colors_info = logoColorInfoDefaultObject()
         state.defaultColors = default_colors_object
-        updateLastActiveProductData({ default_colors: state.defaultColors })
       }
       else {
         if('colors' in payload.data) {
@@ -1159,6 +1151,7 @@ const ProductAttributes:Module<any, any> = {
         }
         state.logo_colors_info = {...state.logo_colors_info, ...payload.data}
       }
+      updateLastActiveProductData({ default_colors: state.defaultColors })
     },
     SET_DEFAULT_COLORS(state: Record<any, any>, payload: Record<any, any>) {
       state.defaultColors = payload

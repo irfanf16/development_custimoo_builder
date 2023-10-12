@@ -314,7 +314,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         if(this.getSelectedCategory && this.getSelectedCategory.category_id) {
           query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
         }
-        query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
+        query_params.push(
+          `customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`,
+          `private=${this.$store.getters.getPrivateProduct}`
+        )
         await self.retrieveProductsNew(query_params)
 
       }

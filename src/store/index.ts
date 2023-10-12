@@ -50,7 +50,7 @@ export default new Vuex.Store({
       'Auth.platform',
       'ProductAttributes.product_edit_info_object',
       'ProductAttributes.last_active_product_data',
-      // 'ProductAttributes.logo_colors_info',
+      'ProductAttributes.logo_colors_info',
      ],
      storage: {
       getItem: (key) => {

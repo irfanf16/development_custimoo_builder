@@ -271,46 +271,34 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         else {
           if(last_active_prod_data.product_id) {
             let custom_logos = last_active_prod_data.custom_logos;
-            let active_product_team_logo:Record<any, any> = {};
             let custom_logos_type = custom_logos.constructor.name;
             if(!checkIsEmpty(custom_logos)) {
               // array check is for handling old data. From now it always will be object
               if(custom_logos_type == "Array") {
                 this.$store.commit('SET_CUSTOM_LOGOS', { custom_logos: custom_logos })
-                active_product_team_logo = custom_logos[0]
               }
               if(custom_logos_type == "Object") {
                 this.$store.commit('SET_CUSTOM_LOGOS', { set_all: true,  custom_logos: custom_logos })
-                active_product_team_logo =  checkIsEmpty(custom_logos[active_product_id]) ? {} : custom_logos[active_product_id][0]
-              }
-            }
-            if(!checkIsEmpty(active_product_team_logo)) {
-              let logo_colors = active_product_team_logo.logo_colors
-              if(logo_colors && logo_colors.length > 0) {
-                logo_colors = processColorsCustom(logo_colors)
-              }
-              if(logo_colors && logo_colors.length > 0) {
-                this.$store.commit('SET_LOGO_COLORS_INFO', {data: {...logoColorInfoDefaultObject(), ...{extracted_colors: logo_colors, colors: logo_colors}}})
               }
             }
             let product_roster_detail =  last_active_prod_data.products_rosters
             /*
             * no need to set custom texts from last active product it will be set automatically by methods  setRetrievedProductsCustomTexts(retrieved_products)
+            * no need to set product rosters from last active product it will be set automatically vuex action setProductsRosters
             * */
-            await this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors, product_roster_detail: product_roster_detail})
+            await this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors,
+              default_colors: last_active_prod_data.default_colors, product_roster_detail: product_roster_detail})
           }
-          else {
-            let last_active_obj_updated_values = {
-              product_index: active_product_index, product_id: active_product_id,
-              style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
-              search_products: self.search_products, customized: this.$store.getters.getCustomized,
-              personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
-              products_rosters: this.$store.getters.getProductRosters('all')
-            }
-            let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
-            self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
-            this.$store.dispatch("setProductsRosters");
+          let last_active_obj_updated_values = {
+            product_index: active_product_index, product_id: active_product_id,
+            style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
+            search_products: self.search_products, customized: this.$store.getters.getCustomized,
+            personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
+            products_rosters: this.$store.getters.getProductRosters('all')
           }
+          let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
+          self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
+          this.$store.dispatch("setProductsRosters");
           setRetrievedProductsCustomTexts(retrieved_products)
           await initCustomLogosNew(retrieved_products)
 
@@ -352,11 +340,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       }
       self.$eventBus.$emit("customLogoResetAndAdd")
     }
-    /*if(custom_logos && custom_logos.constructor.name == "Array" && custom_logos.length > 0) {
-      await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', {product_id: active_product_id, custom_logos: custom_logos});
-      this.setProductTeamLogoColors(custom_logos)
-      self.$eventBus.$emit("customLogoResetAndAdd")
-    }*/
     if(product_custom_texts) {
       let active_product_custom_texts = [];
       if(product_custom_texts.constructor.name == "Array" && product_custom_texts.length > 0) {
@@ -378,23 +361,10 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       })
 
     }
-
-    /*if(product_custom_texts && product_custom_texts.constructor.name == "Array" && product_custom_texts.length > 0) {
-      this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {product_id: active_product_id, value: product_custom_texts});
-      product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
-        self.$eventBus.$emit("customTextUpdated", {
-          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
-        });
-      })
-    }*/
-
     let emit_color_change_event = false;
     if(default_colors && default_colors.length > 0) {
       emit_color_change_event = true
       await this.$store.dispatch('overRideDefaultColors', default_colors);
-      this.$store.commit('SET_LOGO_COLORS_INFO', {
-        data: {using_logo_colors: false,  is_shuffled: false,  colors: default_colors }
-      })
     }
    if(group_colors) {
      if(group_colors.constructor.name == "Array" && group_colors.length == 0) {
@@ -592,8 +562,7 @@ export class ProductsQueryParamsMixin extends Mixins() {
       let last_active_product_data = self.getLastActiveProductData;
       if(last_active_product_data.product_id) {
         query_params.push(
-          `customized=${last_active_product_data.customized}`, `personalized=${last_active_product_data.personalized}`,
-          `private=${last_active_product_data.private_product}`, `active_product_id=${last_active_product_data.product_id}`,
+          `active_product_id=${last_active_product_data.product_id}`,
           `style_id=${last_active_product_data.style_id}`, `design_id=${last_active_product_data.design_id}`, 'paginate=false'
         )
         if(last_active_product_data.search_products) {
@@ -603,7 +572,7 @@ export class ProductsQueryParamsMixin extends Mixins() {
       if(selected_category.category_id) {
         query_params.push(`category_id=${selected_category.category_id}`)
       }
-      query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`)
+      query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`, `private=${this.$store.getters.getPrivateProduct}`)
     }
     return query_params
   }

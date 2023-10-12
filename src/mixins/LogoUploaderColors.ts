@@ -26,7 +26,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     this.$store.commit('SET_LOGO_COLOR', payload)
     self.$eventBus.$emit('changeDefaultColors')
     this.hideLockerProductUpdateButton()
-    this.setLastActiveProductDefaultcolors()
   }
 
 
@@ -34,12 +33,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     this.logoColorsInfo.colors[logo_color_index] = { hex: null, name: null, pantone: null }
     this.$set(this.logoColorsInfo.colors, logo_color_index, { hex: null, name: null, pantone: null })
     this.hideLockerProductUpdateButton()
-  }
-
-  setLastActiveProductDefaultcolors() {
-    if(!this.lastActiveProductData.editing) {
-      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {default_colors: this.logoColorsInfo.colors})
-    }
   }
 
   public useOriginalColors() {
@@ -51,7 +44,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     Store.commit('SET_DEFAULT_COLORS', [])
     self.$eventBus.$emit('useProductOriginalColors')
     this.hideLockerProductUpdateButton()
-    this.setLastActiveProductDefaultcolors()
   }
 
   public async useLogoColors() {
@@ -62,7 +54,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
     self.$eventBus.$emit('changeDefaultColors')
     this.hideLockerProductUpdateButton()
-    this.setLastActiveProductDefaultcolors()
   }
 
   public rollbackPreviousColors() {
