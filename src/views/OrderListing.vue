@@ -100,8 +100,7 @@
                             <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                             <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                             <td>{{ product.roster_quantity }}</td>
-                            <td>
-                              <span class="factory_status" :class="product.status">{{ product.status | Status }}</span>
+                            <td style="text-align: center">
                              <template v-if="product.can_reorder">
                                <span class="btn btn-dark mx-xxl-2" @click="reorderItem(order, item.id, product)">Reorder</span>
                              </template>

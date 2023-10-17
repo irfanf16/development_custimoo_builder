@@ -567,6 +567,7 @@ Vue.filter('formatDate', function(value:string) {
   },
 
   async mounted() {
+    localStorage.removeItem('custimo')
     this.$gtag.pageview({ page_path: '/home' })
     this.$gtag.pageview('/about')
     this.$gtag.pageview(this.$route)

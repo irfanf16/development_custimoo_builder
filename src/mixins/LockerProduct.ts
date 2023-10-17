@@ -800,11 +800,17 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
   public checkMinimumOrderQtyBYDesign(){
+    let roster = this.$store.getters.getProductRosters();
+    if (roster.some(el => (el.quantity > 0 &&  (el.size=="" || el.size == null || parseInt(el.size_index) < 0)  ))) {
+      this.showToast(`Please provide size for all roster items`, "error");
+      this.showVModal('rostermodal');
+      return false;
+    }
     // check is the sum of roster items(collectively) is greater than sku's 'minimum order quantity'
     if(this.sku_information.minimum_order_quantity_type === "by_design" && this.sku_information.minimum_order_quantity != null &&
       this.sku_information.minimum_order_quantity > 0) {
       let roster_item_sum = 0;
-      this.$store.getters.getProductRosters().forEach((item:Record<any, any>) => {
+      roster.forEach((item:Record<any, any>) => {
         roster_item_sum += parseInt(item.quantity);
       })
       if(roster_item_sum < this.sku_information.minimum_order_quantity){

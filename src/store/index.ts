@@ -31,7 +31,7 @@ export default new Vuex.Store({
     Cart
   },
   plugins: [createPersistedState({
-    key: 'custimo',
+    key: 'custimoo',
     paths: [
       'ProductAttributes.selectedIndex',
       'ProductAttributes.selectedPrdId',
