@@ -654,6 +654,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         reorder_data.order_id = product_edit_info_obj.reorder_product_info.order_id
         reorder_data.order_number = product_edit_info_obj.reorder_product_info.order_number
         reorder_data.order_item_id = product_edit_info_obj.reorder_product_info.order_item_id
+        reorder_data.factory_id = product_edit_info_obj.reorder_product_info.factory_id
+        reorder_data.factory_name = product_edit_info_obj.reorder_product_info.factory_name
         reorder_data.factory_product_id = product_edit_info_obj.reorder_product_info.factory_product_id
         reorder_data.changes = []
         reorder_data.roster_change = false
@@ -947,19 +949,6 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
     return last_active_product_custom_texts && last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: retrieved_products_custom_texts })
-  /*
-  * For commit {SET_LAST_ACTIVE_PRODUCT_CUSTOM_TEXTS} the custom text is being passed by reference so any change in custom text will also be reflected in
-  * state.last_active_product_data
-   */
-  // retrieved_products_custom_texts.forEach((product_custom_texts: Record<any, any>[]) => {
-  //   const product_id = product_custom_texts && product_custom_texts.length > 0 ? product_custom_texts[0].product_id : null;
-  //   if(product_id) {
-  //     Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-  //       product_custom_texts: {[product_id]: product_custom_texts}
-  //     });
-  //   }
-  // })
-
 }
 //type could be locker_product, cart_product, order_product, reorder_product
 const getEditModeDefaultObj = (prop='') => {
@@ -969,8 +958,8 @@ const getEditModeDefaultObj = (prop='') => {
     style_id :null, design_id : null, factory_product_active_index : 0, paginate: false
   }
   const reorder_product_info = {
-    order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null, active_style_id: null,
-    design_id: null, active_design_id: null, reorder_product: null
+    order_id: null, order_number: null, order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null,
+    design_id: null, factory_id: null,  factory_name: null
   }
   const locker_product_info = { product_id: null, locker_product_id: null, style_id: null, design_id: null }
   const filters =  { customized: true, personalized: false, search_products: '' }

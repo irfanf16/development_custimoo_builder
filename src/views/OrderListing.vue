@@ -102,7 +102,7 @@
                             <td>{{ product.roster_quantity }}</td>
                             <td style="text-align: center">
                              <template v-if="product.can_reorder">
-                               <span class="btn btn-dark mx-xxl-2" @click="reorderItem(order, item.id, product)">Reorder</span>
+                               <span class="btn btn-dark mx-xxl-2" @click="reorderItem(order, item, product)">Reorder</span>
                              </template>
                               <template v-else>
                                 <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
@@ -278,7 +278,8 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
     }
     this.getOrders(params);
   }
-  public reorderItem(order: Record<any, any>,order_item_id: string, factory_product: Record<any, any>) {
+  public reorderItem(order: Record<any, any>,order_item: Record<any, any>, factory_product: Record<any, any>) {
+    const order_item_id: string = order_item.id
     http.post(`product/${factory_product.product_id}/can_reorder`).then(async (res:Record<any, any>) => {
       const res_result = res.data.result
       if(res_result.can_reorder) {
@@ -288,8 +289,10 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
         this.$router.push({
           name: 'Home',
           query: {
-            is_reorder: 'true', order_id: order.id, order_number: order.order_no , order_item_id: order_item_id, factory_product_id:  factory_product.id, active_product_id:  factory_product.product_id,
-            style_id: factory_product.style_id, design_id: factory_product.design_id,
+            is_reorder: 'true', order_id: order.id, order_number: order.order_no , order_item_id: order_item_id,
+            factory_product_id:  factory_product.id, active_product_id:  factory_product.product_id,
+            style_id: factory_product.style_id, design_id: factory_product.design_id, factory_id: order_item.factory_id,
+            factory_name: order_item.factory_name,
           }
         });
       } else {
