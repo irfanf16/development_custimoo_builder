@@ -128,7 +128,9 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         this.showError("No Product Found");
         await this.handleProductNotFound()
       }
-    }, (error) => {
+    }, async (error) => {
+      this.showError("Product no more exists.");
+      await this.handleProductNotFound()
       console.error('Error while getting products listing')
     })
   }
@@ -137,13 +139,10 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     let self: Record<any, any> = this;
     await this.handleCancelEditMode();
     await resetLastActiveProductData();
-    this.fetchCategories('customized').then(async (cat_response) => {
-      let query_params: string[] = [`customized=true`, `personalized=false`];
-      const selected_category = self.$store.getters.getSelectedCategory;
-      if(selected_category && selected_category.category_id) {
-        query_params.push(`category_id=${selected_category.category_id}`)
-      }
-      await this.retrieveProductsNew(query_params)
+    this.fetchCategories('customized').then((cat_response) => {
+      self.setQueryParams().then(async (query_params: string[]) => {
+        await this.retrieveProductsNew(query_params)
+      });
     });
   }
 
