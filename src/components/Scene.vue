@@ -500,7 +500,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public changeDefaultColorsEvent() {
-    this.$store.dispatch('setGroupColors', {})
+    if(this.mainPreview && (Object.keys(this.groupColors).length)) {
+      this.$store.dispatch('setGroupColors', {})
+    }
     this.changeDefaultColors()
   }
 
@@ -2081,7 +2083,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         logo.haveControls = Boolean(logo.haveControls)
         let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
         fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
-          img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
+          const aspect_ratio = img.width / img.height
+          if(aspect_ratio > 1) {
+            img.scaleToWidth(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
+          } else {
+            img.scaleToHeight(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
+          }
           img.set({
             left: this.canvasWidth / this.mainCanvasWidth * logo.x_axis,
             top: this.canvasHeight / this.mainCanvasHeight * logo.y_axis,
