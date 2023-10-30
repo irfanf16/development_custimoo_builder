@@ -41,7 +41,8 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
       edit_product_info_obj.editing = true;
       edit_product_info_obj.type = 'locker_product';
       edit_product_info_obj.locker_product_info = {
-        product_id: product_id, locker_product_id: locker_product.id, style_id: locker_product.style_id, design_id: locker_product.design_id
+        product_id: product_id, locker_product_id: locker_product.id, style_id: locker_product.style_id, design_id: locker_product.design_id,
+        locker_product_name: locker_product.product_name
       };
       this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", edit_product_info_obj)
       const query_params = await self.setQueryParams()
