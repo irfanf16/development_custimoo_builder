@@ -2253,7 +2253,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-        text: 'Size ' + converted_width!.value + converted_width!.unit + ' x ' + converted_height!.value + converted_height!.unit,
+        text: 'Size (W)' + converted_width!.value + converted_width!.unit + ' x (H)' + converted_height!.value + converted_height!.unit,
         visible: true
       }).bringToFront()
     }

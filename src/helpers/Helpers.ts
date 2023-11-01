@@ -1872,12 +1872,8 @@ const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
     id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,
     transparent_logo: updated_logo.transparent_logo_url, smart_transparent_logo: updated_logo.smart_transparent_logo_url,
     is_smart_transparent: updated_logo.is_smart_transparent ? true : false, is_vector: updated_logo.is_vector ? true : false,
-    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success ? true : false
-  }
-  if(updated_logo.logo_colors) {
-    updated_props.logo_colors = updated_logo.logo_colors
-  } else {
-    delete updated_props.logo_colors
+    logo_name: updated_logo.logo_name, is_replace_success: updated_logo.is_replace_success ? true : false,
+    logo_colors: updated_logo.logo_colors
   }
   return updated_props
 }

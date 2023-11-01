@@ -127,26 +127,24 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
   public async setRecentLogo(recent_logo: Record<any, any>) {
     let self: Record<any, any> = this;
     await setUndoRedoItems('customLogos', 'recent_added')
+    let logo_colors = processColorsCustom(recent_logo.logo_colors)
+    recent_logo.logo_colors = JSON.parse(JSON.stringify(logo_colors))
     const custom_logos_updated_props: Record<any, any> = {
       transparent_logo: recent_logo.transparent_logo_url, smart_transparent_logo: recent_logo.smart_transparent_logo_url,
       original_logo_url: recent_logo.original_logo_url, original_logo: recent_logo.original_logo, is_smart_transparent: false,
       url: recent_logo.logo_url, id: recent_logo.id, is_vector: recent_logo.is_vector, is_recent_logo: true,
-      logo_name: recent_logo.logo_name
+      logo_name: recent_logo.logo_name, logo_colors: logo_colors
     }
     delete this.customLogo.scaleX
     delete this.customLogo.scaleY
-
     if(this.customLogoIndex == 0) {
       if(recent_logo.logo_colors && recent_logo.logo_colors instanceof Array) {
-        let logo_colors = processColorsCustom(recent_logo.logo_colors)
-        recent_logo.logo_colors = JSON.parse(JSON.stringify(logo_colors))
         this.$store.commit('SET_LOGO_COLORS_INFO', {
           data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
         })
       }
       this.addRemoveTeamLogoOnAllProducts('add', recent_logo)
     } else {
-      delete this.customLogo.logo_colors
       this.$store.commit('SET_CUSTOM_LOGOS', {
         logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
       })

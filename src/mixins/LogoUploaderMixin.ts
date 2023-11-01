@@ -133,12 +133,12 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
         const logo_data = response_data.result.customer_logo
         logo_data.is_replace_success =  replaceLogo ? true : false
         await setUndoRedoItems('customLogos', 'added')
+        const logo_colors = processColorsCustom(logo_data.logo_colors)
+        logo_data.logo_colors = logo_colors
         if(customLogoIndex == 0) {
-          const logo_colors = processColorsCustom(logo_data.logo_colors)
           this.$store.commit('SET_LOGO_COLORS_INFO', {
             data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
           })
-          logo_data.logo_colors = logo_colors
           await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
           const custom_logos_updated_props = getLogoUpdatedProps(logo_data)
