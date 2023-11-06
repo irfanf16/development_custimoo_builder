@@ -82,7 +82,6 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   public isElementOverflowingContainer(element:Record<any, any>) {
     setTimeout(()=>{
       if(element && this.ref['locker-modal-body']){
-        console.log('element', element)
         const elementRect = element.getBoundingClientRect();
         const containerRect = this.ref['locker-modal-body'].getBoundingClientRect();
 
@@ -100,9 +99,7 @@ export default class LockerRoomModal extends Mixins(ModalAction){
         }
         this.opacityset = true
       }
-
-      console.log('out if element', element)
-    }, 550)
+    }, 10)
   }
 
   public addDesignCollection () {

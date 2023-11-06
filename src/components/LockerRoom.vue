@@ -81,7 +81,7 @@
                               </b-button>
 
                               <aside :id="'share-popper-content'+i+''+ind" v-show="popperID == ('share'+i+''+ind)" :ref="'share-popper-content'+i+''+ind"
-                                     :style="{'opacity': !opacityset ? '0' : '1'}"
+                                     :class="!opacityset ? 'opacity-0' : 'opacity-100'"
                                      v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-product-tooltip" :key="popperID">
                                 <div class="share-holder">
                                   <h3>Copy link and Share</h3>
@@ -287,7 +287,7 @@
                             custom-class="share-tooltip"><font-awesome-icon
                     :icon="['fas', 'share-alt']"/></b-button>
                     <aside :id="'popper-content'+index" v-show="popperID == 'share-collection'+index" :ref="'popper-content'+index"
-                           :style="{'opacity': !opacityset ? '0' : '1'}"
+                           :class="!opacityset ? 'opacity-0' : 'opacity-100'"
                            v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip" :key="popperID">
                       <div class="share-holder">
                         <h3>Copy link and Share</h3>
@@ -775,12 +775,15 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     return this.$store.getters.getProductEditInfoObject;
   }
 
-  public showPopper(id:string){
-    this.$store.commit('setPopper', id)
+  public showPopper(id:string, callback){
+    this.$store.commit('setPopper', id);
+    setTimeout(function (){
+      callback();
+    },500)
   }
   public hidePopper(){
-    this.$store.commit('setPopper', '');
     this.$emit('setOpacity', false)
+    this.$store.commit('setPopper', '');
   }
   public alertt(){
     alert('setPopper')
@@ -803,8 +806,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
             shared_url += res.data.url;
             Vue.set(this.getLockerProducts[lockerIndex].product[ind], 'shared_url', shared_url)
           }
-        this.showPopper('share'+lockerIndex+''+ind);
-        this.isElementOverflowingContainer(`share-popper-content${lockerIndex}${ind}`)
+        this.hidePopper()
+        this.showPopper('share'+lockerIndex+''+ind, ()=>{this.isElementOverflowingContainer(`share-popper-content${lockerIndex}${ind}`)});
       }
     } catch (error) {
       console.log(error)
@@ -826,8 +829,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
           shared_url += res.data.url;
           Vue.set(this.getCollections[index], 'shared_url', shared_url)
         }
-        this.showPopper('share-collection'+index)
-        this.isElementOverflowingContainer('popper-content'+index)
+        this.hidePopper()
+        this.showPopper('share-collection'+index, ()=>{this.isElementOverflowingContainer('popper-content'+index)})
       }
     } catch (error) {
       console.log(error)
