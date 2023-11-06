@@ -10,7 +10,7 @@
         </a>
         <div id="collectionPdfContainer">
           <div v-if="company.id == 1" class="pdf_cover">
-            <h1 class="text-white p-4">{{ collection.name }} </h1>
+            <h1 class="text-white p-4" style="text-align: center">{{ collection.name }} </h1>
 
             <div class="logo">
               <img src="../../src/assets/logo.png" alt="Logo">
