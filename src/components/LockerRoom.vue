@@ -80,8 +80,9 @@
                                 :icon="['fas', 'share-alt']"/>
                               </b-button>
 
-                              <aside :id="'share-popper-content'+i+''+ind" v-if="popperID == ('share'+i+''+ind)" :ref="'share-popper-content'+i+''+ind" style="opacity: 0"
-                                     v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-product-tooltip">
+                              <aside :id="'share-popper-content'+i+''+ind" v-show="popperID == ('share'+i+''+ind)" :ref="'share-popper-content'+i+''+ind"
+                                     :style="{'opacity': !opacityset ? '0' : '1'}"
+                                     v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-product-tooltip" :key="popperID">
                                 <div class="share-holder">
                                   <h3>Copy link and Share</h3>
                                   <div class="share-form">
@@ -285,8 +286,9 @@
                             :ref="'share-collection'+index" class="light rounded-circle"
                             custom-class="share-tooltip"><font-awesome-icon
                     :icon="['fas', 'share-alt']"/></b-button>
-                    <aside :id="'popper-content'+index" v-if="popperID == 'share-collection'+index" :ref="'popper-content'+index" style="opacity: 0"
-                           v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip">
+                    <aside :id="'popper-content'+index" v-show="popperID == 'share-collection'+index" :ref="'popper-content'+index"
+                           :style="{'opacity': !opacityset ? '0' : '1'}"
+                           v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip" :key="popperID">
                       <div class="share-holder">
                         <h3>Copy link and Share</h3>
                         <div class="share-form">
@@ -441,7 +443,7 @@ import {AxiosError} from "axios";
   }
 })
 export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin) {
-  @Prop({required: true}) lockerModalBody:Record<any, any>
+  @Prop({required: true}) opacityset:boolean
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private baseUrl = location.host + "/#/"
@@ -524,27 +526,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public isElementOverflowingContainer(elementRef:string) {
-    setTimeout(()=>{
-      const element = this.ref[elementRef][0];
-      if(element && this.lockerModalBody){
-        const elementRect = element.getBoundingClientRect();
-        const containerRect = this.lockerModalBody.getBoundingClientRect();
-
-        const isOverflowingHorizontally = elementRect.right > containerRect.right || elementRect.left < containerRect.left;
-        const isOverflowingVertically = elementRect.bottom > containerRect.bottom || elementRect.top < containerRect.top;
-
-        const overflowInfo = {
-          horizontal: isOverflowingHorizontally,
-          vertical: isOverflowingVertically,
-        };
-
-        let horizontalDifference = elementRect.right - containerRect.right + 15
-        if(overflowInfo.horizontal){
-          element.style.marginLeft = `${horizontalDifference * -1}px`
-        }
-        element.style.opacity = '1'
-      }
-    }, 550)
+    this.$emit('isElementOverflowingContainer', this.ref[elementRef][0])
   }
 
   public locker_with_rosters(id:any) {
@@ -797,7 +779,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('setPopper', id)
   }
   public hidePopper(){
-    this.$store.commit('setPopper', '')
+    this.$store.commit('setPopper', '');
+    this.$emit('setOpacity', false)
   }
   public alertt(){
     alert('setPopper')

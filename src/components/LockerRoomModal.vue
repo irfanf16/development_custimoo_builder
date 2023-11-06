@@ -15,7 +15,9 @@
         <div id="modal-center-lockerroom" class="modal-body" ref="locker-modal-body">
           <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideVModal('locker-modal')"
                       @showCollectionModal="showCollectionModal" @lockerModalOpened="lockerModalOpened"
-                      @editCollectionModal="editCollectionModal" :lockerModalBody="$refs['locker-modal-body']"
+                      @editCollectionModal="editCollectionModal" :opacityset="opacityset"
+                      @setOpacity="setOpacity"
+                      @isElementOverflowingContainer="isElementOverflowingContainer"
                       />
         </div>
       </div>
@@ -46,6 +48,11 @@ export default class LockerRoomModal extends Mixins(ModalAction){
 
   private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
 
+  private opacityset = false;
+  public setOpacity (toSet){
+    this.opacityset = toSet
+  }
+
   private showCollectionModal = () => {
     this.$emit('showCollectionModal')
   }
@@ -70,6 +77,32 @@ export default class LockerRoomModal extends Mixins(ModalAction){
       eventProductMode:false,
       eventCollectionMode:false
     })
+  }
+
+  public isElementOverflowingContainer(element:Record<any, any>) {
+    setTimeout(()=>{
+      if(element && this.ref['locker-modal-body']){
+        console.log('element', element)
+        const elementRect = element.getBoundingClientRect();
+        const containerRect = this.ref['locker-modal-body'].getBoundingClientRect();
+
+        const isOverflowingHorizontally = elementRect.right > containerRect.right || elementRect.left < containerRect.left;
+        const isOverflowingVertically = elementRect.bottom > containerRect.bottom || elementRect.top < containerRect.top;
+
+        const overflowInfo = {
+          horizontal: isOverflowingHorizontally,
+          vertical: isOverflowingVertically,
+        };
+
+        let horizontalDifference = elementRect.right - containerRect.right + 15
+        if(overflowInfo.horizontal){
+          element.style.marginLeft = `${horizontalDifference * -1}px`
+        }
+        this.opacityset = true
+      }
+
+      console.log('out if element', element)
+    }, 550)
   }
 
   public addDesignCollection () {
