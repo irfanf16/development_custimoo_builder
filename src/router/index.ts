@@ -13,6 +13,7 @@ const Orders = ()=> import('../views/Orders.vue')
 const ShareRoster = ()=> import('../views/ShareRoster.vue')
 const CollectionViewPDF = ()=> import('@/views/CollectionViewPDF.vue')
 const OrderListing = ()=> import("@/views/OrderListing.vue")
+const Resetpassword = ()=> import("@/views/Resetpassword.vue")
 const Dashboard = ()=> import("@/views/Dashboard.vue")
 const Thankyou = ()=> import("@/views/Thankyou.vue")
 const Deactive = ()=> import("@/views/Deactive.vue")
@@ -95,6 +96,11 @@ const routes: Array<RouteConfig> = [
     path:'/deactive',
     name:'Deactive',
     component: Deactive,
+  },
+  {
+    path:'/reset-password',
+    name:'Resetpassword',
+    component: Resetpassword,
   }
 ]
 

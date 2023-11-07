@@ -51,6 +51,10 @@ const Auth:Module<any, any> = {
       commit('SET_CUSTOMER', res.data)
       return res
     },
+    async forgotPassword({commit}, payload){
+      const res = await http.post('customer/forgot-password', payload);
+      return res
+    },
     async signUpCustomer({commit}, payload){
       const res = await http.post('customer/signup', payload);
       commit('SET_CUSTOMER', res.data)

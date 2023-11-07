@@ -1,181 +1,221 @@
 <template>
-  <modal  :width="screenWidth"
-         :resizable="true"
-         :scrollable="true"
-         height="auto"
-         :reset="true"
-         :shiftY="0" name="loginModal" ref="loginModal" id="modal-login" class="login-modal" size="lg" hide-title hide-footer>
-    <div class="modal-header d-flex justify-content-between">
-      <span class="fs-5 font-weight-bold d-inline-flex p-2">Login</span>
-      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
-    </div>
-    <div class="modal-body">
-    <div class="form-holder" :class="{active: isActive}">
-      <div class="form-area form-signin p-4">
-        <b-form>
-          <b-form-group
-            label="Email address:"
-            label-for="input-1" class="text-left"
-          >
-            <b-form-input
-              type="email"
-              v-model="email"
-              placeholder="Enter Email Address"
-              required
-            ></b-form-input>
-          </b-form-group>
-
-          <b-form-group id="input-group-2" label="Password:" class="text-left" label-for="input-2">
-            <b-form-input
-              type="password"
-              v-model="password"
-              placeholder="Enter Password"
-              required
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group>
-            <b-form-checkbox
-              name="checkbox-1"
-              value="accepted"
-              unchecked-value="not_accepted"
+  <div>
+    <modal  :width="screenWidth"
+           :resizable="true"
+           :scrollable="true"
+           height="auto"
+           :reset="true"
+           :shiftY="0" name="loginModal" ref="loginModal" id="modal-login" class="login-modal" size="lg" hide-title hide-footer>
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-5 font-weight-bold d-inline-flex p-2">Login</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
+      </div>
+      <div class="modal-body">
+      <div class="form-holder"  :class="{active: isActive}">
+        <div class="form-area form-signin p-4">
+          <b-form>
+            <b-form-group
+              label="Email address:"
+              label-for="input-1" class="text-left"
             >
-              Keep Me Logged In
-            </b-form-checkbox>
-          </b-form-group>
+              <b-form-input
+                type="email"
+                v-model="email"
+                placeholder="Enter Email Address"
+                required
+              ></b-form-input>
+            </b-form-group>
 
-          <b-button @click="submitForm" variant="primary">Submit</b-button>
+            <b-form-group id="input-group-2" label="Password:" class="text-left" label-for="input-2">
+              <b-form-input
+                type="password"
+                v-model="password"
+                placeholder="Enter Password"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group>
+              <b-form-checkbox
+                name="checkbox-1"
+                value="accepted"
+                unchecked-value="not_accepted"
+              >
+                Keep Me Logged In
+              </b-form-checkbox>
+            </b-form-group>
 
-          <div class="pt-3"><a href="/" class="login-remember">Remember me?</a></div>
+            <b-button @click="submitForm" variant="primary">Submit</b-button>
 
-        </b-form>
-      </div>
-      <div class="form-area form-signup p-4">
-        <h2>Join Customizer!</h2>
-        <b-form>
-          <b-form-group class="text-left"
-            label="First Name"
-            label-for="input-1"
-          >
-            <b-form-input
-              type="text"
-              v-model="form.first_name"
-              placeholder="Enter First Name"
-              required
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group class="text-left"
-            label="Last Name"
-            label-for="input-2"
-          >
-            <b-form-input
+            <div class="pt-3"><span class="login-remember cursor-pointer btn-link" @click="showPasswordModal">Forgot password?</span></div>
 
-              v-model="form.last_name"
-              type="text"
-              placeholder="Enter Last Name"
-              required
-            ></b-form-input>
-          </b-form-group>
+          </b-form>
+        </div>
+        <div class="form-area form-signup p-4">
+          <h2>Join Customizer!</h2>
+          <b-form>
+            <b-form-group class="text-left"
+              label="First Name"
+              label-for="input-1"
+            >
+              <b-form-input
+                type="text"
+                v-model="form.first_name"
+                placeholder="Enter First Name"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group class="text-left"
+              label="Last Name"
+              label-for="input-2"
+            >
+              <b-form-input
 
-          <b-form-group class="text-left"
-            label="Email Address"
-            label-for="input-3"
-          >
-            <b-form-input
-              v-model="form.email"
-              type="email"
-              placeholder="Enter Email Address"
-              required
-            ></b-form-input>
-          </b-form-group>
+                v-model="form.last_name"
+                type="text"
+                placeholder="Enter Last Name"
+                required
+              ></b-form-input>
+            </b-form-group>
 
-          <b-form-group class="text-left"
-                        label="Team / Company Name"
-                        label-for="input-3"
-          >
-            <b-form-input
-              v-model="form.company_name"
-              type="email"
-              placeholder="Enter Team / Company Name"
-              required
-            ></b-form-input>
-          </b-form-group>
-          <b-form-group label-for="country" class="text-left">
-            <label class="required"><strong>Country</strong></label>
-            <v-select
-              autocomplete="off"
-              id="country"
-              :options="countries"
-              name="country"
-              v-model="form.country"
-              placeholder="Select Country"
-              v-validate="{required: true}">
-            </v-select>
-          </b-form-group>
+            <b-form-group class="text-left"
+              label="Email Address"
+              label-for="input-3"
+            >
+              <b-form-input
+                v-model="form.email"
+                type="email"
+                placeholder="Enter Email Address"
+                required
+              ></b-form-input>
+            </b-form-group>
+
+            <b-form-group class="text-left"
+                          label="Team / Company Name"
+                          label-for="input-3"
+            >
+              <b-form-input
+                v-model="form.company_name"
+                type="email"
+                placeholder="Enter Team / Company Name"
+                required
+              ></b-form-input>
+            </b-form-group>
+            <b-form-group label-for="country" class="text-left">
+              <label class="required"><strong>Country</strong></label>
+              <v-select
+                autocomplete="off"
+                id="country"
+                :options="countries"
+                name="country"
+                v-model="form.country"
+                placeholder="Select Country"
+                v-validate="{required: true}">
+              </v-select>
+            </b-form-group>
 
 
-          <b-form-group id="input-group-4" class="text-left" label="Password" label-for="input-4">
-            <b-form-input
-              v-model="form.password"
-              id="input-4"
-              type="password"
-              placeholder="Enter Password"
-              required
-            ></b-form-input>
-          </b-form-group>
+            <b-form-group id="input-group-4" class="text-left" label="Password" label-for="input-4">
+              <b-form-input
+                v-model="form.password"
+                id="input-4"
+                type="password"
+                placeholder="Enter Password"
+                required
+              ></b-form-input>
+            </b-form-group>
 
-          <b-form-group id="input-group-5" class="text-left" label="Confirm Password" label-for="input-5">
-            <b-form-input
-              v-model="form.password_confirmation"
-               type="password"
-              placeholder="Enter Confirm Password"
-              required
-            ></b-form-input>
-          </b-form-group>
+            <b-form-group id="input-group-5" class="text-left" label="Confirm Password" label-for="input-5">
+              <b-form-input
+                v-model="form.password_confirmation"
+                 type="password"
+                placeholder="Enter Confirm Password"
+                required
+              ></b-form-input>
+            </b-form-group>
 
-<!--          <b-form-group>-->
-<!--            <b-form-checkbox-->
-<!--              name="checkbox-2"-->
-<!--              value="accepted"-->
-<!--              unchecked-value="not_accepted"-->
-<!--            >-->
-<!--              Subscribe to newsletter-->
-<!--            </b-form-checkbox>-->
-<!--          </b-form-group>-->
+  <!--          <b-form-group>-->
+  <!--            <b-form-checkbox-->
+  <!--              name="checkbox-2"-->
+  <!--              value="accepted"-->
+  <!--              unchecked-value="not_accepted"-->
+  <!--            >-->
+  <!--              Subscribe to newsletter-->
+  <!--            </b-form-checkbox>-->
+  <!--          </b-form-group>-->
 
-          <div class="pb-3">By creating an account, I acknowledge that I have read and agreed with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
+            <div class="pb-3">By creating an account, I acknowledge that I have read and agreed with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
 
-          <b-button @click="signUp" variant="primary">Create Account and Login</b-button>
+            <b-button @click="signUp" variant="primary">Create Account and Login</b-button>
 
-        </b-form>
-      </div>
-      <div class="signup-section p-4 pt-lg-5">
-        <div>
-          <div class="signup-text-header">
-            <span class="text-join">Need an account?</span>
-            <span class="text-signin">Already have an account?</span>
-            <h2 @click="additionClass()">
-              <span class="text-join">Join Customizer!</span>
-              <span class="text-signin">Login Now!</span>
-            </h2>
+          </b-form>
+        </div>
+        <div class="signup-section p-4 pt-lg-5">
+          <div>
+            <div class="signup-text-header">
+              <span class="text-join">Need an account?</span>
+              <span class="text-signin">Already have an account?</span>
+              <h2 @click="additionClass()">
+                <span class="text-join">Join Customizer!</span>
+                <span class="text-signin">Login Now!</span>
+              </h2>
+            </div>
+  <!--          <div class="social-signup">-->
+  <!--            <ul>-->
+  <!--              <li>-->
+  <!--                <a href="/"><font-awesome-icon :icon="['fab', 'linkedin-in']"/></a>-->
+  <!--              </li>-->
+  <!--              <li>-->
+  <!--                <a class="icon-google" href="/"><font-awesome-icon :icon="['fab', 'google-plus-g']"/></a>-->
+  <!--              </li>-->
+  <!--              <li>-->
+  <!--                <a class="icon-facebook" href="/"><font-awesome-icon :icon="['fab', 'facebook-f']"/></a>-->
+  <!--              </li>-->
+  <!--            </ul>-->
+  <!--          </div>-->
           </div>
-<!--          <div class="social-signup">-->
-<!--            <ul>-->
-<!--              <li>-->
-<!--                <a href="/"><font-awesome-icon :icon="['fab', 'linkedin-in']"/></a>-->
-<!--              </li>-->
-<!--              <li>-->
-<!--                <a class="icon-google" href="/"><font-awesome-icon :icon="['fab', 'google-plus-g']"/></a>-->
-<!--              </li>-->
-<!--              <li>-->
-<!--                <a class="icon-facebook" href="/"><font-awesome-icon :icon="['fab', 'facebook-f']"/></a>-->
-<!--              </li>-->
-<!--            </ul>-->
-<!--          </div>-->
         </div>
       </div>
-    </div>
-    </div>
-  </modal>
+      </div>
+    </modal>
+
+    <modal  :resizable="true"
+            :scrollable="true"
+            height="auto"
+            :reset="true"
+            :shiftY="0" name="forgotPasswordModal" ref="forgotPasswordModal" id="modal-login" class="login-modal" size="sm" hide-title hide-footer>
+      <div class="modal-header bg-light d-flex justify-content-between">
+        <span class="fs-5 font-weight-bold d-inline-flex p-2">Forgot Password?</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="backToLoginModal"><BIconX /></span>
+      </div>
+      <div class="modal-body">
+        <div class="form-holder d-block">
+          <div class="form-area form-signin p-4">
+            <b-form>
+              <b-form-group
+                label="A link will be sent to your email address to reset your password"
+                label-for="input-1" class="text-left"
+              >
+                <b-form-input
+                  type="email"
+                  v-model="email"
+                  placeholder="Enter email address"
+                  required
+                ></b-form-input>
+              </b-form-group>
+
+              <div class="d-flex align-content-center justify-content-center gap-2">
+                <b-button @click="backToLoginModal" variant="secondary" class="light">Cancel</b-button>
+                <b-button v-if="!loading" @click.prevent="forgotPassword">Submit</b-button>
+                <button v-else  class="btn btn-secondary fw-bold light bg-dark" :disabled="true"  style="width: 15%">
+                  <img width="20" height="20" src="@assets/images/loading.gif" />
+                </button>
+              </div>
+            </b-form>
+          </div>
+        </div>
+      </div>
+    </modal>
+  </div>
 </template>
 
 <script lang="ts">
@@ -204,6 +244,7 @@
     public countries:Record<any,any> = [];
     public email  = ''
     public password  = ''
+    public loading = false;
     public form = {
       first_name: '',
       last_name: '',
@@ -222,6 +263,17 @@
     public hide(){
       this.clearForm()
       this.$modal.hide('loginModal')
+    }
+    public showPasswordModal(){
+      this.hide();
+      this.$modal.show('forgotPasswordModal');
+    }
+    public hidePasswordModal(){
+      this.$modal.hide('forgotPasswordModal');
+    }
+    public backToLoginModal(){
+      this.$modal.hide('forgotPasswordModal');
+      this.show()
     }
     public async submitForm(){
       try {
@@ -272,6 +324,25 @@
       this.form.password_confirmation = ''
       this.email = ''
       this.password = ''
+    }
+
+    public async forgotPassword(){
+      try {
+        this.loading = true;
+        let payload = {
+          email: this.email
+        }
+        let res = await this.$store.dispatch('forgotPassword', payload)
+        if (res.status == 200){
+          this.email = ''
+          this.showToast(res.data.message, 'success');
+          this.loading = false;
+          this.$modal.hide('forgotPasswordModal');
+        }
+      }catch (error){
+        this.showError(error)
+        this.loading = false;
+      }
     }
 
   }
