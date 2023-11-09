@@ -15,14 +15,14 @@
     </div>
     <div class="p-4">
       <div class="lockerroom-header">
-        <div class="locker-opener w-100" style="max-width: 100%; overflow-x: auto">
+        <div class="locker-opener w-100 theme-scroll-h" style="max-width: 100%; overflow-x: auto">
           <b-button style="white-space: nowrap" v-for="(locker, index) in lockers" :key="index" variant="secondary" @click="showButton(locker.id, index)"  v-bind:class="tabIndex === index ? 'active' : '' ">{{ locker.room_name }}<a class="remove" @click="deleteRoom(locker.id, index)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a></b-button>
-          <span class="btn btn-secondary light add_new_locker_btn" @click="showVModal('create-modal')">Add <BIconPlus /></span>
+          <span class="btn btn-secondary light add_new_locker_btn" style="white-space: nowrap" @click="showVModal('create-modal')">Add <BIconPlus /></span>
         </div>
         <CreateLockerRoomModal @lockerAdded="lockerAdded" />
       </div>
 
-      <div class="d-flex gap-4 flex-wrap flex-row-reverse">
+      <div class="d-flex gap-4 flex-wrap flex-row-reverse mt-2">
         <div class="bg-light rounded pt-3 text-center" style="flex-basis: calc(40% - 2rem)">
           <div class="fs-3 font-weight-bold">Design Preview</div>
 

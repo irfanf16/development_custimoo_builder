@@ -243,7 +243,7 @@
           <template #tabs-end>
             <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
                         role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-              <span class="btn btn-secondary light" @click="showVModal('create-modal')">Add <BIconPlus/></span>
+              <span class="btn btn-secondary light" style="white-space: nowrap" @click="showVModal('create-modal')">Add <BIconPlus/></span>
             </b-nav-item>
           </template>
 

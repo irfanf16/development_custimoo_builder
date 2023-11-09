@@ -6844,3 +6844,35 @@ $fontSize: 0.5;
         transform: translateX(48%) translateY(-38%) scale(0);
     }
 }
+.locker-tabs{
+    .lockerroom_titles{
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        overflow-x: auto;
+
+        transition: 0.3s all ease-in-out;
+
+        &::-webkit-scrollbar {
+            height: 7px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: rgba(33, 159, 132, 0.267);
+            border-radius: 100px;
+        }
+
+        scrollbar-color: #219F84 #f1f1f1;
+        scrollbar-width: thin;
+
+        &:hover{
+            &::-webkit-scrollbar-thumb {
+                background: #219F84;
+            }
+        }
+    }
+}
