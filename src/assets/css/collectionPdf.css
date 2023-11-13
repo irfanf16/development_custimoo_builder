@@ -391,6 +391,10 @@ img{
     page-break-inside: avoid !important;
 }
 
+.pdf_cover.design_hummel_us{
+    background: url('../images/pdf_cover_us.jpeg') no-repeat center;
+}
+
 .pdf_cover .pdf_collection h1{
     color: #fff;
     width: 100% !important;

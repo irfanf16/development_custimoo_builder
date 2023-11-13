@@ -9,7 +9,7 @@
           </span>
         </a>
         <div id="collectionPdfContainer">
-          <div v-if="company.id == 1" class="pdf_cover">
+          <div v-if="company.id == 1 || company.id == 45" class="pdf_cover" :class="{'design_hummel_us': company.id == 45}">
             <h1 class="text-white p-4" style="text-align: center">{{ collection.name }} </h1>
 
             <div class="logo">
