@@ -706,9 +706,9 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         reorder_data
       }
 
-      if(selected_product.ecommerece_company_addons && selected_product.ecommerece_company_addons.length > 0) {
+      if(selected_product.ecommerce_company_addons && selected_product.ecommerce_company_addons.length > 0) {
         post_data.addons = post_data.addons.map(addon => {
-          const ecommerce_addon = selected_product.ecommerece_company_addons.find(company_addon => company_addon.addon_id === addon.addon_id);
+          const ecommerce_addon = selected_product.ecommerce_company_addons.find(company_addon => company_addon.addon_id === addon.addon_id);
           if(ecommerce_addon) {
             return { ...addon,
               addon_ecommerce_product_id: ecommerce_addon.addon_ecommerce_product_id,

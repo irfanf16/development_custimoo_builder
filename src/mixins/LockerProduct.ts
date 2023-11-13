@@ -871,12 +871,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
   public async removeShopifyAddonIntoCart(remove_addons_obj) {
-    console.log('{updates : remove_addons_obj}', {updates : remove_addons_obj})
-    console.log('Object.keys(remove_addons_obj).length', Object.keys(remove_addons_obj).length)
     if(Object.keys(remove_addons_obj).length > 0) {
       let company = this.$store.getters.getCompany;
       let x_rand = Math.floor((Math.random() * 100) + 1);
-      console.log('{updates : remove_addons_obj}', {updates : remove_addons_obj})
       await http.post(company.company_domain + '/cart/update.js?token='+x_rand, {updates : remove_addons_obj})
     }
 
