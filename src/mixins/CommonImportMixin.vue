@@ -1,9 +1,9 @@
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import {
-  authenticateUser,
+  authenticateUser, checkIsEmpty,
   getCompany,
-  getCustomizerIframe,
+  getCustomizerIframe, getProductPriceDefaultObject,
   getUrlParameter,
   routerPush
 } from '@/helpers/Helpers'
@@ -143,6 +143,7 @@ Vue.directive('click-outside-custom', {
 });
 
 import VueGtag from "vue-gtag";
+import {isEmpty} from "lodash";
 Vue.use(VueGtag, {
   config: { id: "GTM-N2985NF" },
   params: {
@@ -158,6 +159,11 @@ export default class CommonImportMixin extends Vue{
     /*
     * Initialize store state default values starts
     * */
+
+    const product_price_obj = this.$store.getters.getProductPriceObject
+    if(checkIsEmpty(product_price_obj)) {
+      this.$store.commit('SET_PRODUCT_PRICE_OBJECT', getProductPriceDefaultObject())
+    }
 
     /*
     * Initialize store state default values ends

@@ -71,6 +71,21 @@
 
                           </template>
                         </div>
+                        <div class="feedback-text align-items-start mt-1 gap-1 d-flex"
+                             v-if="order_item.factory_products[activity_item_index].addons && order_item.factory_products[activity_item_index].addons.length > 0" >
+                          <div><strong class="fs-1 font-weight-bold">Addons:</strong></div>
+                          <div>
+                            <ul class="list-unstyled d-flex flex-wrap mt-1 mb-0 gap-1" style="max-width: 350px">
+                              <template v-for="factory_product_addon in order_item.factory_products[activity_item_index].addons">
+                                <span class="badge badge-secondary fs-1"
+                                    :key="`factory_product_${order_item.factory_products[activity_item_index].id}_addon_${factory_product_addon.addon_id}`"
+                                >
+                                {{  factory_product_addon.title }}
+                              </span>
+                              </template>
+                            </ul>
+                          </div>
+                        </div>
                         <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no)" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else>
                           <div class="feedback-text" :key="`afd-${activity_item_index}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
@@ -1268,6 +1283,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     color: #555;
     font-size: 1rem;
     padding-top: 7px;
+
+    &+.feedback-text{
+      border-top: 1px solid #ccc;
+    }
   }
 
 }

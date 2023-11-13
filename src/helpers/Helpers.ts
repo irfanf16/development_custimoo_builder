@@ -696,11 +696,28 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,
         style_name: product_style.name,
-        addons : selected_product.addons !== null ? selected_product.addons.join(', ') : '',
+        addons: selected_product.active_addons.filter(addon => {
+          return addon.selected;
+        }),
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null,
         reorder_data
       }
+
+      if(selected_product.ecommerece_company_addons && selected_product.ecommerece_company_addons.length > 0) {
+        post_data.addons = post_data.addons.map(addon => {
+          const ecommerce_addon = selected_product.ecommerece_company_addons.find(company_addon => company_addon.addon_id === addon.addon_id);
+          if(ecommerce_addon) {
+            return { ...addon,
+              addon_ecommerce_product_id: ecommerce_addon.addon_ecommerce_product_id,
+              addon_ecommerce_variant_id: ecommerce_addon.addon_ecommerce_variant_id
+            };
+          } else {
+            return addon;
+          }
+        })
+      }
+
       const svg_content = await fetchUrlContent(post_data.production_url);
       const production_file = await parseSvgStringFile(svg_content, post_data);
       post_data.svg_content = production_file
@@ -2100,6 +2117,68 @@ const getProductById = async (product_id: number, products: Record<any, any>[]) 
   return products.find((product: Record<any, any>) => product.id == product_id)
 }
 
+const getProductPriceDefaultObject = (update_values={}) => {
+  return { ...{
+    show_price: false, product_price: 0, product_price_with_quantity: 0, addons_price:0, addons_price_with_quantity:0,
+      total_price:0 , total_quantity: 0, currency_code: null, active_currency: null
+    }, ...update_values }
+}
+
+const handleProductPriceUpdate = async ():Promise<void> => {
+  const product_sku = Store.getters.getSkuInformation
+  const selected_product = Store.getters.getSelectedProduct
+  const product_roster = Store.getters.getProductRosters()
+  let roster_quantity_total = 0;
+  product_roster.forEach(roster_item => {
+    roster_quantity_total += parseInt(roster_item.quantity)
+  })
+  let product_price_object: Record<any, any> = {
+    total_quantity: roster_quantity_total
+  }
+  if(selected_product && isShowProductPrice()) {
+    if(!checkIsEmpty(product_sku) && product_sku.prices.length > 0) {
+      const product_price = product_sku.prices[0].price ? product_sku.prices[0].price : 0;
+      let addons_price = 0;
+      selected_product.active_addons.forEach(addon => {
+        if(addon.selected) {
+          if(addon.currencies.length > 0) {
+            addons_price += addon.currencies[0].price
+          }
+        }
+      })
+      const product_price_with_quantity = product_price * roster_quantity_total;
+      const addons_price_with_quantity =  addons_price * roster_quantity_total;
+      const total_price = product_price_with_quantity + addons_price_with_quantity;
+      product_price_object = {
+        product_price: product_price, product_price_with_quantity: product_price_with_quantity, addons_price: addons_price,
+        addons_price_with_quantity: addons_price_with_quantity, total_price: total_price, total_quantity: roster_quantity_total,
+        currency_code: product_sku.prices[0].code, active_currency: product_sku.prices[0]
+      }
+    }
+  }
+  Store.commit('SET_PRODUCT_PRICE_OBJECT', product_price_object )
+}
+
+const toggleProductAddons = async ():Promise<void> => {
+  const selected_product = Store.getters.getSelectedProduct
+  if(isShowProductPrice() && selected_product) {
+    let addons_price = 0;
+    selected_product.active_addons.forEach(addon => {
+      if(addon.selected) {
+        if(addon.currencies.length > 0) {
+          addons_price += addon.currencies[0].price
+        }
+      }
+    })
+    Store.commit('SET_PRODUCT_PRICE_OBJECT', { addons_price:  addons_price})
+  }
+}
+
+const isShowProductPrice = () => {
+  const company_currency_info = Store.getters.getSetting('currencies')
+  return company_currency_info && company_currency_info.visible
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2114,5 +2193,5 @@ export {
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
-  updateLastActiveProductData, getProductById
+  updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice
 };

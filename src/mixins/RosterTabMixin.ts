@@ -1,5 +1,6 @@
 import { Component, Mixins } from 'vue-property-decorator'
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
+import {handleProductPriceUpdate} from "@/helpers/Helpers";
 
 @Component
 export default class RosterTabMixin extends Mixins(RosterDetailsGlobal){
@@ -14,18 +15,20 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal){
     this.$emit('addPlayer', this.rosterDetails.length);
   }
 
-  public addRosterItem() {
+  public async addRosterItem() {
     const self: Record<any, any> = this;
     this.show_roster_change_warning = true
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0])));
     roster_items = [...this.productRoster, roster_items];
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-    this.handleRosterUpdate('0', 'size', roster_items.length - 1)
+    await this.handleRosterUpdate('0', 'size', roster_items.length - 1)
+    await handleProductPriceUpdate()
   }
 
-  public removeRosterItem(roster_item_index: number) {
+  public async removeRosterItem(roster_item_index: number) {
     this.show_roster_change_warning = true
     this.$store.commit('REMOVE_ROSTER_ITEM', roster_item_index)
+    await handleProductPriceUpdate()
   }
 
   public resetRosterItem(roster_item: Record<any, any>, productSizes?:Record<any, any>[]) {
@@ -52,6 +55,9 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal){
       roster_data['code'] = selected_size.value
     }
     self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
+    if(type == "quantity") {
+      await handleProductPriceUpdate()
+    }
     //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.
     if(['name', 'number'].includes(type)) {
       clearTimeout (this.handle_text_change_timer);

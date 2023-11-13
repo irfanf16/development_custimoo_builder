@@ -32,6 +32,7 @@ import Scene from '@/components/Scene.vue'
 import {http} from "@/httpCommon";
 import {handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import {handleProductPriceUpdate} from "@/helpers/Helpers";
 
 Vue.use(SlitherSlider)
 
@@ -78,7 +79,8 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     await this.editModeConfirmation();
     this.$store.commit('Change_Locker_Tabs_Index', undefined)
     await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
-    this.$store.dispatch("getSkuInformation", this.products[index].product_id);
+    await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
+    await handleProductPriceUpdate()
     this.$store.dispatch('setColorSectionVisibility')
     this.$emit('setRosterOpen', false);
     this.hideLockerProductUpdateButton()

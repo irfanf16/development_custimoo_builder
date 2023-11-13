@@ -23,7 +23,10 @@
             <th class="font-weight-bold">
               Quantity
             </th>
-            <th colspan="2" class="font-weight-bold">
+            <th class="font-weight-bold">
+              Addons
+            </th>
+            <th class="font-weight-bold">
               Actions
             </th>
           </tr>
@@ -33,7 +36,7 @@
             <template v-for="(factory_product, factory_product_index) in cart_item.factory_products">
               <tr :key="factory_product.id" >
                 <td>
-                  <template v-if="editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
+                  <template v-if="editingCartProductInfo.cart_product_info.cart_item_product && editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
                     <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
                   </template>
                   <template v-else="">
@@ -50,7 +53,7 @@
                   </div>
                 </td>
                 <td>
-                  <template v-if="editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
+                  <template v-if="editingCartProductInfo.cart_product_info.cart_item_product && editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
                   <span title="Editing This Product" style="cursor:pointer;">
                     {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
                   </span>
@@ -62,12 +65,22 @@
                   </template>
 
                 </td>
-                <td class="cursor-pointer">
-                  <template v-if="editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
+                <td>
+                  <template v-if="factory_product.addons">
+                    <template v-for="(addon, addonIndex) in factory_product.addons">
+                      <div :key="`cart-addon-${addon.addon_id}`" class="d-flex w-100" :class="{'border-top mt-1': addonIndex > 0}">
+                        {{ addon.title }}:
+                        <strong class="font-weight-bold ml-auto">{{ addon.currencies[0].symbol }} {{addon.currencies[0].price }}</strong>
+                      </div>
+                    </template>
+                  </template>
+                </td>
+                <td>
+                  <template v-if="editingCartProductInfo.cart_product_info.cart_item_product && editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
                     Editing
                   </template>
                   <template v-else="">
-                    <a data-title="Delete Event" @click="deleteConfirm(cart_item, factory_product)">
+                    <a data-title="Delete Event" class="cursor-pointer" @click="deleteConfirm(cart_item, factory_product)">
                       <font-awesome-icon :icon="['fas', 'trash-alt']" />
                     </a>
                   </template>
@@ -126,13 +139,16 @@
             <thead class="bg-light">
               <tr>
                 <th class="font-weight-bold">
-                  Product Name
+                  Product/Addon Name
                 </th>
                 <th class="font-weight-bold">
                   MOQ
                 </th>
                 <th class="font-weight-bold">
                   Total
+                </th>
+                <th v-if="product_price_object.show_price" class="font-weight-bold">
+                  Price
                 </th>
               </tr>
             </thead>
@@ -150,8 +166,32 @@
                       <span>{{ factory_product.roster_product_count }}</span>
                     </template>
                   </td>
+                  <td v-if="product_price_object.show_price">
+                    {{ product_price_object.active_currency.symbol }}{{ product_price_object.product_price_with_quantity }}
+                  </td>
                 </tr>
               </template>
+              <template v-if="product_price_object.show_price" v-for="(cart_item, index) in cartItems">
+                <tr :key="addon.addon_id" v-for="addon in cart_item.factory_products[index].addons">
+                  <td>
+                    {{addon.title}}
+                  </td>
+                  <td>
+                    &nbsp;
+                  </td>
+                  <td>{{ cart_item.factory_products[index].product_roster_detail | itemQtyCount(cart_item.factory_products[index].product_roster_detail) }}</td>
+                  <td v-if="cart_item.factory_products[index].product_roster_detail">
+                    {{ product_price_object.active_currency.symbol }}{{cart_item.factory_products[index].product_roster_detail.reduce((qt, a) => +qt.quantity + +a.quantity) * addon.currencies[0].price}}
+                  </td>
+                </tr>
+              </template>
+              <tr v-if="product_price_object.show_price">
+                <td></td>
+                <td colspan="2" class="font-weight-bold">Total Price</td>
+                <td colspan="2" class="font-weight-bold">
+                  {{ product_price_object.active_currency.symbol }}{{ +product_price_object.addons_price_with_quantity + +product_price_object.product_price_with_quantity }}
+                </td>
+              </tr>
             </tbody>
           </table>
           <div class="fs-2 font-weight-bold mt-3">Team Name / order reference</div>
@@ -195,7 +235,7 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
         value.forEach((roster: Record<any, any>) => {
           quantity += parseInt(roster.quantity);
         });
-        return quantity
+        return Number(quantity)
       }
       return 0
     }
@@ -277,6 +317,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
   get company(){
     return this.$store.getters.getCompany;
+  }
+  get product_price_object(){
+    return this.$store.getters.getProductPriceObject;
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated

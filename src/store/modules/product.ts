@@ -23,7 +23,8 @@ const Product:Module<any, any> = {
       color_type: 'pantone-tcx',
       vector_image_constraint:true,
     },
-    factory_settings:[]
+    factory_settings:[],
+    product_price_object: {}
   },
   getters:{
     getSkuInformation(state:Record<any, any>){
@@ -71,6 +72,9 @@ const Product:Module<any, any> = {
         factory_settings_obj[factory_setting.key_name] = factory_setting.value;
       });
       return factory_settings_obj;
+    },
+    getProductPriceObject(state:Record<any,any>) {
+      return state.product_price_object;
     }
   },
   mutations:{
@@ -144,6 +148,9 @@ const Product:Module<any, any> = {
     },
     SET_FACTORY_SETTING(state:Record<any, any>, factory_setting){
       state.factory_settings =  factory_setting
+    },
+    SET_PRODUCT_PRICE_OBJECT(state: Record<any, any>, payload) {
+      state.product_price_object = {...state.product_price_object, ...payload}
     }
   },
   actions: {

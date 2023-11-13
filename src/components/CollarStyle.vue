@@ -31,11 +31,15 @@
                 </template>
               </div>
           </div>
-          <div class="choose-stuff" v-if="selectedProduct.addons.length > 0">
-              <h2 class="fw-bold mb-3 fz-18">Choose Stuff</h2>
-              <div class="stuff-row" v-for="(item, i) in selectedProduct.addons" :key="i">
-                  <b-form-checkbox size="lg">{{ item.addon.name }}</b-form-checkbox>
-                  <span class="charges">+${{item.addon.price}}</span>
+          <div class="choose-stuff" v-if="selectedProduct.active_addons.length > 0">
+              <h2 class="fw-bold mb-3 fz-18">Addons</h2>
+              <div class="stuff-row addons d-flex gap-2">
+                  <div class="addon d-inline-flex gap-1" :class="{'selected': addon.selected}" v-for="addon in selectedProduct.active_addons"
+                       :key="addon.id">
+                    <b-form-checkbox size="lg" v-model="addon.selected"   @change="handleAddonSelectionUpdate">
+                      {{ addon.title }} <span class="charges">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
+                    </b-form-checkbox>
+                  </div>
               </div>
           </div>
       </div>
@@ -46,7 +50,7 @@
 import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
 import {findIndex} from "lodash";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
-import {hideLockerProductSaveBtn} from "@/helpers/Helpers";
+import {handleProductPriceUpdate, hideLockerProductSaveBtn} from "@/helpers/Helpers";
     @Component<CollarStyle>({
     })
 
@@ -117,6 +121,9 @@ import {hideLockerProductSaveBtn} from "@/helpers/Helpers";
         })
         hideLockerProductSaveBtn()
       }
+      handleAddonSelectionUpdate(): void {
+        handleProductPriceUpdate()
+      }
     }
 </script>
 
@@ -180,5 +187,38 @@ import {hideLockerProductSaveBtn} from "@/helpers/Helpers";
     }
   }
 }
+.addon{
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: #eee;
+  border: 1px solid transparent;
 
+  &.selected{
+    background: var(--theme-color-light);
+    border-color: var(--theme-color);
+  }
+
+  label{
+    white-space: nowrap;
+    display: flex;
+    cursor: pointer;
+    padding-top: 2px;
+
+    &:before, &:after{
+      margin-top: 2px;
+    }
+  }
+
+  .charges{
+    margin-left: 5px;
+    padding-left: 5px;
+    border-left: 1px solid #ddd;
+    color: #666;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
 </style>

@@ -29,7 +29,7 @@
             <CustomizationPreview :fromRosterModal="true" :designs="products[designsIndex]" :products_fonts="products_fonts" />
             <div class="d-flex py-2 fs-3 justify-content-end">
               <div>Total:</div>
-              <div class="ml-4 font-weight-bolder">{{ rosterTotal }}</div>
+              <div class="ml-4 font-weight-bolder">{{ productPriceObject.total_quantity }}</div>
             </div>
           </div>
         </div>
@@ -75,7 +75,7 @@ import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import readXlsxFile from "read-excel-file";
 import Scene from "@/components/Scene.vue"
-import {getRosterDetailDefaultObject, handleResponseException} from '@/helpers/Helpers'
+import {getRosterDetailDefaultObject, handleProductPriceUpdate, handleResponseException} from '@/helpers/Helpers'
 import { findIndex } from 'lodash'
 import ModalAction from "@/mixins/ModalAction";
 import {AxiosError, AxiosResponse} from "axios";
@@ -181,6 +181,10 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   get custom_number_index() : number {
     return findIndex(this.customText, { type: 'number' })
+  }
+
+  get productPriceObject(): Record<any, any> {
+    return this.$store.getters.getProductPriceObject
   }
 
   /* getters/computed props ends */

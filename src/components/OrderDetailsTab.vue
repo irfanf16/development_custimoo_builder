@@ -19,12 +19,38 @@
       <div class="qty-area">
         <div class="qty-details" v-for="(roster,index) in productRosterDetail" :key="index">
         </div>
-        <div class="order-row total">
-          <div class="total">Total</div>
-          <div class="total-qty">{{ total }}</div>
-        </div>
+        <template v-if="productPriceObject">
+          <div class="order-row total">
+            <div class="total">Quantity</div>
+            <div class="total-qty">{{ productPriceObject.total_quantity }}</div>
+          </div>
+          <template v-if="productPriceObject.show_price">
+            <div class="order-row total" v-if="productPriceObject.product_price > 0">
+              <div class="total">Product Price</div>
+              <div class="total-qty">
+                {{ productPriceObject.product_price }} X {{ productPriceObject.total_quantity }} =
+                {{ productPriceObject.product_price_with_quantity }}{{ productPriceObject.active_currency.symbol }}
+              </div>
+            </div>
+            <template v-if="productPriceObject.addons_price > 0">
+              <div class="order-row total">
+              <div class="total">Addons Price</div>
+              <div class="total-qty">
+                {{productPriceObject.addons_price}} X {{productPriceObject.total_quantity}} =
+                {{ productPriceObject.addons_price_with_quantity}}{{productPriceObject.active_currency.symbol}}
+              </div>
+              </div>
+            </template>
+            <template>
+              <div class="order-row total" v-if="productPriceObject.total_price > 0">
+              <div class="total">Total Price</div>
+              <div class="total-qty">{{ productPriceObject.total_price}}{{productPriceObject.active_currency.symbol}}</div>
+            </div>
+            </template>
+          </template>
+        </template>
       </div>
-      <div class="choose-stuff" v-if="selectedProduct.addons.length">
+      <div class="choose-stuff" v-if="selectedProduct.addons && selectedProduct.addons.length">
         <h2 class="fw-bold mb-3 fz-18 d-none d-lg-block">Choose Stuff</h2>
         <div class="stuff-row" v-for="(item, i) in selectedProduct.addons" :key="i">
           <b-form-checkbox size="sm">{{ item.addon.name }}</b-form-checkbox>
@@ -33,13 +59,9 @@
       </div>
       <div class="pricing-are">
         <div class="order-details">
-<!--          <button  class="btn btn-secondary fw-bold w-100" @click="addToCart">-->
-<!--            Add to Cart-->
-<!--          </button>-->
 
           <template v-if="isCustomerAuthenticated">
             <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
-<!--              <button class="btn btn-secondary fw-bold w-100" @click="generateSVG" >Generate SVG</button>-->
               <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                 <button v-if="!isLoading" :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)">
 
@@ -135,6 +157,11 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject
   }
+
+  get productPriceObject(): Record<any, any> {
+    return this.$store.getters.getProductPriceObject
+  }
+
   public roster_detail: Record<any,any> = [];
 
   public production_file_info: Record<any,any> = {};

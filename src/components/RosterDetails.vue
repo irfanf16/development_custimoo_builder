@@ -228,6 +228,7 @@ import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 import RosterTabMixin from "@/mixins/RosterTabMixin";
+import {handleProductPriceUpdate} from "@/helpers/Helpers";
 
 
 @Component<RosterDetails>({
@@ -402,7 +403,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     self.$eventBus.$emit('cancelCart');
   }
 
-  public handleLockerProductChange(locker_product_id: any) {
+  public async handleLockerProductChange(locker_product_id: any) {
     const self = this as Record<any, any>;
     locker_product_id = locker_product_id.target.value
     if(locker_product_id) {
@@ -411,13 +412,14 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         self.$santaModal.show({
           icon: 'warning', title: 'Are you sure?', text: 'Do you want to overwrite the current information',
           confirm_text: 'Yes, change it', cancel_text: 'No', close_on_confirm: true
-        },self).then((result) => {
+        },self).then(async (result) => {
           if (result) {
             this.show_roster_change_warning = false
             this.show_undo_roster_btn = true
             this.roster_previous_state = JSON.parse(JSON.stringify(this.productRoster))
             this.selected_locker_roster = locker_product_id
             this.selectLockerProductRoster()
+            await handleProductPriceUpdate()
           }
           else {
             let last_selected_roster = this.selected_locker_roster
@@ -437,6 +439,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
         this.roster_previous_state = JSON.parse(JSON.stringify(this.productRoster))
         this.show_undo_roster_btn = true
         this.selectLockerProductRoster()
+        await handleProductPriceUpdate()
       }
     }
     else {

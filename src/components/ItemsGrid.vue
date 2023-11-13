@@ -30,6 +30,7 @@
 import Scene from '@/components/Scene.vue'
 import HorizontalScroll from '@/components/mobile/animations/HorizontalScroll.vue';
 import { Component, Prop, Vue } from 'vue-property-decorator'
+import {handleProductPriceUpdate} from "@/helpers/Helpers";
 
 @Component<ItemsGrid>({
   components: {
@@ -53,11 +54,12 @@ export default class ItemsGrid extends Vue {
     return this.$store.getters.getProducts
   }
 
-  productDesigns(index: number) {
+  async productDesigns(index: number) {
     this.$store.commit('CHANGE_STYLE_INDEX', 0);
-    this.$store.dispatch("getSkuInformation", this.products[index].product_id);
-    this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
-    this.$store.dispatch('setColorSectionVisibility')
+    await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
+    await handleProductPriceUpdate()
+    await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
+    await this.$store.dispatch('setColorSectionVisibility')
   }
 }
 

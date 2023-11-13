@@ -14,7 +14,11 @@ import {
   exitFromEditMode,
   getUrlParameter,
   getEditModeDefaultObj,
-  logoColorInfoDefaultObject, hideLockerProductUpdateButton, checkIsEmpty, getProductById
+  logoColorInfoDefaultObject,
+  hideLockerProductUpdateButton,
+  checkIsEmpty,
+  getProductById,
+  handleProductPriceUpdate,
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -195,7 +199,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     return prms.then(async () => {
       return new Promise<any>(async (resolve) => {
         if(append_products) {
-          await this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
+          this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
           this.$store.commit('SET_APPLICATION_MOUNTED')
           return false;
         }
@@ -208,6 +212,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         if(active_product_detail) {
           const { factory_product_active_index, factory_products } = active_product_detail
           let active_factory_product = factory_products[factory_product_active_index]
+          this.handleFactoryProductAddons(active_factory_product)
 
           let customLogos = self.$store.getters.getCustomLogoObject
           if(!customLogos[active_product_id]) {
@@ -304,6 +309,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
 
           this.$store.dispatch('setColorSectionVisibility')
         }
+        // make sure handleProductPriceUpdate method must be called after selectedProduct has been set in vuex
+        await handleProductPriceUpdate()
         self.$root.$emit('sliderEvent', active_product_index);
         active_product.productstyles[active_style_index].productdesigns.forEach((item: Record<any, any>) => {
           if (item.id == active_design_id) {
@@ -321,6 +328,32 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         resolve(response_data)
       })
     })
+  }
+
+  public async handleFactoryProductAddons(factory_product) {
+    const factory_product_addons = factory_product.addons ? factory_product.addons : [];
+    let factory_product_addon_ids: number[] = [];
+    if(factory_product_addons.length > 0) {
+      factory_product_addon_ids = factory_product_addons.map(factory_product_addon => {
+        return factory_product_addon.addon_id;
+      })
+    }
+    const selected_product = this.$store.getters.getSelectedProduct;
+    if(selected_product) {
+      const active_product_addons = selected_product.active_addons;
+      if(factory_product_addon_ids.length > 0) {
+        active_product_addons.forEach((active_product_addon: Record<any, any>) => {
+          active_product_addon.selected = factory_product_addon_ids.includes(active_product_addon.addon_id);
+        })
+      } else {
+        const editing_product_info = this.$store.getters.getProductEditInfoObject
+        if(editing_product_info && editing_product_info.editing) {
+          active_product_addons.forEach((active_product_addon: Record<any, any>) => {
+            active_product_addon.selected = false;
+          })
+        }
+      }
+    }
   }
 
   public async setCustomizerData(customizer_data) {
@@ -821,6 +854,122 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     return true;
   }
 
+  public async removeShopifyAddonIntoCart(remove_addons_obj) {
+    console.log('{updates : remove_addons_obj}', {updates : remove_addons_obj})
+    console.log('Object.keys(remove_addons_obj).length', Object.keys(remove_addons_obj).length)
+    if(Object.keys(remove_addons_obj).length > 0) {
+      let company = this.$store.getters.getCompany;
+      let x_rand = Math.floor((Math.random() * 100) + 1);
+      console.log('{updates : remove_addons_obj}', {updates : remove_addons_obj})
+      await http.post(company.company_domain + '/cart/update.js?token='+x_rand, {updates : remove_addons_obj})
+    }
+
+  }
+
+  public async addShopifyAddons(addon_ids, total_quantity) {
+
+    return new Promise(async (resolve) => {
+      let company = this.$store.getters.getCompany;
+      let remove_addons:Record<any, any> = {};
+      let addon_quantities:Record<any, any> = {};
+      let add_cart_addons:Record<any, any>[] = [];
+      let shopify_cart_url = company.company_domain + '/cart.js';
+      let res = await http.get(shopify_cart_url);
+      if(res) {
+        let shopify_cart_items = res.data.items;
+        let remove_addons_cart =  shopify_cart_items.filter((obj) => {
+          return addon_ids.includes(obj.id)
+        }) ;
+        if(remove_addons_cart.length > 0) {
+            remove_addons_cart.forEach((remove_addon) => {
+              addon_quantities[remove_addon.variant_id] = remove_addon.quantity;
+              remove_addons[remove_addon.key] = 0;
+            })
+
+             await this.removeShopifyAddonIntoCart(remove_addons);
+        }
+
+        addon_ids.forEach((addon_ecommerce_variant_id) => {
+          if(addon_quantities[addon_ecommerce_variant_id]) {
+            add_cart_addons.push({
+              id: addon_ecommerce_variant_id ,
+              quantity: parseInt(addon_quantities[addon_ecommerce_variant_id].toString()) + parseInt(total_quantity.toString()),
+              properties: {'_is_custimoo_addon' : true}
+            });
+          } else {
+            add_cart_addons.push({id: addon_ecommerce_variant_id, quantity: total_quantity, properties: {'_is_custimoo_addon' : true}});
+          }
+        });
+      }
+
+      resolve( {add_cart_addons });
+    });
+
+  }
+  public async updateShopifyAddons(cart_item_index, updated_addon_ids, total_quantity) {
+    return new Promise( async (resolve) => {
+    let remaining_addons =  [...updated_addon_ids];
+    let company = this.$store.getters.getCompany;
+    let remove_addons:Record<any, any> = {};
+    let add_cart_addons:Record<any, any>[] = [];
+    let shopify_cart_url = company.company_domain + '/cart.js';
+    let res = await http.get(shopify_cart_url);
+    if(res) {
+      let shopify_cart_items = res.data.items;
+      let product_cart_item = shopify_cart_items[cart_item_index];
+      let product_cart_item_quantity = parseInt(product_cart_item.quantity);
+      let child_addon_ids = product_cart_item.properties.child_addons;
+        let previous_addons_cart_items =  shopify_cart_items.filter((obj) => {
+          return child_addon_ids.includes(obj.id)
+        }) ;
+
+        remove_addons[product_cart_item.key] = 0;
+        previous_addons_cart_items.forEach((prevCartItem) => {
+          remove_addons[prevCartItem.key] = 0;
+          if(!updated_addon_ids.includes(prevCartItem.id)) {
+            if(( parseInt(prevCartItem.quantity) - product_cart_item_quantity) > 0 ) {
+              add_cart_addons.push({id:prevCartItem.id, quantity: parseInt(prevCartItem.quantity) - product_cart_item_quantity, properties: {'_is_custimoo_addon' : true}});
+            }
+          } else {
+            add_cart_addons.push({
+              id: prevCartItem.id,
+              quantity: (parseInt(prevCartItem.quantity) - product_cart_item_quantity) + parseInt(total_quantity),
+              properties: {'_is_custimoo_addon' : true}
+            });
+            remaining_addons = remaining_addons.filter(addon_id => addon_id !== prevCartItem.id);
+           }
+
+        })
+        await this.removeShopifyAddonIntoCart(remove_addons);
+
+        if(remaining_addons.length > 0) {
+          remaining_addons.forEach((remaining_id) => {
+            add_cart_addons.push({id: remaining_id, quantity: total_quantity});
+          });
+        }
+
+    }
+
+      resolve( {add_cart_addons });
+    });
+
+  }
+  public async makeShopifyCartCall(ecom_url, shopify_cart_data, collection_view ,delete_cart_item_url  ) {
+   let self  = this;
+    http.post(ecom_url, {items : shopify_cart_data}).then((res: any) => {
+      let company = this.$store.getters.getCompany;
+      self.$store.dispatch('setCartLoading',false);
+      if(!collection_view) {
+        window.location.replace(company.company_domain + '/cart');
+      }
+    }).catch(err => {
+      http.delete(delete_cart_item_url);
+      self.showToast(err, 'ERROR');
+      self.$store.dispatch('setCartLoading',false);
+    })
+  }
+
+
   public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null) {
     if(!this.checkMinimumOrderQtyBYDesign()) {
       if(resolve){
@@ -847,6 +996,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       self.$store.dispatch('setCartLoading',true);
       let collection_view = self.$store.getters.getCollectionView;
       let cart_product = await getActiveProductData(product_fonts);
+
       self.$store.dispatch('setRevertRosterBOOL',true);
       let post_data = {
         factory_product: cart_product
@@ -870,7 +1020,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let ecom_url  = '';
       let total_quantity = 0;
 
-
       if (platform === 'wordpress' || platform === 'shopify') {
         if ((cart_product as Record<any, any>).sync_id === '' || (cart_product as Record<any, any>).ecommerce_post_id === '') {
           self.showToast('This product cannot be added into the cart','Error');
@@ -884,9 +1033,11 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           let roster = roster_detail[i];
           total_quantity += parseInt(roster.quantity);
         }
+
+
       }
 
-      if(platform === 'wordpress'){
+      if(platform === 'wordpress') {
         ecom_url = company_domain + '/wp-admin/admin-ajax.php';
         let ecom_form_data = new FormData();
 
@@ -903,6 +1054,12 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         ecom_form_data.append('quantity', total_quantity.toString());
         ecom_form_data.append('product_front_image', (cart_product as Record<any, any>).front_image);
 
+        if((cart_product as Record<any, any>).addons.length > 0) {
+          for (const addon of (cart_product as Record<any, any>).addons) {
+            ecom_form_data.append('addon_ids[]', addon.addon_ecommerce_product_id.toString());
+          }
+        }
+
         await http.post(ecom_url, ecom_form_data).then((res: any) => {
           if(!res.data.status){
             santacart = false
@@ -918,6 +1075,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
         (post_data as Record<any,any>).factory_product.ecommerce_cart_id = ecommerce_cart_id;
       }
+
 
 
       if(santacart){
@@ -951,23 +1109,19 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               });
 
             }
-            else if(platform === 'shopify'){
-              let shopify_cart_data:Record<any, any> = {};
-              let x_rand = Math.floor((Math.random() * 100) + 1);
-              let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
-              if(ecommerce_update_id){
-               // ecom_url = company_domain + '/cart/change.js'
-                ecom_url = company_domain + '/cart/change?token='+x_rand
-                shopify_cart_data['line'] = product_edit_info_object.cart_product_info.shopify_line_item;
-              }else{
-                //ecom_url = company_domain + '/cart/add.js'
-                ecom_url = company_domain + '/cart/add?token='+x_rand
-                shopify_cart_data['id'] = (cart_product as Record<any, any>).ecommerce_variant_id;
-               }
 
-              shopify_cart_data['quantity'] = total_quantity;
+            else if(platform === 'shopify') {
+
+              let ecom_addon_ids : number[] = [];
+              for (const addon of (cart_product as Record<any, any>).addons) {
+                ecom_addon_ids.push(parseInt(addon.addon_ecommerce_variant_id));
+              }
+              let shopify_main_item_data:Record<any, any> = {};
+              let x_rand = Math.floor((Math.random() * 100) + 1);
+
+              shopify_main_item_data['quantity'] = total_quantity;
               let delete_cart_item_url = `${process.env.VUE_APP_API_BASE_URL}/api/carts/cart-items/${api_res.new_created_id}/factory_product/${api_res.cart_item_key}`;
-              shopify_cart_data['properties'] = {  // items with underscore are private properties of shopify cart object
+              shopify_main_item_data['properties'] = {  // items with underscore are private properties of shopify cart object
                 '_custimoo_cart_id': api_res.new_created_id,
                 '_custimoo_cart_item_key': api_res.cart_item_key,
                 '_custimoo_front_image': api_res.front_image_url,
@@ -980,25 +1134,33 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 'DESIGN NAME': (cart_product as Record<any, any>).product_name,
                 'YOUR DESIGN': 'Below are the links of your customized designs.',
                 'FRONT IMAGE': api_res.front_image_short,
-                'BACK IMAGE': api_res.back_image_short
-               };
+                'BACK IMAGE': api_res.back_image_short,
+                'child_addons' : ecom_addon_ids
+              };
+              if((cart_product as Record<any, any>).minimum_order_quantity_type == 'by_cart' && (cart_product as Record<any, any>).minimum_order_quantity > 0 ) {
+                shopify_main_item_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
+              }
+              ecom_url = company_domain + '/cart/add.js?token='+x_rand
+              shopify_main_item_data['id'] = (cart_product as Record<any, any>).ecommerce_variant_id;
 
-               if((cart_product as Record<any, any>).minimum_order_quantity_type == 'by_cart' && (cart_product as Record<any, any>).minimum_order_quantity > 0 ) {
-                 shopify_cart_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
-               }
+              let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
+              if(ecommerce_update_id) {
+                let cart_item_index = product_edit_info_object.cart_product_info.shopify_line_item;
+                this.updateShopifyAddons(parseInt(cart_item_index)-1, ecom_addon_ids, total_quantity).then( (res : Record<any, any>) => {
+                  let {add_cart_addons} = res;
+                  add_cart_addons.push(shopify_main_item_data);
+                  this.makeShopifyCartCall(ecom_url,add_cart_addons, collection_view, delete_cart_item_url);
+                })
 
-              self.$store.dispatch('setCartLoading',true);
-              http.post(ecom_url, shopify_cart_data).then((res: any) => {
-               self.$store.dispatch('setCartLoading',false);
-                if(!collection_view) {
-                  window.location.replace(company_domain + '/cart');
-                }
-              }).catch(err => {
-                http.delete(delete_cart_item_url);
-                santacart = false
-                self.showToast(err, 'ERROR');
-                self.$store.dispatch('setCartLoading',false);
-              })
+              }else{
+
+                this.addShopifyAddons(ecom_addon_ids, total_quantity).then( (res : Record<any, any>) => {
+                 let {add_cart_addons} = res;
+                  add_cart_addons.push(shopify_main_item_data);
+                  this.makeShopifyCartCall(ecom_url, add_cart_addons, collection_view, delete_cart_item_url);
+                })
+
+              }
 
             }
             else {

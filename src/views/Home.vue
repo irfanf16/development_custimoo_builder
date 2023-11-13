@@ -144,10 +144,9 @@
                     <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                   </div>
 
-                  <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute" style="left: 0; right: 0; top: 15px;" v-if="MSRP">
-                    <template v-if="MSRP.price">
-                      MSRP: {{MSRP.price + " " + MSRP.code}}
-                    </template>
+                  <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute" style="left: 0; right: 0; top: 15px;"
+                       v-if="productPriceObject.show_price && productPriceObject.product_price">
+                    MSRP: {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
                   </div>
 
                   <div>&nbsp;</div>
@@ -292,10 +291,9 @@
             </template>
 
             <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
-              <div v-if="mobileScreen && MSRP" class="w-100 fs-1 font-weight-bolder text-center">
-                <template v-if="MSRP.price">
-                  MSRP: {{MSRP.price + " " + MSRP.code}}
-                </template>
+              <div v-if="mobileScreen && productPriceObject.show_price && productPriceObject.product_price"
+                   class="w-100 fs-1 font-weight-bolder text-center">
+                MSRP: {{productPriceObject.product_price + " " + productPriceObject.currency_code}}
               </div>
 
               <div v-bind:class="{active: isActive}">
@@ -578,8 +576,16 @@ Vue.filter('formatDate', function(value:string) {
     })
 
     await http.get(`/get-settings`).then((res) => {
-      this.$store.commit('SET_SETTING', res.data.result.settings)
-      this.$store.commit('SET_FACTORY_SETTING', res.data.result.factory_settings)
+      const response_data = res.data;
+      const { settings: company_settings,  factory_settings } = response_data.result
+      this.$store.commit('SET_SETTING', company_settings)
+      this.$store.commit('SET_FACTORY_SETTING', factory_settings)
+      if(company_settings && company_settings.currencies) {
+        const company_currency_obj = company_settings.currencies
+        this.$store.commit('SET_PRODUCT_PRICE_OBJECT', {
+          show_price: company_currency_obj.visible,  active_currency: company_currency_obj.currencies[0]
+        })
+      }
     });
     this.setRecentLogos()
 
@@ -805,18 +811,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getSkuInformation
   }
 
-  get MSRP(){
-    let currency = this.$store.getters.getSetting('currencies');
-    let show_msrp = false
-    if(currency && currency.visible) {
-      show_msrp = true
-    }
-    let msrp_currency = null;
-    if(show_msrp && this.selectedProduct && this.sku_information){
-      msrp_currency = this.sku_information.prices[0];
-    }
-
-    return msrp_currency;
+  get productPriceObject() {
+    return this.$store.getters.getProductPriceObject
   }
 
 
