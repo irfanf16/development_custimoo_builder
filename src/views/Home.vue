@@ -535,6 +535,7 @@ import 'popper-vue/dist/popper-vue.css'
 import {filter, findIndex, isEmpty} from 'lodash'
 import opentype from 'opentype.js'
 import { FetchCategories, HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
+import Store from "@/store";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -1397,6 +1398,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         unique[svgGroups[i].color] = 1;
       }
     }
+    const fixed_logo_index = Store.getters.getFixedLogoIndex;
     let locker = {
       product_id: this.selectedProduct.product_id,
       style_id: this.selectedProduct.productstyles[this.styleIndex].id,
@@ -1410,6 +1412,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       locker_front_png: locker_front_png,
       locker_back_png: locker_back_png,
       product_roster_detail: this.rosterDetails,
+      fixed_logo_index: fixed_logo_index,
       svgcolors: distinct
     }
 

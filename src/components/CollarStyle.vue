@@ -31,6 +31,7 @@
                 </template>
               </div>
           </div>
+
           <div class="choose-stuff" v-if="selectedProduct.active_addons.length > 0">
               <h2 class="fw-bold mb-3 fz-18">Addons</h2>
               <div class="stuff-row addons d-flex gap-2">
@@ -41,6 +42,19 @@
                     </b-form-checkbox>
                   </div>
               </div>
+          </div>
+
+          <div v-if="selectedProduct.productstyles[styleIndex].logo.length && selectedProduct.productstyles[styleIndex].is_fixed_logos_all == false" class="choose-collar mt-4 mb-3">
+            <h2 class="fw-bold mb-2 fz-18">Choose logo position</h2>
+            <div class="collar-designs">
+              <template v-for="(logo, index) in selectedProduct.productstyles[styleIndex].logo">
+                <b-form-radio @change="changeFixedLogo(index)" v-model="logo.is_default" name="logo-position" :value="1">
+                  <span class="mt-1 d-inline-flex" :key="'style_name' + index">
+                    {{ logo.placement_title }}
+                  </span>
+                </b-form-radio>
+              </template>
+            </div>
           </div>
       </div>
     </b-tabs>
@@ -123,6 +137,18 @@ import {handleProductPriceUpdate, hideLockerProductSaveBtn} from "@/helpers/Help
       }
       handleAddonSelectionUpdate(): void {
         handleProductPriceUpdate()
+      }
+
+      public changeFixedLogo(selectedIndex) {
+        this.selectedProduct.productstyles[this.styleIndex].logo.forEach((logo, index) => {
+          if (index !== selectedIndex) {
+            logo.is_default = 0;
+          }
+        });
+        this.$store.commit('SET_FIXED_LOGO_INDEX', selectedIndex);
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { fixed_logo_index: selectedIndex });
+        const self: Record<any, any> = this;
+        self.$eventBus.$emit("fixedLogoResetAndAdd")
       }
     }
 </script>

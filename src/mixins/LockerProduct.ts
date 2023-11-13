@@ -208,6 +208,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         await this.$store.dispatch("getSkuInformation", active_product_id);
         await this.$store.dispatch('setSelectedIndex', {selectedIndex: active_product_index, selected_id: active_product_id});
         this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
+        let fixed_logo_index = active_product.productstyles[this.styleIndex].logo.findIndex(logo => logo.is_default === 1);
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
         if(active_product_detail) {
           const { factory_product_active_index, factory_products } = active_product_detail
@@ -227,6 +228,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           }
 
           let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail } = active_factory_product
+          fixed_logo_index = active_factory_product.fixed_logo_index
          if(product_edit_info_object.type == "cart_product" && active_product_detail.factory_products[0].reorder_data) {
            this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', { cart_product_info : {...product_edit_info_object.cart_product_info, reorder_data : active_product_detail.factory_products[0].reorder_data} })
           }
@@ -275,6 +277,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         }
         else {
           if(last_active_prod_data.product_id) {
+            fixed_logo_index = last_active_prod_data.fixed_logo_index
             let custom_logos = last_active_prod_data.custom_logos;
             let custom_logos_type = custom_logos.constructor.name;
             if(!checkIsEmpty(custom_logos)) {
@@ -294,8 +297,9 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             await this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors,
               default_colors: last_active_prod_data.default_colors, product_roster_detail: product_roster_detail})
           }
+
           let last_active_obj_updated_values = {
-            product_index: active_product_index, product_id: active_product_id,
+            product_index: active_product_index, product_id: active_product_id, fixed_logo_index: fixed_logo_index,
             style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
             search_products: self.search_products, customized: this.$store.getters.getCustomized,
             personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
@@ -311,6 +315,18 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         }
         // make sure handleProductPriceUpdate method must be called after selectedProduct has been set in vuex
         await handleProductPriceUpdate()
+
+        if(fixed_logo_index != null) {
+          active_product.productstyles[this.styleIndex].logo.forEach((logo, index) => {
+            if (index == fixed_logo_index) {
+              logo.is_default = 1;
+            } else {
+              logo.is_default = 0;
+            }
+          });
+          self.$eventBus.$emit("fixedLogoResetAndAdd")
+        }
+
         self.$root.$emit('sliderEvent', active_product_index);
         active_product.productstyles[active_style_index].productdesigns.forEach((item: Record<any, any>) => {
           if (item.id == active_design_id) {

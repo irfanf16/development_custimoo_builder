@@ -644,6 +644,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const sku_information = Store.getters.getSkuInformation;
       const back_image = getImageFromCanvas('back')
       const front_image = getImageFromCanvas('front')
+      const fixed_logo_index = Store.getters.getFixedLogoIndex;
       const custom_logos_original = Store.getters.getCustomLogos();
       const custom_logos_filtered = custom_logos_original.filter(custom_logo => {
         return custom_logo && 'id' in custom_logo
@@ -669,6 +670,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: custom_logos_filtered,
+        fixed_logo_index: fixed_logo_index,
         measurement_ratio: selected_product.measurement_ratio,
         custom_logo_svgs: [],
         product_custom_texts: productCustomTexts,
@@ -1548,7 +1550,7 @@ const authenticateUser = async (token: string) => {
 
 const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   const default_obj = {
-    category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+    fixed_logo_index: 0, category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: {}, default_colors: [], group_colors: {}, logo_colors: [],
     roster_detail: [], products_rosters: {}
   }

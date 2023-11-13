@@ -55,6 +55,7 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
     self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
     self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+    self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
     self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
     self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
     self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
@@ -265,6 +266,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private back_boundary: fabric.Image[] = []
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private custom_logo_objects: any[] = []
+  private fixed_logo_objects: any[] = []
   private mounted = false
   private front_models: fabric.Image[]= []
   private back_models: fabric.Image[] = []
@@ -286,6 +288,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public showLoader = true
   public svg_groups_ready = false
   public other_side_logos: any[] = []
+  public other_side_fixed_logos: any[] = []
   public otherSideTexts: any[] = []
   public ctx: any = {}
   public verticalLines: Record<any, any>[] = []
@@ -332,6 +335,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
+  }
+
+  get styleIndex():number{
+    return this.$store.getters.getCurrentStyleIndex;
   }
 
   get productCustomTexts(): Record<any, any>[] {
@@ -914,13 +921,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             this.showLoader = false
           }
 
-          if (this.logos.length) {
-            this.logos.forEach((logo: Record<any, any>) => {
-              if (logo && logo.url) {
-                this.addSvgLogos(logo)
-              }
-            })
-          }
+          this.addFixedLogos()
 
           this.addBoundary([ImageData.safe_zone_url, ImageData.boundary_url], side).then(() => {
             let logos: Record<any, any>[] = []
@@ -1562,6 +1563,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         add_index = target.custom_text_index + '' + target.custom_text_item_index
       } else if(target.type == 'logo') {
         add_index = target.logo_index
+      } else {
+        add_index = target.fixed_logo_index
       }
 
       const modelBoundingRect = texture.getBoundingRect()
@@ -1616,9 +1619,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         checkPointY = target.top - (target.height * target.scaleY / 3)
       }
 
-      let otherSideObjects = this.other_side_logos
+      let otherSideObjects = this.other_side_fixed_logos
       if (target.custom_text_index) {
         otherSideObjects = this.otherSideTexts
+      } else if(target.logo_index) {
+        otherSideObjects = this.other_side_logos
       }
       if (canvas.isTargetTransparent(texture, checkPointX, checkPointY)) {
         let addLeft
@@ -2040,9 +2045,61 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             model.bringToFront()
           })
         }
+        Object.assign(img, {
+          fixed_logo_index: logo.fixed_logo_index,
+          side: logo.side,
+          type: 'fixed_logo'
+        })
+        this.fixed_logo_objects.push(img)
         canvas.requestRenderAll()
         this.addToOtherSide(img, logo.side)
       })
+    }
+  }
+
+  public async resetAndAddFixedLogos() {
+    if(this.mounted) {
+      await this.resetFixedLogosFromCanvas()
+      this.addFixedLogos()
+    }
+  }
+
+  public addFixedLogos() {
+    if (this.logos.length) {
+      this.logos.forEach((logo: Record<any, any>, index: number) => {
+        const is_fixed_logos_all =  this.selectedProduct.productstyles[this.styleIndex].is_fixed_logos_all
+        if(is_fixed_logos_all || (is_fixed_logos_all == false && logo.is_default))
+          if (logo && logo.url) {
+            logo.fixed_logo_index = index
+            this.addSvgLogos(logo)
+          }
+      })
+    }
+  }
+
+  public async resetFixedLogosFromCanvas() {
+    if(this.selectedProductId == this.product_id && this.fixed_logo_objects) {
+      for (let objectIndex = 0; objectIndex < this.fixed_logo_objects.length; objectIndex++) {
+        const fixed_logo = this.fixed_logo_objects[objectIndex]
+        if(fixed_logo) {
+          this.frontCanvas.remove(fixed_logo)
+          if(this.back) {
+            this.backCanvas.remove(fixed_logo)
+          }
+          const otherSideLogo = this.other_side_fixed_logos[objectIndex]
+          if(otherSideLogo) {
+            this.frontCanvas.remove(otherSideLogo)
+            if(this.back) {
+              this.backCanvas.remove(otherSideLogo)
+            }
+          }
+        }
+      }
+      this.frontCanvas.requestRenderAll()
+      if(this.back && this.backCanvas) {
+        this.backCanvas.requestRenderAll()
+      }
+      this.fixed_logo_objects = []
     }
   }
 

@@ -40,6 +40,7 @@ const ProductAttributes:Module<any, any> = {
     categories: [],
     colorsFromRecent: false,
     customLogos: {},
+    fixed_logo_index: 0,
     recentLogos: [],
     defaultcustomLogos: false,
     selectionMode: {
@@ -265,6 +266,9 @@ const ProductAttributes:Module<any, any> = {
      },
     SET_SELECTED_CATEGORY(state:Record<any,any>, payload){
       state.selectedCategory = {category_id:payload.category_id, category_index:payload.category_index};
+    },
+    SET_FIXED_LOGO_INDEX(state:Record<any,any>, payload){
+      state.fixed_logo_index = payload;
     },
     customLogos(state: Record<any, any>, customLogo: Record<any, any>) {
        if(customLogo && customLogo.custom_logo){
@@ -1318,6 +1322,9 @@ const ProductAttributes:Module<any, any> = {
       if(logo_index >= 0)
         return state.customLogos[product_id][logo_index]
       return state.customLogos[product_id]
+    },
+    getFixedLogoIndex: state => {
+      return state.fixed_logo_index
     },
     selectedProductCustomLogos: state => {
       return state.customLogos[state.selectedPrdId]
