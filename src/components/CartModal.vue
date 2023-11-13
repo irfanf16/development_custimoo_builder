@@ -194,7 +194,12 @@
               </tr>
             </tbody>
           </table>
-          <div class="fs-2 font-weight-bold mt-3">Team Name / order reference</div>
+          <div class="fs-2 font-weight-bold mt-3">General comments</div>
+          <div class="mt-1">
+            <b-form-input class="form-input" placeholder="Any comments?" type="text" name="general_comments"
+              v-model="general_comments" />
+          </div>
+          <div class="fs-2 font-weight-bold mt-3"><span class="text-danger">*</span> Team Name / order reference</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Team Name / order reference" type="text" name="customer_reference_no"
               v-model="customer_reference_no" />
@@ -282,6 +287,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   private userData = this.$store.getters.getCustomer;
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public customer_reference_no = ""
+  public general_comments = ""
   public shipping_address: Record<any, any> | null = null
   public can_finalize_order = true;
 
@@ -354,6 +360,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let payload = {}
     // const response = await this.editModeConfirmation();
     payload['customer_reference_no'] = this.customer_reference_no
+    payload['general_comments'] = this.general_comments
     if (!this.customer_reference_no) {
       this.showToast('Please provide customer reference number.', 'error');
       return false;

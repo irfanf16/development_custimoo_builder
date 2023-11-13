@@ -108,6 +108,11 @@
 
                   </div>
 
+                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                       v-if="order.general_comments && item_status_activity_index === 0">
+                    <strong class="font-weight-bold">General Comments:</strong>
+                    <span class="text-muted">{{ order.general_comments }}</span>
+                  </div>
 
                   <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
                     <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment">
