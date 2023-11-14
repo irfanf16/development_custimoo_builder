@@ -646,9 +646,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const front_image = getImageFromCanvas('front')
       const fixed_logo_index = Store.getters.getFixedLogoIndex;
       const custom_logos_original = Store.getters.getCustomLogos();
-      const custom_logos_filtered = custom_logos_original.filter(custom_logo => {
-        return custom_logo && 'id' in custom_logo
-      })
+      let custom_logos_filtered = []
+      if(Object.keys(custom_logos_original).length) {
+        custom_logos_filtered = custom_logos_original.filter(custom_logo => {
+          return custom_logo && 'id' in custom_logo
+        })
+      }
       const reorder_info_obj = Store.getters.getReorderInfoObj;
       let reorder_data: Record<any, any>|null = {}
       if(product_edit_info_obj && product_edit_info_obj.type == "reorder_product") {

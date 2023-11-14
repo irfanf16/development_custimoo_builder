@@ -431,10 +431,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
       //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
       this.$root.$emit('rostershared', '')
-      let url = `list/products?private=${is_private}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product`;
       let query_string = `item_id=${cart_item.id}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product&paginate=false`
       query_string += `&factory_product_id=${cart_item_product.id}&style_id=${cart_item_product.style_id}&design_id=${cart_item_product.design_id}`
-      url = `list/products?${query_string}`;
+      let url = `list/products?${query_string}`;
       self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
       await http.get(url).then(async (response: Record<any, any>) => {
         await (this as Record<any, any>).handleMainProducts(response);

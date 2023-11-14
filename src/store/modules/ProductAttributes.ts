@@ -1546,6 +1546,11 @@ const ProductAttributes:Module<any, any> = {
                 category_id: response.data.product_category_id,
                 category_index: category_index
               });
+            } else {
+              commit("SET_SELECTED_CATEGORY", {
+                category_index: 0,
+                category_id: null
+              });
             }
             resolve(response.data);
           }
