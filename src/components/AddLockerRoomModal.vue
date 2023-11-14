@@ -290,23 +290,25 @@ import { Canvas } from 'fabric/fabric-impl'
               unique[svgGroups[i].color] = 1;
             }
         }
+        const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
         let locker = {
-            roster_url: this.rosterUrl,
-            room_id: null,
-            product_id: this.selectedProduct.product_id,
-            product_name: this.product_name,
-            style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-            design_id: currentDesign[0].id,
-            custom_logos: this.customLogos,
-            text: this.customTexts,
-            colors: this.logoColors,
-            defaultcolors: this.defaultColors,
-            groupcolors: this.groupColors,
-            locker_front_png: locker_front_png,
-            locker_back_png: locker_back_png,
-            product_roster_detail: this.productRosterDetail,
-            svgcolors: distinct
-          }
+          roster_url: this.rosterUrl,
+          room_id: null,
+          product_id: this.selectedProduct.product_id,
+          product_name: this.product_name,
+          style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+          design_id: currentDesign[0].id,
+          custom_logos: this.customLogos,
+          text: this.customTexts,
+          colors: this.logoColors,
+          defaultcolors: this.defaultColors,
+          groupcolors: this.groupColors,
+          locker_front_png: locker_front_png,
+          locker_back_png: locker_back_png,
+          product_roster_detail: this.productRosterDetail,
+          fixed_logo_index: fixed_logo_index,
+          svgcolors: distinct
+        }
         let res = await this.$store.dispatch("SHARE_DESIGN_URL", locker);
 
           if (res.status == 201){
