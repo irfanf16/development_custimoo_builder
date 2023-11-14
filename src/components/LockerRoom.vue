@@ -12,7 +12,7 @@
               <draggable ghostClass="locker-tab-ghost" :data-title="`${room.room_name}`" :group="{name: `locker-${i}`, pull: false, put: true}"
                          :data-room-id="room.id" :data-room-index="i"
                          @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
-                <span @click="changeColor">{{ room.room_name }}</span>
+                <span @click="changeColor" style="white-space: nowrap">{{ room.room_name }}</span>
               </draggable>
               <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom(room.id, i)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']"/>

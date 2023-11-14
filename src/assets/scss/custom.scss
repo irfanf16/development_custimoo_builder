@@ -6850,7 +6850,7 @@ $fontSize: 0.5;
         flex-wrap: nowrap;
         width: 100%;
         overflow-x: auto;
-
+        padding-bottom: 0;
         transition: 0.3s all ease-in-out;
 
         &::-webkit-scrollbar {
