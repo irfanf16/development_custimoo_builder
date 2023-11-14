@@ -607,10 +607,6 @@ export default class EventModal extends Mixins(ErrorMessages) {
     //let extensions = ["jpg","png","jpeg","gif","svg","ai","eps","pdf","csv","xlxx",'doc','docs'];
     let event_data_file = this.event_data.file as File;
 
-    // let ext = event_data_file.name.split('.').pop();
-    // ext = (ext == event_data_file.name)? "" : ext;
-    //  console.log(ext)
-
     //if(extensions.indexOf(ext) !== -1 && (event_data_file.size/1024) <= 2048){
     if(!this.showImage(event_data_file.name)){
       this.showPlaceholder = false

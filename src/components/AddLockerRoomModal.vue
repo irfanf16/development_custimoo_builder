@@ -309,7 +309,6 @@ import { Canvas } from 'fabric/fabric-impl'
           }
         let res = await this.$store.dispatch("SHARE_DESIGN_URL", locker);
 
-          console.log(res);
           if (res.status == 201){
             Vue.set(product, 'shared_url', res.data.url);
             this.$emit('showPopper','shareDesign');

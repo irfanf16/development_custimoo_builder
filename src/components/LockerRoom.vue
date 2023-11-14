@@ -1270,7 +1270,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
   public onClickOutside(event) {
     // Check if the clicked element is outside your target element
-    // return console.log(this.ref[this.renameRef] && event.target)
     if (this.ref[this.renameRef] && !this.ref[this.renameRef][0].contains(event.target)) {
       // Clicked outside the element
       this.renameID = '';

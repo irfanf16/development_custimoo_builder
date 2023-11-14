@@ -361,13 +361,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         active_product_addons.forEach((active_product_addon: Record<any, any>) => {
           active_product_addon.selected = factory_product_addon_ids.includes(active_product_addon.addon_id);
         })
-      } else {
-        const editing_product_info = this.$store.getters.getProductEditInfoObject
-        if(editing_product_info && editing_product_info.editing) {
-          active_product_addons.forEach((active_product_addon: Record<any, any>) => {
-            active_product_addon.selected = false;
-          })
-        }
       }
     }
   }

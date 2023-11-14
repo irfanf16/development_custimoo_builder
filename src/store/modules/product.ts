@@ -282,7 +282,6 @@ const Product:Module<any, any> = {
       return saved;
     },
     async saveLogo({commit}, payload){
-      console.log(commit)
       await http.post("save/locker/asset", payload).then((res) => {
         if (res.status == 201){
           // alert('logo saved');
