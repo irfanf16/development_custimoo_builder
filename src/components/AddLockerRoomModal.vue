@@ -209,6 +209,7 @@ import { Canvas } from 'fabric/fabric-impl'
               unique[svgGroups[i].color] = 1;
             }
           }
+          const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
           let locker = {
             roster_url: this.rosterUrl,
             room_id: this.room_id,
@@ -224,6 +225,7 @@ import { Canvas } from 'fabric/fabric-impl'
             locker_front_png: locker_front_png,
             locker_back_png: locker_back_png,
             product_roster_detail: this.productRosterDetail,
+            fixed_logo_index: fixed_logo_index,
             svgcolors: distinct
           }
          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker).catch(errorResponse => {
