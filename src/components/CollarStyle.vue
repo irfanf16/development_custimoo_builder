@@ -38,7 +38,8 @@
                   <div class="addon d-inline-flex gap-1" :class="{'selected': addon.selected}" v-for="addon in selectedProduct.active_addons"
                        :key="addon.id">
                     <b-form-checkbox size="lg" v-model="addon.selected"   @change="handleAddonSelectionUpdate">
-                      {{ addon.title }} <span class="charges">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
+                      {{ addon.title }}
+                      <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
                     </b-form-checkbox>
                   </div>
               </div>
@@ -96,6 +97,10 @@ import {handleProductPriceUpdate, hideLockerProductSaveBtn} from "@/helpers/Help
 
       get sku_information(){
         return this.$store.getters.getSkuInformation
+      }
+
+      get productPriceObject() {
+        return this.$store.getters.getProductPriceObject
       }
 
       public changeStyleIndex(i: number) {

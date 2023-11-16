@@ -69,8 +69,10 @@
                   <template v-if="factory_product.addons">
                     <template v-for="(addon, addonIndex) in factory_product.addons">
                       <div :key="`cart-addon-${addon.addon_id}`" class="d-flex w-100" :class="{'border-top mt-1': addonIndex > 0}">
-                        {{ addon.title }}:
-                        <strong class="font-weight-bold ml-auto">{{ addon.currencies[0].symbol }} {{addon.currencies[0].price }}</strong>
+                        {{ addon.title }}
+                        <template v-if="product_price_object.show_price">
+                          :<strong class="font-weight-bold ml-auto">{{ addon.currencies[0].symbol }} {{addon.currencies[0].price }}</strong>
+                        </template>
                       </div>
                     </template>
                   </template>
@@ -142,54 +144,67 @@
                   Product/Addon Name
                 </th>
                 <th class="font-weight-bold">
-                  MOQ
+                  Quantity
                 </th>
-                <th class="font-weight-bold">
-                  Total
-                </th>
-                <th v-if="product_price_object.show_price" class="font-weight-bold">
-                  Price
-                </th>
+                <template v-if="product_price_object.show_price">
+                  <th class="font-weight-bold">
+                    Price
+                  </th>
+                  <th class="font-weight-bold">
+                    Total
+                  </th>
+                </template>
               </tr>
             </thead>
             <tbody>
-              <template v-for="(cart_item) in cartItems">
-                <tr :key="factory_product.id" v-for="(factory_product) in filterCartItemsForMOQSummary(cart_item.factory_products)">
-                  <td>
+              <template v-for="(cart_item, index) in cartItems">
+                <template v-for="(factory_product) in cart_item.factory_products">
+                  <tr :key="factory_product.id" >
+                    <td>
                       <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
-                  </td>
-                  <td>
-                      <span>{{ factory_product.minimum_order_quantity == null ? "N/A" : factory_product.minimum_order_quantity }}</span>
-                  </td>
-                  <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
-                    <template>
-                      <span>{{ factory_product.roster_product_count }}</span>
+                    </td>
+                    <td>
+                      <span>{{ factory_product.product_price_object.quantity }}</span>
+                    </td>
+                    <template v-if="product_price_object.show_price">
+                      <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
+                        <template>
+                          <span>{{ factory_product.product_price_object.currency_symbol }}{{
+                              factory_product.product_price_object.product_price
+                            }} </span>
+                        </template>
+                      </td>
+                      <td>
+                        {{ factory_product.product_price_object.currency_symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(factory_product.product_price_object.product_price) }}
+                      </td>
                     </template>
-                  </td>
-                  <td v-if="product_price_object.show_price">
-                    {{ product_price_object.active_currency.symbol }}{{ product_price_object.product_price_with_quantity }}
-                  </td>
-                </tr>
+                  </tr>
+                  <template v-for="(addon, addon_index) in factory_product.addons">
+                    <tr class="bg-light" :key="factory_product.id+index+addon_index">
+                      <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                        {{addon.title}}
+                      </td>
+                      <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                        {{factory_product.product_price_object.quantity}}
+                      </td>
+                      <template v-if="product_price_object.show_price">
+                        <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                          {{ addon.currencies[0].symbol }}{{ addon.currencies[0].price }}
+                        </td>
+                        <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                          {{ addon.currencies[0].symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(addon.currencies[0].price) }}
+                        </td>
+                      </template>
+                    </tr>
+                  </template>
+                </template>
               </template>
-              <template v-if="product_price_object.show_price" v-for="(cart_item, index) in cartItems">
-                <tr :key="addon.addon_id" v-for="addon in cart_item.factory_products[index].addons">
-                  <td>
-                    {{addon.title}}
-                  </td>
-                  <td>
-                    &nbsp;
-                  </td>
-                  <td>{{ cart_item.factory_products[index].product_roster_detail | itemQtyCount(cart_item.factory_products[index].product_roster_detail) }}</td>
-                  <td v-if="cart_item.factory_products[index].product_roster_detail">
-                    {{ product_price_object.active_currency.symbol }}{{cart_item.factory_products[index].product_roster_detail.reduce((qt, a) => +qt.quantity + +a.quantity) * addon.currencies[0].price}}
-                  </td>
-                </tr>
-              </template>
+
               <tr v-if="product_price_object.show_price">
                 <td></td>
                 <td colspan="2" class="font-weight-bold">Total Price</td>
                 <td colspan="2" class="font-weight-bold">
-                  {{ product_price_object.active_currency.symbol }}{{ +product_price_object.addons_price_with_quantity + +product_price_object.product_price_with_quantity }}
+                  {{ product_price_object.active_currency.symbol }}{{ cartTotalPrice }}
                 </td>
               </tr>
             </tbody>
@@ -290,6 +305,25 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public general_comments = ""
   public shipping_address: Record<any, any> | null = null
   public can_finalize_order = true;
+
+  get cartTotalPrice() {
+    const {show_price} = this.$store.getters.getProductPriceObject
+    let total_price = 0
+    if(show_price) {
+      this.cartItems.forEach((cart_item: Record<any, any>) => {
+        const cart_item_factory_products:Record<any, any>[] = cart_item.factory_products;
+        cart_item_factory_products.forEach((cart_item_factory_product: Record<any, any>) => {
+          const {product_price} = cart_item_factory_product.product_price_object
+          total_price += parseInt(cart_item_factory_product.product_price_object.quantity) * parseFloat(product_price)
+          cart_item_factory_product.addons.forEach((factory_product_addon: Record<any, any>) => {
+            total_price += factory_product_addon.currencies.length > 0 && factory_product_addon.currencies[0].price ?
+              parseInt(cart_item_factory_product.product_price_object.quantity) * parseFloat(factory_product_addon.currencies[0].price) : 0;
+         })
+        })
+      })
+    }
+    return total_price
+  }
 
   get cartItems() {
     let cItems = this.$store.getters.getCartItems;

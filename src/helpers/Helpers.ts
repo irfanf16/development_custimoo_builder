@@ -669,7 +669,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       } else {
         reorder_data = null
       }
-
+      const { product_price, total_quantity: quantity, active_currency: {code: currency_code, symbol: currency_symbol} }:Record<any, any> = Store.getters.getProductPriceObject;
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: custom_logos_filtered,
@@ -704,10 +704,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         addons: selected_product.active_addons.filter(addon => {
           return addon.selected;
         }),
+        product_price_object:{ product_price, currency_code, currency_symbol, quantity },
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null,
         reorder_data
       }
+     // if(product_price_object)
 
       if(selected_product.ecommerce_company_addons && selected_product.ecommerce_company_addons.length > 0) {
         post_data.addons = post_data.addons.map(addon => {
@@ -2147,7 +2149,7 @@ const handleProductPriceUpdate = async ():Promise<void> => {
       selected_product.active_addons.forEach(addon => {
         if(addon.selected) {
           if(addon.currencies.length > 0) {
-            addons_price += addon.currencies[0].price
+            addons_price =  addons_price + parseFloat(addon.currencies[0].price)
           }
         }
       })
