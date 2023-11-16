@@ -6876,3 +6876,15 @@ $fontSize: 0.5;
         }
     }
 }
+
+.comment-images{
+    img{
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        background-color: #ddd;
+        cursor: pointer;
+        width: 70px;
+        height: 50px;
+        object-fit: contain;
+    }
+}

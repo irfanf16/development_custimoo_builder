@@ -166,7 +166,7 @@
                           <blockquote class="blockquote mb-0">
                             <footer class="blockquote-footer" v-if="activity_comment.parent_message_id" style="cursor: pointer"
                                     @click="goToMessage(activity_comment.parent_message_id)">
-                              <cite title="Source Title">
+                              <cite class="fs-2 font-italic" title="Source Title">
                                 <template v-if="activity_comment.parent_message">
                                   {{ activity_comment.parent_message }}
                                 </template>
@@ -176,11 +176,15 @@
                               </cite>
                             </footer>
                           </blockquote>
+                          <div class="d-flex gap-1 align-items-start comment-images">
                           <template v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
-                            <template v-if="['png', 'jpg', 'jpeg'].includes(activity_comment_file.extension)">
-                              <img :key="`activity_comment_file_${activity_comment_file_index}`"
-                                   :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
-                            </template>
+                              <template v-if="['png', 'jpg', 'jpeg'].includes(activity_comment_file.extension)">
+                                <a :key="`activity_comment_file_${activity_comment_file_index}`"
+                                   :href="`${storage_url}${activity_comment_file.url}`" target="_blank">
+                                  <img :key="`activity_comment_file_${activity_comment_file_index}`"
+                                     :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
+                                </a>
+                              </template>
 
                             <template v-if="['pdf', 'ai', 'eps', 'svg'].includes(activity_comment_file.extension.toLowerCase())">
                               <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="`${storage_url}${activity_comment_file.url}`" :download="activity_comment_file.name" target="_blank">
@@ -189,6 +193,7 @@
                               </a>
                             </template>
                           </template>
+                          </div>
                           <p> {{ activity_comment.message }} </p>
                           <div class="d-flex justify-content-end">
                             <span> <small class="text-muted">{{ evaluateRole(activity_comment) }}</small> </span>
