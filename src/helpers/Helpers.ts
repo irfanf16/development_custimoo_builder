@@ -647,7 +647,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const fixed_logo_index = Store.getters.getFixedLogoIndex;
       const custom_logos_original = Store.getters.getCustomLogos();
       let custom_logos_filtered = []
-      if(Object.keys(custom_logos_original).length) {
+      if(custom_logos_original && Object.keys(custom_logos_original).length) {
         custom_logos_filtered = custom_logos_original.filter(custom_logo => {
           return custom_logo && 'id' in custom_logo
         })
