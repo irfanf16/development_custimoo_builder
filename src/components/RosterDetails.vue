@@ -282,7 +282,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   public locker_rosters: Record<any, any>[] = []
   public roster_previous_state: Record<any, any>[] = []
   public show_undo_roster_btn = false
-  public is_admin_token = localStorage.getItem('adminToken')
+  public is_admin_token = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key)
 
   /*
   *  component data properties ends

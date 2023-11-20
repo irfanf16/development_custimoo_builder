@@ -108,6 +108,7 @@ import LogoColorTabsNew from "@/components/LogoColorTabsNew.vue"
 import RecentLogos from "@/components/Logo/RecentLogos.vue";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import LogoUploaderMobile from "@/components/mobile/LogoUploaderMobile.vue";
+import Vue from "vue";
 
 @Component<LogoPlacementMobile>({
   components: {
@@ -122,7 +123,7 @@ import LogoUploaderMobile from "@/components/mobile/LogoUploaderMobile.vue";
   mounted() {
     this.product_colors = getProductColors();
 
-    const logo_disclaimer_info = localStorage.getItem("logoDisclaimerInfo")
+    const logo_disclaimer_info = localStorage.getItem(Vue.prototype.$logoDisclaimerInfo_localstorage_key)
     if(logo_disclaimer_info) {
       this.logoDisclaimerInfo = JSON.parse(logo_disclaimer_info)
     }

@@ -308,10 +308,10 @@ Vue.filter('formatDate', function(value:string) {
       await this.retrieveProducts()
     }
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false})
-    this.jwtToken = localStorage.getItem('jwtToken') as string
+    this.jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key) as string
     await this.$store.dispatch('setCategories')
     // await this.$store.dispatch('setJwtToken')
-    if(!localStorage.getItem('browserToken')){
+    if(!localStorage.getItem(Vue.prototype.$browserToken_localstorage_key)){
       await this.$store.dispatch('setBrowserToken')
     }
     if (this.isCustomerAuthenticated){

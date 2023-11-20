@@ -11,7 +11,7 @@ const Auth:Module<any, any> = {
   getters:{
     isCustomerAuthenticated: (state: any) => !!state.jwtToken,
     getCustomer: (state:any) => {
-      return state.customer || (localStorage.getItem("customer") && localStorage.getItem("customer") !='' ) ? JSON.parse(localStorage.getItem("customer") as string) : ''
+      return state.customer || (localStorage.getItem(Vue.prototype.$customer_localstorage_key ) && localStorage.getItem(Vue.prototype.$customer_localstorage_key ) !='' ) ? JSON.parse(localStorage.getItem(Vue.prototype.$customer_localstorage_key) as string) : ''
     },
     getCustomerPermissions:state => {
       return state.customer_permissions
@@ -20,23 +20,23 @@ const Auth:Module<any, any> = {
   },
   mutations:{
     SET_CUSTOMER(state:Record<any, any>, payload){
-      localStorage.setItem('jwtToken', payload.access_token)
+      localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key, payload.access_token)
       if(payload && payload.user){
-        localStorage.setItem('customer', JSON.stringify(payload.user))
+        localStorage.setItem(Vue.prototype.$customer_localstorage_key , JSON.stringify(payload.user))
       }
 
       state.jwtToken = payload.access_token
       state.customer = payload.user
     },
     REMOVE_CUSTOMER(state:any){
-      localStorage.setItem('customer', '')
-      localStorage.setItem('jwtToken', '')
-      localStorage.removeItem('adminToken')
+      localStorage.setItem(Vue.prototype.$customer_localstorage_key , '')
+      localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key, '')
+      localStorage.removeItem(Vue.prototype.$adminToken_localstorage_key)
       state.customer = ''
       state.jwtToken = ''
     },
     SET_CUSTOMER_TOKEN(state:any){
-      state.jwtToken = localStorage.getItem('jwtToken') ? localStorage.getItem('jwtToken') : ''
+      state.jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key) ? localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key) : ''
     },
     SET_CUSTOMER_PERMISSIONS(state:Record<any, any>, payload){
       state.customer_permissions = payload

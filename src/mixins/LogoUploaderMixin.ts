@@ -9,6 +9,7 @@ import {
 } from '@/helpers/Helpers';
 import {http} from "@/httpCommon"
 import CustomLogosMixin from "@/mixins/CustomLogosMixin"
+import Vue from "vue";
 
 @Component
 export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
@@ -93,7 +94,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
     this.handlingDisclaimerAction = true
     this.logoDisclaimerInfo.accepted = true
     this.logoDisclaimerInfo.show_again = show_disclaimer_again
-    localStorage.setItem('logoDisclaimerInfo', JSON.stringify(this.logoDisclaimerInfo));
+    localStorage.setItem(Vue.prototype.$logoDisclaimerInfo_localstorage_key, JSON.stringify(this.logoDisclaimerInfo));
     self.$modal.hide('logo-disclaimer-modal')
     if(this.logo_file) {
       this.uploadLogo(this.logo_file)

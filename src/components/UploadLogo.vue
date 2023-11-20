@@ -101,7 +101,7 @@ import ModalAction from "@/mixins/ModalAction";
 @Component<UploadLogo>({
   components: {LogoEditorModal},
   mounted() {
-      if (localStorage.getItem('logo_modal_status') == null) {
+      if (localStorage.getItem(Vue.prototype.$logo_modal_status_localstorage_key) == null) {
         this.open_modal = true
       } else {
         this.open_modal = false
@@ -148,8 +148,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public uploadLogoBtn() {
-    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
-      localStorage.setItem('logo_modal_status', 'false')
+    if (this.status == 'accepted' && localStorage.getItem(Vue.prototype.$logo_modal_status_localstorage_key) == null) {
+      localStorage.setItem(Vue.prototype.$logo_modal_status_localstorage_key, 'false')
       this.open_modal = false
       this.hideModal();
     }
@@ -160,8 +160,8 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
   }
 
   public uploadLogoDraged() {
-    if (this.status == 'accepted' && localStorage.getItem('logo_modal_status') == null) {
-      localStorage.setItem('logo_modal_status', 'false')
+    if (this.status == 'accepted' && localStorage.getItem(Vue.prototype.$logo_modal_status_localstorage_key) == null) {
+      localStorage.setItem(Vue.prototype.$logo_modal_status_localstorage_key, 'false')
       this.open_modal = false
       this.hideModal();
     }
@@ -213,7 +213,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
 
   public onClickUpload(e: Event){
     this.uploadType = 'click'
-    if ((localStorage.getItem('logo_modal_status') == null)) {
+    if ((localStorage.getItem(Vue.prototype.$logo_modal_status_localstorage_key) == null)) {
       e.preventDefault()
       this.showModal()
     }
@@ -223,7 +223,7 @@ export default class UploadLogo extends Mixins(ErrorMessages, ModalAction) {
     e.preventDefault()
     this.fileObject = e.dataTransfer.files[0];
     this.uploadType = 'drag';
-    if ((localStorage.getItem('logo_modal_status') == null)) {
+    if ((localStorage.getItem(Vue.prototype.$logo_modal_status_localstorage_key) == null)) {
       this.showModal()
     }else{
       this.processLogoImage();

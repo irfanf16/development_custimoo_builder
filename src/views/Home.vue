@@ -726,7 +726,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     </svg>`,
   ]
   private order_update_data:Record<any, any>[]= []
-  public is_admin_token = localStorage.getItem('adminToken');
+  public is_admin_token = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
   public pulse_info: Record<any, any> = {
     use_original_colors: true, shuffle: true, use_logo_colors: true
   }
@@ -741,9 +741,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       routerPush(this.$router,'Home');
     }
 
-    this.jwtToken = localStorage.getItem('jwtToken') as string
+    this.jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key) as string
     // await this.$store.dispatch('setJwtToken')
-    if(!localStorage.getItem('browserToken')){
+    if(!localStorage.getItem(Vue.prototype.$browserToken_localstorage_key)){
       await this.$store.dispatch('setBrowserToken')
     }
 

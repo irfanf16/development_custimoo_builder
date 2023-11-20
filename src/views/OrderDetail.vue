@@ -498,8 +498,8 @@ import {getCompany} from "@/helpers/Helpers";
 
      let customer_authenticated = this.isCustomerAuthenticated;
      if(!customer_authenticated) {
-       let jwttoken = localStorage.getItem("jwtToken");
-       let customer = localStorage.getItem("customer");
+       let jwttoken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
+       let customer = localStorage.getItem(Vue.prototype.$customer_localstorage_key);
        if(jwttoken != null && jwttoken != '' && customer != null && customer != '') {
          let payload = { jwtToken: '', access_token : '',  customer : {}};
          payload.jwtToken = jwttoken;

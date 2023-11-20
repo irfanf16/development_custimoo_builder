@@ -128,7 +128,7 @@ router.beforeEach(async (to, from, next) => {
 })
 
 router.afterEach((to, from) => {
-  const jwtToken = localStorage.getItem('jwtToken')
+  const jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key)
   if(!jwtToken){
     if(to.name == 'OrderDetail'){
       router.push('/')

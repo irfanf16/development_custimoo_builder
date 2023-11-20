@@ -52,11 +52,13 @@ import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
+import Vue from "vue";
+
 
 @Component<LogoUploader>({
   components: { LogoDisclaimerModal, LogoEditor },
   mounted() {
-    const logo_disclaimer_info = localStorage.getItem("logoDisclaimerInfo")
+    const logo_disclaimer_info = localStorage.getItem(Vue.prototype.$logoDisclaimerInfo_localstorage_key)
     if(logo_disclaimer_info) {
       this.logoDisclaimerInfo = JSON.parse(logo_disclaimer_info)
     }

@@ -38,7 +38,7 @@ import {handleProductPriceUpdate} from "@/helpers/Helpers";
     Scene
   },
   mounted() {
-    this.animPlayed = localStorage.getItem('animPlayed')
+    this.animPlayed = localStorage.getItem(Vue.prototype.$animPlayed_localstorage_key)
   }
 })
 

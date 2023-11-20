@@ -19,6 +19,17 @@ const getSize = (obj): string => {
   return megabytes;
 }
 
+let persistant_plugin_key = 'custimoo';
+// @ts-ignore
+if(typeof custimoo_application_suppage_url !== 'undefined') {
+  // @ts-ignore
+  if(custimoo_application_suppage_url !== '' && custimoo_application_suppage_url !== null) {
+    // @ts-ignore
+    persistant_plugin_key += "-" + custimoo_application_suppage_url; // this variable declared in get-app-version js file
+  }
+
+}
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -31,7 +42,8 @@ export default new Vuex.Store({
     Cart
   },
   plugins: [createPersistedState({
-    key: 'custimoo',
+    // @ts-ignore
+    key: persistant_plugin_key, // this variable declared in file get-app-version.js
     paths: [
       'ProductAttributes.selectedIndex',
       'ProductAttributes.selectedPrdId',

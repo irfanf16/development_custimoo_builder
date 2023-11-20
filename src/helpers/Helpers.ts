@@ -1537,7 +1537,7 @@ const authenticateUser = async (token: string) => {
       user: customer
     }
     Store.commit('SET_CUSTOMER', payload)
-    if(!localStorage.getItem('browserToken')){
+    if(!localStorage.getItem(Vue.prototype.$browserToken_localstorage_key)){
       await Store.dispatch('setBrowserToken')
     }
     await Store.dispatch("getLockers");
@@ -1571,28 +1571,28 @@ const exitFromEditMode = () => {
 }
 
 const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
-  let jwtToken = localStorage.getItem('jwtToken')
+  let jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key)
   if(to.query && to.query.token && jwtToken){
     if(jwtToken === to.query.token){
-      const adminToken = localStorage.getItem('adminToken');
+      const adminToken = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
       if(adminToken){
-        localStorage.setItem('jwtToken',adminToken);
-        jwtToken = localStorage.getItem('jwtToken');
+        localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key,adminToken);
+        jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
       }
     }
     else{
       jwtToken = to.query.token;
       if(jwtToken){
-        localStorage.setItem('jwtToken',jwtToken);
-        localStorage.setItem('adminToken',jwtToken);
+        localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key,jwtToken);
+        localStorage.setItem(Vue.prototype.$adminToken_localstorage_key,jwtToken);
       }
     }
   }
   else if(!jwtToken){
-    const adminToken = localStorage.getItem('adminToken');
+    const adminToken = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
     if(adminToken){
-      localStorage.setItem('jwtToken',adminToken);
-      jwtToken = localStorage.getItem('jwtToken');
+      localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key,adminToken);
+      jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
     }
   }
   return jwtToken;
@@ -1612,7 +1612,7 @@ const fetchCustomer = async (jwtToken:string) => {
 }
 
 const setVueVersion = async () => {
-  const is_loggedIn = await localStorage.getItem('jwtToken');
+  const is_loggedIn = await localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
   let customer_id = 0;
   if(is_loggedIn) {
     const customer = Store.getters.getCustomer;
@@ -2063,6 +2063,16 @@ const removeKeyItemFromLocalStorage = (key) => {
 
 
 const removeKeyInitialPersitantItems = () => {
+ /* let persistant_plugin_key = 'custimo';
+// @ts-ignore
+  if(typeof custimoo_application_suppage_url !== 'undefined') {
+    // @ts-ignore
+    if(custimoo_application_suppage_url !== '' && custimoo_application_suppage_url !== null) {
+      // @ts-ignore
+      persistant_plugin_key += "-" + custimoo_application_suppage_url; // this variable declared in get-app-version js file
+    }
+
+  }*/
   const custimoo = getKeyItemFromLocalStorage('custimo');
   console.log(custimoo);
 }

@@ -19,11 +19,11 @@ import {Component, Vue} from 'vue-property-decorator'
 
 @Component<HorizontalScroll>({
   mounted() {
-    this.animPlayed = Boolean(localStorage.getItem('animPlayed'))
+    this.animPlayed = Boolean(localStorage.getItem(Vue.prototype.$animPlayed_localstorage_key))
     if (!this.animPlayed){
       setTimeout(()=>{
-        localStorage.setItem('animPlayed', 'true')
-        this.animPlayed = Boolean(localStorage.getItem('animPlayed'))
+        localStorage.setItem(Vue.prototype.$animPlayed_localstorage_key, 'true')
+        this.animPlayed = Boolean(localStorage.getItem(Vue.prototype.$animPlayed_localstorage_key))
       }, 3000)
     }
   }

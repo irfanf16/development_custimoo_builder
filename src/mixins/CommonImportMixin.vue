@@ -113,6 +113,24 @@ Vue.prototype.$eventBus = eventBus
 import {getDomDocument, logData} from '@/helpers/Helpers'
 Vue.prototype.$logData = logData;
 
+
+const localstorage_keys = ['customer','jwtToken','adminToken','browserToken','actionBeforeLogin','logoDisclaimerInfo',
+  'animPlayed','logo_modal_status'];
+localstorage_keys.forEach(key => {
+  Vue.prototype['$' + key + '_localstorage_key'] = key;
+});
+//Vue.prototype.$logo_modal_status_ls_key
+// @ts-ignore
+if(typeof custimoo_application_suppage_url !== 'undefined') {
+  // @ts-ignore
+  if(custimoo_application_suppage_url !== '' && custimoo_application_suppage_url !== null) {
+    localstorage_keys.forEach(key => {
+      // @ts-ignore
+      Vue.prototype['$' + key + '_localstorage_key'] = `${key}-${custimoo_application_suppage_url}`;
+    });
+  }
+}
+
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
@@ -183,14 +201,14 @@ export default class CommonImportMixin extends Vue{
 
     const token = getUrlParameter('token')
     if (token){
-      localStorage.setItem('jwtToken', token)
-      localStorage.setItem('adminToken', token)
+      localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key, token)
+      localStorage.setItem(Vue.prototype.$adminToken_localstorage_key, token)
       await authenticateUser(token)
       await this.$store.dispatch('resetStore')
       routerPush(this.$router, 'Home')
     } else{
       const storageInterval = setInterval(()=>{
-        const jwtToken = localStorage.getItem('jwtToken');
+        const jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
         if(jwtToken && jwtToken !=''){
           authenticateUser(jwtToken)
           clearInterval(storageInterval);

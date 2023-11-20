@@ -1,6 +1,7 @@
 import {http, noTokenRequest} from "@/httpCommon";
 import { Object } from "fabric/fabric-impl";
 import { Module } from "vuex";
+import Vue from "vue";
 const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 const Main:Module<any, any> = {
   state: {
@@ -97,7 +98,7 @@ const Main:Module<any, any> = {
       commit('SET_MAIN_TOTAL_TABS', payload)
     },
     setJwtToken() {
-      if(!localStorage.getItem('jwtToken')) {
+      if(!localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key)) {
         /***************** THIS LINE ADDED TEMPORARILY  IT WILL REMOVE WHEN JWT TOKEN WILL GET FROM URL *****************/
         // localStorage.setItem('jwtToken', process.env.VUE_APP_JWT_TOKEN)
         /*****************************-------------------*******************************/
@@ -108,7 +109,7 @@ const Main:Module<any, any> = {
         };
         http.get("oauth/token", config).then((response: any) => {
           if (response.data.access_token) {
-            localStorage.setItem('jwtToken', response.data.access_token)
+            localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key, response.data.access_token)
           }
         }).catch((e) => {
           console.log(e)
@@ -120,7 +121,7 @@ const Main:Module<any, any> = {
       for (let i = 0; i < 8; i++) {
         browserTokenString += Math.random().toString(16).slice(-4)
       }
-      localStorage.setItem('browserToken', browserTokenString)
+      localStorage.setItem(Vue.prototype.$browserToken_localstorage_key, browserTokenString)
      }
   }
 }

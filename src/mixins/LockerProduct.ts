@@ -989,7 +989,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let company = self.$store.getters.getCompany;
       let platform = company.platform;
       if(platform === 'wordpress') {
-        const adminToken = localStorage.getItem('adminToken');
+        const adminToken = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
           if(adminToken) {
             if(resolve){
               resolve(false);

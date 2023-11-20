@@ -102,7 +102,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import html2pdf from "html2pdf.js"
 import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
@@ -176,7 +176,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   public INCH_TO_CENTIMETER = 2.54;
 
-  public is_admin_token = localStorage.getItem('adminToken');
+  public is_admin_token = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
 
   get updateOrderItemProducts() {
     return this.$store.getters.getUpdateOrderItemProducts

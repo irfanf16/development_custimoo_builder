@@ -780,9 +780,9 @@ const ProductAttributes:Module<any, any> = {
     ACTION_BEFORE_LOGIN(state: Record<any, any>, action: string){
       state.actionBeforeLogin = action
       if(action) {
-        localStorage.setItem('actionBeforeLogin', action)
+        localStorage.setItem(Vue.prototype.$actionBeforeLogin_localstorage_key, action)
       } else {
-        localStorage.removeItem('actionBeforeLogin')
+        localStorage.removeItem(Vue.prototype.$actionBeforeLogin_localstorage_key)
       }
     },
     SET_COLLECTIONS (state: Record<any, any>, collections: Record<any, any>) {
@@ -1390,7 +1390,7 @@ const ProductAttributes:Module<any, any> = {
       if(state.actionBeforeLogin) {
         return state.actionBeforeLogin
       }
-      return localStorage.getItem('actionBeforeLogin')
+      return localStorage.getItem(Vue.prototype.$actionBeforeLogin_localstorage_key)
     },
     getUndoItems:(state)=> state.undoItems,
     getRedoItems:(state)=> state.redoItems,
