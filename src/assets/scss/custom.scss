@@ -6099,7 +6099,7 @@ $fontSize: 0.5;
 }
 
 .vm--modal {
-    //margin-top: 0px;
+    margin-bottom: 150px !important;
     margin-top: 140px;
 
     @media (max-width: 768px) {
@@ -6891,8 +6891,4 @@ $fontSize: 0.5;
 
 .vm--block-scroll{
     overflow: hidden !important;
-
-    .vm--modal{
-        margin-bottom: 150px !important;
-    }
 }
