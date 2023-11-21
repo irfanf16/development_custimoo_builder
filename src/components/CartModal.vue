@@ -1,5 +1,5 @@
 <template>
-  <modal :minWidth="1000" :scrollable="true" :height="'auto'" :minHeight="600" :resizable="true" :adaptive="true"
+  <modal :minWidth="1000" :scrollable="true" :minHeight="600" :resizable="true" :adaptive="true"
     name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" class="cart-modal" modal-class="modal-fullscreen2"
     content-class="lockerroom-modal" @closed="customer_reference_no = null" @before-open="getAddresses">
     <div class="modal-header d-flex justify-content-between">

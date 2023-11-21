@@ -6888,3 +6888,11 @@ $fontSize: 0.5;
         object-fit: contain;
     }
 }
+
+.vm--block-scroll{
+    overflow: hidden !important;
+
+    .vm--modal{
+        margin-bottom: 150px !important;
+    }
+}
