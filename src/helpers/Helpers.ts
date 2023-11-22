@@ -711,20 +711,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       }
      // if(product_price_object)
 
-      if(selected_product.ecommerce_company_addons && selected_product.ecommerce_company_addons.length > 0) {
-        post_data.addons = post_data.addons.map(addon => {
-          const ecommerce_addon = selected_product.ecommerce_company_addons.find(company_addon => company_addon.addon_id === addon.addon_id);
-          if(ecommerce_addon) {
-            return { ...addon,
-              addon_ecommerce_product_id: ecommerce_addon.addon_ecommerce_product_id,
-              addon_ecommerce_variant_id: ecommerce_addon.addon_ecommerce_variant_id
-            };
-          } else {
-            return addon;
-          }
-        })
-      }
-
       const svg_content = await fetchUrlContent(post_data.production_url);
       const production_file = await parseSvgStringFile(svg_content, post_data);
       post_data.svg_content = production_file

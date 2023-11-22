@@ -3,7 +3,7 @@ import { Component, Vue, Watch } from 'vue-property-decorator'
 import {
   authenticateUser, checkIsEmpty,
   getCompany,
-  getCustomizerIframe, getProductPriceDefaultObject,
+  getCustomizerIframe, getEditModeDefaultObj, getProductPriceDefaultObject,
   getUrlParameter,
   routerPush
 } from '@/helpers/Helpers'
@@ -181,6 +181,11 @@ export default class CommonImportMixin extends Vue{
     const product_price_obj = this.$store.getters.getProductPriceObject
     if(checkIsEmpty(product_price_obj)) {
       this.$store.commit('SET_PRODUCT_PRICE_OBJECT', getProductPriceDefaultObject())
+    }
+
+    const product_edit_info_obj = this.$store.getters.getProductEditInfoObject
+    if(checkIsEmpty(product_edit_info_obj)) {
+      this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', getEditModeDefaultObj())
     }
 
     /*

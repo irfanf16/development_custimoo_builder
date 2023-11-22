@@ -235,7 +235,7 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
-  getActiveProductData,
+  getActiveProductData, getEditModeDefaultObj,
   getReminderOptions,
   getSelectedProductData,
   lastActiveProductDefaultObject, logData,
@@ -456,10 +456,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       }
 
       self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-        editing: true,  type: "cart_product", filters: {search_products: "", private_product: is_private}, locker_product_info: null, cart_product_info: {
-          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index, cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item
+        editing: true,  type: "cart_product", filters: {search_products: "", private_product: is_private},
+        locker_product_info: getEditModeDefaultObj('locker_product_info'), cart_product_info: {
+          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index,
+          cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item
         },
-        order_product_info: null
+        order_product_info: getEditModeDefaultObj('order_product_info')
       })
       self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
 

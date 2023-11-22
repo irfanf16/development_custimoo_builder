@@ -120,8 +120,7 @@ const ProductAttributes:Module<any, any> = {
     revertRosterBool:false,
     hideSaveLockerButton: true,
     product_custom_texts: {},
-    //could be locker_product, cart_product, order_product, reorder_product
-    product_edit_info_object: { editing: false, type: null, filters: null, locker_product_info: null, cart_product_info: null, order_product_info: null, reorder_product_info: null},
+    product_edit_info_object: {},//it's default value is being set from file common_import_mixin mounted method through commit 'SET_PRODUCT_EDIT_INFO_OBJECT'
     last_active_product_data: {}, //it's default value is being set from Home.vue mounted method through commit 'SET_LAST_ACTIVE_PRODUCT_DATA'
     editing_roster_player_index: 0,
     selectedCategories:[],

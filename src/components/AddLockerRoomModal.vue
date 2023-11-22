@@ -87,7 +87,12 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
 import ModalAction from "@/mixins/ModalAction";
-import {getImageFromCanvas, getLockerColors, syncGroupColorsWithSvgGroups} from '@/helpers/Helpers'
+import {
+  getEditModeDefaultObj,
+  getImageFromCanvas,
+  getLockerColors,
+  syncGroupColorsWithSvgGroups
+} from '@/helpers/Helpers'
 import { Canvas } from 'fabric/fabric-impl'
     @Component<AddLockerRoomModal>({
         components: {
@@ -240,7 +245,7 @@ import { Canvas } from 'fabric/fabric-impl'
               editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
               locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id,
                 design_id: locker.design_id},
-              cart_product_info: null, order_product_info: null
+              cart_product_info: getEditModeDefaultObj('cart_product_info'), order_product_info: getEditModeDefaultObj('order_product_info')
             })
 
             if (this.rosterUrl){
