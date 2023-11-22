@@ -1515,7 +1515,7 @@ const logData = (...args: Record<any, any>[]) => {
   console.log('Logging data', data)
 }
 
-const authenticateUser = async (token: string) => {
+const authenticateUser = async (token: string, only_authenticate= false) => {
   const customer = await Store.dispatch('getCustomerFromToken', token)
   if (customer){
     const payload = {
@@ -1525,6 +1525,9 @@ const authenticateUser = async (token: string) => {
     Store.commit('SET_CUSTOMER', payload)
     if(!localStorage.getItem(Vue.prototype.$browserToken_localstorage_key)){
       await Store.dispatch('setBrowserToken')
+    }
+    if(only_authenticate) {
+      return true;
     }
     await Store.dispatch("getLockers");
     await Store.commit("SET_RECENT_LOGOS");
@@ -2182,6 +2185,25 @@ const isShowProductPrice = () => {
   return company_currency_info && company_currency_info.visible
 }
 
+const initiateLocalStorageKeys = async ():Promise<void> => {
+  const localstorage_keys = ['customer','jwtToken','adminToken','browserToken','actionBeforeLogin','logoDisclaimerInfo',
+    'animPlayed','logo_modal_status'];
+  localstorage_keys.forEach(key => {
+    Vue.prototype['$' + key + '_localstorage_key'] = key;
+  });
+//Vue.prototype.$logo_modal_status_ls_key
+// @ts-ignore
+  if(typeof custimoo_application_suppage_url !== 'undefined') {
+    // @ts-ignore
+    if(custimoo_application_suppage_url !== '' && custimoo_application_suppage_url !== null) {
+      localstorage_keys.forEach(key => {
+        // @ts-ignore
+        Vue.prototype['$' + key + '_localstorage_key'] = `${key}-${custimoo_application_suppage_url}`;
+      });
+    }
+  }
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2196,5 +2218,5 @@ export {
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
-  updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice
+  updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys
 };

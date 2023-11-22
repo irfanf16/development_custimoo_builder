@@ -461,7 +461,7 @@ import {
   handleResponseException,
   logData,
   activityStatus,
-  urlToBase64, getDomDocument
+  urlToBase64, getDomDocument, initiateLocalStorageKeys, authenticateUser
 } from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
@@ -475,6 +475,7 @@ import {getCompany} from "@/helpers/Helpers";
 
 @Component<OrderDetail>({
   async mounted() {
+    await initiateLocalStorageKeys();
     this.activity_item_info = this.getOrderItemStatusActivityInfoDefaultObject()
     this.api_url = `${process.env.VUE_APP_API_BASE_URL}/api`
     await getCompany();
@@ -499,14 +500,19 @@ import {getCompany} from "@/helpers/Helpers";
      let customer_authenticated = this.isCustomerAuthenticated;
      if(!customer_authenticated) {
        let jwttoken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
-       let customer = localStorage.getItem(Vue.prototype.$customer_localstorage_key);
-       if(jwttoken != null && jwttoken != '' && customer != null && customer != '') {
-         let payload = { jwtToken: '', access_token : '',  customer : {}};
-         payload.jwtToken = jwttoken;
-         payload.access_token = jwttoken;
-         payload.customer = JSON.parse(customer);
-         this.$store.commit('SET_CUSTOMER', payload);
-         customer_authenticated = true;
+       let customer:any = localStorage.getItem(Vue.prototype.$customer_localstorage_key);
+       if(jwttoken != null && jwttoken != '' ) {
+         if(customer == null || customer == '') {
+           await authenticateUser(jwttoken, true);
+           customer_authenticated = true;
+         }else {
+           let payload = { jwtToken: '', access_token : '',  customer : {}};
+           payload.jwtToken = jwttoken;
+           payload.access_token = jwttoken;
+           payload.customer = JSON.parse(customer);
+           this.$store.commit('SET_CUSTOMER', payload);
+           customer_authenticated = true;
+         }
        }
      }
 

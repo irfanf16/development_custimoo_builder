@@ -5,7 +5,8 @@ import {
   getCompany,
   getCustomizerIframe, getEditModeDefaultObj, getProductPriceDefaultObject,
   getUrlParameter,
-  routerPush
+  routerPush,
+  initiateLocalStorageKeys
 } from '@/helpers/Helpers'
 import { i18n } from '@/i18n'
 import store from '@/store'
@@ -114,22 +115,7 @@ import {getDomDocument, logData} from '@/helpers/Helpers'
 Vue.prototype.$logData = logData;
 
 
-const localstorage_keys = ['customer','jwtToken','adminToken','browserToken','actionBeforeLogin','logoDisclaimerInfo',
-  'animPlayed','logo_modal_status'];
-localstorage_keys.forEach(key => {
-  Vue.prototype['$' + key + '_localstorage_key'] = key;
-});
-//Vue.prototype.$logo_modal_status_ls_key
-// @ts-ignore
-if(typeof custimoo_application_suppage_url !== 'undefined') {
-  // @ts-ignore
-  if(custimoo_application_suppage_url !== '' && custimoo_application_suppage_url !== null) {
-    localstorage_keys.forEach(key => {
-      // @ts-ignore
-      Vue.prototype['$' + key + '_localstorage_key'] = `${key}-${custimoo_application_suppage_url}`;
-    });
-  }
-}
+initiateLocalStorageKeys();
 
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';

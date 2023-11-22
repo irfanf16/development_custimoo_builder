@@ -23,10 +23,9 @@ const Auth:Module<any, any> = {
       localStorage.setItem(Vue.prototype.$jwtToken_localstorage_key, payload.access_token)
       if(payload && payload.user){
         localStorage.setItem(Vue.prototype.$customer_localstorage_key , JSON.stringify(payload.user))
+        state.customer = payload.user
       }
-
       state.jwtToken = payload.access_token
-      state.customer = payload.user
     },
     REMOVE_CUSTOMER(state:any){
       localStorage.setItem(Vue.prototype.$customer_localstorage_key , '')
