@@ -6100,7 +6100,7 @@ $fontSize: 0.5;
 
 .vm--modal {
     //margin-bottom: 150px !important;
-    //margin-top: 140px;
+    margin-top: 60px;
 
     @media (max-width: 768px) {
         margin: 0 auto !important;
@@ -6133,6 +6133,7 @@ $fontSize: 0.5;
 .cart-modal{
     .vm--modal{
         max-height: calc(100vh - 230px);
+        margin-top: 0px;
     }
 }
 
