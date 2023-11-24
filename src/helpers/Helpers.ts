@@ -925,14 +925,17 @@ const getUploadedLogoObject = async (res:Record<any, any>) => {
 }
 
 const getCompany = async () => {
-  const res = await http.get('company').catch(error => {
-    handleResponseException(error)
-    console.info("error while getting company", error)
-  })
-  if (res && res.status == 200){
-    Store.dispatch("companyAction", res.data.company)
-  } else {
-    Store.dispatch("companyAction", null)
+  const company = Store.getters.getCompany
+  if(!company.id) {
+    const res = await http.get('company').catch(error => {
+      handleResponseException(error)
+      console.info("error while getting company", error)
+    })
+    if (res && res.status == 200) {
+      Store.dispatch("companyAction", res.data.company)
+    } else {
+      Store.dispatch("companyAction", null)
+    }
   }
 }
 
@@ -1600,33 +1603,6 @@ const fetchCustomer = async (jwtToken:string) => {
   }
 }
 
-const setVueVersion = async () => {
-  const is_loggedIn = await localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
-  let customer_id = 0;
-  if(is_loggedIn) {
-    const customer = Store.getters.getCustomer;
-    customer_id = customer.id;
-    if(customer_id) {
-      await http.get('get-reset-store?customer_id='+customer_id).then((res) => {
-        if(typeof res.data.company != 'undefined' && res.data.company.reset_store == 1) {
-          if(is_loggedIn && res.data.isCustomerStoreReset == 0){
-            http.post('set-reset-store', {company_id:res.data.company.id,customer_id:customer_id}).then(() => {
-              restore();
-            })
-          }
-        }
-      })
-    }
-  }
-}
-
-async function restore(){
-  await Store.dispatch('resetStore');
-  setTimeout(() => {
-    location.reload()
-  }, 2500)
-}
-
 const getProductColors = (product_id = null, append_locker_colors = true ) => {
   let product_colors: Record<any, any>[] = []
   product_id = product_id ? product_id : Store.getters.getSelectedProductId
@@ -2212,7 +2188,7 @@ export {
   getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObj, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, setVueVersion, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
+  persistToken, fetchCustomer, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
