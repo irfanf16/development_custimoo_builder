@@ -32,7 +32,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {LockerProducts, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {
-  hideLockerProductSaveBtn,
+  hideLockerProductUpdateButton,
   processColorsCustom,
   setUndoRedoItems
 } from "@/helpers/Helpers"
@@ -149,7 +149,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
         logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
       })
     }
-    hideLockerProductSaveBtn()
+    hideLockerProductUpdateButton(false)
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
   }

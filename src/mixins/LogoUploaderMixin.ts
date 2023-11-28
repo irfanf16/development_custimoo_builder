@@ -1,11 +1,10 @@
 import {Component, Mixins} from "vue-property-decorator";
 import {
   setUndoRedoItems,
-  hideLockerProductSaveBtn,
   getExtensionsFor,
   processColorsCustom,
   getLogoUpdatedProps,
-  recentLogoDefaultObject
+  recentLogoDefaultObject, hideLockerProductUpdateButton
 } from '@/helpers/Helpers';
 import {http} from "@/httpCommon"
 import CustomLogosMixin from "@/mixins/CustomLogosMixin"
@@ -160,7 +159,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
       }
       const inputRef = this.$refs.logoUploadInput as Record<any, any>
       inputRef.value = null;
-      hideLockerProductSaveBtn()
+      await hideLockerProductUpdateButton(false)
       this.showLoader = false;
       this.$store.commit('SET_UPDATING_LOGO', false)
     })

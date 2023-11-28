@@ -65,7 +65,7 @@
 import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
 import {findIndex} from "lodash";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
-import {handleProductPriceUpdate, hideLockerProductSaveBtn} from "@/helpers/Helpers";
+import {handleProductPriceUpdate, hideLockerProductUpdateButton} from "@/helpers/Helpers";
     @Component<CollarStyle>({
     })
 
@@ -138,7 +138,7 @@ import {handleProductPriceUpdate, hideLockerProductSaveBtn} from "@/helpers/Help
         this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.selectedProduct.productstyles[i].id,
           design_index:   design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
         })
-        hideLockerProductSaveBtn()
+        hideLockerProductUpdateButton(false)
       }
       handleAddonSelectionUpdate(): void {
         handleProductPriceUpdate()

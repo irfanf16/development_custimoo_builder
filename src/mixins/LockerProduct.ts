@@ -53,6 +53,8 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
       await self.retrieveProductsNew(query_params)
       this.$emit('hideLockerRoomModal')
     });
+
+    await hideLockerProductUpdateButton(true)
   }
 
   get getLockerProducts() {

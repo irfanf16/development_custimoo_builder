@@ -419,10 +419,6 @@
                       </span>
                      </template>
                   </template>
-
-                  <b-button @click="cancelEdit" class="mx-2 px-5 light" variant="secondary" aria-label="Cnacel" v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'cart_product'">
-                    Cancel
-                  </b-button>
                 </div>
               </div>
             </div>
@@ -2119,7 +2115,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 //.customization-preview-process{
 .undo-btn-area {
   display: flex;
-  //justify-content: space-between;
+
+  &>div{
+    &:first-child{
+      position: relative;
+      z-index: 100;
+    }
+  }
 
   .btn {
     color: #000;

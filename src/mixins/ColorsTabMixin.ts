@@ -1,5 +1,5 @@
 import { Component, Vue } from 'vue-property-decorator'
-import {getSelectedProductPantones, hideLockerProductSaveBtn, setUndoRedoItems} from '@/helpers/Helpers'
+import {getSelectedProductPantones, hideLockerProductUpdateButton, setUndoRedoItems} from '@/helpers/Helpers'
 import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
 @Component
@@ -81,7 +81,7 @@ export default class ColorsTabMixin extends Vue{
   public async setColor(color: Record<any, any>) {
     const self: Record<any, any> = this
     await setUndoRedoItems('groupColors','updated')
-    hideLockerProductSaveBtn()
+    await hideLockerProductUpdateButton(false)
     if (color.value){
       this.$store.commit('UPDATE_GROUP_COLORS',
         {

@@ -2,7 +2,7 @@ import { Component, Vue } from 'vue-property-decorator'
 import {
   getLogoSettingsObject,
   getLogoUpdatedProps,
-  hideLockerProductSaveBtn,
+  hideLockerProductUpdateButton,
   setUndoRedoItems
 } from '@/helpers/Helpers'
 
@@ -52,6 +52,6 @@ export default class CustomLogosMixin extends Vue{
     await self.$store.commit('SET_LOGO_COLORS_INFO', {reset: true});
     await self.$eventBus.$emit("customLogoRemoved", logo_index)
     await self.$eventBus.$emit('handleNonVectorCustomLogosCount')
-    hideLockerProductSaveBtn()
+    await hideLockerProductUpdateButton(false)
   }
 }
