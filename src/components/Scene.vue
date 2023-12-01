@@ -726,12 +726,57 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     texture.forEach((item: Record<any, any>) => {
       if(item.id) {
         item.id = item.id.toLowerCase()
-        if (!item.id.includes('noncustomizable') && !this.containsObject({id: item.id})) {
+        if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
           let count = 1
           if (item.id == 'base') {
             count = 100000 // to make base always at first color position
           }
-          if (!item.id.includes('inside')) {
+
+          if (item.fill && item.fill.gradientUnits) {
+            let gradient_colors: Record<any, any>[] = []
+            item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
+              if (color_stop.color.includes('rgb')) {
+                color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
+              }
+              let pantoneColor: Record<any, any> = {pantone: '', name: ''}
+              if (this.mainPreview) {
+                pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
+              }
+              gradient_colors.push({color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name})
+            })
+
+            this.svgGroups.push({id: item.id, count: count, gradient_colors: gradient_colors})
+          } else {
+            if (item.fill.includes('rgb')) {
+              item.fill = rgbHex(item.fill).includes('#') ? rgbHex(item.fill) : '#' + rgbHex(item.fill);
+            }
+            let pantoneColor: Record<any, any> = {pantone: '', name: ''}
+            if (this.mainPreview) {
+              pantoneColor = getClosestColor(item.fill, selectProductPantonesList, this.getColorType)
+            }
+
+            this.svgGroups.push({
+              id: item.id,
+              color: item.fill,
+              count: count,
+              pantone: pantoneColor.pantone,
+              name: pantoneColor.name
+            })
+          }
+        }
+      }
+    })
+
+    if (this.backTexture) {
+      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
+      texture.forEach((item: Record<any, any>) => {
+        if(item.id) {
+          item.id = item.id.toLowerCase()
+          if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
+            let count = 1
+            if (item.id == 'base') {
+              count = 100000 // to make base always at first color position
+            }
             if (item.fill && item.fill.gradientUnits) {
               let gradient_colors: Record<any, any>[] = []
               item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
@@ -742,7 +787,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 if (this.mainPreview) {
                   pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
                 }
-                gradient_colors.push({color: color_stop.color, pantone: pantoneColor.pantone, name: pantoneColor.name})
+                gradient_colors.push({
+                  color: color_stop.color,
+                  pantone: pantoneColor.pantone,
+                  name: pantoneColor.name
+                })
               })
 
               this.svgGroups.push({id: item.id, count: count, gradient_colors: gradient_colors})
@@ -762,58 +811,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 pantone: pantoneColor.pantone,
                 name: pantoneColor.name
               })
-            }
-          }
-        }
-      }
-    })
-
-    if (this.backTexture) {
-      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-      texture.forEach((item: Record<any, any>) => {
-        if(item.id) {
-          item.id = item.id.toLowerCase()
-          if (!item.id.includes('noncustomizable') && !this.containsObject({id: item.id})) {
-            let count = 1
-            if (item.id == 'base') {
-              count = 100000 // to make base always at first color position
-            }
-            if (!item.id.includes('inside')) {
-              if (item.fill && item.fill.gradientUnits) {
-                let gradient_colors: Record<any, any>[] = []
-                item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
-                  if (color_stop.color.includes('rgb')) {
-                    color_stop.color = rgbHex(color_stop.color).includes('#') ? rgbHex(color_stop.color) : '#' + rgbHex(color_stop.color);
-                  }
-                  let pantoneColor: Record<any, any> = {pantone: '', name: ''}
-                  if (this.mainPreview) {
-                    pantoneColor = getClosestColor(color_stop.color, selectProductPantonesList, this.getColorType)
-                  }
-                  gradient_colors.push({
-                    color: color_stop.color,
-                    pantone: pantoneColor.pantone,
-                    name: pantoneColor.name
-                  })
-                })
-
-                this.svgGroups.push({id: item.id, count: count, gradient_colors: gradient_colors})
-              } else {
-                if (item.fill.includes('rgb')) {
-                  item.fill = rgbHex(item.fill).includes('#') ? rgbHex(item.fill) : '#' + rgbHex(item.fill);
-                }
-                let pantoneColor: Record<any, any> = {pantone: '', name: ''}
-                if (this.mainPreview) {
-                  pantoneColor = getClosestColor(item.fill, selectProductPantonesList, this.getColorType)
-                }
-
-                this.svgGroups.push({
-                  id: item.id,
-                  color: item.fill,
-                  count: count,
-                  pantone: pantoneColor.pantone,
-                  name: pantoneColor.name
-                })
-              }
             }
           }
         }

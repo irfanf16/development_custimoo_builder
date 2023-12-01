@@ -8,7 +8,7 @@
         <template v-if="application_mounted && selectedProduct">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
             <CustomizationTabs v-if="!manageComponents.mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
-                               @setRosterOpen="setRosterOpen" @open-add-to-locker="getLockers(true)"
+                                @open-add-to-locker="getLockers(true)"
                                :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
                                :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
             <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
@@ -204,6 +204,7 @@
                       <b-icon-arrow-right-short />
                     </button>
                     <template v-else>
+<!--                      todo: need to replace add to cart button with AddToCardButton component with apply of different icon instead of Add to Cart text used in mobile view for Gulzar -->
                       <template v-if="isCustomerAuthenticated">
                         <template>
                           <template v-if="$store.getters.getUpdateOrderItemProducts == null">
@@ -367,58 +368,7 @@
 
                   >Next</b-button>
 
-                  <template v-else>
-                    <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'order_product'"></template>
-                    <b-button :key="'editRoster'" v-else-if="!isRosterOpened"  class="mx-2 px-5" variant="secondary" @click="()=>{this.setRosterOpen(true); showVModal('rostermodal')}">
-                      Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}
-                    </b-button>
-
-                    <template v-else-if="isCustomerAuthenticated">
-                      <template>
-                        <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                          <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-                            <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
-                              <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart" disabled>
-                                Add to Cart
-                              </b-button>
-                            </span>
-
-                            <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
-                              <b-button @click="addToCart(null)" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-                                Finalize Design
-                              </b-button>
-                            </span>
-                            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  class="mx-2 px-5" variant="secondary" @click="addToCart(null)">
-                              {{ getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'? 'Update Cart' : 'Add to Cart' }}
-                            </b-button>
-                            <b-button v-else  class="mx-2 px-5" variant="secondary" :disabled="true" >
-                              <img width="20" height="20" src="@assets/images/loading.gif" />
-                            </b-button>
-                          </template>
-                         </template>
-                      </template>
-                    </template>
-
-                    <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false && isRosterOpened">
-                      <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-                        Finalize Design
-                      </b-button>
-                    </span>
-
-                    <template v-else>
-                      <template v-if="company.platform !== 'self'">
-                        <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
-                          <b-button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                        </span>
-                        <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
-                      </template>
-                      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
-                          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
-                            Finalize Design
-                          </b-button>
-                      </span>
-                     </template>
-                  </template>
+                  <AddToCartButton v-else :products_fonts="products_fonts"></AddToCartButton>
                 </div>
               </div>
             </div>
@@ -464,7 +414,7 @@
 
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
             <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen"
-                             @hideAll="hideAll" :categories="categories" @setRosterOpen="setRosterOpen"
+                             @hideAll="hideAll" :categories="categories"
                              v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
           </b-col>
         </template>
@@ -532,6 +482,7 @@ import {filter, findIndex, isEmpty} from 'lodash'
 import opentype from 'opentype.js'
 import { FetchCategories, HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 import Store from "@/store";
+import AddToCartButton from "@/components/AddToCartButton.vue";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -541,6 +492,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    AddToCartButton,
     Popper,
     CartModal,
     CustomTabs,
@@ -687,7 +639,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private playersDataHeight = 0
   private sideTabIndex = 0
   private maximized = true
-  private isRosterOpened = false
   private isColorShuffled = true
   public shareDesignLoader = false
   private product: Record<any, any> = {}
@@ -768,7 +719,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private setRosterOpen(val: boolean) {
-    this.isRosterOpened = val
+    this.$store.commit('SET_IS_ROSTER_OPEN', val)
   }
 
   private genImages(isClose = false) {
@@ -779,6 +730,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.frontPreview = getImageFromCanvas('front') as string
       this.backPreview = getImageFromCanvas('back') as string
     }
+  }
+
+  get isRosterOpened() {
+    return this.$store.getters.getIsRosterOpened
   }
 
   get application_mounted() {
@@ -1032,7 +987,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get notVectorLogosCount(){
-    const custom_logos = this.$store.getters.koivna
+    const custom_logos = this.$store.getters.selectedProductCustomLogos
     let non_vector_logos_count = 0
     if(custom_logos && custom_logos.length > 0) {
       const non_vector_logos = filter(custom_logos, (custom_logo: Record<any, any>) => {
@@ -1245,7 +1200,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     } else if (this.actionBeforeLogin == 'summary') {
       this.buyNow()
     } else if (this.actionBeforeLogin == 'addToCart') {
-      this.isRosterOpened = true;
+      this.setRosterOpen(true)
       this.addToCart(null)
     } else if (this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
@@ -1351,7 +1306,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.showDesign()
         this.switchTabs(0, true)
       }
-      this.isRosterOpened = false
+      this.setRosterOpen(false)
       this.showLoader = false
     })
   }
@@ -1722,7 +1677,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             this.showDesign()
             this.switchTabs(0, true)
           }
-          this.isRosterOpened = false
+          this.setRosterOpen(false)
         })
       } else {
         if (response === true || response === false) {

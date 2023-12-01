@@ -82,7 +82,7 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</h2>
-              <EditRosterAreaTab @setRosterOpen="setRosterOpen" @open-add-to-locker="openAddToLocker"
+              <EditRosterAreaTab @open-add-to-locker="openAddToLocker"
                                  :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
             </div>
           </b-tab>
@@ -149,9 +149,6 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, Custo
   }
   @Prop({required: false, default:0}) tabIndexNew!: number
 
-  private setRosterOpen(val:boolean){
-    this.$emit('setRosterOpen', val)
-  }
   get company(): Record<any, any>{
     return this.$store.getters.getCompany
   }

@@ -82,7 +82,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
     await handleProductPriceUpdate()
     this.$store.dispatch('setColorSectionVisibility')
-    this.$emit('setRosterOpen', false);
+    this.setRosterOpen(false)
     this.hideLockerProductUpdateButton()
     this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
     let design_index = 0;
@@ -106,6 +106,10 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     this.$store.commit('CHANGE_STYLE_INDEX', style_index);
     const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
     this.$store.commit('SET_SETTING', factory_setting)
+  }
+
+  private setRosterOpen(val: boolean) {
+    this.$store.commit('SET_IS_ROSTER_OPEN', val)
   }
 
   public setSliderIndex(slide_no = 0) {

@@ -11,7 +11,7 @@
            height="auto"
            :reset="true"
            :shiftY="0"
-           @opened="$emit('setRosterOpen', true), getLockerProductsRosters()"
+           @opened="setRosterOpen(true), getLockerProductsRosters()"
            name="rostermodal" class="roster-modal" size="xl"
              footer-class="hide-modal-footer d-none"
           @closed="close" @before-close="handleRosterModalBeforeClose"
@@ -211,6 +211,10 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   /*
   * methods starts
   * */
+
+  private setRosterOpen(val: boolean) {
+    this.$store.commit('SET_IS_ROSTER_OPEN', val)
+  }
 
   public shareRoster(){
     this.ref['order-details'].getLockers();

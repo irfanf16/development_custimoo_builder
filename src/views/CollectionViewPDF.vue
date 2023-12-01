@@ -120,7 +120,7 @@
                height="auto"
                :reset="true"
                :shiftY="0"
-               @opened="$emit('setRosterOpen', true)"
+               @opened="setRosterOpen(true)"
                name="rostermodal" class="roster-modal" size="xl"
                footer-class="hide-modal-footer d-none"
         >
@@ -282,6 +282,10 @@
 
     get customerPermissions(){
       return this.$store.getters.getCustomerPermissions
+    }
+
+    private setRosterOpen(val: boolean) {
+      this.$store.commit('SET_IS_ROSTER_OPEN', val)
     }
 
     public gotoLogin(){

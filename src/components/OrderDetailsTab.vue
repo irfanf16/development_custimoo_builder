@@ -59,38 +59,7 @@
       </div>
       <div class="pricing-are">
         <div class="order-details">
-
-          <template v-if="isCustomerAuthenticated">
-            <template v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product'">
-              <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-                <button v-if="!isLoading" :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')"  class="btn btn-secondary fw-bold w-100" @click="addToCartMixin(products_fonts)">
-
-                  <template v-if="getProductEditInfoObject.editing">
-                    <template v-if="getProductEditInfoObject.type == 'cart_product'">
-                      Update Cart
-                    </template>
-                    <template v-else>
-                      Update Item
-                    </template>
-                  </template>
-                  <template v-else>
-                    Add to Cart
-                  </template>
-                </button>
-                <button v-else  class="btn btn-secondary fw-bold w-100" :disabled="true" >
-                  <img width="20" height="20" src="@assets/images/loading.gif" />
-                </button>
-
-              </template>
-
-
-            </template>
-          </template>
-          <template v-else>
-            <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-              <button  @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" :disabled="is_admin_token && company.platform == 'wordpress'"   class="btn btn-secondary fw-bold w-100">Add to Cart</button>
-            </template>
-          </template>
+          <AddToCartButton :products_fonts="products_fonts"></AddToCartButton>
         </div>
       </div>
     </div>
@@ -121,11 +90,13 @@ import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMo
 
 import {compact} from 'lodash';
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
+import AddToCartButton from "@/components/AddToCartButton.vue";
 
 type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<OrderDetailsTab>({
   components: {
+    AddToCartButton,
     ProductionScene,
     AddLockerRoomModal, ConfirmOrderTab,
     LoginForm
@@ -141,7 +112,7 @@ type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "ima
 })
 
 export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData, FetchCategories) {
-  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public base64Logos: any[] = []
   public ref = this.$refs as Record<any, any>

@@ -25,6 +25,7 @@ import {eventBus} from "@/event/eventBus";
 const MAX_UNDO_REDO_ITEMS = 3;
 const ProductAttributes:Module<any, any> = {
   state: {
+    isRosterOpened: false,
     stock_count:0,
     personalized_count: 0 ,
     customized_count:0,
@@ -145,6 +146,9 @@ const ProductAttributes:Module<any, any> = {
     updating_logo: false,
   },
   mutations: {
+    SET_IS_ROSTER_OPEN(state:Record<any,any>, payload: boolean){
+      state.isRosterOpened = payload;
+    },
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
      const index =  state.notifications.findIndex((item:Record<any, any>)=>{
         return item.id == payload.id
@@ -1215,9 +1219,9 @@ const ProductAttributes:Module<any, any> = {
     getEditLockerProduct: state => {
       return state.editLockerProduct
     },
-    // getEditCart: state => {
-    //   return state.editCart
-    // },
+    getIsRosterOpened: state => {
+      return state.isRosterOpened
+    },
     getNotifications: state => {
       return state.notifications
     },
