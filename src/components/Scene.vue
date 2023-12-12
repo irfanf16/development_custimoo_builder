@@ -5,7 +5,28 @@
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" class="scene-container" :class="{ 'show-small': showSmall.front }">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
-        <div class="d-flex gap-2 align-items-center justify-content-center">
+        <div class="d-flex gap-2 align-items-center justify-content-center position-relative">
+          <a v-if="sku_information.image_url && mainPreview" class="btn btn-secondary fs-2 btn-sm main_size_guide_btn"
+             title="Size Guide"
+             :href="`${storage_url}${sku_information.image_url}`"
+             target="_blank"
+          >
+            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet">
+              <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+                 fill="currentColor" stroke="none">
+                <path d="M3855 5101 c-26 -16 -1647 -1637 -3328 -3326 -459 -462 -527 -534 -527 -560 0 -26 75 -105 593 -622 519 -519 596 -593 622 -593 26 0 255 225
+              1967 1938 1713 1712 1938 1941 1938 1967 0 26 -74 103 -593 622 -466 467 -597 593 -617 593 -14 0 -38 -9 -55 -19z m565 -686 l515 -515 -327 -327 -328 -328
+              -368 368 c-326 325 -371 367 -399 367 -40 0 -71 -27 -79 -68 -7 -33 -1 -39 365 -405 l371 -372 -230 -230 -230 -230 -223 223 c-209 208 -225 222 -259 222
+              -28 0 -42 -7 -57 -26 -43 -54 -38 -61 204 -304 l225 -225 -232 -232 -233 -233 -365 365 c-337 336 -369 365 -400 365 -44 0 -80 -33 -80 -74 0 -27 44 -75 367
+              -398 l368 -368 -227 -227 -228 -228 -223 223 c-199 198 -227 222 -255 222 -41 0 -82 -38 -82 -77 0 -22 40 -68 220 -248 121 -121 220 -225 220 -230 0 -6
+              -101 -111 -225 -235 l-225 -225 -362 362 c-200 198 -373 364 -386 368 -47 14 -102 -30 -102 -83 0 -9 164 -181 365 -382 201 -201 365 -370 365 -375 0 -6
+              -149 -159 -330 -340 l-330 -330 -518 518 -517 517 1855 1855 c1020 1020 1857 1855 1860 1855 3 0 237 -232 520 -515z"/>
+              </g>
+            </svg>
+
+            <span class="ml-1" style="font-size: smaller"><temlpate v-if="!manageComponents.mobileScreen">Size </temlpate>Guide</span>
+          </a>
+
           <h2>Front</h2>
           <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': manageComponents.mobileScreen}">
             <a class="zoom_in_out" @click="zoomInOut('front', 'in')">
@@ -21,7 +42,27 @@
       <a @click="setShowSmall('front')" class="scene-container" :class="{ 'show-small': showSmall.back }" v-if="back">
         <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth"
           :height="canvasHeight"></canvas>
-        <div class="d-flex gap-2 align-items-center justify-content-center">
+        <div class="d-flex gap-2 align-items-center justify-content-center position-relative">
+          <a v-if="sku_information.image_url && mainPreview && manageComponents.mobileScreen" class="btn btn-secondary fs-2 btn-sm main_size_guide_btn"
+             title="Size Guide"
+             :href="`${storage_url}${sku_information.image_url}`"
+             target="_blank"
+          >
+            <svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet">
+              <g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)"
+                 fill="currentColor" stroke="none">
+                <path d="M3855 5101 c-26 -16 -1647 -1637 -3328 -3326 -459 -462 -527 -534 -527 -560 0 -26 75 -105 593 -622 519 -519 596 -593 622 -593 26 0 255 225
+              1967 1938 1713 1712 1938 1941 1938 1967 0 26 -74 103 -593 622 -466 467 -597 593 -617 593 -14 0 -38 -9 -55 -19z m565 -686 l515 -515 -327 -327 -328 -328
+              -368 368 c-326 325 -371 367 -399 367 -40 0 -71 -27 -79 -68 -7 -33 -1 -39 365 -405 l371 -372 -230 -230 -230 -230 -223 223 c-209 208 -225 222 -259 222
+              -28 0 -42 -7 -57 -26 -43 -54 -38 -61 204 -304 l225 -225 -232 -232 -233 -233 -365 365 c-337 336 -369 365 -400 365 -44 0 -80 -33 -80 -74 0 -27 44 -75 367
+              -398 l368 -368 -227 -227 -228 -228 -223 223 c-199 198 -227 222 -255 222 -41 0 -82 -38 -82 -77 0 -22 40 -68 220 -248 121 -121 220 -225 220 -230 0 -6
+              -101 -111 -225 -235 l-225 -225 -362 362 c-200 198 -373 364 -386 368 -47 14 -102 -30 -102 -83 0 -9 164 -181 365 -382 201 -201 365 -370 365 -375 0 -6
+              -149 -159 -330 -340 l-330 -330 -518 518 -517 517 1855 1855 c1020 1020 1857 1855 1860 1855 3 0 237 -232 520 -515z"/>
+              </g>
+            </svg>
+
+            <span class="ml-1" style="font-size: smaller"><temlpate v-if="!manageComponents.mobileScreen">Size </temlpate>Guide</span>
+          </a>
           <h2>Back</h2>
           <div style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': manageComponents.mobileScreen}" v-if="mainPreview">
             <a class="zoom_in_out" @click="zoomInOut('back', 'in')">
@@ -303,6 +344,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public is_back_dragging = false
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] | null[] = []
+  private storage_url = process.env.VUE_APP_STORAGE_URL
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -351,6 +393,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   get is_safari(): boolean {
     return this.$store.getters.getIsSafari
+  }
+
+  get sku_information(){
+    return this.$store.getters.getSkuInformation
   }
 
   public storeCanvasImage() {
@@ -2742,5 +2788,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     color: var(--theme-color) !important;
     background: var(--theme-color-light);
   }
+}
+
+.main_size_guide_btn{
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translateY(50%);
+  color: #fff !important;
 }
 </style>
