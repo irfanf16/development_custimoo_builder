@@ -32,7 +32,7 @@
                 {{ productPriceObject.product_price_with_quantity }}{{ productPriceObject.active_currency.symbol }}
               </div>
             </div>
-            <template>
+            <template v-if="productPriceObject.addons_price">
               <div class="order-row total">
               <div class="total">Addons Price</div>
               <div class="total-qty">
