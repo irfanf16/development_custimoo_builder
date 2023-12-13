@@ -78,24 +78,39 @@
                     <template v-if="isAuthenticated">
                       <template v-if="company.platform !== 'self'  || (company.platform == 'self' && company.id !== 1)
                                 || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-                        <button  class="btn btn-secondary" style="width:30%" v-if="active_product_index !== idxs" @click="addToCart(collection_product,idxs)">
+                        <button  class="btn btn-secondary mx-2" style="width:30%" v-if="active_product_index !== idxs" @click="addToCart(collection_product,idxs)">
                         Purchase
                       </button>
-                        <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
+                        <button v-else class="btn btn-secondary mx-2" style="width:30%" :disabled="true" >
+                          <img width="20" height="20" src="@assets/images/loading.gif" />
+                        </button>
+                      </template>
+                      <template>
+                        <button  class="btn btn-secondary mx-2" style="width:30%" v-if="active_product_index !== idxs" @click="saveToLockerRoom(collection,collection_product)">
+                          Save To Locker
+                        </button>
+                        <button v-else class="btn btn-secondary mx-2" style="width:30%" :disabled="true" >
                           <img width="20" height="20" src="@assets/images/loading.gif" />
                         </button>
                       </template>
                     </template>
                     <template v-else>
                       <template v-if="company.platform !== 'self'">
-                        <button  class="btn btn-secondary" style="width:30%" v-if="active_product_index !== idxs"  @click="setActionBeforeLogin('addToCart',collection_product,idxs)">
+                        <button  class="btn btn-secondary" style="width:30%" v-if="active_product_index !== idxs"  @click="setActionBeforeLogin('addToCart', collection, collection_product, idxs)">
                           Purchase
                         </button>
                         <button v-else class="btn btn-secondary" style="width:30%" :disabled="true" >
                           <img width="20" height="20" src="@assets/images/loading.gif" />
                         </button>
                       </template>
-
+                      <template>
+                        <button  class="btn btn-secondary mx-2" style="width:30%" v-if="active_product_index !== idxs"  @click="setActionBeforeLogin('saveToLockerRoom', collection, collection_product, idxs)">
+                          Save To Locker
+                        </button>
+                        <button v-else class="btn btn-secondary mx-2" style="width:30%" :disabled="true" >
+                          <img width="20" height="20" src="@assets/images/loading.gif" />
+                        </button>
+                      </template>
                     </template>
                   </div>
                 </td>
@@ -138,6 +153,12 @@
           </div>
         </modal>
       </template>
+      <template v-if="locker_room_product">
+        <AddLockerRoomModal :locker_room_product="locker_room_product"
+                            :locker_room_product_type="'collection_product'"
+                            :frontPreview="`${storageUrl}${locker_room_product.front_image}`"
+                            :backPreview="`${storageUrl}${locker_room_product.back_image}`" ref="saveToLockerModal"/>
+      </template>
       <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
       <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-cart-item" ref="delete-cart-item"></confirm-modal>
     </div>
@@ -154,15 +175,16 @@
   import ModalAction from "@/mixins/ModalAction";
   import CustomizationPreview from '@/components/CustomizationPreview.vue'
   import RosterDetails from '@/components/RosterDetails.vue'
-  import {findIndex} from "lodash";
   import CartModal from "@/components/CartModal.vue";
   import ConfirmModal from "@/components/ConfirmModal.vue";
   import opentype from 'opentype.js'
+  import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
+  import {findIndex,lowerCase} from 'lodash';
 
 
 
   @Component<CollectionViewPDF>({
-    components: {LoginForm,CustomizationPreview,RosterDetails,CartModal,ConfirmModal},
+    components: {AddLockerRoomModal, LoginForm,CustomizationPreview,RosterDetails,CartModal,ConfirmModal},
     async mounted() {
       if(this.isAuthenticated){
         await  getPermissions()
@@ -261,6 +283,9 @@
     public room_product_index = 0;
     public current_product = {};
     public current_index = 0;
+    public current_collection = {};
+    public locker_room_product: Record<any, any>|null = null;
+    public button_type = '';
 
     public show_roster = false;
 
@@ -300,10 +325,17 @@
         }
       }
     }
-    public async setActionBeforeLogin(type: string , product:Record<any,any>,idxs) {
+    public async setActionBeforeLogin(type: string ,collection: Record<any, any>, product:Record<any,any>,idxs) {
       this.$store.commit("ACTION_BEFORE_LOGIN", type);
-      this.current_product = product;
-      this.current_index = idxs
+      if(type === 'addToCart'){
+        this.button_type = 'cart';
+      }
+      else if(this.actionBeforeLogin == 'saveToLockerRoom'){
+        this.button_type = 'locker';
+      }
+        this.current_product = product;
+        this.current_index = idxs;
+        this.current_collection = collection;
       this.$store.commit('SET_SELECTION_MODE',{
         readonly:false,
         collectionAddmoreMode:false,
@@ -316,7 +348,12 @@
 
     public actionAfterLogin() {
       if(this.actionBeforeLogin == 'addToCart') {
+        this.button_type = 'cart';
         this.addToCart(this.current_product, this.current_index);
+      }
+      else if(this.actionBeforeLogin == 'saveToLockerRoom'){
+        this.button_type = 'locker';
+        this.saveToLockerRoom(this.current_collection, this.current_product);
       }
       this.$store.commit("ACTION_BEFORE_LOGIN", '');
     }
@@ -371,6 +408,10 @@
     }
     get getCartLoading(): boolean {
       return this.$store.getters.getCartLoading;
+    }
+
+    get locker_products(){
+      return this.$store.getters.getLockerProducts;
     }
 
     get isAuthenticated(){
@@ -516,6 +557,45 @@
         resolve(room_products);
       });
     }
+    async saveToLockerRoom(collection,product) {
+      const {
+          product_locker_room
+      } = product;
+
+
+      const{ id, room_id, product_name, design_id, style_id, product_id , custom_logos, text, colors, defaultcolors, groupcolors, locker_product_images_folder, product_attribute, room, product_roster_detail } = product_locker_room;
+      const attribute = JSON.parse(product_attribute);
+
+      let modified_product:Record<any, any> = {
+          room_id: room_id,
+          locker_id:id,
+          // old_room_id: room_id,
+          product_name: product_name,
+          product_id: product_id,
+          design_id: design_id,
+          style_id: style_id,
+          custom_logos: JSON.parse(custom_logos),
+          product_custom_texts: text,
+          colors: JSON.parse(colors),
+          defaultcolors: JSON.parse(defaultcolors),
+          groupcolors: JSON.parse(groupcolors),
+          front_image: `${locker_product_images_folder}/front.png`,
+          back_image: `${locker_product_images_folder}/back.png`,
+          product_roster_detail: product_roster_detail,
+          svg_groups: room.folders
+      }
+      if(attribute && Object.prototype.hasOwnProperty.call(attribute, "fixed_logo_index")) {
+        modified_product.fixed_logo_index = attribute.fixed_logo_index
+      }
+
+      this.locker_room_product = {...modified_product, collection:collection}
+      this.button_type = 'locker';
+      setTimeout(() => {
+        //@ts-ignore
+        this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+      })
+    }
+
   }
   </script>
 

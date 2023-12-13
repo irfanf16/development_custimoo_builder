@@ -974,7 +974,7 @@ const getEditModeDefaultObj = (prop='') => {
     order_id: null, order_number: null, order_item_id: null, factory_product_id: null, active_product_id: null, style_id: null,
     design_id: null, factory_id: null,  factory_name: null
   }
-  const locker_product_info = { product_id: null, locker_product_id: null, style_id: null, design_id: null }
+  const locker_product_info = { product_id: null, locker_product_id: null, style_id: null, design_id: null, meta_info: null}
   const filters =  { customized: true, personalized: false, search_products: '' }
   const default_obj = {
     editing: false, type: '', filters: filters, locker_product_info: locker_product_info, cart_product_info: cart_product_info,

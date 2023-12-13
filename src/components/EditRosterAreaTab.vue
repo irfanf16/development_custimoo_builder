@@ -13,12 +13,12 @@
            :shiftY="0"
            @opened="setRosterOpen(true), getLockerProductsRosters()"
            name="rostermodal" class="roster-modal" size="xl"
-             footer-class="hide-modal-footer d-none"
-          @closed="close" @before-close="handleRosterModalBeforeClose"
+           footer-class="hide-modal-footer d-none"
+           @before-close="handleRosterModalBeforeClose"
         >
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bolder">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span>
-        <span class="fs-5 font-weight-bold cursor-pointer modal-close" v-if="getProductEditInfoObject.type == 'cart_product'" @click="cancelCart"><BIconX /></span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" v-if="getProductEditInfoObject.type == 'cart_product' && goBackToCart" @click="cancelCart"><BIconX /></span>
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" v-else-if="getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" @click="cancelLocker"><BIconX /></span>
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" v-else @click="close"><BIconX /></span>
       </div>
@@ -59,7 +59,10 @@
     </modal>
 
     <div class="d-lg-none">
-      <RosterDetails @addToCartAnimation="()=>this.$emit('addToCartAnimation')" :products_fonts="products_fonts" :lockers="lockers" @addPlayer="rosterDetailsInit" :productSizes="productSizes" ref="roster-detail"/>
+      <RosterDetails @addToCartAnimation="()=>this.$emit('addToCartAnimation')"
+                     :products_fonts="products_fonts" :lockers="lockers"
+                     @addPlayer="rosterDetailsInit" :productSizes="productSizes"
+                     ref="roster-detail"/>
     </div>
     <div class="team-order-details">
       <OrderDetailsTab :products_fonts="products_fonts" @open-add-to-locker="openAddToLocker" ref="order-details" />
@@ -187,6 +190,9 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     return this.$store.getters.getProductPriceObject
   }
 
+  get goBackToCart():boolean{
+    return this.getProductEditInfoObject.cart_product_info!.back_to_cart
+  }
   /* getters/computed props ends */
 
   /*
@@ -236,12 +242,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     const self = this as Record<any, any>;
     this.$store.commit('SET_REVERT_ROSTER_BOOL',true);
 
-    self.$modal.hide('rostermodal');
-
-    if(self.isEditingFromRoster){
-      self.$eventBus.$emit('cancelLocker');
-      self.$modal.show('locker-modal')
-    }
+    self.ref['roster-detail'].handleRosterClose()
   }
 
   public cancelLocker(){

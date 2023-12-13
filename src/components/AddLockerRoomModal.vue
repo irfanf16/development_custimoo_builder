@@ -5,13 +5,13 @@
          :scrollable="true"
          height="auto"
          :reset="true"
-         @opened="$emit('genImages')"
-         @closed="$emit('genImages', true)"
+         @opened="handleModalOpenEvent"
          :shiftY="0"
+         :clickToClose="false"
          id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal">
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Save your design <span v-if="$store.getters.getIsShareDesign">before sharing</span></span>
-      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('add-to-lockerroom')"><BIconX /></span>
+      <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="handleModalCloseEvent"><BIconX /></span>
     </div>
     <div class="p-4">
       <div class="lockerroom-header">
@@ -73,46 +73,51 @@
           </div>
         </div>
       </div>
-
+        <confirm-modal name="confirm-locker-modal" message="Do you really want to exit without saving the changes" cancel_text="No" confirm_text="Yes" ref="confirm-locker-modal"></confirm-modal>
         <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
       <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     </div>
     </modal>
 </template>
-
-<script lang="ts">
-import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
-import ErrorMessages from "@/mixins/ErrorMessages";
-import ConfirmModal from "@/components/ConfirmModal.vue";
-import LockerRoom from "@/components/LockerRoom.vue";
-import ModalAction from "@/mixins/ModalAction";
-import {
-  getEditModeDefaultObj,
-  getImageFromCanvas,
-  getLockerColors,
-  syncGroupColorsWithSvgGroups
-} from '@/helpers/Helpers'
-import { Canvas } from 'fabric/fabric-impl'
+  <script lang="ts">
+    import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
+    import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+    import ErrorMessages from "@/mixins/ErrorMessages";
+    import ConfirmModal from "@/components/ConfirmModal.vue";
+    import LockerRoom from "@/components/LockerRoom.vue";
+    import ModalAction from "@/mixins/ModalAction";
+    import {
+      checkIsEmpty,
+      getEditModeDefaultObj,
+      getImageFromCanvas,
+      getLockerColors,
+      syncGroupColorsWithSvgGroups
+    } from '@/helpers/Helpers'
+    import { Canvas } from 'fabric/fabric-impl'
+    import {lowerCase} from "lodash";
     @Component<AddLockerRoomModal>({
-        components: {
-          ConfirmModal,
-          LockerRoom,
-          CreateLockerRoomModal
-        },
+      components: {
+        ConfirmModal,
+        LockerRoom,
+        CreateLockerRoomModal
+      },
     })
     export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
       @Prop({required: false, default: true}) readonly close_on_add !: boolean
       @Prop({required: false, default: false})  rosterUrl !: boolean
       @Prop({required: true})  frontPreview !: string
       @Prop({required: true})  backPreview !: string
+      @Prop({required: false, default: () => {} })  locker_room_product:Record<any, any>
+      @Prop({required: false, default: ''})  locker_room_product_type:string  //possible values are order_product, collection_product
       async recallProducts(){
-        this.showLoader = true;
-        await this.$store.dispatch('GET_LOCKER_PRODUCTS')
-        this.showLoader = false;
-        if (this.roomWithProducts.length){
-          this.productData = this.roomWithProducts[0].product
-          this.tabIndex = 0
+        if(!(this.locker_room_product_type === 'collection_product')){
+          this.showLoader = true;
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+          this.showLoader = false;
+          if (this.roomWithProducts.length){
+            this.productData = this.roomWithProducts[0].product
+            this.tabIndex = 0
+          }
         }
       }
       private storageUrl = process.env.VUE_APP_STORAGE_URL
@@ -124,6 +129,10 @@ import { Canvas } from 'fabric/fabric-impl'
       public tabIndex = this.$store.getters.getLockerActiveTabIndex
       public productData: any[] = []
       private screenWidth = (window.screen.availWidth - 100)
+      public locker_room_action = {
+        created: true,
+        saved:false,
+      };
 
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts()
@@ -168,17 +177,38 @@ import { Canvas } from 'fabric/fabric-impl'
         return this.$store.getters.getProductRosters()
       }
       get mainProductType():string{
-        let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
-        return selected_product.back_design ?  "front_back" : "front";
+        if(this.selectedProduct) {
+          let selected_product = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design:Record<any, any>) => design.design_show == 1)[0];
+          return selected_product.back_design ?  "front_back" : "front";
+        } else {
+          return '';
+        }
       }
       get canvasImage() {
         return this.$store.getters.getCanvasImage
       }
-      public showButton(id:number, index:number){
-        this.room_id = id;
-        this.tabIndex = index
-        this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
-        this.productData = this.roomWithProducts[index].product
+      public async showButton(id:number, index:number){
+          if(this.locker_room_product_type === 'collection_product' && this.locker_room_action.created){
+            const ok = await this.ref['confirm-locker-modal'].showConfirm()
+            if(ok){
+                await this.$store.dispatch('deleteRoom', {id: this.room_id, index: index});
+                this.locker_room_action.created = false;
+                this.locker_room_action.saved = false;
+                this.product_name = "";
+                await this.$store.dispatch('getLockers')
+                this.room_id = id;
+                this.tabIndex = index
+                this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
+                this.productData = this.roomWithProducts[index].product
+            }
+          }
+          else {
+            this.room_id = id;
+            this.tabIndex = index
+            this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
+            this.productData = this.roomWithProducts[index].product
+          }
+
       }
       public lockerAdded(){
         let index = this.lockers.length -1
@@ -189,7 +219,76 @@ import { Canvas } from 'fabric/fabric-impl'
         }
       }
 
+      public async saveExistingProductToLockerRoom() {
+        this.showLoader = true
+        let locker_data: Record<any, any> = await this.getLockerProductData()
+        if(this.locker_room_product_type == 'collection_product'){
+          locker_data.locker_id = this.locker_room_product.locker_id;
+          locker_data.fixed_logo_index = this.locker_room_product.fixed_logo_index;
+        }
+        this.$store.dispatch("SAVE_TO_LOCKER", locker_data).then((response) => {
+          this.showLoader = false
+          if(this.locker_room_product_type === 'collection_product'){
+            this.locker_room_action.saved = true;
+          }
+          this.locker_room_action.created = false;
+          this.locker_room_action.saved = false;
+          this.hideVModal('add-to-lockerroom');
+
+        }).catch(errorResponse => {
+          this.showLoader = false
+          this.showError(errorResponse);
+        });
+      }
+
+      public async getLockerProductData() {
+        const locker_room_product: Record<any, any> = this.locker_room_product
+        const {
+          product_id, style_id, design_id, custom_logos, product_custom_texts, defaultcolors, groupcolors,
+          svg_groups, front_image, back_image, product_roster_detail, fixed_logo_index
+        } = locker_room_product;
+        let logo_colors = [];
+        if(custom_logos && custom_logos.length > 0) {
+          logo_colors = custom_logos.logo_colors
+        }
+        let distinct:Record<any, any> = []
+        let unique:any = [];
+        for( let i = 0; i < svg_groups.length; i++ ) {
+          if( !unique[svg_groups[i].color]){
+            distinct.push({value: svg_groups[i].color, name: svg_groups[i].name});
+            unique[svg_groups[i].color] = 1;
+          }
+        }
+        let locker_data: Record<any, any> = {
+          roster_url: this.rosterUrl,
+          room_id: this.room_id,
+          product_id: product_id,
+          product_name: this.product_name,
+          style_id: style_id,
+          design_id: design_id,
+          custom_logos: custom_logos,
+          text: product_custom_texts,
+          colors: logo_colors,
+          defaultcolors: defaultcolors,
+          groupcolors: groupcolors,
+          locker_front_png: front_image,
+          locker_back_png: back_image,
+          product_roster_detail: product_roster_detail,
+          fixed_logo_index: 0,
+          svgcolors: distinct,
+          locker_product_type: this.locker_room_product_type
+        }
+        if(fixed_logo_index != undefined) {
+          locker_data.fixed_logo_index = fixed_logo_index
+        }
+        return locker_data;
+      }
+
       public async saveToLocker(){
+        if(!checkIsEmpty(this.locker_room_product)) {
+          await this.saveExistingProductToLockerRoom()
+          return false
+        }
         syncGroupColorsWithSvgGroups()
         this.showLoader = true
         if (this.isCustomerAuthenticated) {
@@ -233,10 +332,10 @@ import { Canvas } from 'fabric/fabric-impl'
             fixed_logo_index: fixed_logo_index,
             svgcolors: distinct
           }
-         let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker).catch(errorResponse => {
-           this.showLoader = false
-           this.showError(errorResponse);
-         });
+          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker).catch(errorResponse => {
+            this.showLoader = false
+            this.showError(errorResponse);
+          });
           if (res && res.status == 201){
             let is_customized = this.$store.getters.getCustomized
             let is_personalized = this.$store.getters.getPersonalized
@@ -251,21 +350,21 @@ import { Canvas } from 'fabric/fabric-impl'
             if (this.rosterUrl){
               this.$root.$emit('rostershared', res.data.data.roster_shared_url)
             }
-              this.showToast('Design saved successfully', 'success')
-              await getLockerColors();
-              this.product_name = ''
-              this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
-              if(this.close_on_add) {
-                this.hideVModal('add-to-lockerroom');
-                this.showLoader = false
-              } else {
-                // if(!this.$store.getters.getIsShareDesign){
-                //   this.$emit('open-locker-room', this.tabIndex);
-                // }else{
-                //   this.hideVModal('add-to-lockerroom');
-                // }
-                this.hideVModal('add-to-lockerroom');
-              }
+            this.showToast('Design saved successfully', 'success')
+            await getLockerColors();
+            this.product_name = ''
+            this.$store.commit("Change_Locker_Tabs_Index", this.tabIndex)
+            if(this.close_on_add) {
+              this.hideVModal('add-to-lockerroom');
+              this.showLoader = false
+            } else {
+              // if(!this.$store.getters.getIsShareDesign){
+              //   this.$emit('open-locker-room', this.tabIndex);
+              // }else{
+              //   this.hideVModal('add-to-lockerroom');
+              // }
+              this.hideVModal('add-to-lockerroom');
+            }
           }else{
             //as the exception has been caught above so here we just need to return if there is any error in api response
             return
@@ -274,14 +373,18 @@ import { Canvas } from 'fabric/fabric-impl'
           this.showError("please login first");
           return
         }
-          if(this.$store.getters.getIsShareDesign){
-            (this.$parent as Record<any, any>).shareDesign();
-          }
+        if(this.$store.getters.getIsShareDesign){
+          (this.$parent as Record<any, any>).shareDesign();
+        }
         this.$store.commit('setIsShareDesign', false);
       }
-      public async shareDesignUrl(product:Record<any,any>){
+      public async shareDesignUrl(product:Record<any,any>) {
+        if(!checkIsEmpty(this.locker_room_product)) {
+          await  this.shareOrderProductDesignUrl()
+          return false
+        }
         const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-            return item.design_show
+          return item.design_show
         })
         this.product_name = this.selectedProduct.product_name;
         this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
@@ -292,10 +395,10 @@ import { Canvas } from 'fabric/fabric-impl'
         let svgGroups = this.$store.getters.getSvgGroups
         let unique:any = [];
         for( let i = 0; i < svgGroups.length; i++ ){
-            if( !unique[svgGroups[i].color]){
-              distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
-              unique[svgGroups[i].color] = 1;
-            }
+          if( !unique[svgGroups[i].color]){
+            distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
+            unique[svgGroups[i].color] = 1;
+          }
         }
         const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
         let locker = {
@@ -318,13 +421,13 @@ import { Canvas } from 'fabric/fabric-impl'
         }
         let res = await this.$store.dispatch("SHARE_DESIGN_URL", locker);
 
-          if (res.status == 201){
-            Vue.set(product, 'shared_url', res.data.url);
-            this.$emit('showPopper','shareDesign');
-          }else{
-            this.showLoader = false
-            this.showError(res);
-          }
+        if (res.status == 201){
+          Vue.set(product, 'shared_url', res.data.url);
+          this.$emit('showPopper','shareDesign');
+        }else{
+          this.showLoader = false
+          this.showError(res);
+        }
       }
       public async deleteRoom(id:number, index:number){
         if (confirm('You are going to delete associated product')){
@@ -373,6 +476,108 @@ import { Canvas } from 'fabric/fabric-impl'
           product.product_url = product.product_front_url
         }
         this.productData[productIndex] = product;
+      }
+      public async createLocker(name: string) {
+        return new Promise<Record<any,any>>(async (resolve) => {
+          let res:Record<any,any> = this.$store.dispatch('createLocker', name);
+          if (res.status == 201) {
+            this.$store.dispatch('GET_LOCKER_PRODUCTS');
+            this.lockerAdded()
+          } else if (res.status == 422) {
+            this.showError(res.message)
+          }
+          resolve(res);
+        });
+      }
+      public async handleModalOpenEvent() {
+        this.$emit('genImages')
+        if(!checkIsEmpty(this.locker_room_product)) {
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+          this.product_name = this.locker_room_product.product_name
+          if(this.locker_room_product_type === "order_product"){
+              this.tabIndex = 0;
+              this.room_id = this.roomWithProducts[0].id;
+          }
+          //create locker room with collection name if not exists
+          if(this.locker_room_product_type === "collection_product") {
+            if (this.roomWithProducts.length){
+              let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
+                return lowerCase(locker_product.room_name) === lowerCase(this.locker_room_product.collection.name)
+              });
+              if(lockerRoomIndex > -1 ){
+                this.tabIndex = lockerRoomIndex;
+                this.locker_room_action.created = false;
+                this.productData = this.roomWithProducts[lockerRoomIndex].product
+                this.locker_room_product.room_id = this.roomWithProducts[lockerRoomIndex].id;
+                this.room_id = this.roomWithProducts[lockerRoomIndex].id
+              }
+              else{
+                this.createLocker(this.locker_room_product.collection.name).then(async (room) => {
+                  this.locker_room_action.created = true;
+                  this.locker_room_product.room_id = room.data.data.id;
+                  await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+                  this.tabIndex = this.roomWithProducts.length - 1;
+                  this.productData = this.roomWithProducts[this.tabIndex].product
+                  this.room_id = room.data.data.id
+                })
+              }
+            }
+          }
+        }
+      }
+      public async handleModalCloseEvent(){
+        if(this.locker_room_product_type === 'collection_product' && this.locker_room_action.created){
+          const ok = await this.ref['confirm-locker-modal'].showConfirm()
+          if(ok){
+            let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
+              return locker_product.id === this.room_id
+            });
+            await this.$store.dispatch('deleteRoom', {id: this.room_id, index: lockerRoomIndex});
+            this.locker_room_action.created = false;
+            this.locker_room_action.saved = false;
+            this.product_name = "";
+            await this.$store.dispatch('getLockers');
+            this.hideVModal('add-to-lockerroom');
+            this.$emit('genImages', true)
+          }
+
+        }
+        else{
+          this.hideVModal('add-to-lockerroom');
+          this.$emit('genImages', true)
+        }
+
+      }
+
+     public async handleBeforeClose(event) {
+        event.cancel()
+        if(this.locker_room_product_type === 'collection_product' && this.locker_room_action.created){
+          const ok = await this.ref['confirm-locker-modal'].showConfirm()
+          if(ok){
+            let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
+              return locker_product.id === this.room_id
+            });
+            await this.$store.dispatch('deleteRoom', {id: this.room_id, index: lockerRoomIndex});
+            this.locker_room_action.created = false;
+            this.locker_room_action.saved = false;
+            this.product_name = "";
+            await this.$store.dispatch('getLockers');
+            this.hideVModal('add-to-lockerroom');
+            this.$emit('genImages', true)
+          }
+
+        }
+        else{
+          this.hideVModal('add-to-lockerroom');
+          this.$emit('genImages', true)
+        }
+      }
+      async shareOrderProductDesignUrl() {
+        let locker_data = await this.getLockerProductData()
+        this.showLoader = true
+        console.log("before")
+        return await this.$store.dispatch("SHARE_DESIGN_URL", locker_data);
+
       }
     }
 

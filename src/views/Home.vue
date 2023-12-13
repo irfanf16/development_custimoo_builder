@@ -454,6 +454,7 @@ import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import ClickOutside from 'vue-click-outside';
+import {isEqual} from 'lodash'
 
 import {
   logData,
@@ -578,23 +579,22 @@ Vue.filter('formatDate', function(value:string) {
       await this.afterCategoriesCallOnMounted();
     }
 
-
-      await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
-        await this.getLockers(false,false,resolve);
-      })
-      await this.$eventBus.$on('saveRosterToLocker', ()=>{
-        this.getLockers(false,false,null,true)
-      })
-      this.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
-      await this.$eventBus.$on('cancelLocker', ()=>{
-        this.cancelLocker()
-      })
-      await this.$eventBus.$on('cancelCart', ()=>{
-        this.cancelCart()
-      })
-      await this.$eventBus.$on('updateCart', async (resolve: any) => {
-        await this.addToCart(resolve);
-      })
+    await this.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
+      await this.getLockers(false,false,resolve);
+    })
+    await this.$eventBus.$on('saveRosterToLocker', (backToLocker=true)=>{
+      this.getLockers(false,false,null,backToLocker)
+    })
+    this.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
+    await this.$eventBus.$on('cancelLocker', ()=>{
+      this.cancelLocker()
+    })
+    await this.$eventBus.$on('cancelCart', ()=>{
+      this.cancelCart()
+    })
+    await this.$eventBus.$on('updateCart', async (resolve: any) => {
+      await this.addToCart(resolve);
+    })
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {

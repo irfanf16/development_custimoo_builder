@@ -41,7 +41,7 @@
                   </template>
                   <template v-else="">
                     <a style="cursor:pointer;color:blue;text-decoration: underline"
-                       @click="editCartItem(cart_item_index, factory_product_index)">{{ factory_product.product_name }}</a>
+                       @click="editCartItem(cart_item_index, factory_product_index, true, false)">{{ factory_product.product_name }}</a>
                   </template>
                 </td>
                 <td>
@@ -59,7 +59,7 @@
                   </span>
                   </template>
                   <template v-else="">
-                    <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, false)">
+                    <a style="font-weight: bold; cursor:pointer; color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, false, true)">
                       {{ factory_product.product_roster_detail | itemQtyCount(factory_product.product_roster_detail) }}
                     </a>
                   </template>
@@ -442,7 +442,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     this.hideVModal('cart-modal');
   }
 
-  public async editCartItem(cart_item_index: number, factory_product_index: number, edit=true) {
+  public async editCartItem(cart_item_index: number, factory_product_index: number, edit=true, backToCart=false) {
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index];
@@ -459,7 +459,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         editing: true,  type: "cart_product", filters: {search_products: "", private_product: is_private},
         locker_product_info: getEditModeDefaultObj('locker_product_info'), cart_product_info: {
           cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index,
-          cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item
+          cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item, back_to_cart: backToCart
         },
         order_product_info: getEditModeDefaultObj('order_product_info')
       })

@@ -101,12 +101,28 @@
                             <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                             <td>{{ product.roster_quantity }}</td>
                             <td style="text-align: center">
-                             <template v-if="product.can_reorder">
-                               <span class="btn btn-dark mx-xxl-2" @click="reorderItem(order, item, product)">Reorder</span>
-                             </template>
-                              <template v-else>
-                                <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
-                              </template>
+                              <div class="d-flex w-100 gap-1">
+                                <span class="btn btn-dark btn-sm mx-xxl-2" @click="saveToLockerRoom(product)">Save As</span>
+                                <template>
+                                  <span  v-if="product.share_design_info.show_loader" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
+                                    <img width="20" height="20" src="@assets/images/loading.gif" />
+                                  </span>
+                                  <span v-else-if="product.share_design_info.share_url" class="btn btn-dark btn-sm mx-xxl-2" @click="copyShareUrl(product.share_design_info.share_url)">Copy Share Url</span>
+                                  <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="shareDesign(item.id, product)">Share</span>
+                                </template>
+                                <template>
+                                  <span  v-if="product.adding_to_cart" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
+                                    <img width="20" height="20" src="@assets/images/loading.gif" />
+                                  </span>
+                                  <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="addToCart(item.id, product)">Add To Cart</span>
+                                </template>
+                                <template v-if="product.can_reorder">
+                                  <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product)">Reorder</span>
+                                </template>
+                                <template v-else>
+                                  <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
+                                </template>
+                              </div>
                             </td>
                           </tr>
                         </template>
@@ -115,6 +131,11 @@
                   </template>
                 </td>
               </tr>
+            </template>
+            <template v-if="locker_room_product">
+              <AddLockerRoomModal :locker_room_product="locker_room_product" locker_room_product_type="order_product"
+                                  :frontPreview="`${storage_url}${locker_room_product.front_image}`"
+                                  :backPreview="`${storage_url}${locker_room_product.back_image}`" ref="saveToLockerModal"/>
             </template>
           </template>
           <template v-else>
@@ -143,9 +164,16 @@ import {Component, Mixins, Vue} from "vue-property-decorator";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {http} from "@/httpCommon";
 import moment from "moment";
-import {CustimooOrderFlowStatuses, exitFromEditMode, resetLastActiveProductData} from '@/helpers/Helpers';
+import {
+  CustimooOrderFlowStatuses,
+  exitFromEditMode,
+  handleResponseException,
+  resetLastActiveProductData
+} from '@/helpers/Helpers';
 import Search from '@/components/Search.vue';
 import {query} from "vue-gtag";
+import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
+import ModalAction from "@/mixins/ModalAction";
 
 Vue.filter('orderDate', function(value:string) {
   if (value) {
@@ -161,6 +189,7 @@ Vue.filter('Status', function(value:string) {
 
 @Component<OrderListing>({
   components:{
+    AddLockerRoomModal,
     Search
   },
   created(){
@@ -179,7 +208,7 @@ Vue.filter('Status', function(value:string) {
     }
   }
 })
-export default class OrderListing  extends Mixins(ErrorMessages)  {
+export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
   private screenWidth = (window.screen.availWidth - 100)
   public storage_url = process.env.VUE_APP_STORAGE_URL
   public params:Record<any,any> = {
@@ -204,10 +233,12 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
     total:0
   }
   public toggletText =  ['show', 'hide']
+  public locker_room_product = null;
 
 
-
-
+get locker_products(){
+  return this.$store.getters.getLockerProducts;
+}
   public toggleHideShow(index:number,val:boolean) {
     Vue.set(this.orders[index], 'visible', val)
   }
@@ -302,6 +333,55 @@ export default class OrderListing  extends Mixins(ErrorMessages)  {
       this.showError(e.response.data.message)
     })
 
+  }
+  saveToLockerRoom(product) {
+    this.locker_room_product = product;
+   setTimeout(() => {
+     //@ts-ignore
+     this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
+   })
+  }
+  addToCart(order_item_id, product) {
+    const cart_data = { order_item_id, product_id: product.product_id, factory_product_id: product.id }
+    product.adding_to_cart = true
+    http.post(`add_product_to_cart`, cart_data).then(async (successResponse:any) => {
+      const response_data = successResponse.data;
+      if(response_data.success) {
+        this.showToast(response_data.message, "success")
+      } else {
+        this.showError(response_data.message)
+      }
+      product.adding_to_cart = false
+    }).catch((e:any) => {
+      product.adding_to_cart = false
+      this.showError(e.response.data.message)
+    })
+  }
+
+  async shareDesign(order_item_id, product) {
+  this.locker_room_product = product;
+  product.share_design_info.show_loader = true
+    setTimeout(async () => {
+      //@ts-ignore
+      await this.ref['saveToLockerModal'].shareOrderProductDesignUrl().then(successResponse => {
+        product.share_design_info.show_loader = false
+        product.share_design_info.share_url = successResponse.data.url
+        this.copyShareUrl(product.share_design_info.share_url)
+      }).catch(errorResponse => {
+        product.share_design_info.show_loader = false
+        handleResponseException(errorResponse)
+      })
+    })
+  }
+
+  copyShareUrl(clipboard_string) {
+    const clipboard_input_field = document.createElement("input");
+    clipboard_input_field.value = clipboard_string;
+    document.body.appendChild(clipboard_input_field);
+    clipboard_input_field.select();
+    document.execCommand("copy");
+    document.body.removeChild(clipboard_input_field);
+    this.showToast("Design share url copied", "success")
   }
 
 }

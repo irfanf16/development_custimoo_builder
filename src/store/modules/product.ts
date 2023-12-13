@@ -189,7 +189,7 @@ const Product:Module<any, any> = {
             err =  errors.response.data.errors.name[0];
             reject(err);
           }
-          reject(err);
+          reject(errors);
         });
       });
     },

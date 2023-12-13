@@ -14,7 +14,10 @@
                          @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
                 <span @click="changeColor" style="white-space: nowrap">{{ room.room_name }}</span>
               </draggable>
-              <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom(room.id, i)">
+              <a v-if="!getSelectionMode.readonly" style="right: 13px" title="Rename locker" @click="renameLockerModal($event, room)" class="remove-tab theme-bg-color theme-color">
+                <b-icon-pencil-fill />
+              </a>
+              <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom($event, room.id, i)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']"/>
               </a>
             </template>
@@ -75,7 +78,7 @@
                                  @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
                             </li>
                             <li v-if="!getSelectionMode.readonly" class="position-relative" style="z-index: 20;">
-                              <b-button style="font-size: 12px;" data-title="Share design" :ref="'share'+i+''+ind" :id="'share'+i+''+ind"
+                              <b-button style="font-size: 12px;"  @mouseleave="hideTooltip" @mouseenter="showTooltip" data-title="Share design" :ref="'share'+i+''+ind" :id="'share'+i+''+ind"
                                         @click.stop="shareProduct(product, ind, i)"><font-awesome-icon
                                 :icon="['fas', 'share-alt']"/>
                               </b-button>
@@ -98,12 +101,12 @@
                               </aside>
                             </li>
                             <li v-if="!getSelectionMode.readonly">
-                              <a style="font-size: 12px;"  @click="showDesignModal(product)">
+                              <a style="font-size: 12px;"  @click="showDesignModal(product)" @mouseleave="hideTooltip" @mouseenter="showTooltip" data-title="Copy design">
                                 <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy" class="svg-inline--fa fa-copy" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path></svg>
                               </a>
                             </li>
                             <li>
-                              <a style="font-size: 12px;" data-title="Edit Roster" @click="editProduct(room.id, product, ind, '', true)"
+                              <a style="font-size: 12px;" data-title="Edit roster" @click="editProduct(room.id, product, ind, '', true,{target: 'locker-room', activeLocker: tabIndex, lockerActiveTabIndex: lockerActiveTabIndex})"
                                  @mouseleave="hideTooltip" @mouseenter="showTooltip">
                                 <b-icon-list class="fs-3" />
                               </a>
@@ -318,10 +321,10 @@
                   ref="reset-confirm-modal" name=""></confirm-modal>
 
     <span class="hover_tooltip" ref="hoover_tooltip"></span>
-    <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" class="lockerroom-modal create-lockerroom-modal" id="modal-center-copydesign" :scrollable="true" size="xl">
+    <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" class="lockerroom-modal " id="modal-center-copydesign" :scrollable="true" size="xl">
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-3 font-weight-bold">Copy Design</span>
-        <span class="fs-4 font-weight-bold cursor-pointer modal-close" @click="$modal.hide('copy-product-modal')"><BIconX /></span>
+        <span class="fs-4 font-weight-bold cursor-pointer modal-close" @click="hideVModal('copy-product-modal')"><BIconX /></span>
       </div>
       <div class="modal-body">
         <div class="pt-4 design-name-form">
@@ -350,6 +353,34 @@
         </div>
       </div>
     </modal>
+
+    <modal ref="rename-locker-modal" name="rename-locker-modal" hide-footer class="lockerroom-modal " :scrollable="true" size="xl">
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-3 font-weight-bold">Rename locker</span>
+        <span class="fs-4 font-weight-bold cursor-pointer modal-close" @click="hideVModal('rename-locker-modal')"><BIconX /></span>
+      </div>
+      <div class="modal-body">
+        <div class="pt-4 design-name-form">
+            <div>
+              <div class="d-flex align-items-end gap-2 justify-content-between">
+                <div class="w-100 d-block text-left">
+                  <label class="w-100 d-block">Locker name</label>
+                  <b-input-group>
+                        <b-form-input v-model="newLockerName" class="mt-1 w-100" placeholder="Enter new name"></b-form-input>
+                    </b-input-group>
+                </div>
+
+                <div class="w-auto d-flex gap-1">
+                  <b-button variant="secondary" class="w-100" @click="renameRoomName">Rename</b-button>
+                  <b-button variant="secondary" class="w-100 light" @click="hideVModal('rename-locker-modal')">Cancel</b-button>
+                </div>
+              </div>
+            </div>
+
+          <div class="loader relative" v-if="renameLoader"><img src="@assets/images/loading.gif" /></div>
+        </div>
+      </div>
+    </modal>
   </span>
 </template>
 
@@ -365,7 +396,13 @@ import draggable from "vuedraggable";
 import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
-import {getRandom, classObserver, handleResponseException, getDomDocument} from "@/helpers/Helpers";
+import {
+  getRandom,
+  classObserver,
+  handleResponseException,
+  getDomDocument,
+  getEditModeDefaultObj
+} from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
@@ -453,6 +490,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public renameLoader = false
   public copiedProductId = 0
   public copiedProductName = ''
+  public newLockerName = ''
   public copiedProductLockerId = 0
   public url = ''
   public group = ''
@@ -468,6 +506,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public yearly_planner_template_id = null;
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
   public renameRef = "";
+  public lockerToRename: Record<any, any> = {};
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
@@ -504,6 +543,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public async getLockerProductsRosters() {
+    let edit_product_info_obj = getEditModeDefaultObj()
     let response: any = await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
       handleResponseException(errorResponse)
     })
@@ -515,8 +555,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       }
 
       setTimeout(()=>{
-        if('target' in this.$store.getters.getBackFromRoster){
-          const {activeLocker, lockerActiveTabIndex, lockerActiveDesignIndex} = this.$store.getters.getBackFromRoster;
+        if('target' in edit_product_info_obj.locker_product_info!.meta_info){
+          const {activeLocker, lockerActiveTabIndex, lockerActiveDesignIndex} = edit_product_info_obj.locker_product_info!.meta_info;
           this.tabIndex = activeLocker;
           this.lockerActiveTabIndex = lockerActiveTabIndex;
           this.lockerActiveDesignIndex = lockerActiveDesignIndex;
@@ -789,7 +829,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     alert('setPopper')
   }
 
-  public async shareProduct(product: Record<any, any>, ind: number, lockerIndex: number) {
+  public async shareProduct(product: Record<any, any>, ind: number|string, lockerIndex: number|string) {
     try {
       if(product){
         let payload = {
@@ -849,7 +889,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public copyLink(room_index: number, ind: number) {
+  public copyLink(room_index: number|string, ind: number|string) {
     let toCopy = this.$refs['copylink_product_' + room_index + '' + ind] as Record<any, any>
     toCopy = toCopy[0].$el as Record<any, any>
     toCopy.select()
@@ -861,7 +901,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public async deleteProduct(i: number, ind: number, id: number) {
+  public async deleteProduct(i: number|string, ind: number|string, id: number) {
     const ok = await this.ref['reset-confirm-modal'].showConfirm()
     if (ok) {
       let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id: id});
@@ -886,7 +926,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public async deleteRoom(id: number, index: number) {
+  public async deleteRoom($event, id: number, index: number | string) {
+    $event.stopPropagation();
     if (confirm('You are going to delete associated product')) {
       let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
       if (res == true) {
@@ -902,6 +943,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         this.showError(res);
       }
     }
+  }
+
+  public async renameLockerModal($event, locker:Record<any, any>) {
+    $event.stopPropagation();
+    this.lockerToRename = locker;
+    this.newLockerName = locker?.room_name;
+    this.showVModal('rename-locker-modal');
   }
 
   public fetchColors($event: Record<any, any>, i: number, ind: number) {
@@ -1052,12 +1100,14 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit("Change_Locker_Active_Tab", 0)
   }
   public handleTabChanged(tabIndex: number){
-    const getBack = this.$store.getters.getBackFromRoster
+    let edit_product_info_obj = getEditModeDefaultObj()
+    const getBack = edit_product_info_obj.locker_product_info!.meta_info;
     if(tabIndex == 3 && getBack){
       if('target' in getBack && getBack.lockerActiveDesignIndex != 0){
         setTimeout(()=>{
           this.lockerActiveDesignIndex = getBack.lockerActiveDesignIndex;
-          this.$store.dispatch('setBackFromRoster', {})
+          const updated_product_info = {...edit_product_info_obj.locker_product_info, meta_info: null}
+          this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', {locker_product_info:updated_product_info});
         }, 550)
       }else{
         this.lockerActiveDesignIndex = 0;
@@ -1273,6 +1323,32 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     if (this.ref[this.renameRef] && !this.ref[this.renameRef][0].contains(event.target)) {
       // Clicked outside the element
       this.renameID = '';
+    }
+  }
+  public renameRoomName(){
+    const self = this as Record<any, any>
+    let data = {id: self.lockerToRename.id, room_name:  self.newLockerName}
+    self.renameLoader = true;
+    if(data.id && data.room_name && data.room_name !=''){
+      http.put(`locker/room-name/changed`, data).then((res) => {
+        self.$store.dispatch("GET_LOCKER_PRODUCTS");
+        self.lockerToRename = {};
+        self.newLockerName = "";
+        self.showToast(res.data.message, 'success')
+        self.hideVModal('rename-locker-modal');
+        self.renameLoader = false;
+      }).catch(err => {
+        if (err.response.status) {
+          self.renameLoader = false;
+          self.showToast('Locker Name is not renamed, try again', 'error')
+          self.hideVModal('rename-locker-modal');
+        }
+      })
+    }else{
+      self.showToast('Please write some name', 'error')
+      self.hideVModal('rename-locker-modal');
+      self.renameLoader = false;
+
     }
   }
 }

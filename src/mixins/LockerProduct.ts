@@ -32,7 +32,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
     return this.$store.getters.getMainTotalTabs;
   }
 
-  public async editProduct(room_id: number, locker_product: Record<any, any>, ind: number, share_url="", editRoster=false, backTo={}) {
+  public async editProduct(room_id: number, locker_product: Record<any, any>, ind: number|string, share_url="", editRoster=false, backTo={}) {
     let self: Record<any, any> = this;
     const product_id  = locker_product.product_id;
     const locker_product_id  = locker_product.id;
@@ -48,10 +48,14 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
         product_id: product_id, locker_product_id: locker_product.id, style_id: locker_product.style_id, design_id: locker_product.design_id,
         locker_product_name: locker_product.product_name
       };
+      if(editRoster){
+        edit_product_info_obj.locker_product_info!.meta_info = backTo
+      }
       this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", edit_product_info_obj)
       const query_params = await self.setQueryParams()
       await self.retrieveProductsNew(query_params)
-      this.$emit('hideLockerRoomModal')
+      this.$emit('hideLockerRoomModal');
+
     });
 
     await hideLockerProductUpdateButton(true)
@@ -276,6 +280,15 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           await this.setCustomizerData(customizer_data)
           this.$store.commit('RESET_UNDO');
           this.$store.commit('RESET_REDO');
+          if(product_edit_info_object.type == "locker_product" && product_edit_info_object.locker_product_info!.meta_info) {
+            const main_total_tabs = self.$store.getters.getMainTotalTabs
+            let total_tabs = (main_total_tabs > 0) ? main_total_tabs: 3;
+            await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
+            setTimeout(()=>{
+              self.showVModal('rostermodal');
+            },500)
+
+          }
         }
         else {
           if(last_active_prod_data.product_id) {
@@ -1017,6 +1030,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         cart_edit_mode = true;
         (post_data as Record<any,any>).factory_product.id = product_edit_info_object.cart_product_info.cart_item_product.id
         url = `carts/cart-items/${product_edit_info_object.cart_product_info.cart_item_id}/update`
+        this.showVModal('cart-modal')
       }
 
       let santacart = true;

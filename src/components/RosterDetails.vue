@@ -156,25 +156,71 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker')">
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromLocker" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker')">
         Save & close
       </button>
-      <button v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto fw-bold" @click="close">
-        Update Item
+      <button v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker', false)">
+        Save & close
       </button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="cancelCart">
-        Cancel
+      <template v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product' && goBackToCart">
+        <button class="btn btn-secondary w-auto fw-bold" @click="close">
+          Update Item
+        </button>
+        <button class="btn btn-secondary w-auto light fw-bold" @click="handleRosterClose">
+          {{ ['cart_product', 'locker_product'].includes(getProductEditInfoObject.type) ? "Cancel": "Close" }}
+        </button>
+      </template>
+      <button v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal')">
+        Save & close
       </button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromRoster" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal'), $eventBus.$emit('cancelLocker'), showVModal('locker-modal')">
-        Cancel
-      </button>
-      <button v-else-if="(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') || getProductEditInfoObject.type != 'cart_product'" class="btn btn-secondary w-auto light fw-bold" @click="hideVModal('rostermodal')">
-        Close
+      <button v-else class="btn btn-secondary w-auto light fw-bold" @click="handleRosterClose">
+        {{ ['cart_product', 'locker_product'].includes(getProductEditInfoObject.type) ? "Cancel": "Close" }}
       </button>
     </div>
 
     <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false || (getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
       <AddToCartButton :products_fonts="products_fonts"></AddToCartButton>
+      <!--      <button v-if="!$root.$refs.Order_Details.isLoading" class="btn btn-secondary w-auto fw-bold" @click="addToCart"-->
+      <template v-if="!isCustomerAuthenticated" >
+        <template v-if="company.platform !== 'self'">
+          <button class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart');"
+                  :disabled="canvasImage.scene == null  || (is_admin_token && company.platform == 'wordpress')">
+            Add to Cart
+          </button>
+        </template>
+        <span v-else-if="notVectorLogosCount > 0">
+          <b-button @click="showVModal('replace-logo')" aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">
+            Finalize Design
+          </b-button>
+        </span>
+      </template>
+      <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-else-if="canvasImage.scene == null  && (is_admin_token && company.platform == 'wordpress')">
+        <b-button @click="addToCart" disabled aria-label="Add to Cart" class="mx-2 px-5" variant="secondary">Add to Cart</b-button>
+      </span>
+
+      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+        <b-button @click="showVModal('replace-logo')" aria-label="Finalize Order" class="mx-2 px-5" variant="secondary">Finalize Design</b-button>
+      </span>
+      <template v-else-if="!getCartLoading && !(getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product') && !getCollectionView">
+        <template v-if="company.platform !== 'self'  || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform === 'self' && company.id !== 1)">
+          <button class="btn btn-secondary w-auto fw-bold" @click="addToCart"
+                  :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+            Add to Cart
+          </button>
+        </template>
+      </template>
+      <template v-else-if="!getCartLoading">
+        <template v-if="company.platform !== 'self'  || (company.platform === 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform === 'self' && company.id !== 1) ">
+          <button class="btn btn-secondary w-auto fw-bold" @click="addToCartMixin(products_fonts)"
+                  :disabled="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+            Add to Cart
+          </button>
+
+        </template>
+      </template>
+      <button v-else class="btn btn-secondary w-auto fw-bold" :disabled="true">
+        <img width="20" height="20" src="@assets/images/loading.gif" />
+      </button>
     </div>
   </div>
 </template>
@@ -263,10 +309,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getCollectionView;
   }
 
-  get getProductEditInfoObject() {
-    return this.$store.getters.getProductEditInfoObject;
-  }
-
   get sku_information(){
     return this.$store.getters.getSkuInformation
   }
@@ -275,8 +317,12 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     return this.$store.getters.getFactorySettings(this.selectedProduct.factory_id)?.vector_image_constraint
   }
 
-  get isEditingFromRoster():boolean{
-    return this.$store.getters.getEditRosterFromLocker;
+  get isEditingFromLocker():boolean{
+    return this.getProductEditInfoObject.locker_product_info!.meta_info ? true : false
+  }
+
+  get goBackToCart():boolean{
+    return this.getProductEditInfoObject.cart_product_info!.back_to_cart
   }
 
   get notVectorLogosCount(){
@@ -537,6 +583,26 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     this.locker_rosters = []
     this.selected_locker_roster = null
     this.selected_locker = null
+  }
+
+  public handleRosterClose() {
+    const edit_product_info_obj = this.getProductEditInfoObject;
+    if(edit_product_info_obj.type == 'cart_product' && edit_product_info_obj.cart_product_info!.back_to_cart) {
+      this.cancelCart();
+      const updated_product_info = {
+        ...edit_product_info_obj.locker_product_info,
+        cart_product_info: {...edit_product_info_obj.locker_product_info.cart_product_info, back_to_cart: false}
+      }
+      this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', {locker_product_info:updated_product_info});
+    }else if(edit_product_info_obj.type == 'locker_product' && this.isEditingFromLocker) {
+      this.hideVModal('rostermodal');
+      const updated_product_info = {...edit_product_info_obj.locker_product_info, meta_info: null}
+      this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', {locker_product_info:updated_product_info});
+      (this as Record<any, any>).$eventBus.$emit('cancelLocker');
+      this.showVModal('locker-modal')
+    }else{
+      this.hideVModal('rostermodal')
+    }
   }
 
   /*

@@ -11,6 +11,10 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal){
     return this.$store.getters.getProductRosters()
   }
 
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject;
+  }
+
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
   }
@@ -40,6 +44,12 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal){
   }
 
   public async handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
+    if(this.getProductEditInfoObject.editing && this.getProductEditInfoObject.type == 'locker_product'){
+      this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
+    }else{
+      this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', true)
+    }
+
     const self: Record<any, any> = this;
     this.show_roster_change_warning = true
     const roster_updated_key = type == 'name' ? 'text' : type;
