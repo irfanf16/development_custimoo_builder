@@ -430,9 +430,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
   get groupColors(){
     return this.$store.getters.getGroupColors
   }
-  get getColorType(){
-    return this.$store.getters.getSetting('color_type');
-  }
 
   @Watch('lockerColors', {
     deep: false
@@ -480,12 +477,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
     }
     this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
   }
-
-  // public changeColor(color: Record<any, any>) {
-  //   const selectProductPantonesList = getSelectedProductPantones()
-  //   let pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType);
-  //   this.setColor({value: pantoneColor.hex, name: pantoneColor.pantone})
-  // }
 }
 </script>
 

@@ -1,5 +1,5 @@
 import { Component, Vue } from 'vue-property-decorator'
-import {getSelectedProductPantones, hideLockerProductUpdateButton, setUndoRedoItems} from '@/helpers/Helpers'
+import {getSelectedProductPantones, hideLockerProductUpdateButton, setUndoRedoItems, getColorType} from '@/helpers/Helpers'
 import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
 @Component
@@ -20,10 +20,6 @@ export default class ColorsTabMixin extends Vue{
 
   get svgGroups() {
     return this.$store.getters.getSvgGroups
-  }
-
-  get getColorType(): string {
-    return this.$store.getters.getSetting('color_type');
   }
 
   get selectedProduct(): Record<any, any> {
@@ -100,13 +96,13 @@ export default class ColorsTabMixin extends Vue{
 
   public changeColor(color: Record<any, any>) {
     const selectProductPantonesList = getSelectedProductPantones()
-    const pantoneColor = getClosestColor(color.hex,selectProductPantonesList,this.getColorType) // this is sub-menu other tab of color tab in menu
+    const pantoneColor = getClosestColor(color.hex,selectProductPantonesList, getColorType(this.svgGroups[this.selectAccordionIndex].id)) // this is sub-menu other tab of color tab in menu
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
   public changePantoneColor() {
     const color_code = this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone)?this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone):this.svgGroups[this.selectAccordionIndex].pantone;
-    const pantoneColor = getColorEncoding(color_code, this.getColorType);
+    const pantoneColor = getColorEncoding(color_code, getColorType(this.svgGroups[this.selectAccordionIndex].id));
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name})
       this.pantoneMessage = ''
@@ -117,7 +113,7 @@ export default class ColorsTabMixin extends Vue{
   }
 
   public changeLogoPantoneColor(color_code, color_object) {
-    const pantoneColor = getColorEncoding(color_code, this.getColorType);
+    const pantoneColor = getColorEncoding(color_code, getColorType(this.svgGroups[this.selectAccordionIndex].id));
 
     if (pantoneColor) {
       color_object.hex = pantoneColor?.hex.toUpperCase();
@@ -134,7 +130,7 @@ export default class ColorsTabMixin extends Vue{
 
   public extractExactCode(code:string) {
     let pantone_coated: string|null = null;
-    if(this.getColorType === 'pantone-coated'){
+    if(getColorType(this.svgGroups[this.selectAccordionIndex].id) === 'pantone-coated'){
       const regex_numbers = /^[0-9]+/g;
       const regex_alphabets = /[a-zA-Z]+/g;
       const numbers = regex_numbers.exec(code);

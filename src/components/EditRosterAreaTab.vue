@@ -104,7 +104,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   * data props starts
   * */
 
-  @Prop({ required: true }) readonly products_fonts!: Record<any, any>
+  @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
   @Prop({required: true}) productSizes!: any
 
   /*

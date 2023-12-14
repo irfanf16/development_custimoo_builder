@@ -179,33 +179,44 @@ const processColorsCustom = (colors: any, logos_count=4) => {
   const deletedCount = uniqueColors.length - 4
   uniqueColors.splice(4, deletedCount)
   const selectProductPantonesList = getSelectedProductPantones()
-  const color_type = Store.getters.getSetting('color_type');
   uniqueColors.forEach((color: string) => {
-    const pantoneColor = getClosestColor(color, selectProductPantonesList,color_type);
+    const pantoneColor = getClosestColor(color, selectProductPantonesList, getColorType());
     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
   })
   while(imageColors.length < logos_count ) {
     imageColors.push({hex: null, pantone: null, name: null})
   }
   return imageColors;
-
 }
 
-const getSelectedProductPantones = (product_id: null|number = null) => {
+const getSelectedProductPantones = (product_id: null|number = null, svg_group: string = '') => {
   const product_pantones: Record<any, any>[] = []
   const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
   if(product) {
-    product.colors.forEach((product_colors: any, key: number) => {
-      if(key == 0){
-        const colors = product_colors.json_data
-        colors.forEach((color: any) => {
-          const pantone = color.pantone ? color.pantone : ''
-          product_pantones.push({pantone : pantone, name: color.name, hex: color.value});
-        })
-      }
+    let colors
+    if(svg_group && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
+      colors = product.svg_group_color_container[svg_group].json_data
+    } else {
+      product.colors.forEach((product_colors: any, key: number) => {
+        if (key == 0) {
+          colors = product_colors.json_data
+        }
+      })
+    }
+    colors.forEach((color: Record<any, any>) => {
+      const pantone = color.pantone ? color.pantone : ''
+      product_pantones.push({pantone: pantone, name: color.name, hex: color.value});
     })
   }
   return product_pantones;
+}
+
+const getColorType = (svg_group: string = '', product_id: number|null = null) => {
+  const product = product_id? Store.getters.getProduct(product_id) : Store.getters.getProduct()
+  if(svg_group && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
+    return 'product_color'
+  }
+  return Store.getters.getSetting('color_type');
 }
 
 const sortTextsArray = (product_names: any) => {
@@ -2185,7 +2196,7 @@ export {
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
   getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
-  getSelectedProductPantones, setRetrievedProductsCustomTexts, getEditModeDefaultObj, fetchUrlContent,
+  getSelectedProductPantones, getColorType, setRetrievedProductsCustomTexts, getEditModeDefaultObj, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
