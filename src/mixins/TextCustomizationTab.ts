@@ -12,6 +12,9 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
   public activeFolderIndex = 0
   public product_fonts: Record<any, any>[] = []
   public handle_text_change_timer = 0 // this will hold the id returned by the setTimeout()
+  public active_jersey_part:Record<any, any>[] = [];
+  public text_accordion:boolean[] = [];
+  public selected_font = '';
 
   get getColorType(): string {
     return this.$store.getters.getSetting('color_type');
@@ -64,6 +67,17 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
       }
     }
     return pantone_coated;
+  }
+
+  public setActiveJerseyPart(active_text_index:number, active_jersey_part:any) {
+    const updatedActiveJerseyParts:Record<any, any>[] = []
+    const updatedTextAccordion:boolean[] = []
+    for(let i = 0; i < this.active_jersey_part.length; i++){
+      i == active_text_index ? updatedActiveJerseyParts[i] = active_jersey_part : updatedActiveJerseyParts[i] = this.active_jersey_part[i];
+      i == active_text_index ? updatedTextAccordion[i] = true : updatedTextAccordion[i] = false
+    }
+    this.active_jersey_part = updatedActiveJerseyParts
+    this.text_accordion = updatedTextAccordion
   }
 
   public bindScroll($event:Record<any, any>){
@@ -214,6 +228,35 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
       emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
     });
   }
+
+  async applySameTextStyle(current_custom_text_index:any) {
+    const self:Record<any, any> = this;
+    await this.hideLockerProductUpdateButton()
+    await setUndoRedoItems('customTexts', 'font_updated')
+    const style_to_apply = self.product_custom_texts[current_custom_text_index]
+    
+    self.product_custom_texts.forEach((custom_text:Record<any, any>, custom_text_index:any)=>{
+      if(current_custom_text_index != custom_text_index){
+        custom_text.font_family = style_to_apply.font_family;
+        custom_text.items.forEach((current_item:Record<any, any>)=>{
+          current_item.color = style_to_apply.items[style_to_apply.active_item_index].color
+          current_item.color_pantone = style_to_apply.items[style_to_apply.active_item_index].color_pantone
+          current_item.font_family = style_to_apply.items[style_to_apply.active_item_index].font_family
+
+          if(current_item.outline_enabled){
+            current_item.outline_width = style_to_apply.items[style_to_apply.active_item_index].outline_width
+            current_item.outline_color = style_to_apply.items[style_to_apply.active_item_index].outline_color
+            current_item.outline_color_pantone = style_to_apply.items[style_to_apply.active_item_index].outline_color_pantone
+          }
+        })
+        self.$eventBus.$emit("customTextUpdated", {
+          emitter: "apply_button", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
+        });
+      }
+    })
+  }
+
+
 
   async addCustomText(productColors:Record<any, any>) {
     const self: Record<any, any> = this;

@@ -25,8 +25,17 @@
           </span>
         </button>
       </div>
-      <b-collapse accordion="my-accordion" :visible="false" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`text-accordion-${customTextIndex}`" :ref="`text-accordion-${customTextIndex}`" role="tabpanel">
-          <div class="font-type-area">
+
+      <div class="fs-2 text-muted">
+        Font used: <span class="text-body" :style="{fontFamily: product_custom_text.font_family}">{{product_custom_text.font_family}}</span>
+      </div>
+      <div>
+        <button @click="applySameTextStyle(customTextIndex)" class="btn btn-secondary btn-sm">Use styling for every text/number</button>
+      </div>
+
+      <b-collapse accordion="my-accordion" v-model="text_accordion[customTextIndex]" :visible="false" :key="`accordion-${selectedProductId+customTextIndex}`" :id="`text-accordion-${customTextIndex}`" :ref="`text-accordion-${customTextIndex}`" role="tabpanel">
+        <div class="dropdown-divider"></div>
+        <div class="font-type-area">
             <div class="fade-right w-100 py-2">
               <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 fontList ">
                 <div v-for="(product_font, product_font_index) in product_fonts" :key="`product_font_${product_font_index}`"
@@ -43,13 +52,13 @@
               </div>
             </div>
           </div>
-
         </div>
-        <div >
+
+        <div>
           <div class="customization-tabs show_hide_text">
-            <b-tabs content-class="mt-3" class="sportswear-parts" align="center" @input="resetCustomTextColorIndex(product_custom_text)">
+            <b-tabs content-class="mt-3" v-model="active_jersey_part[customTextIndex]" :key="`text_tab_${customTextIndex}`" class="sportswear-parts" align="center" @input="resetCustomTextColorIndex(product_custom_text)">
               <template v-for="(product_custom_text_item, productCustomTextItemIndex) in product_custom_text.items">
-                <b-tab v-model="product_custom_text.active_item_index" :key="`custom_${product_custom_text.type}_${customTextIndex}_children_${productCustomTextItemIndex}`">
+                <b-tab :key="`custom_${product_custom_text.type}_${customTextIndex}_children_${productCustomTextItemIndex}`">
                 <!-- Tabs title slot -->
                   <template #title>
                     <span @click="($event)=>$event.stopPropagation()">
@@ -259,6 +268,12 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
     await this.productFonts();
 
     await getLockerColors();
+
+    await this.$eventBus.$on('setActiveJerseyPart', (active_text_index:any, active_jersey_part:any) => {
+      active_text_index = +active_text_index
+      active_jersey_part = +active_jersey_part
+      this.setActiveJerseyPart(active_text_index, active_jersey_part);
+    })
   },
   filters: {
     capitalize: (value: string) => {
@@ -279,8 +294,7 @@ export default class CustomizationText extends Mixins(TextCustomizationTab) {
   @Prop({required: true}) productColors!: Record<any, any>[]
   /* component data properties goes here */
   public default_font_obj = ''
-  public selected_font = '';
-  public colors: [] = []
+  public colors: [] = [];
 
   /* component props ends here */
 
