@@ -13,9 +13,7 @@
 
         </span>
     </div>
-    <div class="fs-4 text-muted text-center p-4">
-      {{ message }}
-    </div>
+    <div class="fs-4 text-muted text-center p-4" v-html="message"></div>
 
     <div class="d-flex align-items-center justify-content-center gap-2">
       <b-button v-if="confirm_text.length > 0"  @click="_confirm" >{{ confirm_text }}</b-button>

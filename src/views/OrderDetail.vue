@@ -1,10 +1,15 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
-    <div class="loader global" v-if="showLoader" ><img style="width: 100px" src="require('@/assets/images/loading.gif')" /></div>
+    <div v-if="showLoader" class="loader">
+      <img src="@assets/images/loading.gif" />
+    </div>
     <div class="order-wrapper" v-if="order && order.id">
       <div class="d-flex justify-content-between align-items-center">
         <div class="fs-4 font-weight-bolder order-title p-2">Order # {{ order.order_no }}</div>
-        <div class="font-weight-bolder order-title p-2">
+        <div class="font-weight-bolder d-flex order-title p-2">
+          <button class="btn btn-dark mx-2 cursor-pointer fs-2" @click.stop="cancelOrder(order)"
+                  v-if="order.items[order.items.length-1].status === FACTORYREVIEW">Cancel order</button>
+
           <button class="btn p-0 fs-5 btn-dark" @click="$router.push({path: '/customer-orders'})" title="Go Back" style="line-height: 0">
             <b-icon-arrow-left-short />
           </button>
@@ -447,6 +452,7 @@
 
 
     </modal>
+    <confirm-modal :message="cancel_confirm_message" ref="confirm_order_cancel" name="confirm_order_cancel"></confirm-modal>
   </div>
 </template>
 
@@ -471,6 +477,7 @@ import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {findIndex, debounce, filter} from "lodash";
 import {getCompany} from "@/helpers/Helpers";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 
 @Component<OrderDetail>({
@@ -531,6 +538,7 @@ import {getCompany} from "@/helpers/Helpers";
 
   },
   components: {
+    ConfirmModal,
     AddUpdateComment,
     OrderFlowStatusLine,
     ActivityStatusIcons
@@ -623,6 +631,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     {key: 'size', label: 'Size'}, {key: 'quantity', label: 'Quantity'}, {key: 'number', label: 'Number'}, {key: 'name', label: 'Name'}
   ]
   public api_url =  ''
+  public cancel_confirm_message =  `Are you sure that you want to cancel this order?`
 
   /*
   * data props ends
@@ -658,6 +667,27 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }).catch((errorResponse: any) => {
       handleResponseException(errorResponse)
     });
+  }
+
+  public async cancelOrder(order:Record<any, any>){
+    this.cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+    const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
+    const confirm = await confirm_modal.showConfirm();
+
+    if(confirm){
+      this.showLoader = true;
+      http.put(`customer-orders/cancel/${order.id}`).then(async (res:Record<any, any>) => {
+        console.log('res', res.data)
+        if(res.data.success){
+          await this.getOrderDetail();
+          this.showToast(res.data.message, 'success');
+        }else{
+          this.showToast('ERROR! Could not cancel the order, please try again.', 'error')
+        }
+
+        this.showLoader = false;
+      })
+    }
   }
 
   async deleteComment(activity_comment: Record<any, any>, item_status_activity: Record<any, any>) {
@@ -977,6 +1007,31 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 </script>
 
 <style lang="scss" scoped>
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 1030;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+  [v-cloak] {
+    display: none !important;
+  }
+}
+
 @mixin avatar {
   display: flex;
   font-size: 1rem;

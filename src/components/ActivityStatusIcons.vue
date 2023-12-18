@@ -33,6 +33,9 @@
     <template v-else-if="activity_status == ORDERCOMPLETED">
       <BIconCartCheck />
     </template>
+    <template v-else-if="activity_status == ORDERCANCELLED">
+      <BIconX />
+    </template>
     <template v-else>
       <BIconLightningFill />
     </template>
@@ -48,6 +51,7 @@ const CUSTOMERAPPROVED = "customer_approved"
 const CUSTOMERREJECTED = "customer_rejected"
 const ORDERINPRODUCTION = "in_production"
 const ORDERSHIPPED = "shipped"
+const ORDERCANCELLED = "order_cancel"
 const ORDERCOMPLETED = "completed"
 
 export default {
@@ -65,6 +69,7 @@ export default {
         ORDERINPRODUCTION : ORDERINPRODUCTION,
         ORDERSHIPPED : ORDERSHIPPED,
         ORDERCOMPLETED : ORDERCOMPLETED,
+        ORDERCANCELLED : ORDERCANCELLED,
       }
   }
 }

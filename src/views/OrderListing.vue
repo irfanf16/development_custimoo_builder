@@ -1,5 +1,8 @@
 <template>
   <div class="page-wrapper m-lg-4" v-cloak>
+    <div v-if="showLoader" class="loader">
+      <img src="@assets/images/loading.gif" />
+    </div>
     <div class="d-flex justify-content-between">
       <div class="fs-4 font-weight-bold">
         Order
@@ -81,8 +84,14 @@
                   {{ order.customer_reference_no ? order.customer_reference_no : 'N / A' }}
                 </td>
                 <td>
-                  <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2">PDF</a>
-                  <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2">Details</router-link>
+                  <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2 fs-2">PDF</a>
+                  <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2 fs-2">Details</router-link>
+                  <template v-for="(item, index) in order.items">
+                    <button class="btn btn-dark mx-2 d-none cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
+                            v-if="item.status == 'order_approve' || item.status == 'order_cancel'" @click.stop="cancelOrder(order)">Cancel</button>
+                    <button class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
+                            v-else @click.stop="cancelOrder(order)">Cancel</button>
+                  </template>
                 </td>
               </tr>
               <tr :key="'order-detail'+index" v-if="order.visible" class="order-detail-row">
@@ -146,6 +155,7 @@
           </tbody>
         </table>
       </div>
+      <confirm-modal :message="cancel_confirm_message" ref="confirm_order_cancel" name="confirm_order_cancel"></confirm-modal>
     </div>
     <b-pagination
       v-model="pagination.currentPage"
@@ -174,6 +184,7 @@ import Search from '@/components/Search.vue';
 import {query} from "vue-gtag";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ModalAction from "@/mixins/ModalAction";
+import ConfirmModal from "@/components/ConfirmModal.vue";
 
 Vue.filter('orderDate', function(value:string) {
   if (value) {
@@ -190,6 +201,7 @@ Vue.filter('Status', function(value:string) {
 @Component<OrderListing>({
   components:{
     AddLockerRoomModal,
+    ConfirmModal,
     Search
   },
   created(){
@@ -234,11 +246,11 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
   }
   public toggletText =  ['show', 'hide']
   public locker_room_product = null;
+  public cancel_confirm_message =  `Are you sure that you want to cancel this order?`
 
-
-get locker_products(){
-  return this.$store.getters.getLockerProducts;
-}
+  get locker_products(){
+    return this.$store.getters.getLockerProducts;
+  }
   public toggleHideShow(index:number,val:boolean) {
     Vue.set(this.orders[index], 'visible', val)
   }
@@ -261,6 +273,28 @@ get locker_products(){
     await this.getOrders('')
     this.$modal.show('orderspopup')
   }
+
+  public async cancelOrder(order:Record<any, any>){
+    this.cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+    const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
+    const confirm = await confirm_modal.showConfirm();
+
+    if(confirm){
+      this.showLoader = true;
+      http.put(`customer-orders/cancel/${order.id}`).then(async (res:Record<any, any>) => {
+        console.log('res', res.data)
+        if(res.data.success){
+          await this.getOrders();
+          this.showToast(res.data.message, 'success');
+        }else{
+          this.showToast('ERROR! Could not cancel the order, please try again.', 'error')
+        }
+
+        this.showLoader = false;
+      })
+    }
+  }
+
   public makePagination(data:Record<any, any>){
     this.pagination.currentPage = data.current_page;
     this.pagination.rows = data.total;
@@ -389,7 +423,7 @@ get locker_products(){
 
 <style scoped lang="scss">
 .loader{
-  position: fixed;
+  position: absolute;
   left: 0;
   right: 0;
   top: 0;
@@ -400,8 +434,17 @@ get locker_products(){
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: #fff;
+  background: rgba(255,255,255,0.9);
   z-index: 1030;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+  [v-cloak] {
+    display: none !important;
+  }
 }
 
 .list-item-container{
@@ -435,13 +478,13 @@ get locker_products(){
     &>tr{
      &>th{
        &:nth-child(1){
-         width: 10%;
+         width: 7%;
        }
        &:nth-child(2){
-         width: 10%;
+         width: 7%;
        }
        &:nth-child(3){
-         width: 10%;
+         width: 7%;
        }
        &:nth-child(4){
          width: 45%;
@@ -450,7 +493,7 @@ get locker_products(){
          width: 10%;
        }
        &:nth-child(6){
-         width: 15%;
+         width: 23%;
        }
      }
     }
