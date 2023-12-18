@@ -1,5 +1,8 @@
 <template>
-  <span>
+  <span><b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
+                    role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
+              <span class="btn btn-secondary light" style="white-space: nowrap" @click="showVModal('create-modal')">Add <BIconPlus/></span>
+            </b-nav-item>
     <b-tabs class="main-locker-tabs" @input="hidePopper" ref="main-locker-tabs" v-model="main_locker_tabs">
       <b-tab>
         <template #title>
@@ -243,12 +246,6 @@
             </div>
           </b-tab>
         </template>
-          <template #tabs-end>
-            <b-nav-item v-b-tooltip.rightbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
-                        role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom href="#">
-              <span class="btn btn-secondary light" style="white-space: nowrap" @click="showVModal('create-modal')">Add <BIconPlus/></span>
-            </b-nav-item>
-          </template>
 
 
           <CreateLockerRoomModal ref="create-modal" @lockerAdded="lockerAdded"/>
