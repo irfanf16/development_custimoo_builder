@@ -12,12 +12,14 @@
           <b-icon-download /><br>
           Download sample
         </button>
-        <div class="excel-file-uploader">
-          <b-icon-file-earmark-excel-fill />
-          <div style="white-space: nowrap" class="drop-file">Drop/Select the file</div>
-          <div style="white-space: nowrap">Upload excel file</div>
-          <input type="file" @change="uploadExcelFile">
-        </div>
+        <form name="upload_excel" ref="upload_excel">
+          <div class="excel-file-uploader">
+            <b-icon-file-earmark-excel-fill />
+            <div style="white-space: nowrap" class="drop-file">Drop/Select the file</div>
+            <div style="white-space: nowrap">Upload excel file</div>
+            <input type="file" @input="uploadExcelFile($event)">
+          </div>
+        </form>
       </div>
     </div>
     <div class="d-flex mt-2 align-items-center justify-content-between bg-light p-2">

@@ -103,14 +103,15 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     return count
   }
 
-  public async uploadExcelFile(event: Record<any, any>){
+  public async uploadExcelFile($event: Record<any, any>){
     this.showLoader = true
-    const files = event.target.files ? event.target.files[0] : null;
+    const files = $event.target.files ? $event.target.files[0] : null;
     const ext = files.name.split('.').pop();
     const updated_roster:Record<any, any>[] = []
     let derived_size_index = -1
     if (ext != 'xlsx'){
       alert("please upload a valid excel file");
+      this.showLoader = false;
       return false
     }
     let check_cols = false;
@@ -119,9 +120,11 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
       check_cols = rows[0][0] == 'NAME ON PRODUCT' && rows[0][1] == 'NUMBER' && rows[0][2] == 'SIZE*' && rows[0][3] == 'QUANTITY*'
       if (rows[0].length != 4){
         alert("Please upload valid file");
+        this.showLoader = false;
         return false
       }else if(rows.length < 2){
         alert("The excel file has no data in it");
+        this.showLoader = false;
         return false
       }else if(check_cols){
         rows.forEach((row:Record<any, any>[], index:number)=>{
@@ -144,12 +147,13 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
           }
         })
       }else{
-        alert('Please upload the file with valid pattern')
+        alert('Please upload the file with valid pattern');
+        this.showLoader = false;
       }
       this.$store.dispatch('setProductsRosters', {roster_data: updated_roster, product_id: this.selectedProduct.id});
       handleProductPriceUpdate()
       this.showLoader = false;
-      event.target.value = ''
+      (this.$refs['upload_excel'] as Record<any, any>).reset();
     })
   }
 }

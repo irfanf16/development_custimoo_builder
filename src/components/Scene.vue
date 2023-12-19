@@ -24,7 +24,7 @@
               </g>
             </svg>
 
-            <span class="ml-1" style="font-size: smaller"><temlpate v-if="!manageComponents.mobileScreen">Size </temlpate>Guide</span>
+            <span class="ml-1" style="font-size: smaller"><template v-if="!manageComponents.mobileScreen">Size </template>Guide</span>
           </a>
 
           <h2>Front</h2>
@@ -61,7 +61,7 @@
               </g>
             </svg>
 
-            <span class="ml-1" style="font-size: smaller"><temlpate v-if="!manageComponents.mobileScreen">Size </temlpate>Guide</span>
+            <span class="ml-1" style="font-size: smaller"><template v-if="!manageComponents.mobileScreen">Size </template>Guide</span>
           </a>
           <h2>Back</h2>
           <div style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': manageComponents.mobileScreen}" v-if="mainPreview">
