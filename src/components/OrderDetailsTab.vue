@@ -29,7 +29,7 @@
               <div class="total">Product Price</div>
               <div class="total-qty">
                 {{ productPriceObject.product_price }} X {{ productPriceObject.total_quantity }} =
-                {{ productPriceObject.product_price_with_quantity }}{{ productPriceObject.active_currency.symbol }}
+                {{ Number(productPriceObject.product_price_with_quantity).toFixed(2) }}{{ productPriceObject.active_currency.symbol }}
               </div>
             </div>
             <template v-if="productPriceObject.addons_price">
@@ -37,14 +37,14 @@
               <div class="total">Addons Price</div>
               <div class="total-qty">
                 {{productPriceObject.addons_price}} X {{productPriceObject.total_quantity}} =
-                {{ productPriceObject.addons_price_with_quantity}}{{productPriceObject.active_currency.symbol}}
+                {{ Number(productPriceObject.addons_price_with_quantity).toFixed(2)}}{{productPriceObject.active_currency.symbol}}
               </div>
               </div>
             </template>
             <template>
               <div class="order-row total" v-if="productPriceObject.total_price > 0">
               <div class="total">Total Price</div>
-              <div class="total-qty">{{ productPriceObject.total_price}}{{productPriceObject.active_currency.symbol}}</div>
+              <div class="total-qty">{{ Number(productPriceObject.total_price).toFixed(2) }}{{productPriceObject.active_currency.symbol}}</div>
             </div>
             </template>
           </template>
