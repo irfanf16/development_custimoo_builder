@@ -1,8 +1,27 @@
 <template>
   <div class="roster-section">
-    <div class="d-flex align-items-center justify-content-between bg-light p-2">
-      <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '0 0 0 0' : '0 0 0 37px'}">
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
+    <div class="px-2 d-flex gap-1 flex-wrap align-items-center justify-content-between">
+      <div>
+        Add {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster'}} details from excel file:
+      </div>
 
+      <div class="d-flex gap-2 mt-1">
+        <button @click="downloadTemplate(selectedProduct.id)" class="btn btn-secondary btn-sm"
+                v-b-tooltip="'Download the sample file of microsoft excel to fill the data to upload it later'">
+          <b-icon-download /><br>
+          Download sample
+        </button>
+        <div class="excel-file-uploader">
+          <b-icon-file-earmark-excel-fill />
+          <div style="white-space: nowrap" class="drop-file">Drop/Select the file</div>
+          <div style="white-space: nowrap">Upload excel file</div>
+          <input type="file" @change="uploadExcelFile">
+        </div>
+      </div>
+    </div>
+    <div class="d-flex mt-2 align-items-center justify-content-between bg-light p-2">
+      <div class="align-self-start" :style="{margin: company.platform != 'cdnExceptLogin' ? '0 0 0 0' : '0 0 0 37px'}">
           <div class="d-flex gap-2" v-if="selectedProduct.allow_name_number && (custom_name_index != -1 || custom_number_index != -1)
                && lockers && lockers.length">
             <div>
@@ -83,7 +102,6 @@
         </b-button>
       </div>
     </div>
-
     <div class="mt-3">
       <div class="roster-row mb-2">
         <div class="align-left" :class="{ 'justify-content-start pl-4': !selectedProduct.allow_name_number }">
@@ -200,7 +218,7 @@ import AddToCartButton from "@/components/AddToCartButton.vue";
   mounted() {
     this.fontsColorsManipulation()
     this.fontsList()
-  },
+  }
 })
 export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton, RosterTabMixin) {
   /*
@@ -685,5 +703,71 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   //    }
   //  }
   //}
+}
+
+.excel-file-uploader{
+  position: relative;
+  background: var(--theme-color-light);
+  border:1px solid var(--theme-color);
+  border-radius: 4px;
+  padding: 10px 20px;
+  color: var(--theme-color);
+  cursor: pointer;
+  text-align: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  min-width: 190px;
+
+  .drop-file{
+    display: none;
+  }
+
+  &:hover{
+    border-style: dashed;
+
+    div:not(.drop-file){
+      display: none;
+    }
+    .drop-file{
+      display: block;
+    }
+  }
+
+  input{
+    position: absolute;
+    z-index: 100;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    appearance: none;
+    display: block;
+    height: 1000px;
+    width: 1000px;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.loader{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255,255,255,0.9);
+  z-index: 1030;
+  img{
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
 }
 </style>
