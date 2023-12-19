@@ -93,7 +93,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
       const blob = new Blob([res.data],{type:res.headers['content-type']})
       const link = document.createElement('a')
       link.href = window.URL.createObjectURL(blob)
-      link.download = 'roster_template.xlsx';
+      link.download = 'product_'+ this.selectedProduct.display_name +'_template.xlsx';
       link.click();
     })
   }
