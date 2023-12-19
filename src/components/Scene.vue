@@ -352,6 +352,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public product_custom_text_objects: Record<any, any>[] | null[] = []
   private storage_url = process.env.VUE_APP_STORAGE_URL
 
+  get fillColors(): [Record<any, any>] {
+    return this.$store.getters.getDefaultFilledColors
+  }
+
+  get getColorType() : string {
+    return this.$store.getters.getSetting('color_type');
+  }
+
   get custom_logos(): [Record<any, any>] {
     let product_id = this.product_id ? this.product_id : this.selectedProductId
     return this.$store.getters.getCustomLogos(product_id)
@@ -2780,6 +2788,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       display: none;
     }
   }
+
+  .main_size_guide_btn{
+    display: none;
+  }
 }
 
 .customization-area {
@@ -2789,6 +2801,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         display: block;
         text-align: center;
       }
+    }
+
+    .main_size_guide_btn{
+      display: block;
     }
   }
 }
