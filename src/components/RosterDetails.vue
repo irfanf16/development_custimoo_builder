@@ -176,7 +176,7 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product' && isEditingFromLocker" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker', isEditingFromLocker)">
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker', isEditingFromLocker)">
         Save & close
       </button>
       <template v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product' && goBackToCart">
