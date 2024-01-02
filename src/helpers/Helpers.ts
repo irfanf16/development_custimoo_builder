@@ -647,9 +647,9 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
 
       let design_name = selected_design.design_name;
-      if(productEditInfo.editing && productEditInfo.type == 'locker_product'){
+      if(productEditInfo.editing && productEditInfo.type == 'locker_product') {
         const lockerEditProduct = productEditInfo.locker_product_info;
-          design_name = lockerEditProduct.locker_product_name
+          design_name = `${lockerEditProduct.locker_product_name} - ${design_name}`
       }
       product_name = `${product_name} - ${design_name}`;
       const sku_information = Store.getters.getSkuInformation;
