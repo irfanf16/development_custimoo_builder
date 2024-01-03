@@ -229,7 +229,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           this.$store.commit('RESET_CUSTOM_TEXTS')
           this.$store.commit('RESET_CUSTOM_LOGOS')
           this.$store.commit('RESET_ALL_COLORS')
-          if(active_factory_product.product_custom_texts.length > 0 ) {
+          if(active_factory_product.product_custom_texts && active_factory_product.product_custom_texts.length > 0 ) {
             product_custom_texts = active_factory_product.product_custom_texts
           }
 
