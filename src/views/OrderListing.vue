@@ -62,7 +62,7 @@
           </tr>
           <template v-if="orders.length !== 0">
             <template v-for="(order,index) in orders" >
-              <tr  @click="toggleHideShow(index,!order.visible)" :key="index" >
+              <tr  @click="toggleAccordion(index)" :key="index" >
                 <td>
                   {{order.order_no}}
                 </td>
@@ -92,54 +92,64 @@
                     <button class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
                             v-else @click.stop="cancelOrder(order)">Cancel</button>
                   </template>
+                  <div class="btn d-inline-flex accordion-icon">
+                    <b-icon
+                      :icon="isAccordionOpen === index ? 'chevron-right' : 'chevron-down'"
+                      :class="{ 'rotate-icon': isAccordionOpen === index, 'larger-icon': true }"
+                      aria-hidden="true"
+                      class="chevron-icon"
+                    ></b-icon>
+                  </div>
                 </td>
               </tr>
-              <tr :key="'order-detail'+index" v-if="order.visible" class="order-detail-row">
-                <td>&nbsp;</td>
-                <td colspan="5" class="order-detail-container bg-light">
-                  <template v-for="(item,indexItem) in order.items" >
-                    <div class="order-detail" :key="indexItem+index">
-                      <div class="factory-container">
-                        <h2 class="factory-name d-flex align-items-center gap-1"> {{ 'Factory ' + parseInt(indexItem + 1) }} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
-                      </div>
-                      <table class="w-100">
-                        <template v-for="(product,indexProduct) in item.factory_products">
-                          <tr class="product-details" :key="indexItem + indexProduct + index">
-                            <td>{{ product.product_name }}</td>
-                            <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                            <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                            <td>{{ product.roster_quantity }}</td>
-                            <td style="text-align: center">
-                              <div class="d-flex w-100 gap-1">
-                                <span class="btn btn-dark btn-sm mx-xxl-2" @click="saveToLockerRoom(product)">Save As</span>
-                                <template>
+              <transition name="fade">
+                  <tr :key="'order-detail'+index" class="order-detail-row accordion-body" v-show="isAccordionOpen === index">
+                    <td>&nbsp;</td>
+                    <td colspan="5" class="order-detail-container bg-light">
+                      <template v-for="(item,indexItem) in order.items" >
+                        <div class="order-detail" :key="indexItem+index">
+                          <div class="factory-container">
+                            <h2 class="factory-name d-flex align-items-center gap-1"> {{ 'Factory ' + parseInt(indexItem + 1) }} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
+                          </div>
+                          <table class="w-100">
+                            <template v-for="(product,indexProduct) in item.factory_products">
+                              <tr class="product-details" :key="indexItem + indexProduct + index">
+                                <td>{{ product.product_name }}</td>
+                                <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                                <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                                <td>{{ product.roster_quantity }}</td>
+                                <td style="text-align: center">
+                                  <div class="d-flex w-100 gap-1">
+                                    <span class="btn btn-dark btn-sm mx-xxl-2" @click="saveToLockerRoom(product)">Save As</span>
+                                    <template>
                                   <span  v-if="product.share_design_info.show_loader" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
                                     <img width="20" height="20" src="@assets/images/loading.gif" />
                                   </span>
-                                  <span v-else-if="product.share_design_info.share_url" class="btn btn-dark btn-sm mx-xxl-2" @click="copyShareUrl(product.share_design_info.share_url)">Copy Share Url</span>
-                                  <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="shareDesign(item.id, product)">Share</span>
-                                </template>
-                                <template>
+                                      <span v-else-if="product.share_design_info.share_url" class="btn btn-dark btn-sm mx-xxl-2" @click="copyShareUrl(product.share_design_info.share_url)">Copy Share Url</span>
+                                      <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="shareDesign(item.id, product)">Share</span>
+                                    </template>
+                                    <template>
                                   <span  v-if="product.adding_to_cart" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
                                     <img width="20" height="20" src="@assets/images/loading.gif" />
                                   </span>
-                                  <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="addToCart(item.id, product)">Add To Cart</span>
-                                </template>
-                                <template v-if="product.can_reorder">
-                                  <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product)">Reorder</span>
-                                </template>
-                                <template v-else>
-                                  <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
-                                </template>
-                              </div>
-                            </td>
-                          </tr>
-                        </template>
-                      </table>
-                    </div>
-                  </template>
-                </td>
-              </tr>
+                                      <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="addToCart(item.id, product)">Add To Cart</span>
+                                    </template>
+                                    <template v-if="product.can_reorder">
+                                      <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product)">Reorder</span>
+                                    </template>
+                                    <template v-else>
+                                      <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
+                                    </template>
+                                  </div>
+                                </td>
+                              </tr>
+                            </template>
+                          </table>
+                        </div>
+                      </template>
+                    </td>
+                  </tr>
+              </transition>
             </template>
             <template v-if="locker_room_product">
               <AddLockerRoomModal :locker_room_product="locker_room_product" locker_room_product_type="order_product"
@@ -247,13 +257,12 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
   public toggletText =  ['show', 'hide']
   public locker_room_product = null;
   public cancel_confirm_message =  `Are you sure that you want to cancel this order?`
+  public isAccordionOpen = null;
 
   get locker_products(){
     return this.$store.getters.getLockerProducts;
   }
-  public toggleHideShow(index:number,val:boolean) {
-    Vue.set(this.orders[index], 'visible', val)
-  }
+
   public async getOrders(params: string | void){
     if(!params)
       params = ''
@@ -416,6 +425,9 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
     document.execCommand("copy");
     document.body.removeChild(clipboard_input_field);
     this.showToast("Design share url copied", "success")
+  }
+  toggleAccordion(index) {
+    this.isAccordionOpen = this.isAccordionOpen === index ? null : index;
   }
 
 }
@@ -642,4 +654,35 @@ table.order-listing{
 
   }
 }
+/* Add your styling for accordion here */
+.accordion-icon {
+  cursor: pointer;
+  padding: 10px;
+}
+
+.accordion-body {
+  padding: 10px;
+  background-color: #ffffff;
+}
+
+.chevron-icon{
+  transition: transform 0.5s ease;
+
+  &.rotate-icon {
+    transform: rotate(180deg);
+  }
+}
+
+.larger-icon {
+  font-size: 32px; /* Adjust the size as needed */
+}
+
+.accordion-fade-enter-active, .accordion-fade-leave-active {
+  transition: opacity 0.5s ease; /* Adjust the timing function as needed */
+}
+
+.accordion-fade-enter, .accordion-fade-leave-to {
+  opacity: 0;
+}
+
 </style>
