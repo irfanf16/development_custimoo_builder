@@ -327,9 +327,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
   get cartItems() {
     let cItems = this.$store.getters.getCartItems;
+    this.can_finalize_order = true;
     cItems.forEach((item:Record<any, any>) => {
-    let uniqueProductContainer:Record<any, any> = [];
-    item.factory_products.forEach((product:Record<any, any>) => {
+      let uniqueProductContainer:Record<any, any> = [];
+      item.factory_products.forEach((product:Record<any, any>) => {
         let product_count = 0;
         item.factory_products.forEach((nestProduct:Record<any, any>) => {
           if(product.product_id == nestProduct.product_id){
@@ -347,6 +348,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
           product.show_in_summary = true;
         }
         product.roster_product_count = product_count;
+        if(product.roster_product_count < product.minimum_order_quantity) {
+          this.can_finalize_order = false;
+        }
       });
     });
 
@@ -375,15 +379,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
   get mainTotalTabs(){
     return this.$store.getters.getMainTotalTabs;
-  }
-
-  public filterCartItemsForMOQSummary(cartItems:Record<any, any>){
-    this.can_finalize_order = true;
-    return cartItems.filter(item =>{
-      if(typeof item.roster_product_count !== 'undefined' && item.minimum_order_quantity != null && item.roster_product_count < item.minimum_order_quantity)
-        this.can_finalize_order = false;
-      return typeof item.show_in_summary !== 'undefined' && item.show_in_summary === true;
-    });
   }
 
   public createOrder() {
