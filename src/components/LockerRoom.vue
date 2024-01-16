@@ -106,7 +106,7 @@
                               </a>
                             </li>
                             <li>
-                              <a style="font-size: 12px;" data-title="Edit roster" @click="editProduct(room.id, product, ind, '', true,{target: 'locker-room', activeLocker: tabIndex, lockerActiveTabIndex: lockerActiveTabIndex})"
+                              <a style="font-size: 12px;" data-title="Edit roster" @click="editRoster(product)"
                                  @mouseleave="hideTooltip" @mouseenter="showTooltip">
                                 <b-icon-list class="fs-3" />
                               </a>
@@ -375,6 +375,7 @@
         </div>
       </div>
     </modal>
+    <EditRosterDetails ref="editrostermodal"  :lockers="lockers_and_rosters" :locker_id="locker_roster_id" />
   </span>
 </template>
 
@@ -404,9 +405,11 @@ import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import ModalAction from "@/mixins/ModalAction";
 import {AxiosError} from "axios";
+import EditRosterDetails from "@/components/EditRosterDetails.vue";
 
 @Component<LockerRoom>({
   components: {
+    EditRosterDetails,
     ConfirmModal,
     Scene,
     CreateLockerRoomModal,
@@ -501,6 +504,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
   public renameRef = "";
   public lockerToRename: Record<any, any> = {};
+  public locker_roster_id: number = 0
+
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
     for(const mutation of mutationsList) {
@@ -1345,6 +1350,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
     }
   }
+  public editRoster(product:Record<any, any>){
+    this.locker_roster_id = product.id;
+    this.ref["editrostermodal"].show()
+  }
+
+
 }
 </script>
 
