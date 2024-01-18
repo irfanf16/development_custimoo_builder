@@ -146,7 +146,7 @@
 
                   <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute" style="left: 0; right: 0; top: 15px;"
                        v-if="productPriceObject.show_price && productPriceObject.product_price">
-                    MSRP: {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
+                    {{ PriceLabel }} : {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
                   </div>
 
                   <div>&nbsp;</div>
@@ -734,6 +734,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get isRosterOpened() {
     return this.$store.getters.getIsRosterOpened
+  }
+
+  get PriceLabel(){
+    const msrp_label = this.settings("msrp_label");
+    const msrp_label_admin = this.settings("msrp_label_admin");
+    return msrp_label.is_custom_msrp_label?msrp_label.msrp_label:msrp_label_admin;
   }
 
   get application_mounted() {
