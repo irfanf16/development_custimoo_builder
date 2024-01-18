@@ -35,7 +35,7 @@
                   <td class="border-0 text-white font-weight-bold py-3">
                     <p class="ml-2">Address</p>
                   </td>
-                  <td class="border-0 text-white font-weight-bold py-3" style="width: 200px; max-width: 200px; word-wrap: break-word;">
+                  <td class="border-0 text-white font-weight-bold py-3" style="width: 400px; max-width: 400px; word-wrap: break-word;">
                     <p class="ml-2">Actions</p>
                   </td>
                 </tr>
@@ -60,6 +60,8 @@
                     <p class="h6" v-if="address.country.name">{{ address.country.name }}</p>
                   </td>
                   <td class="text-center pl-2" style="width: 200px; max-width: 200px; word-wrap: break-word; vertical-align: middle;">
+                    <button class="btn btn-dark light mx-2" v-if="address.default != 1 || address.default != true" @click="useAddress(address)">Use this Address</button>
+                    <button class="btn btn-dark light mx-2" v-else :disabled="true">Use this Address</button>
                     <button class="btn btn-dark light mx-2" @click="editAddressModalShow(address)">Edit</button>
                     <button class="btn btn-success mx-2" @click="deleteAddress(address)"
                       v-if="address.default != 1 || address.default != true">Delete</button>
@@ -128,6 +130,29 @@ export default class Addresses extends Mixins(ErrorMessages) {
   editAddressModalShow(address: Record<any, any>): void {
     this.ref['update-address-modal'].updateForm(address);
     this.ref['update-address-modal'].show()
+  }
+
+  useAddress(address: Record<any, any>){
+    try {
+      http.put(`/addresses/default/${address.id}`, {...address, default: true}).then((response: any) => {
+        if(response.data.success){
+          this.$store.commit('ADD_SHIPPING_ADDRESS', response.data.result)
+          this.$emit('actionAfterAddressSave');
+        }else{
+          if(response.data.status_code === 422){
+            this.showErrorArr(response.data.errors);
+          }
+          else{
+            this.showError(response.data.message);
+          }
+        }
+      }).catch((e: any) => {
+        this.showError(e.response.data.message)
+      });
+    }catch (error){
+      this.showError(error)
+    }
+    this.actionAfterAddressSave();
   }
 
   // public showConfirm(){
