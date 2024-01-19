@@ -5,6 +5,7 @@
 
     <ShareDesignModal :product="product" :loader="shareDesignLoader" />
     <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
+    <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
 
     <b-container fluid>
       <b-row>
@@ -178,7 +179,6 @@
                     <img @click="switchView()" class="cursor-pointer" v-else src="img/icons/2Dicon.svg" height="20">
                   </div>
                 </div>
-                <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                 <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
                 <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
