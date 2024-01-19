@@ -173,7 +173,10 @@
                     {{ PriceLabel }} : {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
                   </div>
 
-                  <div>&nbsp;</div>
+                  <div v-if="selectedProduct.is_3d_product" class="ml-auto">
+                    <img @click="switchView()" class="cursor-pointer" v-if="!selectedProduct.show_3d" src="img/icons/3Dicon.svg" height="20">
+                    <img @click="switchView()" class="cursor-pointer" v-else src="img/icons/2Dicon.svg" height="20">
+                  </div>
                 </div>
                 <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
@@ -350,40 +353,51 @@
                     <template v-if="selectedProduct.productstyles[styleIndex]" >
                       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
-                          <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{
-                                    textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                    safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                    boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                                    models: selectedProduct.productstyles[styleIndex].front_models
-                                 }"
-                                 :back="{
-                                    textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
-                                    safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
-                                    boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
-                                    models: selectedProduct.productstyles[styleIndex].back_models
-                                 }"
-                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
-                                 :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-                                 :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
-                                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
-                          />
+                          <template v-if="selectedProduct.is_3d_product && selectedProduct.show_3d">
+                            <ThreeDScene :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url, texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url, design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
+                                         :measurement-ratio="selectedProduct.measurement_ratio"
+                                         :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                         :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                                         :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                         :colorGrouping="[]" :productType="selectedProduct.product_type"
+                                         :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"></ThreeDScene>
+                          </template>
+                          <div v-show="!selectedProduct.show_3d">
+                            <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
+                                   :front="{
+                                      textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                      safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                      boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                      models: selectedProduct.productstyles[styleIndex].front_models
+                                   }"
+                                   :back="{
+                                      textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
+                                      safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                      boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
+                                      models: selectedProduct.productstyles[styleIndex].back_models
+                                   }"
+                                   :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                   :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                                   :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                   :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                            />
 
-                          <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
-                                 :front="{
-                                    textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                    safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                    boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                                    models: selectedProduct.productstyles[styleIndex].front_models
-                                 }"
-                                 :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
-                                 :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                 :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
-                                 :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
-                                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
-                          />
+                            <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
+                                   :front="{
+                                      textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                      safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                      boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                      models: selectedProduct.productstyles[styleIndex].front_models
+                                   }"
+                                   :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                   :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                                   :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
+                                   :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                   :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                            />
+                          </div>
                         </div>
                       </template>
                     </template>
@@ -542,6 +556,8 @@ import { FetchCategories, HideUpdateLockerButton } from '@/mixins/SelectedProduc
 import Store from "@/store";
 import AddToCartButton from "@/components/AddToCartButton.vue";
 import ShareDesignModal from "@/components/ShareDesignModal.vue";
+import ThreeDScene from "@/components/ThreeDScene.vue";
+import Scene3d from "@/components/3d/scene-3d.vue";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -552,6 +568,8 @@ Vue.filter('formatDate', function(value:string) {
 @Component<Home>({
   components: {
     ShareDesignModal,
+    Scene3d,
+    ThreeDScene,
     AddToCartButton,
     Popper,
     CartModal,
@@ -1223,6 +1241,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     setTimeout(()=>{
       func2();
     },500)
+  }
+  public switchView() {
+    this.selectedProduct.show_3d = !this.selectedProduct.show_3d
   }
 
   public async initProductsFonts(products: Record<any, any>[], resolve: any) {

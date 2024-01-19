@@ -100,7 +100,7 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
     self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
     self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
-    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogos)
+    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
     self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
     self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
     self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
@@ -278,11 +278,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   @Prop({ required: false }) readonly backTextrueExtension !: string;
   @Prop({ required: false }) readonly logos !: [Record<string, any>];
   @Prop({ required: false, default: () => { return [] } }) readonly texts !: [Record<string, any>];
-  @Prop({ required: false, default: () => { return [] } }) readonly lockerDefaultColors !: [Record<string, any>];
-  @Prop({ required: false, default: () => { return {} } }) readonly lockerGroupColors !: Record<string, any>;
   @Prop({ required: false }) readonly product_id !: number
   @Prop({ required: false }) readonly product_index !: number
-  @Prop({ required: false }) readonly carousel !: string
   @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
   @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
   @Prop({ required: false }) readonly logosLimit !: number
@@ -304,8 +301,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private front_zoom_point: fabric.Point
   private back_zoom_point: fabric.Point
   private last_canvas_pointer: fabric.Point
-  private frontTexture !: any
-  private backTexture !: any
+  private frontDesign !: any
+  private backDesign !: any
   private default_view_port: number[]
   private front_safe_zone: fabric.Image[] = []
   private back_safe_zone: fabric.Image[] = []
@@ -332,8 +329,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     fontFamily: 'Ubuntu'
   })
   public dimTextBack!: fabric.Text
+  public fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
   public showLoader = true
-  public svg_groups_ready = false
   public other_side_logos: any[] = []
   public other_side_fixed_logos: any[] = []
   public otherSideTexts: any[] = []
@@ -462,8 +459,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if (Object.keys(this.groupColors).length) {
         let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
         let groupColors = this.groupColors
-        let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
-        texture.forEach((item: Record<any, any>) => {
+        let design = this.frontDesign._objects ? this.frontDesign._objects : [this.frontDesign]
+        design.forEach((item: Record<any, any>) => {
           if(item.id) {
             item.id = item.id.toLowerCase()
             if (groupColors[item.id]) {
@@ -515,8 +512,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         })
         this.frontCanvas.requestRenderAll()
         if (this.back) {
-          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
-          texture.forEach((item: Record<any, any>) => {
+          design = this.backDesign._objects ? this.backDesign._objects : [this.backDesign]
+          design.forEach((item: Record<any, any>) => {
             if(item.id) {
               item.id = item.id.toLowerCase()
               if (groupColors[item.id]) {
@@ -644,8 +641,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         })
 
-        let texture = this.frontTexture._objects ? this.frontTexture._objects : [this.frontTexture]
-        texture.forEach((item: Record<any, any>) => {
+        let design = this.frontDesign._objects ? this.frontDesign._objects : [this.frontDesign]
+        design.forEach((item: Record<any, any>) => {
           if(item.id) {
             item.id = item.id.toLowerCase()
             if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
@@ -661,8 +658,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         this.frontCanvas.requestRenderAll()
 
         if (this.back) {
-          texture = this.backTexture._objects ? this.backTexture._objects : [this.backTexture]
-          texture.forEach((item: Record<any, any>) => {
+          design = this.backDesign._objects ? this.backDesign._objects : [this.backDesign]
+          design.forEach((item: Record<any, any>) => {
             if(item.id) {
               item.id = item.id.toLowerCase()
               if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
@@ -709,8 +706,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
     })
 
-    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
-    texture.forEach((item: Record<any, any>) => {
+    let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]
+    design.forEach((item: Record<any, any>) => {
       if(item.id) {
         item.id = item.id.toLowerCase()
         if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
@@ -726,8 +723,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.frontCanvas.requestRenderAll()
 
     if (this.back) {
-      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-      texture.forEach((item: Record<any, any>) => {
+      design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
+      design.forEach((item: Record<any, any>) => {
         if(item.id) {
           item.id = item.id.toLowerCase()
           if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
@@ -773,8 +770,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               const closestColor = getClosestColor('#000000', selectProductPantonesList, getColorType(key, this.product_id));
               changeColor = { value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone }
             }
-            let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
-            texture.forEach((item: Record<any, any>) => {
+            let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]
+            design.forEach((item: Record<any, any>) => {
               item.id = item.id.toLowerCase()
               if (key.toLowerCase() == item.id) {
                 item.set('fill', changeColor.value);
@@ -782,8 +779,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             })
             this.frontCanvas.requestRenderAll()
             if (this.back) {
-              texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-              texture.forEach((item: Record<any, any>) => {
+              design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
+              design.forEach((item: Record<any, any>) => {
                 item.id = item.id.toLowerCase()
                 if (key.toLowerCase() == item.id) {
                   item.set('fill', changeColor.value);
@@ -820,8 +817,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public async getSvgGroups() {
     this.svgGroups = []
     this.initialSvgGroups = []
-    let texture = this.frontTexture._objects? this.frontTexture._objects : [this.frontTexture]
-    texture.forEach((item: Record<any, any>) => {
+    let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]
+    design.forEach((item: Record<any, any>) => {
       if(item.id) {
         item.id = item.id.toLowerCase()
         if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
@@ -865,9 +862,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
     })
 
-    if (this.backTexture) {
-      texture = this.backTexture._objects? this.backTexture._objects : [this.backTexture]
-      texture.forEach((item: Record<any, any>) => {
+    if (this.backDesign) {
+      design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
+      design.forEach((item: Record<any, any>) => {
         if(item.id) {
           item.id = item.id.toLowerCase()
           if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
@@ -941,7 +938,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public loadScene(ImageData: Record<any, any>, side: string) {
     return new Promise((resolve) => {
-      this.svg_groups_ready = false
       this.mounted = false
       let element = this.$refs.front as HTMLCanvasElement
       if (side === 'back') {
@@ -953,7 +949,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       } else {
         this.frontCanvas = canvas
       }
-      fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center' as string
+      // fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center' as string
 
       (fabric.Image.prototype as Record<any, any>).getBase64 = function() {
         let el = fabric.util.createCanvasElement() as Record<any, any>
@@ -971,24 +967,24 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         })
       }
 
-      promises.push(this.addTexture(ImageData.textureUrl, side, ImageData.file_extension) as never)
+      promises.push(this.addDesign(ImageData.textureUrl, side, ImageData.file_extension) as never)
 
       if (this.backTextureUrl && side == 'front') {
-        promises.push(this.addTexture(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
+        promises.push(this.addDesign(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
 
       const self: Record<any, any> = this
 
       Promise.all(promises).then((values) => {
-        let texture = this.frontTexture
+        let design = this.frontDesign
         models = this.front_models
         if (side == 'back') {
-          texture = this.backTexture
+          design = this.backDesign
           models = this.back_models
         }
 
-        canvas.add(texture)
-        canvas.viewportCenterObject(texture)
+        canvas.add(design)
+        canvas.viewportCenterObject(design)
 
         if (this.productType == 'customized') {
           models.forEach((model: fabric.Image) => {
@@ -1031,7 +1027,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if (logos.length) {
               logos.forEach((logo: Record<any, any>) => {
                 if (logo && logo.url) {
-                  this.addLogos(logo, true)
+                  this.addLogo(logo, true)
                 }
               })
             }
@@ -1164,9 +1160,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         })
 
         canvas.on('object:moving', (e: Record<any, any>) => {
-          let center = this.frontTexture.getCenterPoint()
+          let center = this.frontDesign.getCenterPoint()
           if(side == 'back') {
-            center = this.backTexture.getCenterPoint()
+            center = this.backDesign.getCenterPoint()
           }
           const relativeWidth = center.x
           const relativeHeight = center.y
@@ -1521,10 +1517,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public objectScaling(e: Record<any, any>, side: string) { // bound object to do not move out from product
-    let texture = this.frontTexture
+    let design = this.frontDesign
     let canvas = this.frontCanvas
     if (side == 'back') {
-      texture = this.backTexture
+      design = this.backDesign
       canvas = this.backCanvas
     }
 
@@ -1540,7 +1536,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }, 1);
     }
 
-    const modelBoundingRect = texture.getBoundingRect()
+    const modelBoundingRect = design.getBoundingRect()
     let boundingRect = {
       left: modelBoundingRect.left,
       right: modelBoundingRect.left + modelBoundingRect.width,
@@ -1562,7 +1558,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
 
     let centerPoint = e.target.getCenterPoint()
-    if (canvas.isTargetTransparent(texture, centerPoint.x, centerPoint.y)) {
+    if (canvas.isTargetTransparent(design, centerPoint.x, centerPoint.y)) {
       const boundingDistance = {
         left: Math.abs(boundingRect.left - centerPoint.x),
         top: Math.abs(boundingRect.top - centerPoint.y),
@@ -1581,7 +1577,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         moveTo = 'right'
       }
 
-      let direction = this.targetNonTransparentVH(canvas, texture, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo, other_move_to)
+      let direction = this.targetNonTransparentVH(canvas, design, e.target.left, e.target.top, e.target.width, e.target.scaleX, moveTo, other_move_to)
 
       e.target.left = direction.left
     }
@@ -1644,11 +1640,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public addToOtherSide(target: any, side: string, clone_again = false) {
     side = side.toLowerCase()
     if(side == 'back' || (this.back && side == 'front')) {
-      let texture = this.frontTexture
+      let design = this.frontDesign
       let canvas = this.frontCanvas
       let zoom_point = this.front_zoom_point
       if (side == 'back' && this.back) {
-        texture = this.backTexture
+        design = this.backDesign
         canvas = this.backCanvas
         zoom_point = this.back_zoom_point
       }
@@ -1670,7 +1666,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         add_index = target.fixed_logo_index
       }
 
-      const modelBoundingRect = texture.getBoundingRect()
+      const modelBoundingRect = design.getBoundingRect()
       let boundingRect = {
         left: modelBoundingRect.left,
         right: modelBoundingRect.left + modelBoundingRect.width,
@@ -1728,27 +1724,27 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       } else if(target.logo_index) {
         otherSideObjects = this.other_side_logos
       }
-      if (canvas.isTargetTransparent(texture, checkPointX, checkPointY)) {
+      if (canvas.isTargetTransparent(design, checkPointX, checkPointY)) {
         let addLeft
         let addTop
-        const model_start = (texture.left - ((texture.width * texture.scaleX) / 2)) - 1
-        const model_end = (texture.left + ((texture.width * texture.scaleX) / 2)) + 1
+        const model_start = (design.left - ((design.width * design.scaleX) / 2)) - 1
+        const model_end = (design.left + ((design.width * design.scaleX) / 2)) + 1
         const width = target.width * target.scaleX;
         const height = target.height * target.scaleY;
         if(actualNearTo == 'top') { // todo may be find the direction from top for other side canvas to fix both side size mismatch issue
-          const direction = this.targetNonTransparent(canvas, texture, centerPoint.x, centerPoint.y - height , 0, 1, 'bottom')
+          const direction = this.targetNonTransparent(canvas, design, centerPoint.x, centerPoint.y - height , 0, 1, 'bottom')
           addTop = direction.top - checkPointY
           addLeft = this.canvasWidth - target.left
         } else if (moreToWords == 'left') {
-          const direction = this.targetNonTransparent(canvas, texture, checkPointX, centerPoint.y, 0, 1, 'right')
-          const directionFromRight = this.targetNonTransparent(canvas, texture, model_end, checkPointY, 0, 1, 'left')
+          const direction = this.targetNonTransparent(canvas, design, checkPointX, centerPoint.y, 0, 1, 'right')
+          const directionFromRight = this.targetNonTransparent(canvas, design, model_end, checkPointY, 0, 1, 'left')
           const outside = direction.left - checkPointX
           const modelSpaceLeft = directionFromRight.left + (width / 2) - 3
           addLeft = modelSpaceLeft - outside
           addTop = target.top
         } else {
-          const direction = this.targetNonTransparent(canvas, texture, target.left+ width, target.top, 0, 1, 'left')
-          const directionFromRight = this.targetNonTransparent(canvas, texture, model_start, centerPoint.y, 0, 1, 'right')
+          const direction = this.targetNonTransparent(canvas, design, target.left+ width, target.top, 0, 1, 'left')
+          const directionFromRight = this.targetNonTransparent(canvas, design, model_start, centerPoint.y, 0, 1, 'right')
           const outside = checkPointX - direction.left
           const modelSpaceRight = directionFromRight.left - (width / 2) - 3
           addLeft = modelSpaceRight + outside
@@ -1890,10 +1886,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     })
   }
 
-  public addTexture(textureUrl: string, side: string, file_ext: string) {
+  public addDesign(designUrl: string, side: string, file_ext: string) {
     return new Promise((resolve, reject) => {
       if (file_ext == 'svg') {
-        fabric.loadSVGFromURL(textureUrl, (objects: any, options: any) => {
+        fabric.loadSVGFromURL(designUrl, (objects: any, options: any) => {
           options.crossOrigin = 'Anonymous'
           const img = fabric.util.groupSVGElements(objects) as fabric.Group
           if(img.width! > img.height!) {
@@ -1918,14 +1914,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           img.center().setCoords();
 
           if (side == 'back') {
-            this.backTexture = img
+            this.backDesign = img
           } else {
-            this.frontTexture = img
+            this.frontDesign = img
           }
           resolve('done')
         })
       } else {
-        fabric.Image.fromURL(textureUrl + '?nocache=2', async (img: any) => {
+        fabric.Image.fromURL(designUrl + '?nocache=2', async (img: any) => {
           if(img.width > img.height) {
             img.scaleToWidth(this.canvasWidth - 10)
           } else {
@@ -1941,9 +1937,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           img.center().setCoords()
 
           if (side == 'back') {
-            this.backTexture = img
+            this.backDesign = img
           } else {
-            this.frontTexture = img
+            this.frontDesign = img
           }
           resolve('done')
         }, { crossOrigin: 'Anonymous' })
@@ -1954,10 +1950,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public addBoundary(boundary_images: string[], side: string) {
     return new Promise((resolve, reject) => {
       let canvas = this.frontCanvas
-      let texture = this.frontTexture
+      let design = this.frontDesign
       if(side == 'back') {
         canvas = this.backCanvas
-        texture = this.backTexture
+        design = this.backDesign
       }
       boundary_images.forEach((url: string, index: number) => {
         if(url) {
@@ -1967,8 +1963,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             const boundaries_clip = fabric.util.groupSVGElements(img) as fabric.Group
             canvas.viewportCenterObject(boundaries_clip)
             boundaries_clip.set({
-              scaleX: texture.scaleX,
-              scaleY: texture.scaleY,
+              scaleX: design.scaleX,
+              scaleY: design.scaleY,
               hasControls: false,
               selectable: false,
               evented: false,
@@ -2011,13 +2007,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let boundaries = this.front_boundary
     let safe_zone = this.front_safe_zone
     let canvas = this.frontCanvas
-    let texture = this.frontTexture
+    let design = this.frontDesign
     let zoom_point = this.front_zoom_point
     if(side.toLowerCase() == 'back') {
       boundaries = this.back_boundary
       safe_zone = this.back_safe_zone
       canvas = this.backCanvas
-      texture = this.backTexture
+      design = this.backDesign
       zoom_point = this.back_zoom_point
     }
 
@@ -2041,8 +2037,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       const boundaries_clip = fabric.util.groupSVGElements(boundaries) as fabric.Group
       canvas.viewportCenterObject(boundaries_clip)
       boundaries_clip.set({
-        scaleX: texture.scaleX,
-        scaleY: texture.scaleY,
+        scaleX: design.scaleX,
+        scaleY: design.scaleY,
         hasControls: false,
         selectable: false,
         evented: false,
@@ -2070,8 +2066,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       const clip = fabric.util.groupSVGElements(apply_boundary) as fabric.Group
       canvas.viewportCenterObject(clip)
       clip.set({
-        scaleX: texture.scaleX,
-        scaleY: texture.scaleY,
+        scaleX: design.scaleX,
+        scaleY: design.scaleY,
         hasControls: false,
         selectable: false,
         evented: false,
@@ -2220,16 +2216,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if (logos.length) {
         logos.forEach((logo: Record<any, any>) => {
           if (logo && logo.url) {
-            this.addLogos(logo)
+            this.addLogo(logo)
           }
         })
       }
     }
   }
 
-  public addLogos(logo: Record<any, any>, from_load = false) {
+  public addLogo(logo: Record<any, any>, from_load = false) {
     logo = this.custom_logos ? this.custom_logos[logo.logo_index] : {}
-    if( !checkIsEmpty(logo) && logo && logo.product_id == this.product_id && (this.mounted || from_load)) {
+    if(!checkIsEmpty(logo) && logo && logo.product_id == this.product_id && (this.mounted || from_load)) {
       if(this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
@@ -2280,17 +2276,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             dimText = this.dimTextBack
           }
 
-          img.setControlsVisibility({
-            tl: false,
-            bl: false,
-            tr: true,
-            br: true,
-            ml: false,
-            mb: false,
-            mr: false,
-            mt: false,
-            mtr: false
-          })
+          img.setControlsVisibility(this.fabric_control_visibility)
 
           await this.applyClipPath(img, logo.side);
 
@@ -2504,7 +2490,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           /* in case of add button we just need to execute method syncCustomTextsWithCustomTextsObjects() that's why returning here  */
           return false;
         }
-        let fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
         self.product_custom_texts[custom_text_index] = custom_text_info.value;
 
         let add_custom_text = await this.isCustomTextAllowed(custom_text_index);
@@ -2580,7 +2565,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                       if(this.product_id == this.selectedProductId) {
                         self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: this.product_custom_texts[custom_text_index].items }})
                       }
-                      fabric_text.setControlsVisibility(fabric_control_visibility)
+                      fabric_text.setControlsVisibility(this.fabric_control_visibility)
                       if (!self.product_custom_text_objects[custom_text_index]) {
                         self.product_custom_text_objects[custom_text_index] = [];
                         self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
@@ -2653,7 +2638,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     fabric_text.scaleY = custom_text_item.scaleY
                   }
 
-                  fabric_text.setControlsVisibility(fabric_control_visibility)
+                  fabric_text.setControlsVisibility(this.fabric_control_visibility)
                   if (!self.product_custom_text_objects[custom_text_index]) {
                     self.product_custom_text_objects[custom_text_index] = [];
                     self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;

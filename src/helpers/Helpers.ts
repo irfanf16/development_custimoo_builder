@@ -2012,6 +2012,24 @@ const getSize = (obj): string => {
   return megabytes;
 }
 
+const getDeviceInfo = () => {
+  const user_agent: string = navigator.userAgent ?? '';
+  const is_mobile =  /Mobi/.test(user_agent);
+  const device_data = {
+    is_mobile: is_mobile,
+    device: '',
+    browser: '',
+    agent: user_agent
+  }
+  // @ts-ignore
+  const browser_info = user_agent.match(/(firefox|chrome|safari|opera|edge|trident(?=\/))\/?\s*(\d+)/i);
+  device_data.browser = browser_info ? browser_info[1].toLowerCase() : ''
+  // @ts-ignore
+  const device_info = user_agent.match(/Android|iPhone|iPad|iPod|Windows Phone/i);
+  device_data.device = device_info ? device_info[0].toLowerCase() : '';
+  return device_data;
+}
+
 const getCollectionLogoDefaultObj = (values={}): Record<any, any> => {
   const default_obj =  {
     id: null, collection_id: null, name: null, size: null, extension: null, file: null, path: null, sort_order: 0, is_recent_logo: false
@@ -2203,7 +2221,7 @@ export {
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
-  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
+  classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, getDeviceInfo, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys
 };

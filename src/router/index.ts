@@ -15,8 +15,13 @@ const CollectionViewPDF = ()=> import('@/views/CollectionViewPDF.vue')
 const OrderListing = ()=> import("@/views/OrderListing.vue")
 const Resetpassword = ()=> import("@/views/Resetpassword.vue")
 const Dashboard = ()=> import("@/views/Dashboard.vue")
+const ThreeDView = ()=> import("@/views/ThreeDView.vue")
 const Thankyou = ()=> import("@/views/Thankyou.vue")
 const Deactive = ()=> import("@/views/Deactive.vue")
+const scene3d  = () => import("@/components/3d/scene-3d.vue")
+const GLBLoader  = () => import("@/components/3d/glb-loader.vue")
+const GLBLoaderNew  = () => import("@/components/3d/glb-loader_new.vue")
+
 
 
 Vue.use(VueRouter)
@@ -101,6 +106,22 @@ const routes: Array<RouteConfig> = [
     path:'/reset-password',
     name:'Resetpassword',
     component: Resetpassword,
+  },
+  {
+    path: '/3dscene',
+    component: scene3d
+  },
+  {
+    path: '/three-d-view',
+    component: ThreeDView
+  },
+  {
+    path: '/glb',
+    component: GLBLoader
+  },
+  {
+    path: '/glb_new',
+    component: GLBLoaderNew
   }
 ]
 
