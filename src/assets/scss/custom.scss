@@ -4578,6 +4578,21 @@ $fontSize: 0.5;
             object-fit: contain;
         }
     }
+
+    &.back{
+        .scene-container:first-child{
+            .main_size_guide_btn{
+                display: none !important;
+            }
+        }
+    }
+    &.front{
+        .scene-container:last-child{
+            .main_size_guide_btn{
+                display: none !important;
+            }
+        }
+    }
 }
 
 .pdf_page strong {
@@ -5133,7 +5148,7 @@ $fontSize: 0.5;
 
     &:after {
         position: absolute;
-        z-index: 100;
+        z-index: 8;
         content: "";
         right: 0;
         top: 0;
@@ -5724,9 +5739,20 @@ $fontSize: 0.5;
     bottom: 0;
     left: 0;
     right: 0;
-    background: white;
+    background: #f7f8f9;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+
+    .hu-color-picker{
+        box-shadow: none;
+        padding-top: 0;
+    }
+
+    .color-set{
+        &~div:not(.color-show){
+            display: none;
+        }
+    }
 }
 
 .tabs-logo-container {
@@ -6380,6 +6406,31 @@ $fontSize: 0.5;
     }
 }
 
+.theme-scroll-v {
+    &::-webkit-scrollbar {
+        width: 7px;
+        height: 0;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba(33, 159, 132, 0.267);
+        border-radius: 100px;
+    }
+
+    scrollbar-color: #219F84 #f1f1f1;
+    scrollbar-width: thin;
+
+    &:hover{
+        &::-webkit-scrollbar-thumb {
+            background: #219F84;
+        }
+    }
+}
+
 .theme-scroll-h {
     transition: 0.3s all ease-in-out;
 
@@ -6892,4 +6943,13 @@ $fontSize: 0.5;
 
 .vm--block-scroll{
     overflow: hidden !important;
+}
+
+.mobile-full-screen{
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 9999;
 }

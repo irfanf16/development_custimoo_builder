@@ -213,7 +213,7 @@ const getSelectedProductPantones = (product_id: null|number = null, svg_group: s
 
 const getColorType = (svg_group: string = '', product_id: number|null = null) => {
   const product = product_id? Store.getters.getProduct(product_id) : Store.getters.getProduct()
-  if(svg_group && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
+  if(svg_group && product && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
     return 'product_color'
   }
   return Store.getters.getSetting('color_type');

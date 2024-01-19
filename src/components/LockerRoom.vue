@@ -179,10 +179,10 @@
                           <div class="color-container">
                             <template v-for="(item, ix) in colors">
                               <div :key="`item_${ix}`" v-if="item.value">
-                                <div class="color-box"
+                                <div class="color-box" :title="item.pantone? item.pantone: item.name"
                                      :style="{backgroundColor: item.value}" :key="`${ix}`">
                                 </div>
-                                <span> {{ item.name }} </span>
+                                <span> {{ item.pantone? item.pantone: item.name }} </span>
                               </div>
                             </template>
                           </div>

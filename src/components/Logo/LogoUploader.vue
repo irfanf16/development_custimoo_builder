@@ -18,24 +18,15 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <template v-if="replaceLogo">
-          <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
-                  type="file"
-                  name="logos" ref="logoUploadInput"
-                  @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
-                  @click="handleInputOnClick($event, replaceLogo, customLogo, customLogoIndex)"
-                  @drop="handleInputOnDrag($event, replaceLogo, customLogo, customLogoIndex)"
-                  class="fileLoader"
-                  accept="application/postscript,application/pdf,application/eps,image/eps,image/tiff">
-        </template>
-        <input v-else :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
+        <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
                 type="file"
                 name="logos" ref="logoUploadInput"
                 @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
                 @click="handleInputOnClick($event, replaceLogo, customLogo, customLogoIndex)"
                 @drop="handleInputOnDrag($event, replaceLogo, customLogo, customLogoIndex)"
                 class="fileLoader"
-                accept="image/*,application/postscript,application/pdf">
+                :accept="replaceLogo ? 'application/postscript,application/pdf,application/eps,image/eps,image/tiff' : 'image/*,application/postscript,application/pdf'"
+        >
       </div>
     </div>
     <LogoDisclaimerModal @disclaimer-accepted="handleDisclaimerAction" @hide-disclaimer-modal="handleDisclaimerModalHideEvent"/>
@@ -66,25 +57,6 @@ import Vue from "vue";
 })
 export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, CustomLogosMixin, LogoUploaderMixin) {
 
-  /*
-  * props starts here
-  * */
-
-  @Prop({ required: true }) customLogoIndex!: number
-  @Prop({ required: true }) customLogo!: Record<any, any>
-  @Prop({ required: false }) replaceLogo!: boolean
-
-  /*
-  * props ends here
-  * */
-
-  /*
-  * data props starts here
-  * */
-
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
-  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-  public logo_allowed_extensions = ['jpg','gif','png','jpeg','pdf','eps','ai']
 }
 
 </script>

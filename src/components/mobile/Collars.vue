@@ -2,23 +2,32 @@
   <div>
     <div>
         <div>
-          <div><span class="font-weight-bold fs-2">{{ selectedProduct.display_name }}</span> <span class="read_more" @click="toggle_read(currentStyle)" :data-index="currentStyle"><BIconChevronDown /></span></div>
-          <div style="display: none" v-html="sku_information.description">
+          <div class="d-flex align-items-center gap-1">
+            <span class="font-weight-bold fs-2">{{ selectedProduct.display_name }}</span>
+            <span class="read_more d-inline-flex" style="transition: 0.3s all ease"
+                  :style="{'transform': show_read_more ? 'rotate(180deg)': 'rotate(0deg)'}" @click="toggle_read">
+              <BIconChevronDown />
+            </span>
+          </div>
+          <div style="max-height: 0; overflow: hidden; transition: 0.5s all ease"
+               :style="{'max-height': show_read_more ? '700px': '0'}"
+               v-html="sku_information.description">
           </div>
         </div>
     </div>
 
     <div class="choose-collar mb-3">
-      <div class="font-weight-bold fs-2 title">Choose Option</div>
-
       <div v-if="selectedProduct.productstyles.length > 1" class="choose-collar mb-3">
-        <h2 class="fw-bold mb-2 fz-18">Choose option</h2>
+        <h2 class="fw-bold mb-2 fs-2">Choose option</h2>
         <div class="collar-designs">
           <template v-for="(style, i) in selectedProduct.productstyles">
             <template v-if="selectedProduct.productstyles.length > 1">
               <b-button :key="i" :class="{'active': styleIndex === i}" variant="outline-light" @click="changeStyleIndex(i)">
                 <template v-if="style.front_models.length > 0">
-                  <img :src="storageUrl+style.front_models[0].file_url " height="100" />
+                  <img v-if="style.style_icon_url" :src="storageUrl+style.style_icon_url" alt="Collar" :key="`style_icon${i}`"
+                       style="max-width: 97px; object-fit: contain"/>
+                  <img v-else :src="storageUrl+style.front_models[0].file_url"  alt="Collar" :key="`front_style_image${i}`"
+                       style="height: 100px; max-width: 97px; object-fit: contain" />
                </template>
               </b-button>
             </template>
@@ -27,19 +36,15 @@
       </div>
     </div>
 
-    <div class="pt-1 mt-1" style="border-top: 1px solid #eee" v-if="selectedProduct.addons">
-      <div class="font-weight-bold fs-2">Choose Stuff</div>
-      <div class="fade-right">
-        <div class="pt-1 d-flex align-items-center gap-1 hide-scroll" style="overflow-x: auto">
-          <label v-for="(item, i) in selectedProduct.addons" :key="i">
-            <input type="checkbox" name="style"/>
-            <span>
-              <BIconCheckCircleFill/>
-              <span>{{ item.addon.name }}</span>
-              <span class="mx-1">-</span>
-              <span>${{item.addon.price}}</span>
-            </span>
-          </label>
+    <div class="choose-stuff" v-if="selectedProduct.active_addons.length > 0">
+      <h2 class="fw-bold mb-3 fz-18">Addons</h2>
+      <div class="stuff-row addons d-flex gap-2 pb-2 theme-scroll-h" style="overflow-x: auto">
+        <div class="addon d-inline-flex gap-1" :class="{'selected': addon.selected}" v-for="addon in selectedProduct.active_addons"
+             :key="addon.id">
+          <b-form-checkbox size="sm" v-model="addon.selected"   @change="handleAddonSelectionUpdate">
+            {{ addon.title }}
+            <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
+          </b-form-checkbox>
         </div>
       </div>
     </div>
@@ -50,13 +55,14 @@
 import {Component, Prop, Vue} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {default as $} from "jquery";
+import {handleProductPriceUpdate} from "@/helpers/Helpers";
 
 @Component<Collars>({
 })
 
 export default class Collars extends Vue {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  private currentStyle = 0;
+  private show_read_more = false;
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
@@ -68,9 +74,12 @@ export default class Collars extends Vue {
     return this.$store.getters.getSkuInformation
   }
 
-  private toggle_read(index:number){
-    $(`.read_more:eq(${index})`).toggleClass('flip_vertical')
-    $(`.read_more:eq(${index})`).parent("div").next("div").slideToggle('fast')
+  private toggle_read(){
+    this.show_read_more = !this.show_read_more;
+  }
+
+  get productPriceObject() {
+    return this.$store.getters.getProductPriceObject
   }
 
   public changeStyleIndex(i: number) {
@@ -106,6 +115,10 @@ export default class Collars extends Vue {
     }
     this.$store.commit('CHANGE_STYLE_INDEX', i);
   }
+
+  handleAddonSelectionUpdate(): void {
+    handleProductPriceUpdate()
+  }
 }
 </script>
 
@@ -133,6 +146,7 @@ export default class Collars extends Vue {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  align-items: stretch;
 
   .btn{
     border-color: #ececec;

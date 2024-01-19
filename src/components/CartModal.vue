@@ -9,29 +9,31 @@
       </span>
     </div>
 
-    <div class="theme-scroll" style="height: calc(100vh - 300px); overflow-y: auto; padding-bottom: 20px">
+    <div style="height: calc(100vh - 300px); padding-bottom: 20px; overflow: hidden; overflow-y: auto;" class="theme-scroll-v">
       <div class="loader relative" v-if="viewLoader || cartLoading"><img src="@assets/images/loading.gif" /></div>
-      <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
-        <thead class="bg-light">
+
+      <div class="theme-scroll-h" style="overflow-y: auto; width: 100%">
+        <table class="table table-bordered mb-0" v-if="cartItems" style="min-width: 800px; table-layout: fixed">
+          <thead class="bg-light">
           <tr>
-            <th class="font-weight-bold">
+            <th style="width: 30%" class="font-weight-bold">
               Product Name
             </th>
-            <th class="font-weight-bold">
+            <th style="width: 25%" class="font-weight-bold">
               Design Image
             </th>
-            <th class="font-weight-bold">
+            <th style="width: 10%" class="font-weight-bold">
               Quantity
             </th>
-            <th class="font-weight-bold">
+            <th style="width: 25%" class="font-weight-bold">
               Addons
             </th>
-            <th class="font-weight-bold">
+            <th style="width: 10%" class="font-weight-bold">
               Actions
             </th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           <template v-for="(cart_item, cart_item_index) in cartItems">
             <template v-for="(factory_product, factory_product_index) in cart_item.factory_products">
               <tr :key="factory_product.id" >
@@ -91,10 +93,11 @@
             </template>
 
           </template>
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+      </div>
 
-      <div class="p-3 grid grid-mobile-2 gap-2 text-left">
+      <div class="p-3 grid grid-2 gap-2 text-left">
         <div class="well border-0" style="background: #f5f5f5">
           <div class="fs-2 font-weight-bold px-2 pt-1 pb-2">
             Shipping Address
@@ -136,79 +139,81 @@
           </div>
         </div>
 
-        <div class="align-self-start">
-          <table class="table table-bordered b-table-fixed mb-0 w-100" v-if="cartItems">
-            <thead class="bg-light">
-              <tr>
-                <th class="font-weight-bold">
-                  Product/Addon Name
-                </th>
-                <th class="font-weight-bold">
-                  Quantity
-                </th>
-                <template v-if="product_price_object.show_price">
+        <div class="align-self-start" style="max-width: 100%">
+          <div class="theme-scroll-h" style="overflow: hidden; max-width: calc(95vw - 32px); overflow-x: auto">
+            <table class="table table-bordered mb-0 w-100" v-if="cartItems">
+              <thead class="bg-light">
+                <tr>
                   <th class="font-weight-bold">
-                    Price
+                    Product/Addon Name
                   </th>
                   <th class="font-weight-bold">
-                    Total
+                    Quantity
                   </th>
-                </template>
-              </tr>
-            </thead>
-            <tbody>
-              <template v-for="(cart_item, index) in cartItems">
-                <template v-for="(factory_product) in cart_item.factory_products">
-                  <tr :key="factory_product.id" >
-                    <td>
-                      <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
-                    </td>
-                    <td>
-                      <span>{{ factory_product.product_price_object.quantity }}</span>
-                    </td>
-                    <template v-if="product_price_object.show_price">
-                      <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
-                        <template>
-                          <span>{{ factory_product.product_price_object.currency_symbol }}{{
-                              factory_product.product_price_object.product_price
-                            }} </span>
-                        </template>
+                  <template v-if="product_price_object.show_price">
+                    <th class="font-weight-bold">
+                      Price
+                    </th>
+                    <th class="font-weight-bold">
+                      Total
+                    </th>
+                  </template>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-for="(cart_item, index) in cartItems">
+                  <template v-for="(factory_product) in cart_item.factory_products">
+                    <tr :key="factory_product.id" >
+                      <td>
+                        <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
                       </td>
                       <td>
-                        {{ factory_product.product_price_object.currency_symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(factory_product.product_price_object.product_price) }}
-                      </td>
-                    </template>
-                  </tr>
-                  <template v-for="(addon, addon_index) in factory_product.addons">
-                    <tr class="bg-light" :key="factory_product.id+index+addon_index">
-                      <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
-                        {{addon.title}}
-                      </td>
-                      <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
-                        {{factory_product.product_price_object.quantity}}
+                        <span>{{ factory_product.product_price_object.quantity }}</span>
                       </td>
                       <template v-if="product_price_object.show_price">
-                        <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
-                          {{ addon.currencies[0].symbol }}{{ addon.currencies[0].price }}
+                        <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
+                          <template>
+                            <span>{{ factory_product.product_price_object.currency_symbol }}{{
+                                factory_product.product_price_object.product_price
+                              }} </span>
+                          </template>
                         </td>
-                        <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
-                          {{ addon.currencies[0].symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(addon.currencies[0].price) }}
+                        <td>
+                          {{ factory_product.product_price_object.currency_symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(factory_product.product_price_object.product_price) }}
                         </td>
                       </template>
                     </tr>
+                    <template v-for="(addon, addon_index) in factory_product.addons">
+                      <tr class="bg-light" :key="factory_product.id+index+addon_index">
+                        <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                          {{addon.title}}
+                        </td>
+                        <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                          {{factory_product.product_price_object.quantity}}
+                        </td>
+                        <template v-if="product_price_object.show_price">
+                          <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                            {{ addon.currencies[0].symbol }}{{ addon.currencies[0].price }}
+                          </td>
+                          <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
+                            {{ addon.currencies[0].symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(addon.currencies[0].price) }}
+                          </td>
+                        </template>
+                      </tr>
+                    </template>
                   </template>
                 </template>
-              </template>
 
-              <tr v-if="product_price_object.show_price">
-                <td></td>
-                <td colspan="2" class="font-weight-bold">Total Price</td>
-                <td colspan="2" class="font-weight-bold">
-                  {{ product_price_object.active_currency.symbol }}{{ cartTotalPrice }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                <tr v-if="product_price_object.show_price">
+                  <td></td>
+                  <td colspan="2" class="font-weight-bold">Total Price</td>
+                  <td colspan="2" class="font-weight-bold">
+                    {{ product_price_object.active_currency.symbol }}{{ cartTotalPrice }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
           <div class="fs-2 font-weight-bold mt-3">General comments</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Any comments?" type="text" name="general_comments"

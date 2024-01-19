@@ -40,11 +40,6 @@
                   :class="{'pulse-animation': !logoColorsInfo.is_shuffled}"
                   variant="secondary">Shuffle
         </b-button>
-        <b-button class="use-btn flex-shrink-1" :class="{'invisible': !(logoColorsInfo.colors.length && logoColorsInfo.using_logo_colors)}"
-                  style="width: auto" @click="rollbackPreviousColors()"
-                   variant="secondary">
-          <font-awesome-icon :icon="['fas', 'redo-alt']"/>
-        </b-button>
       </div>
     </div>
   </div>

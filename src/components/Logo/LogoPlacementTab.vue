@@ -37,7 +37,9 @@
               </div>
             </div>
           </div>
-          <logo-extracted-colors :custom-logo="custom_logo" v-if="logoColors.length > 0 && customLogoIndex == 0" />
+          <template v-if="custom_logo.url && customLogoIndex == 0">
+            <logo-extracted-colors :custom-logo="custom_logo" v-if="logoColors.length > 0 && customLogoIndex == 0" />
+          </template>
         </div>
       </b-tab>
       <template v-if="customLogos && customLogos.length > 0">
@@ -54,11 +56,12 @@
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import LogoUploader from "@/components/Logo/LogoUploader.vue"
 import RecentLogos from "@/components/Logo/RecentLogos.vue";
 import LogoExtractedColors from "@/components/Logo/LogoExtractedColors.vue";
 import {getLogoSettingsObject, setUndoRedoItems} from "@/helpers/Helpers"
+import {LogoPlacementTabMixin} from "@/mixins/LogoPlacementTabMixin";
 
 
 @Component<LogoPlacementTab>({
@@ -67,156 +70,8 @@ import {getLogoSettingsObject, setUndoRedoItems} from "@/helpers/Helpers"
     LogoUploader,
     LogoExtractedColors
   },
-  async mounted() {
-    this.$eventBus.$on('set-logo-tab-index', (logo_tab_index: number) => {
-      this.custom_logo_tab_index = logo_tab_index >=0 ? logo_tab_index : 0
-    })
-    this.$root.$on('changeLogoTabIndex', (index:number) => {
-      // here you need to use the arrow function
-      this.tabIndex = index;
-    })
-  }
 })
-export default class LogoPlacementTab extends Vue {
-  // @Prop({required: true}) numberOfLogosAllowed!: number
-  // @Prop({required: true}) isColorShuffled!: boolean
-  /*
-  * props starts
-  * */
-  @Prop({required: false, default: () => { return [{
-      url: '',
-      width: 200,
-      height: 200,
-      x_axis: 250,
-      y_axis: 200,
-      rotation: 0,
-      haveControls: true,
-      side: 'front',
-      customLogo: true
-    }]}}) logosSetting!: [Record<any, any>]
-
-  /*
-  * props ends
-  * */
-
-  /*
-  * data props starts
-  * */
-
-  public ref = this.$refs as Record<any, any>
-  public numberOfLogos = 1
-  public showFileInput  = true
-
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
-  public selected = 'front'
-  public tabIndex = 0
-  public options = [
-    {value: 'front', text: 'Front'},
-    {value: 'back', text: 'Back'}
-  ]
-  public logoColorUsed = false
-  public allowedLogosLimit = 1000
-  public productColors: any[] = []
-  public showSVGs = false
-  public showLogoColors = false
-  public selectedSwatchIndex = -1
-  public defSwatchColor = '#ffffff'
-  public defSwatchPantone = '11-0601'
-  public custom_logo_tab_index = 0
-  public expand_logos = true
-
-  /*
-  * data props ends
-  * */
-
-
-  /*
-  * computed props starts
-  * */
-
-  get selectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
-  }
-
-  get lockerColors(){
-    return this.$store.getters.getLockerColors
-  }
-
-  get customLogos() {
-    return this.$store.getters.getCustomLogos();
-  }
-
-  get logoColors() {
-    return this.$store.getters.getLogoColorsInfo('colors')
-  }
-
-  /*
-  * computed props ends
-  * */
-
-  /*
-  * methods starts
-  * */
-
-  public changeTab (index: number) {
-    this.$store.dispatch('setLogoTab', index)
-  }
-
-  get vectorImageConstraint():boolean{
-    return this.$store.getters.getFactorySettings(this.selectedProduct.factory_id)?.vector_image_constraint
-  }
-
-  public addLogoTab() {
-    const new_logo_index = this.customLogos.length
-    //check if logo setting at given index exists then get that else get logo default object
-    let logo_setting_at_index = this.selectedProduct.logos_setting[new_logo_index] ? this.selectedProduct.logos_setting[new_logo_index] : {}
-    logo_setting_at_index = {...getLogoSettingsObject({product_id: this.selectedProduct.id}), ...logo_setting_at_index}
-    logo_setting_at_index.logo_index = new_logo_index
-    this.customLogos.push(logo_setting_at_index)
-    this.custom_logo_tab_index = new_logo_index
-  }
-
-  public async removeLogoTab(logo_index: number) {
-    const self: Record<any, any> = this;
-    await setUndoRedoItems('customLogos', 'logo_tab_removed')
-    this.customLogos.splice(logo_index, 1)
-    this.customLogos.forEach((custom_logo: Record<any, any>, customLogoIndex) => {
-      custom_logo.logo_index = customLogoIndex
-    })
-    if(logo_index == this.customLogos.length) {
-      await self.$eventBus.$emit("customLogoRemoved", logo_index)
-    } else {
-      self.$eventBus.$emit("customLogoResetAndAdd") // as logo is removed in between so index of logos are changed, just reset and add all logos in canvas
-    }
-    this.custom_logo_tab_index = logo_index - 1
-    self.$eventBus.$emit('handleNonVectorCustomLogosCount')
-  }
-
-  public async handleLogoPlacementChange(updated_value: string, custom_logo_index: number) {
-    let self: Record<any, any> = this;
-    await setUndoRedoItems('customLogos', 'placement_updated')
-    this.customLogos[custom_logo_index].side = updated_value
-    this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: custom_logo_index, custom_logos:  this.customLogos[custom_logo_index]})
-    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
-  }
-
-  public getColors() {
-    this.productColors = []
-    this.selectedProduct.colors.forEach((colors: any, key: number) => {
-      let finalColor = {color_text: [], selectedColor: "", name: colors.file_name.substr(0, colors.file_name.indexOf('.'))}
-      finalColor.color_text = colors.json_data
-      this.productColors = this.productColors.concat(finalColor)
-    })
-    this.productColors = this.productColors.concat(this.lockerColors)
-  }
-
-  public handleCustomLogoTabInputEvent(selected_tab_index: number) {
-    this.custom_logo_tab_index = selected_tab_index
-  }
-
-  /*
-  * methods ends
-  * */
+export default class LogoPlacementTab extends Mixins(LogoPlacementTabMixin) {
 
 }
 </script>

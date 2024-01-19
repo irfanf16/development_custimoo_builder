@@ -27,13 +27,13 @@
             <span class="selected-color ml-2 flex-shrink-0 mt-1" :style="{ background : gradient_color_string(svgGroups[selectAccordionIndex].gradient_colors) }"></span>
             <span class="color-pantone-name gap-1 text-uppercase">
                <template v-for="(gradient_color, g_index) in svgGroups[selectAccordionIndex].gradient_colors">
-                 {{ gradient_color.pantone }} {{ gradient_color.name }} <template v-if="g_index < svgGroups[selectAccordionIndex].gradient_colors.length - 1">/</template>
+                 {{ gradient_color.pantone }} {{ gradient_color.name | capitalize }} <template v-if="g_index < svgGroups[selectAccordionIndex].gradient_colors.length - 1">/</template>
                </template>
               </span>
           </template>
           <template v-else>
             <span class="selected-color ml-2 flex-shrink-0 mt-1" :style="{ background : svgGroups[selectAccordionIndex].color }"></span>
-            <span class="color-pantone-name text-uppercase">{{ svgGroups[selectAccordionIndex].pantone }} {{ svgGroups[selectAccordionIndex].name }}</span>
+            <span class="color-pantone-name text-uppercase" style="margin-top: 2px;">{{ svgGroups[selectAccordionIndex].pantone }} {{ svgGroups[selectAccordionIndex].name | capitalize }}</span>
           </template>
 <!--          <span class="selected-color ml-2 flex-shrink-0" :style="{background: svgGroups[selectAccordionIndex].color}"></span>-->
 <!--          <div class="m-1 text-muted">-->
@@ -44,20 +44,25 @@
       </div>
       <div class="overflow-hidden fade-right">
         <ul class="mobile-nav horizontal active_underline hide-scroll pr-4">
-          <li v-for="(colorName, index) in productColors" :key="index">
-            <a class="faded_text text-capitalize" :class="selectTypeIndex == index ? 'active_dark' : ''" @click="selectType(index)">{{colorName.name}}</a>
+          <li v-if="getSvgGroupColors(svgGroups[selectAccordionIndex].id)">
+            <a class="faded_text active_dark">{{ getSvgGroupColors(svgGroups[selectAccordionIndex].id).name | capitalize }}</a>
           </li>
-          <li v-if="logoColorsInfo && logoColorsInfo.length">
-            <a class="faded_text text-capitalize" :class="selectTypeIndex == productColors.length ? 'active_dark' : ''"
-               @click="selectType(productColors.length)">Team logo colors</a>
-          </li>
-          <li v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length">
-            <a class="faded_text text-capitalize" :class="selectTypeIndex == productColors.length + 1 ? 'active_dark' : ''"
-               @click="selectType(productColors.length + 1)">Locker colors</a>
-          </li>
-          <li v-if="selectedProduct.is_custom_color_allowed">
-            <a class="faded_text text-capitalize" @click="showOther">Other</a>
-          </li>
+          <template v-else>
+            <li v-for="(colorName, index) in productColors" :key="index">
+              <a class="faded_text" :class="selectTypeIndex == index ? 'active_dark' : ''" @click="selectType(index)">{{colorName.name | capitalize}}</a>
+            </li>
+            <li v-if="logoColorsInfo && logoColorsInfo.length">
+              <a class="faded_text" :class="selectTypeIndex == productColors.length ? 'active_dark' : ''"
+                 @click="selectType(productColors.length)">Team logo colors</a>
+            </li>
+            <li v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length">
+              <a class="faded_text" :class="selectTypeIndex == productColors.length + 1 ? 'active_dark' : ''"
+                 @click="selectType(productColors.length + 1)">Locker colors</a>
+            </li>
+            <li v-if="selectedProduct.is_custom_color_allowed">
+              <a class="faded_text" @click="showOther">Other</a>
+            </li>
+          </template>
         </ul>
       </div>
       <div v-if="selectTypeIndex == (productColors.length + 1)" class="overflow-hidden fade-right">
@@ -80,37 +85,69 @@
       </div>
     </div>
 
-    <div v-if="selectTypeIndex == productColors.length" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
-      <template v-for="(ext_color, ext_index) in logoColorsInfo">
-        <div v-if="ext_color.hex"  class="color_circle" @click="ext_color.hex == svgGroups[selectAccordionIndex].color ? null : setColor({value: ext_color.hex, ...ext_color})"
-             :title="ext_color.name" :style="{background: ext_color.hex, boxShadow: `0 0 0 3px white, 0 0 0 4px ${ext_color.hex}`}" :key="'base-color' +ext_index + ext_color.name">
-<!--                    <span v-if="ext_color.hex == svgGroups[selectAccordionIndex].color || (gradient_index !== undefined && svgGroups[selectAccordionIndex].gradient_colors && svgGroups[selectAccordionIndex].gradient_colors[gradient_index].color == ext_color.hex)" class="selected" style="z-index: 100; opacity: 1">-->
-<!--                      <BIconCheck />-->
-<!--                    </span>-->
-        </div>
-      </template>
-    </div>
-    <template v-if="selectTypeIndex == (productColors.length + 1)">
-      <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
-        <div class="color_circle" @click="setColor(color)" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`"
-             v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)"
-             :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}">
-<!--            <span v-if="color.value == svgGroups[selectAccordionIndex].color" class="selected" style="z-index: 100; opacity: 1">-->
-<!--                          <BIconCheck />-->
-<!--                        </span>-->
-        </div>
-      </div>
-    </template>
-
-    <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px" v-if="productColors[selectTypeIndex]">
+    <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px" v-if="getSvgGroupColors(svgGroups[selectAccordionIndex].id)">
       <div class="color_circle" :key="`color-main-${index}`" @click="color.value == svgGroups[selectAccordionIndex].color ? null : setColor(color)"
-           v-for="(color, index) in productColors[selectTypeIndex].color_text"
+           v-for="(color, index) in getSvgGroupColors(svgGroups[selectAccordionIndex].id).json_data"
            :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}"></div>
     </div>
 
+    <template v-else>
+      <div v-if="selectTypeIndex == productColors.length" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
+        <template v-for="(ext_color, ext_index) in logoColorsInfo">
+          <div v-if="ext_color.hex"  class="color_circle" @click="ext_color.hex == svgGroups[selectAccordionIndex].color ? null : setColor({value: ext_color.hex, ...ext_color})"
+               :title="ext_color.name" :style="{background: ext_color.hex, boxShadow: `0 0 0 3px white, 0 0 0 4px ${ext_color.hex}`}" :key="'base-color' +ext_index + ext_color.name">
+            <!--                    <span v-if="ext_color.hex == svgGroups[selectAccordionIndex].color || (gradient_index !== undefined && svgGroups[selectAccordionIndex].gradient_colors && svgGroups[selectAccordionIndex].gradient_colors[gradient_index].color == ext_color.hex)" class="selected" style="z-index: 100; opacity: 1">-->
+            <!--                      <BIconCheck />-->
+            <!--                    </span>-->
+          </div>
+        </template>
+      </div>
+      <template v-if="selectTypeIndex == (productColors.length + 1)">
+        <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
+          <div class="color_circle" @click="setColor(color)" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`"
+               v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)"
+               :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}">
+            <!--            <span v-if="color.value == svgGroups[selectAccordionIndex].color" class="selected" style="z-index: 100; opacity: 1">-->
+            <!--                          <BIconCheck />-->
+            <!--                        </span>-->
+          </div>
+        </div>
+      </template>
+
+      <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px" v-if="productColors[selectTypeIndex]">
+        <div class="color_circle" :key="`color-main-${index}`" @click="color.value == svgGroups[selectAccordionIndex].color ? null : setColor(color)"
+             v-for="(color, index) in productColors[selectTypeIndex].color_text"
+             :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}"></div>
+      </div>
+    </template>
+
     <div v-if="showOtherColors && selectedProduct.is_custom_color_allowed" class="mobile-other">
       <span class="close" @click="hideOther"><BIconX /></span>
-      <color-picker :colors-default="[]" @changeColor="changeColor" theme="light" :color="svgGroups[selectAccordionIndex] ? svgGroups[selectAccordionIndex].color : '#000000'" :sucker-hide="true"/>
+      <div class="py-2 px-3" style="padding-bottom: 0;">
+        <b-form class="pantone-color-field" v-on:submit.prevent>
+          <label for="inline-form-input-pantone-color" v-if="getColorType === 'cmyk'">CMYK (x,x,x,x)</label>
+          <label for="inline-form-input-pantone-color" v-else-if="getColorType === 'pantone-coated'">Pantone: (xxx c)</label>
+          <label class="mb-2" for="inline-form-input-pantone-color" v-else>Pantone: (TCX xx-xxxx)</label>
+          <div class="d-flex gap-2">
+            <b-form-input
+              @focusin="($event)=>$event.target.select()"
+              v-model="svgGroups[selectAccordionIndex].pantone"
+              class="mb-2 mr-sm-2 mb-sm-0"
+              :placeholder="place_holder"
+              @input="changePantoneColor"
+              :disabled="getColorType === 'cmyk'"
+            ></b-form-input>
+
+            <button @click="hideOther" class="btn mb-2 btn-secondary btn-sm d-inline-flex align-items-center gap-1">
+              <b-icon-arrow-left-circle /> Back
+            </button>
+          </div>
+          <div class="pantone-message p-1 text-danger">
+            {{ pantoneMessage }}
+          </div>
+        </b-form>
+      </div>
+      <color-picker :key="svgGroups[selectAccordionIndex] ? svgGroups[selectAccordionIndex].color: '#000000'" :sucker-hide="true" @changeColor="changeColor" theme="light" :color="svgGroups[selectAccordionIndex] ? svgGroups[selectAccordionIndex].color : '#000000'" />
     </div>
   </div>
 </template>
@@ -124,6 +161,13 @@ import colorPicker from '@caohenghu/vue-colorpicker'
 @Component<ColorAccordionMobile>({
   components: {
     colorPicker,
+  },
+  filters: {
+    capitalize: (value: string) => {
+      if (!value) return ''
+      value = value.toString()
+      return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+    }
   },
   mounted() {
     getLockerColors();

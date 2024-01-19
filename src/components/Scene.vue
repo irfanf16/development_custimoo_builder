@@ -1199,13 +1199,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public setActiveTab(selected: Record<any, any>) {
+    let self: Record<any, any> = this;
     let [active_text_index, active_jersey_part] = [selected.custom_text_index, selected.custom_text_item_index]
     if(!this.fromRosterModal){
       if(selected.type == 'logo') {
         this.$store.dispatch('setTabMain',{value:0})
       }else if(selected.type == 'text'){
         this.$store.dispatch('setTabMain',{value:2});
-        this.$emit('setCustomTextIndex', selected.text_index);
+        // self.$eventBus.$emit("customTextTabChanged", (selected.text_index) as number)
+        setTimeout(() => {
+          self.$eventBus.$emit("customTextTabChanged", (selected.text_index) as number);
+        }, 500);
+        // this.$emit('setCustomTextIndex', selected.text_index);
         (this as Record<any, any>).$eventBus.$emit('setActiveJerseyPart', active_text_index, active_jersey_part);
       }
 

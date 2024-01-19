@@ -1,7 +1,6 @@
 <template>
   <div>
     <div class="customize_controls" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 0 && selectedProduct.is_logo_allowed">
-<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
@@ -10,14 +9,12 @@
       </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 1" >
-<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <ColorAccordionMobile @showOther="updateOtherTab" :productColors="productColors" :key="selectedProduct.id" />
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_name_number">
-<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(1)" v-touch:start="setPlayersDataHeight(1)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(1)"></span>
 
@@ -26,10 +23,9 @@
         @showOther="updateOtherTab"
         ref="custom-text-mobile"
         :productFonts="selectedProduct.namefonts" :selectedProductID="selectedProduct.id"
-        :fontsColors="fontsColors" :firstColor="firstColor" :secondColor="secondColor" :fontOptions="fontOptions" />
+        :fontsColors="fontsColors" :fontOptions="fontOptions" />
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 3" >
-<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(2)" v-touch:start="setPlayersDataHeight(2)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(2)"></span>
       <div class="mt-2"></div>
@@ -37,7 +33,6 @@
       <Collars/>
     </div>
     <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-show="this.$store.getters.getActiveTab === 4">
-<!--      <span class="close" @click="this.hideAll"><BIconX /></span>-->
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
@@ -57,6 +52,11 @@
             </template>
             <template v-else>
               <template v-if="company.platform !== 'self'">
+                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                Add to cart
+              </span></span>
+              </template>
+              <template v-else>
                 <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
                 Add to cart
               </span></span>
@@ -93,7 +93,7 @@ import TextCustomization from "@/components/mobile/TextCustomization.vue";
 import Collars from "@/components/mobile/Collars.vue";
 import {getClosestColor} from "@/pantoneColor";
 import readXlsxFile from "read-excel-file";
-import LogoPlacementMobile from "@/components/mobile/LogoPlacementMobile.vue";
+import LogoPlacementMobile from "@/components/Logo/LogoPlacementMobile.vue";
 import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
@@ -133,12 +133,7 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
   private activeEye = -1;
   private playersDataHeight = 0;
   public fontsColors: any[] = []
-  public firstColor!: Record<any, any>
-  public secondColor!: Record<any, any>
   public fontOptions: Record<any, any>[] = []
-  // public color = '#59c7f9'
-  public pantoneColorVal= '13-4411'
-  // privat tabTop = window.screen.availHeight - 190;
   public id = 0
   public custom_arr: Record<any, any>[] = [];
   public sizeOptions: Record<any, any>[] = []
@@ -454,29 +449,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
   get lockerColors(){
     return this.$store.getters.getLockerColors
   }
-
-  public addTab(index: number) {
-    let text = {
-      text: '',
-      type: 'name',
-      width: 50,
-      height: 50,
-      x_axis: 300,
-      y_axis: 180,
-      rotation: 0,
-      name_of_placement: this.selectedProduct.productnames[0].name_of_placement,
-      haveControls: true,
-      outlineEnabled: true,
-      side: 'back',
-      fontFamily: this.fontOptions[0] ? this.fontOptions[0].value : '',
-      fillColor: this.firstColor.value,
-      fillColorPantone: this.firstColor.name,
-      outLineColor: this.secondColor.value,
-      outLineColorPantone: this.secondColor.name,
-      outLineWidth: 0
-    }
-    this.$store.dispatch('setCustomTexts', {index: this.customTexts.length, text: text})
-  }
 }
 </script>
 
@@ -511,10 +483,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
     margin: 0 auto;
     height: auto;
   }
-}
-
-.read_more{
-  transform: rotate(0deg); transition: 0.2s all ease; display: inline-block;
 }
 
 .fontList{

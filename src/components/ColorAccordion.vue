@@ -89,7 +89,7 @@
               <!-- logo colors -->
               <template v-else-if="selectTypeIndex == productColors.length && !showOtherColors" v-for="(ext_color, ext_index) in logoColorsInfo">
                 <div v-if="ext_color.hex"  class="color-box" @click="ext_color.hex == svgElement.color ? null : setColor({value: ext_color.hex, ...ext_color})"
-                     :title="ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
+                     :title="ext_color.pantone ? ext_color.pantone : ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
                   <span v-if="ext_color.hex == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == ext_color.hex)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
                   </span>
@@ -179,17 +179,6 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     }
   }
 
-  get place_holder() {
-    if(this.getColorType === 'cmyk') {
-      return 'x,x,x,x';
-    } else if(this.getColorType === 'pantone-coated') {
-      return 'xxx c';
-    } else if(this.getColorType === 'pantone-tcx') {
-      return 'xx-xxxx';
-    }
-    return '';
-  }
-
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
@@ -198,19 +187,8 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     return this.$store.getters.getGroupColors
   }
 
-  get getColorType(){
-    return getColorType()
-  }
-
   public getColorTypeBySvgGroup(svg_group: string) {
     return getColorType(svg_group)
-  }
-
-  public getSvgGroupColors(svg_group) {
-    if(svg_group && this.selectedProduct.svg_group_color_container && this.selectedProduct.svg_group_color_container[svg_group]) {
-      return this.selectedProduct.svg_group_color_container[svg_group]
-    }
-    return false
   }
 }
 </script>

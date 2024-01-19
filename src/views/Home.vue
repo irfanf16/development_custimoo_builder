@@ -1,18 +1,42 @@
 <template>
-  <div class="page-wrapper m-lg-4" v-cloak style="margin-top: 0 !important;" >
+  <div class="page-wrapper m-lg-4" :class="{'mobile-full-screen': fullScreen}" v-cloak style="margin-top: 0 !important;" >
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
 
+    <ShareDesignModal :product="product" :loader="shareDesignLoader" />
+    <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
+
     <b-container fluid>
       <b-row>
+        <b-col cols="12" v-if="!manageComponents.CustomizationPreview">
+          <div  class="py-2 px-1 text-right">
+            <div v-if="isCustomerAuthenticated" class="d-inline-flex align-items-center gap-1 justify-content-end fs-1 py-1 px-2">
+              {{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}
+
+              <b-button @click="logoutCustomer" class="d-inline-flex align-items-center gap-1 justify-content-end fs-1 py-1 px-2">
+                <b-icon-box-arrow-right /> Logout
+              </b-button>
+            </div>
+
+            <b-button @click.stop="gotoLogin" v-else class="d-inline-flex align-items-center gap-1 justify-content-end fs-1 py-1 px-2">
+              <b-icon-person-circle /> Login
+            </b-button>
+          </div>
+        </b-col>
+
         <template v-if="application_mounted && selectedProduct">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <CustomizationTabs v-if="!manageComponents.mobileScreen" :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
-                                @open-add-to-locker="getLockers(true)"
-                               :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
-                               :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
-            <CustomTabs v-else @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
-                        @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs" :products_fonts="products_fonts" />
+            <template v-if="manageComponents.mobileScreen">
+              <CustomTabs v-if="manageComponents.CustomizationPreview" @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
+                          @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs"
+                          :products_fonts="products_fonts" />
+            </template>
+            <template v-else>
+              <CustomizationTabs  :isColorShuffled="isColorShuffled" @setColorShuffled="(val) => isColorShuffled = val"
+                                 @open-add-to-locker="getLockers(true)"
+                                 :tabIndexNew="this.$store.getters.getMainTab" @tabIndexChange="changeTabs" ref="customization-tab"
+                                 :products_fonts="products_fonts" :customTextIndex="customTextIndex" @addToCartAnimation="addToCartAnimation"/>
+            </template>
           </b-col>
 
           <b-col v-if="manageComponents.CustomizationPreview" cols="12" lg="6" ref="preview-column" class="preview-column position-relative" >
@@ -67,7 +91,7 @@
                                                 :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
 
                                   ></b-form-input>
-                                  <button @click="copyLink(lockerProductIndex)" class="btn" type="button">Copy Link</button>
+                                  <button @click="copyLink()" class="btn" type="button">Copy Link</button>
                                 </b-form>
                               </div>
                             </div>
@@ -144,7 +168,7 @@
                     <b-button variant="outline-secondary" :class="{'pulse-animation': !logoColorsInfo.is_shuffled}" v-if="logoColorsInfo.using_logo_colors && logoColorsInfo.colors.length > 1" @click="shuffleLogoColors">Shuffle colors</b-button>
                   </div>
 
-                  <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute" style="left: 0; right: 0; top: 15px;"
+                  <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute main-home-price" style="left: 0; right: 0; top: 15px;"
                        v-if="productPriceObject.show_price && productPriceObject.product_price">
                     {{ PriceLabel }} : {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
                   </div>
@@ -155,7 +179,6 @@
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
                 <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
                 <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
-                <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                   <div>
                     <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction()"
@@ -191,6 +214,11 @@
                         <svg fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="1em" width="1em"> <g> <g> <rect x="139.636" y="372.364" width="232.727" height="46.545"/> </g> </g> <g> <g> <polygon points="139.636,465.455 139.636,488.727 139.636,512 372.364,512 372.364,488.727 372.364,465.455 		"/> </g> </g> <g> <g> <path d="M507.338,133.843L413.823,9.3c-4.395-5.854-11.29-9.3-18.61-9.3h-38.364v23.273v23.273v147.394 c0,12.851-10.42,23.273-23.273,23.273H116.364c-12.853,0-23.273-10.422-23.273-23.273V46.545V23.273V0H23.273 C10.42,0,0,10.422,0,23.273v465.455C0,501.578,10.42,512,23.273,512h69.818v-23.273v-23.273v-23.273v-93.091 c0-12.854,10.42-23.273,23.273-23.273h279.273c12.853,0,23.273,10.418,23.273,23.273v93.091v23.273v23.273V512h69.818 C501.58,512,512,501.578,512,488.727v-340.91C512,142.778,510.363,137.872,507.338,133.843z"/> </g> </g> <g> <g> <polygon points="139.636,0 139.636,23.273 139.636,46.545 139.636,170.667 310.303,170.667 310.303,46.545 310.303,23.273 310.303,0 		"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg>
                       </b-button>
                     </template>
+                    <button class="d-inline-flex align-items-center align-self-stretch btn ml-2 p-1 fs-3"
+                            @click="resetStore" v-if="mobileScreen && (undoItems.length > 0 || redoItems.length > 0)"
+                            style="padding: 7px;">
+                      <b-icon-arrow-clockwise />
+                    </button>
                   </div>
 
                   <div class="mobile-nav">
@@ -211,7 +239,7 @@
                             <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                             <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
                               <b-button :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
-                                <b-icon-cart />
+                                <b-icon-cart-plus />
                               </b-button>
                             </span>
 
@@ -222,7 +250,7 @@
                               </span>
                               <b-button :key="'AddToCart'" aria-label="Add to Cart" v-else-if="!cartLoading"  :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px" @click="addToCart(null)">
                                 <b-icon-cart-check v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product'" />
-                                <b-icon-cart v-else />
+                                <b-icon-cart-plus v-else />
                               </b-button>
                               <button v-else :disabled="true" class="btn text-white fs-3 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4px 5px">
                                 <i class="fa fa-spinner fa-spin"></i>
@@ -232,57 +260,76 @@
                         </template>
                       </template>
 
-                      <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false && isRosterOpened">
-                        <button @click="showVModal('replace-logo')" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
-                          <b-icon-card-checklist />
-                        </button>
-                      </span>
-
                       <template v-else>
-                        <template v-if="company.platform !== 'self'">
+                        <span v-if="vectorImageConstraint?notVectorLogosCount > 0:false && isRosterOpened">
+                          <button @click="showVModal('replace-logo')" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                            <b-icon-card-checklist />
+                          </button>
+                        </span>
+
+                        <template v-else-if="company.platform !== 'self'">
                           <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="is_admin_token && company.platform == 'wordpress'">
-                            <button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px"><b-icon-cart /></button>
+                            <button @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="canvasImage.scene == null || is_admin_token" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                              <b-icon-cart-plus />
+                            </button>
                           </span>
-                            <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px"><b-icon-cart /></b-button>
-                          </template>
-                          <span v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
+                          <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                            <b-icon-cart-plus />
+                          </b-button>
+                        </template>
+                        <template v-else-if="vectorImageConstraint?notVectorLogosCount > 0:false">
                             <button @click="showVModal('replace-logo')" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
                               <b-icon-card-checklist />
                             </button>
-                          </span>
                         </template>
+                        <template v-else>
+                          <button @click="setActionBeforeLogin('addToCart')" :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" style="line-height: normal; padding: 4.5px 5px">
+                            <b-icon-cart-plus />
+                          </button>
+                        </template>
+                      </template>
                     </template>
 
                     <strong class="user-name mr-1">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
 
-                    <button @click="toggleDD" class="custom-link reset-btn position-relative" v-click-outside="() => showDD = false">
-                      <BIconThreeDotsVertical />
+                    <button @click="toggleDD" class="custom-link reset-btn p-1 position-relative border rounded" style="border: 1px solid #ccc !important;">
+                      <BIconThreeDotsVertical v-if="!showDD" />
+                      <BIconX v-else />
 
-                      <ul class="dropdown-menu dropdown-menu-right" :class="{'show': showDD}" ref="dd-menu" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
+                      <ul class="dropdown-menu dropdown-menu-right mt-3" :class="{'show': showDD}" :key="showDD" ref="dd-menu" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
                         <li>
-                          <a class="dropdown-item" target="_self"><button @click="showDesign">Change Design / Item</button></a>
+                          <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{showDesign()})">Change Design / Item</button></a>
                         </li>
-                        <li v-if="isCustomerAuthenticated">
-                          <a class="dropdown-item" target="_self"><button :key="'lockerRoom'" @click="getLockerRoomProducts(null)">Open locker room</button></a>
+                       <template>
+                         <li v-if="isCustomerAuthenticated">
+                           <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{generatePdf()})">Generate PDf</button></a>
+                         </li>
+                         <li v-else>
+                           <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{setActionBeforeLogin('generatePdf')})">Generate PDf</button></a>
+                         </li>
+                       </template>
+                        <template>
+                          <li v-if="isCustomerAuthenticated">
+                            <a class="dropdown-item" target="_self"><button :key="'lockerRoom'" @click.stop="callDropdownMenu(toggleDD, ()=>{getLockerRoomProducts(null)})">Open locker room</button></a>
+                          </li>
+                          <li v-else>
+                            <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{setActionBeforeLogin('lockerRoom')})" :key="'loginmodal'">Open locker room</button></a>
+                          </li>
+                        </template>
+                        <li>
+                          <a @click.stop="callDropdownMenu(toggleDD, ()=>{resetStore()})" class="dropdown-item" target="_self">Reset</a>
                         </li>
-                        <li v-else>
-                          <a class="dropdown-item" target="_self"><button @click="setActionBeforeLogin('lockerRoom')" :key="'loginmodal'">Open locker room</button></a>
+                        <li>
+                          <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{shareDesign()})">Share Design</button></a>
                         </li>
-<!--                        <li v-if="isCustomerAuthenticated">-->
-<!--                          <a class="dropdown-item" target="_self"><button :key="'summarybutton'" @click="buyNow">Summary</button></a>-->
-<!--                        </li>-->
-<!--                        <li v-else>-->
-<!--                          <a class="dropdown-item" target="_self"><b-button @click="setActionBeforeLogin('summary')" :key="'loginmodalsummary'">Summary</b-button></a>-->
-<!--                        </li>-->
-                        <li @click="resetStore">
-                          <a class="dropdown-item" target="_self">Reset</a>
-                        </li>
-                        <li v-if="!isCustomerAuthenticated">
-                          <a class="dropdown-item" target="_self"><button @click="gotoLogin">Login</button></a>
-                        </li>
-                        <li v-if="isCustomerAuthenticated">
-                          <a class="dropdown-item" target="_self"><button @click="logoutCustomer">Logout</button></a>
-                        </li>
+                        <template>
+                          <li v-if="isCustomerAuthenticated">
+                            <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{logoutCustomer()})">Logout</button></a>
+                          </li>
+                          <li v-else>
+                            <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{gotoLogin()})">Login</button></a>
+                          </li>
+                        </template>
                       </ul>
                     </button>
 
@@ -293,7 +340,7 @@
 
             <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
               <div v-if="mobileScreen && productPriceObject.show_price && productPriceObject.product_price"
-                   class="w-100 fs-1 font-weight-bolder text-center">
+                   class="w-100 fs-1 font-weight-bolder text-center main-home-price">
                 MSRP: {{productPriceObject.product_price + " " + productPriceObject.currency_code}}
               </div>
 
@@ -372,7 +419,7 @@
                 </div>
               </div>
             </div>
-            <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink(lockerProductIndex)"/>
+            <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink"/>
             <div class="sideNav" v-if="mobileScreen">
               <ul>
                 <li v-if="selectedProduct.is_logo_allowed">
@@ -408,8 +455,18 @@
               </ul>
             </div>
           </b-col>
-          <div class="mobile-reset" v-if="mobileScreen && (undoItems.length > 0 || redoItems.length > 0)">
-            <b-button @click="resetStore" variant="secondary" class="p-1"><b-icon-arrow-clockwise /></b-button>
+          <div class="mobile-reset" v-if="mobileScreen">
+            <template v-if="(isCustomerAuthenticated && ((company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform == 'self' && company.id !== 1)  || company.platform == 'cdnExceptLogin'))">
+              <b-button @click="openCartModal" variant="secondary" class="p-1 mobile-cart-btn">
+                <span class="cart-count">{{ cartItemsCount }}</span>
+                <b-icon-cart />
+              </b-button>
+            </template>
+
+            <b-button @click="toggleFullScreen" variant="secondary" class="p-1 mobile-cart-btn">
+              <b-icon-fullscreen-exit v-if="fullScreen" />
+              <b-icon-fullscreen v-else />
+            </b-button>
           </div>
 
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
@@ -484,6 +541,7 @@ import opentype from 'opentype.js'
 import { FetchCategories, HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 import Store from "@/store";
 import AddToCartButton from "@/components/AddToCartButton.vue";
+import ShareDesignModal from "@/components/ShareDesignModal.vue";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -493,6 +551,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    ShareDesignModal,
     AddToCartButton,
     Popper,
     CartModal,
@@ -645,6 +704,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private frontPreview = ''
   private backPreview = ''
   private showDD = false;
+  private fullScreen = false;
   private customTextIndex = -1
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
@@ -730,6 +790,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.frontPreview = getImageFromCanvas('front') as string
       this.backPreview = getImageFromCanvas('back') as string
     }
+  }
+
+  get mainTabIndex() {
+    return this.$store.getters.getMainTab
+  }
+
+  @Watch('mainTabIndex')
+  mainTabIndexChanged(newVal: number) {
+    this.switchTabs(newVal, false)
   }
 
   get isRosterOpened() {
@@ -842,6 +911,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private switchTabs(ind: number, isHome: boolean) {
+    this.$store.dispatch('setTabMain',{value:ind});
     this.maximized = true
 
     let self = this;
@@ -1147,6 +1217,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
+  public callDropdownMenu(func1, func2){
+    func1();
+
+    setTimeout(()=>{
+      func2();
+    },500)
+  }
+
   public async initProductsFonts(products: Record<any, any>[], resolve: any) {
     for (let product_index = 0; product_index < products.length; product_index++) {
       const product = products[product_index]
@@ -1351,7 +1429,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let unique: any = [];
     for (let i = 0; i < svgGroups.length; i++) {
       if (!unique[svgGroups[i].color]) {
-        distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
+        distinct.push({value: svgGroups[i].color, name: svgGroups[i].name, pantone: svgGroups[i].pantone});
         unique[svgGroups[i].color] = 1;
       }
     }
@@ -1589,7 +1667,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public toggleDD() {
-    this.showDD = this.showDD ? false : true;
+    this.showDD = !this.showDD;
+  }
+
+  public toggleFullScreen() {
+    this.fullScreen=!this.fullScreen
+
+    if(this.fullScreen){
+      this.showToast('Fullscreen mode', 'SUCCESS')
+    }else{
+      this.showToast('Exit fullscreen', 'SUCCESS')
+    }
   }
 
   public changeSide(index: number) {
@@ -1902,10 +1990,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async shareDesign() {
+    if(this.mobileScreen){
+      this.showVModal('shareDesign')
+    }
+
     if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoItems.length > 0)) {
       await this.$store.dispatch('GET_LOCKER_PRODUCTS')
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
-      this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
+      await this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
 
@@ -1913,7 +2005,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.shareDesignLoader = true;
       await (this.$refs['saveToLockerModal'] as Record<any, any>).shareDesignUrl(this.product);
       this.shareDesignLoader = false;
-
     }
   }
 
@@ -2080,7 +2171,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   &>div{
     &:first-child{
       position: relative;
-      z-index: 100;
+      z-index: 8;
     }
   }
 
@@ -2319,10 +2410,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200&display=swap');
 
-
-
-
-
 .icon {
   cursor: pointer;
   margin-right: 50px;
@@ -2405,7 +2492,24 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 .notifications h2 span {
   color: #f00
 }
+.mobile-cart-btn{
+  position: relative;
 
+  .cart-count{
+    position: absolute;
+    color: #fff;
+    background: #c80b0b;
+    height: 18px;
+    width: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    font-size: 11px;
+    top: -8px;
+    right: -1px;
+  }
+}
 .notifications-item {
   width: 100%;
   display: flex;
@@ -2492,9 +2596,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
 .mobile-reset{
   position: fixed;
-  top: 50%;
+  top: calc(50vh - 30px);
   right: 0;
-  z-index: 2;
+  z-index: 10;
 
   .btn{
     display: flex;
@@ -2502,6 +2606,16 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     justify-content: center;
     line-height: normal;
     border-radius: 5px 0 0 5px;
+
+    &:not(:first-child){
+      margin-top: 10px;
+    }
   }
+}
+
+.main-home-price{
+  max-width: min(70%, 400px);
+  margin-left: auto;
+  margin-right: auto;
 }
 </style>

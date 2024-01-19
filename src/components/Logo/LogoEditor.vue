@@ -1,6 +1,6 @@
 <template>
   <div class="logo-option-area">
-    <div style="padding-bottom: 10px" class="upload-logo-opener">
+    <div :style="{paddingBottom: mobileScreen ? '0px' : '10px' }" class="upload-logo-opener">
       <div class="logo-option-area mb-3 mt-3" v-if="customLogo.url">
         <div class="w-100 text-left position-relative logo-edit-btn-updated">
           <div class="d-sm-block d-lg-block continue-btn-holder pt-1" style="padding: 0">
@@ -9,8 +9,9 @@
         </div>
       </div>
     </div>
-    <b-button v-if="mobileScreen" style="position:absolute; left: 0; top: -38px; width: auto" @click="showVModal('logo-editor-modal')"  class="logo-editor-button" variant="secondary">
-      <b-icon-pencil fl /> Edit Logo
+    <b-button v-if="mobileScreen && customLogo.url" style="position:absolute; left: 66px; top: 15px; width: auto; font-size: 12px" @click="showVModal('logo-editor-modal')"
+              class="mobile-logo-editor-button py-2 btn-sm border-0" variant="secondary">
+      <b-icon-pencil fl />
     </b-button>
     <modal name="logo-editor-modal" ref="logo-editor-modal" :width="screenWidth" :resizable="true" :scrollable="true" height="auto"
            :reset="true" :shiftY="0" id="modal-center-savecolormodal" hide-footer centered size="xl" class="edit-logo-modal"

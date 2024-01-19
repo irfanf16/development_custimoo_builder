@@ -18,8 +18,23 @@ export default class ColorsTabMixin extends Vue{
     return this. $store.getters.getLastActiveProductData
   }
 
+  get place_holder() {
+    if(this.getColorType === 'cmyk') {
+      return 'x,x,x,x';
+    } else if(this.getColorType === 'pantone-coated') {
+      return 'xxx c';
+    } else if(this.getColorType === 'pantone-tcx') {
+      return 'xx-xxxx';
+    }
+    return '';
+  }
+
   get svgGroups() {
     return this.$store.getters.getSvgGroups
+  }
+
+  get getColorType(){
+    return getColorType()
   }
 
   get selectedProduct(): Record<any, any> {
@@ -32,6 +47,13 @@ export default class ColorsTabMixin extends Vue{
 
   get logoColorsInfo() {
     return this.$store.getters.getLogoColorsInfo('extracted_colors');
+  }
+
+  public getSvgGroupColors(svg_group) {
+    if(svg_group && this.selectedProduct.svg_group_color_container && this.selectedProduct.svg_group_color_container[svg_group]) {
+      return this.selectedProduct.svg_group_color_container[svg_group]
+    }
+    return false
   }
 
   public setActivePart(index:number){

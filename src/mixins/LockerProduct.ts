@@ -318,7 +318,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
             search_products: self.search_products, customized: this.$store.getters.getCustomized,
             personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
-            products_rosters: this.$store.getters.getProductRosters('all')
+            products_rosters: this.$store.getters.getProductRosters('all'), default_colors: last_active_prod_data.default_colors
           }
           let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
           self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
@@ -551,7 +551,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
 }
 
 @Component
-export class ProductsQueryParamsMixin extends Mixins() {
+export class ProductsQueryParamsMixin extends Vue {
   public async setQueryParams() {
     let self: Record<any, any> = this;
     /*
@@ -673,6 +673,10 @@ export class ProductsQueryParamsMixin extends Mixins() {
 
     if (url_query_string?.includes('share')) {
       query_params.push(`shared_url=${url_query_string}`, "active_product_type=share_product")
+      const is_mobile_screen = this.$store.getters.getMobileScreen
+      if(is_mobile_screen) {
+        this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
+      }
       resetLastActiveProductData()
       exitFromEditMode()
     }

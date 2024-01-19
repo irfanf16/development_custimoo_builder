@@ -1,4 +1,4 @@
-import {Component, Mixins} from "vue-property-decorator";
+import {Component, Mixins, Prop} from "vue-property-decorator";
 import {
   setUndoRedoItems,
   getExtensionsFor,
@@ -12,11 +12,35 @@ import Vue from "vue";
 
 @Component
 export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
+
+  /*
+  * props starts here
+  * */
+
+  @Prop({ required: true }) customLogoIndex!: number
+  @Prop({ required: true }) customLogo!: Record<any, any>
+  @Prop({ required: false }) replaceLogo!: boolean
+
+  /*
+  * props ends here
+  * */
+
+  /*
+  * data props starts here
+  * */
+
   public showLoader = false;
   public logoDisclaimerInfo = { accepted: false, show_again: true, user_id: null }
   public handlingDisclaimerAction = false
   public logo_file: File | null = null
 
+  public storageUrl = process.env.VUE_APP_STORAGE_URL
+  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+  public logo_allowed_extensions = ['jpg','gif','png','jpeg','pdf','eps','ai']
+
+  /*
+  * data props ends here
+  * */
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }

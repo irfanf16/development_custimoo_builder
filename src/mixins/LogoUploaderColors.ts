@@ -56,10 +56,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     this.hideLockerProductUpdateButton()
   }
 
-  public rollbackPreviousColors() {
-    console.log('useLogoColors')
-  }
-
   public async shuffleLogoColors() {
     const self: Record<any, any> = this
     this.pulse_info.shuffle = false

@@ -11,8 +11,8 @@
         >
           <BIconX class="position-relative" style="top: -1.7px" />
         </a>
-        <img @click="customLogo.id != recent_logo.id ? setRecentLogo(recent_logo) : null"
-             style="max-width: 100%; height: auto" :src="storageUrl+recent_logo.logo_url+'?nocache=1'" alt="not working"
+        <img @click="customLogo.id != recent_logo.id ? setRecentLogo(recent_logo) : null" loading="lazy"
+             style="max-width: 100%; height: auto; min-height: 30px; object-fit: contain; background: rgb(215, 215, 215)" :src="storageUrl+recent_logo.logo_url+'?nocache=1'" alt="not working"
         />
       </div>
 

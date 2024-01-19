@@ -6,31 +6,54 @@ import Main from "@/store/modules/main";
 import Product from "@/store/modules/product";
 import Event from "@/store/modules/event";
 import Cart from "@/store/modules/cart";
-import createPersistedState from "vuex-persistedstate";
-import LZString from 'lz-string';
-const getSize = (obj): string => {
-  const obj_type = obj.constructor.name
-  let str = obj;
-  if(obj_type == 'Object') {
-    str = JSON.stringify(obj);
-  }
-  const bytes = new Blob([str]).size;
-  const megabytes = (bytes / (1024 * 1024)).toFixed(2);
-  return megabytes;
-}
-
-let persistant_plugin_key = 'custimoo';
-// @ts-ignore
-if(typeof custimoo_application_suppage_url !== 'undefined') {
-  // @ts-ignore
-  if(custimoo_application_suppage_url !== '' && custimoo_application_suppage_url !== null) {
-    // @ts-ignore
-    persistant_plugin_key += "-" + custimoo_application_suppage_url; // this variable declared in get-app-version js file
-  }
-
-}
+import { saveState, loadState } from '@/indexedDBPersistence.js';
 
 Vue.use(Vuex)
+
+const pathsToPersist = {
+  'ProductAttributes': ['selectedIndex', 'selectedPrdId', 'selectedDesignId', 'products_rosters', 'using_logo_colors',
+  'product_edit_info_object', 'last_active_product_data', 'logo_colors_info'],
+  'Product': ['logoColors', 'initialExtractedColors'],
+  'Main': ['tabIndexMain'],
+  'Auth': ['jwtToken', 'platform']
+}
+
+let timeout;
+const plugins = [
+  (store) => {
+    // Load the state from IndexedDB when the store is initialized
+    loadState().then((savedState) => {
+      if (savedState) {
+        // Merge the loaded state with the existing state
+        Object.keys(pathsToPersist).forEach((namespace) => {
+          pathsToPersist[namespace].forEach((key) => {
+            const path = `${namespace}.${key}`;
+            store.commit('SET_STATE', { path, value: savedState[path] });
+          });
+        });
+      }
+    });
+
+    // Save the specified paths to IndexedDB whenever the state changes
+    store.subscribe((mutation, state) => {
+      if (timeout) clearTimeout(timeout);
+
+      timeout = setTimeout(() => {
+        const stateToPersist = {};
+
+        Object.keys(pathsToPersist).forEach((namespace) => {
+          pathsToPersist[namespace].forEach((key) => {
+            const path = `${namespace}.${key}`
+            // console.log(path, state[namespace][key])
+            stateToPersist[path] = state[namespace][key]
+          })
+        })
+        // console.log(stateToPersist)
+        saveState(stateToPersist)
+      }, 2000)
+    })
+  },
+];
 
 export default new Vuex.Store({
   modules: {
@@ -41,45 +64,18 @@ export default new Vuex.Store({
     Event,
     Cart
   },
-  plugins: [createPersistedState({
-    // @ts-ignore
-    key: persistant_plugin_key, // this variable declared in file get-app-version.js
-    paths: [
-      'ProductAttributes.selectedIndex',
-      'ProductAttributes.selectedPrdId',
-      // 'ProductAttributes.customLogos',
-      // 'ProductAttributes.product_custom_texts',
-      // 'ProductAttributes.defaultColors',
-      // 'ProductAttributes.groupColors',
-      'ProductAttributes.selectedDesignId',
-      'ProductAttributes.products_rosters',
-      'ProductAttributes.using_logo_colors',
-      'Product.logoColors',
-      'Product.initialExtractedColors',
-      'Main.tabIndexMain',
-      'ProductAttributes.customLogoObjects',
-      'Auth.jwtToken',
-      'Auth.platform',
-      'ProductAttributes.product_edit_info_object',
-      'ProductAttributes.last_active_product_data',
-      'ProductAttributes.logo_colors_info',
-     ],
-     storage: {
-      getItem: (key) => {
-        const compressedValue = localStorage.getItem(key)
-        if (compressedValue) {
-          return  LZString.decompressFromUTF16(compressedValue)
-        }
-        return null
-      },
-      setItem: (key, value) => {
-        const compressedValue = LZString.compressToUTF16(value)
-        localStorage.setItem(key, compressedValue)
-      },
-      removeItem: (key) => {
-        localStorage.removeItem(key)
-      },
-    }
-    })]
+  mutations: {
+    SET_STATE(state, { path, value }) {
+      // Dynamically set the state based on the path separated by dots
+      const keys = path.split('.');
+      let currentState = state;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        currentState = currentState[keys[i]];
+      }
+      currentState[keys[keys.length - 1]] = value;
+    },
+  },
+  plugins
 })
 

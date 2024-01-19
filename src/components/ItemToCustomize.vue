@@ -175,7 +175,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   @Prop({default: ''}) search_products!: any;
 
   public storage_url = process.env.VUE_APP_STORAGE_URL
-  private showItems = false;
+  private showItems = true;
   private showDesigns = true;
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
 
