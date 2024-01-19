@@ -272,6 +272,13 @@ export default class CommonImportMixin extends Vue{
     }
   }
 
+  created(){
+    window.addEventListener('beforeunload', this.saveBeforeExit);
+  }
+  destroyed(){
+    window.removeEventListener('beforeunload', this.saveBeforeExit);
+  }
+
   get company():Record<any, any> {
     return store.getters.getCompany
   }
@@ -279,6 +286,17 @@ export default class CommonImportMixin extends Vue{
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+
+  private saveBeforeExit(e: Event){
+    let self: Record<any, any> = this;
+    if(self.$store.getters.getUndoItems.length > 0 || self.$store.getters.getRedoItems.length > 0){
+      const confirmationMessage = "You have unsaved changes. Are you sure you want to leave?";
+      alert(confirmationMessage);
+      (e as any).returnValue = confirmationMessage;
+      return confirmationMessage;
+    }
+  }
+  
   @Watch('isCustomerAuthenticated')
   async isCustomerAuthenticatedChanged(newVal: boolean, oldVaL: boolean){
     if(newVal) {
