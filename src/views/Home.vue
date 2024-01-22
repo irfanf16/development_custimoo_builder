@@ -175,8 +175,8 @@
                   </div>
 
                   <div v-if="selectedProduct.is_3d_product" class="ml-auto">
-                    <img @click="switchView()" class="cursor-pointer" v-if="!selectedProduct.show_3d" src="img/icons/3Dicon.svg" height="20">
-                    <img @click="switchView()" class="cursor-pointer" v-else src="img/icons/2Dicon.svg" height="20">
+                    <img @click="switchView()" class="cursor-pointer" src="@/assets/images/3Dicon.svg" v-if="!selectedProduct.show_3d" height="20">
+                    <img @click="switchView()" class="cursor-pointer" src="@/assets/images/2Dicon.svg" v-else height="20">
                   </div>
                 </div>
                 <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
