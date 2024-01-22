@@ -1770,7 +1770,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       const ok = await this.ref['reset-changes'].showConfirm()
       if (ok) {
         this.search_products = '';
-        (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
+       if(this.$refs['ItemToCustomize']) {
+         (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
+       }
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
         await self.$eventBus.$emit('useProductOriginalColors')
         await this.$store.dispatch('resetStore')
@@ -1782,7 +1784,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           await self.$eventBus.$emit('resetTextsCanvas')
           await self.$eventBus.$emit('resetLogosCanvas')
           await this.$store.dispatch('setTabMain', {value: 0});
-          (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+          if(this.$refs['ItemToCustomize']) {
+            (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+          }
           await this.$store.dispatch('SET_LOGO_COLORS', [])
           this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
           await this.$store.dispatch("setProductsRosters")
