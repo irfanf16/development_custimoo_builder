@@ -24,6 +24,16 @@
                 </template>
               </div>
           </div>
+          <div v-else class="pdf_cover_all">
+            <h1 class="text-dark p-4" style="text-align: center">{{ collection.name }} </h1>
+            <div class="collection_logos">
+              <template v-for="(collection_logo, clIdx) in collection.logos">
+                <div :key="`collection_logo_${clIdx}`">
+                  <img :src="`${storageUrl}${collection_logo.path}`" alt="Logo">
+                </div>
+              </template>
+            </div>
+          </div>
 
           <div class="pdf_page" v-for="(products_chunks,idx)  in collection.collection_products" :key="idx"
                :style="{ background: company.id == 1? `url('img/page_background.png') no-repeat center` : `url('img/page_background_2.png') no-repeat center` }">

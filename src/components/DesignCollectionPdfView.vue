@@ -94,6 +94,16 @@ export default class DesignCollectionPdfView extends Vue {
   page-break-after: avoid !important;
 }
 
+.pdf_cover_all{
+  position: relative;
+  background: url('../assets/images/pdf_cover_all.jpg') no-repeat center;
+  background-size: cover !important;
+  width: 11in;
+  height: 8.499in;
+  page-break-before: avoid !important;
+  page-break-after: avoid !important;
+}
+
 .pdf_cover .pdf_collection h1{
   color: #fff;
   text-shadow: 0 0 10px rgba(0,0,0,0.5);

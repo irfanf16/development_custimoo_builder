@@ -391,6 +391,18 @@ img{
     page-break-inside: avoid !important;
 }
 
+
+.pdf_cover_all{
+    position: relative;
+    background: url('../images/pdf_cover_all.jpg') no-repeat center;
+    background-size: cover !important;
+    width: 100%;
+    min-height: 100vh;
+    /*page-break-before: avoid !important;*/
+    /*page-break-after: avoid !important;*/
+    page-break-inside: avoid !important;
+}
+
 .pdf_cover.design_hummel_us{
     background: url('../images/pdf_cover_us.jpeg') no-repeat center;
 }
