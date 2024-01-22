@@ -6158,8 +6158,12 @@ $fontSize: 0.5;
 
 .cart-modal{
     .vm--modal{
-        max-height: calc(100vh - 230px);
+        //max-height: calc(100vh - 130px);
         margin-top: 0px;
+    }
+
+    &.vm--container{
+        position: absolute;
     }
 }
 
