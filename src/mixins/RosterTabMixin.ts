@@ -28,13 +28,15 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     this.$emit('addPlayer', this.rosterDetails.length);
   }
 
-  public async addRosterItem() {
+  public async addRosterItem(productSizes:Record<any, any>[]) {
     const self: Record<any, any> = this;
     this.show_roster_change_warning = true
-    let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0])));
+    let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0], productSizes)));
     roster_items = [...this.productRoster, roster_items];
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-    await this.handleRosterUpdate('0', 'size', roster_items.length - 1)
+
+
+    await this.handleRosterUpdate(roster_items.size_index, 'size', roster_items.length - 1)
     await handleProductPriceUpdate()
   }
 
@@ -44,11 +46,16 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     await handleProductPriceUpdate()
   }
 
-  public resetRosterItem(roster_item: Record<any, any>, productSizes?:Record<any, any>[]) {
+
+  public resetRosterItem(roster_item: Record<any, any>, productSizes:Record<any, any>[]) {
     roster_item = JSON.parse(JSON.stringify(roster_item))
-    const first_size = productSizes && productSizes[0].value;
+    const lastRosterIndex = this.productRoster.length - 1;
+    const lastRosterSize = this.productRoster[lastRosterIndex].size;
+    const lastItemSizeIndex = productSizes.findIndex((size) => {
+      return size.value === lastRosterSize;
+    })
     return Object.assign(roster_item, {
-      text: '',  number: '',  size_index: 0,  size: first_size,  code: first_size, quantity: 1, information: ''
+      text: '',  number: '',  size_index: lastItemSizeIndex,  size: lastRosterSize,  code: lastRosterSize, quantity: 1, information: ''
     })
   }
 

@@ -175,7 +175,7 @@
     </div>
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
-      <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
+      <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem(productSizes)">Add Player</button>
       <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker', isEditingFromLocker)">
         Save & close
       </button>
@@ -374,7 +374,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   * */
 
   public addRosterItemOnTab($event:Record<any, any>) {
-    (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem();
+    (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem(this.productSizes);
   }
 
   public cancelCart(){
