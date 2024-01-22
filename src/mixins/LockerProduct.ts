@@ -875,7 +875,11 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         roster_item_sum += parseInt(item.quantity);
       })
       if(roster_item_sum < this.sku_information.minimum_order_quantity){
-        this.showToast(`${this.$t('minimum_order_roster_message', {min_products_count: this.sku_information.minimum_order_quantity})}`, "error");
+        this.showToast(`${this.$t('minimum_order_roster_message',
+          {
+            product_name: this.$store.getters.getSelectedProduct.display_name,
+            min_products_count: this.sku_information.minimum_order_quantity
+          })}`, "error", 9000);
         return false;
       }
     }

@@ -364,6 +364,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   get getProductSkus(){
     return this.$store.getters.getProductsSkus;
   }
+  get sku_information(){
+    return this.$store.getters.getSkuInformation
+  }
   get company(){
     return this.$store.getters.getCompany;
   }
@@ -388,7 +391,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
   public createOrder() {
     if(!this.can_finalize_order){
-      this.showToast(`${this.$t('minimum_order_cart_message')}`, "error");
+      this.showToast(`${this.$t('minimum_order_cart_message',
+        {
+          product_name: this.$store.getters.getSelectedProduct.display_name,
+          min_products_count: this.sku_information.minimum_order_quantity
+        })}`,
+        "error", 9000);
       return false;
     }
     let payload = {}

@@ -7,20 +7,20 @@ export default class ErrorMessages extends Vue{
   /*
   * title= {success, warning, error, info, secondary}
   * */
-  public showToast(message:string, title:string):void{
+  public showToast(message:string, title:string, timeout=5000):void{
     VsToast.show({
       title: message,
       variant: title,
-      timeout: 5000,
+      timeout: timeout,
       position: "bottom-left"
     });
   }
-  public showError(err: any):void{
+  public showError(err: any, timeout=5000):void{
     if(typeof err === 'string') {
       VsToast.show({
         title: err,
         variant: 'error',
-        timeout: 5000,
+        timeout: timeout,
         position: "bottom-left"
       });
     }
@@ -41,7 +41,7 @@ export default class ErrorMessages extends Vue{
     }
 
   }
-  public showErrorArr(errors: Record<any, any>[string]):void{
+  public showErrorArr(errors: Record<any, any>[string], timeout=5000):void{
    const errArr: string[] = [];
     Object.keys(errors).map((field: string) => {
       errArr.push(errors[field][0]);
@@ -50,13 +50,13 @@ export default class ErrorMessages extends Vue{
       VsToast.show({
         title: element,
         variant: 'error',
-        duration: 5000,
+        duration: timeout,
         position: 'bottom-left'
       });
     })
   }
 
-  public showErrorValidation(errors: Record<any, any>[string]):void{
+  public showErrorValidation(errors: Record<any, any>[string], timeout=5000):void{
     const errArr: string[] = [];
      Object.keys(errors).map((field: string) => {
        errArr.push(errors[field]);
@@ -65,7 +65,7 @@ export default class ErrorMessages extends Vue{
        VsToast.show({
          title: element,
          variant: 'error',
-         duration: 5000,
+         duration: timeout,
          position: 'bottom-left'
        });
      })
