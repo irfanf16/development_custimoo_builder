@@ -72,7 +72,7 @@
     </table>
 
     <div class="roster-row mb-2 flex justify-content-end gap-1 button-holder p-0">
-      <button @click="addRosterItem" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
+      <button @click="addRosterItem(productSizes)" class="btn btn-secondary light rounded-circle p-0 fs-4 d-inline-flex align-items-center justify-content-center" style="height: 35px; width: 35px">
         <BIconPlus />
       </button>
 
