@@ -128,13 +128,21 @@
 
                   <ul class="preview-header-icons">
                     <li class="d-flex flex-wrap align-items-center">
-                      <b-button v-if="!isCustomerAuthenticated" @click="gotoLogin"><font-awesome-icon :icon="['fas', 'user']"/></b-button>
+                      <button class="btn d-inline-flex align-items-center gap-1 btn-outline-secondary px-2" v-if="!isCustomerAuthenticated" @click="gotoLogin">
+                        <font-awesome-icon :icon="['fas', 'user']"/>
+                        Login
+                      </button>
                       <strong class="user-name">{{  isCustomerAuthenticated ? 'Hello ' + customer.first_name : '' }}</strong>
-                      <b-button @click="logoutCustomer" v-if="isCustomerAuthenticated"><font-awesome-icon :icon="['fas', 'sign-out-alt']"/></b-button>
+                      <button @click="logoutCustomer" v-if="isCustomerAuthenticated" class="btn btn-outline-secondary px-2">
+                        <font-awesome-icon :icon="['fas', 'sign-out-alt']"/>
+                      </button>
                     </li>
-                    <li><a>
-                      <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
-                    </a></li>
+                    <li>
+                      <button class="btn d-inline-flex align-items-center gap-1 btn-outline-secondary px-2">
+                        <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
+                        Reset
+                      </button>
+                    </li>
                     <li v-if="isCustomerAuthenticated && false">
                       <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
                       <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
@@ -2229,7 +2237,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     background: none;
   }
   .btn {
-    margin: 0 0.3rem 0 0;
+    margin: 0 10px 0 0;
     font-size: 12px;
     color: #000;
     border-color: #DDDFE3;
@@ -2241,7 +2249,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     @media only screen and (min-width: 992px){
       font-size: 14px;
       font-weight: 600;
-      margin: 0 15px 0 0;
+      margin: 0 10px 0 0;
       padding: 0.375rem 0.75rem;
     }
     &:last-child{margin: 0;}
@@ -2262,16 +2270,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     list-style: none;
     //@media only screen and (min-width: 992px){font-size: 18px;}
     li {
-      margin: 0 0 0 15px;
+      margin: 0 0 0 10px;
       position: relative;
-      @media only screen and (min-width: 768px){margin: 0 0 0 12px;}
+      @media only screen and (min-width: 768px){margin: 0 0 0 5px;}
       .btn{
-        margin: 0 0 0 10px;
-        background: none;
-        padding: 0;
-        border: none;
+        margin: 0 0 0 5px;
         color: #03142e;
-        font-size: 18px;
+        font-size: 14px;
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
