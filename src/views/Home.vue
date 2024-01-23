@@ -138,8 +138,8 @@
                       </button>
                     </li>
                     <li>
-                      <button class="btn d-inline-flex align-items-center gap-1 btn-outline-secondary px-2">
-                        <font-awesome-icon @click="resetStore" :icon="['fas', 'redo-alt']" title="Reset to default"/>
+                      <button class="btn d-inline-flex align-items-center gap-1 btn-outline-secondary px-2" @click="resetStore">
+                        <font-awesome-icon :icon="['fas', 'redo-alt']" title="Reset to default"/>
                         Reset
                       </button>
                     </li>
@@ -309,36 +309,36 @@
 
                       <ul class="dropdown-menu dropdown-menu-right mt-3" :class="{'show': showDD}" :key="showDD" ref="dd-menu" size="lg" variant="link" toggle-class="text-decoration-none" no-caret>
                         <li>
-                          <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{showDesign()})">Change Design / Item</button></a>
+                          <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{showDesign()})">Change Design / Item</a>
                         </li>
                        <template>
                          <li v-if="isCustomerAuthenticated">
-                           <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{generatePdf()})">Generate PDf</button></a>
+                           <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{generatePdf()})">Generate PDf</a>
                          </li>
                          <li v-else>
-                           <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{setActionBeforeLogin('generatePdf')})">Generate PDf</button></a>
+                           <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{setActionBeforeLogin('generatePdf')})">Generate PDf</a>
                          </li>
                        </template>
                         <template>
                           <li v-if="isCustomerAuthenticated">
-                            <a class="dropdown-item" target="_self"><button :key="'lockerRoom'" @click.stop="callDropdownMenu(toggleDD, ()=>{getLockerRoomProducts(null)})">Open locker room</button></a>
+                            <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{getLockerRoomProducts(null)})">Open locker room</a>
                           </li>
                           <li v-else>
-                            <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{setActionBeforeLogin('lockerRoom')})" :key="'loginmodal'">Open locker room</button></a>
+                            <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{setActionBeforeLogin('lockerRoom')})" :key="'loginmodal'">Open locker room</a>
                           </li>
                         </template>
                         <li>
-                          <a @click.stop="callDropdownMenu(toggleDD, ()=>{resetStore()})" class="dropdown-item" target="_self">Reset</a>
+                          <a @click.stop="callDropdownMenu(toggleDD, ()=>{resetStore()})" class="dropdown-item">Reset</a>
                         </li>
                         <li>
-                          <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{shareDesign()})">Share Design</button></a>
+                          <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{shareDesign()})">Share Design</a>
                         </li>
                         <template>
                           <li v-if="isCustomerAuthenticated">
-                            <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{logoutCustomer()})">Logout</button></a>
+                            <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{logoutCustomer()})">Logout</a>
                           </li>
                           <li v-else>
-                            <a class="dropdown-item" target="_self"><button @click.stop="callDropdownMenu(toggleDD, ()=>{gotoLogin()})">Login</button></a>
+                            <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{gotoLogin()})">Login</a>
                           </li>
                         </template>
                       </ul>

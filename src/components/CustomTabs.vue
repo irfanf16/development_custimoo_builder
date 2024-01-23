@@ -41,25 +41,33 @@
             <template v-if="isCustomerAuthenticated">
               <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                 <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                <span v-if="!cartLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
-                  Add to cart
-                </span></span>
-                  <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff"><span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
-                  Please wait
-                </span></span>
+                  <span v-if="!cartLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer">
+                    <span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                    Add to cart
+                    </span>
+                  </span>
+                  <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff">
+                    <span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
+                      Please wait
+                    </span>
+                  </span>
                 </template>
               </template>
             </template>
             <template v-else>
               <template v-if="company.platform !== 'self'">
-                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
-                Add to cart
-              </span></span>
+                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer">
+                  <span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                    Add to cart
+                  </span>
+                </span>
               </template>
               <template v-else>
-                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer"><span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
-                Add to cart
-              </span></span>
+                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer">
+                  <span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                    Add to cart
+                  </span>
+                </span>
               </template>
             </template>
           <span class="addPlayer" @click="shareRoster"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Link</span></span>

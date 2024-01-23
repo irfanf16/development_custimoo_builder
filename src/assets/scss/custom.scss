@@ -6030,6 +6030,28 @@ $fontSize: 0.5;
     border: none !important;
     outline: none !important;
     background: none !important;
+
+    &.custom-link{
+        color: #333;
+
+        ul{
+            li {
+                color: #333;
+
+                a{
+                    color: #333;
+                    padding-top: 7px;
+                    padding-bottom: 7px;
+                }
+
+                &+li{
+                    a{
+                        border-top: 1px solid #e0e0e0;
+                    }
+                }
+            }
+        }
+    }
 }
 
 .btn-dark.light {
