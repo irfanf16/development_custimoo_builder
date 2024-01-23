@@ -326,7 +326,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     await resetLastActiveProductData()
     this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { category_index: category_index, category_id: selected_category.id });
     this.$store.commit('SET_SELECTED_CATEGORY', { category_id:selected_category.id, category_index: category_index })
-    let query_params: string[] = [];
+    let query_params: string[] = [
+      `customized=${this.getCustomized}`, `personalized=${this.getPersonalized}`
+    ];
     if (selected_category && selected_category.id){
       query_params.push(`category_id=${selected_category.id}`);
     }

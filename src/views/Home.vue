@@ -690,7 +690,7 @@ Vue.filter('formatDate', function(value:string) {
         if(ok){
           this.gotoLogin();
         }
-      }, 50000)
+      }, this.mobileScreen ? 100000 : 50000)
     }
   },
   async beforeRouteEnter(to, from, next) {
