@@ -499,10 +499,13 @@
         </template>
       </b-row>
     </b-container>
+
     <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-cart-item" ref="delete-cart-item"></confirm-modal>
     <confirm-modal message="Do you really want to logout?" cancel_text="Cancel" confirm_text="Yes" name="reset-modal" ref="reset-modal"></confirm-modal>
-    <confirm-modal message="This will reset everything. All design changes will be lost.
- Continue?" cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes" name="reset-changes"></confirm-modal>
+    <confirm-modal message="Enjoying the customizer? please login to enhance your experience"
+                   cancel_text="Later" confirm_text="Login" name="login-reminder" popup_icon="info" ref="login-reminder"></confirm-modal>
+    <confirm-modal message="This will reset everything. All design changes will be lost. Continue?"
+                   cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes" name="reset-changes"></confirm-modal>
   </div>
 </template>
 
@@ -680,6 +683,15 @@ Vue.filter('formatDate', function(value:string) {
     await this.$eventBus.$on('updateCart', async (resolve: any) => {
       await this.addToCart(resolve);
     })
+
+    if(!this.isCustomerAuthenticated){
+      setTimeout(async ()=>{
+        const ok = await this.ref['login-reminder'].showConfirm();
+        if(ok){
+          this.gotoLogin();
+        }
+      }, 50000)
+    }
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {
