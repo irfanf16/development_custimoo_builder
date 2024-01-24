@@ -6183,8 +6183,10 @@ $fontSize: 0.5;
         //max-height: calc(100vh - 130px);
         margin-top: 0px;
     }
+}
 
-    &.vm--container{
+.vm--container{
+    &.absolute-modals{
         position: absolute;
     }
 }

@@ -1,11 +1,22 @@
 <template>
-  <div class="page-wrapper m-lg-4" :class="{'mobile-full-screen': fullScreen}" v-cloak style="margin-top: 0 !important;" >
+  <div class="page-wrapper position-relative m-lg-4" :class="{'mobile-full-screen': fullScreen}" v-cloak style="margin-top: 0 !important;" >
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
 
     <ShareDesignModal :product="product" :loader="shareDesignLoader" />
     <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
     <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
+    <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+    <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
+    <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
+    <modal name="product-rejection-info-modal" class="absolute-modals" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
+      <h1>
+        {{getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].message}}
+      </h1>
+      <template v-for="(activity_file, activity_file_index) in getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].activity_files">
+        <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
+      </template>
+    </modal>
 
     <b-container fluid>
       <b-row>
@@ -115,14 +126,7 @@
                       <b-button  @click="UpdateOrderProducts()" variant="outline-secondary"
                                  v-if="getProductEditInfoObject.order_product_info.factory_product_active_index == (getProductEditInfoObject.order_product_info.factory_products.length - 1)">Update Products</b-button>
                       <b-button  variant="outline-info" @click="$modal.show('product-rejection-info-modal')">Show Reason</b-button>
-                      <modal name="product-rejection-info-modal" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
-                        <h1>
-                          {{getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].message}}
-                        </h1>
-                        <template v-for="(activity_file, activity_file_index) in getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].activity_files">
-                          <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
-                        </template>
-                      </modal>
+
                     </template>
                   </div>
 
@@ -187,9 +191,6 @@
                     <img @click="switchView()" class="cursor-pointer" src="@/assets/images/2Dicon.svg" v-else height="20">
                   </div>
                 </div>
-                <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
-                <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
-                <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
                   <div>
                     <b-button variant="outline-secondary mr-2" @click="handleUndoRedoAction()"

@@ -8,6 +8,7 @@
          @opened="handleModalOpenEvent"
          :shiftY="0"
          :clickToClose="false"
+         class="absolute-modals"
          id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal">
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Save your design <span v-if="$store.getters.getIsShareDesign">before sharing</span></span>

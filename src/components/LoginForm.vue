@@ -5,7 +5,7 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           :shiftY="0" name="loginModal" ref="loginModal" id="modal-login" class="login-modal" size="lg" hide-title hide-footer>
+           :shiftY="0" name="loginModal" ref="loginModal" id="modal-login" class="login-modal absolute-modals" size="lg" hide-title hide-footer>
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bold d-inline-flex p-2">Login</span>
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
