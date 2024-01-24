@@ -117,6 +117,8 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         hasControls: false,
         selectable: false,
         evented: false,
+        originX: 'center',
+        originY: 'center',
         lockMovementX: true,
         lockMovementY: true,
         visible: false,
@@ -323,6 +325,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     hasControls: false,
     selectable: false,
     evented: false,
+    originX: 'center',
+    originY: 'center',
     lockMovementX: true,
     lockMovementY: true,
     visible: false,
@@ -1810,6 +1814,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           objectAdd.hasControls = false
           objectAdd.selectable = false
           objectAdd.evented = false
+          objectAdd.originX = 'center'
+          objectAdd.originY = 'center'
           if(add_index != undefined) {
             otherSideObjects[add_index] = objectAdd
           }
@@ -1871,6 +1877,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           hasControls: false,
           selectable: false,
           evented: false,
+          originX: 'center',
+          originY: 'center',
           globalCompositeOperation: composition
           // globalCompositeOperation: 'overlay'
         })
@@ -1904,6 +1912,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             evented: false,
             lockMovementX: true,
             lockMovementY: true,
+            originX: 'center',
+            originY: 'center',
           })
 
           // img._objects.forEach((element: any) => {
@@ -1931,6 +1941,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             hasControls: false,
             selectable: false,
             evented: false,
+            originX: 'center',
+            originY: 'center',
             lockMovementX: true,
             lockMovementY: true
           })
@@ -1968,6 +1980,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               hasControls: false,
               selectable: false,
               evented: false,
+              originX: 'center',
+              originY: 'center',
               lockMovementX: true,
               lockMovementY: true,
               absolutePositioned: true,
@@ -2042,6 +2056,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         hasControls: false,
         selectable: false,
         evented: false,
+        originX: 'center',
+        originY: 'center',
         lockMovementX: true,
         lockMovementY: true,
         absolutePositioned: true,
@@ -2071,6 +2087,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         hasControls: false,
         selectable: false,
         evented: false,
+        originX: 'center',
+        originY: 'center',
         lockMovementX: true,
         lockMovementY: true,
         absolutePositioned: true,
@@ -2126,9 +2144,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           hasControls: false,
           selectable: false,
           evented: false,
+          originX: 'center',
+          originY: 'center',
           lockMovementX: true,
           lockMovementY: true,
-          globalCompositeOperation: 'source-atop',
+          globalCompositeOperation: 'source-atop'
         })
 
         let models = this.front_models
@@ -2255,6 +2275,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             hasControls: logo.haveControls,
             hasBorders: false,
             evented: true,
+            originX: 'center',
+            originY: 'center',
             globalCompositeOperation: 'source-atop',
             lockScalingFlip: true,
             padding: 15,
@@ -2533,6 +2555,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         hasControls: true,
                         hasBorders: false,
                         evented: true,
+                        originX: 'center',
+                        originY: 'center',
                         globalCompositeOperation: 'source-atop',
                         fill: custom_text_item.color,
                         stroke: custom_text_item.outline_color,
@@ -2548,7 +2572,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         type: "text",
                         side: custom_text_item.placement,
                         text_index: custom_text_index,
-                        manually_added: custom_text.manually_added
+                        manually_added: custom_text.manually_added,
                       })
 
                       this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
@@ -2614,6 +2638,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     hasControls: true,
                     hasBorders: false,
                     evented: true,
+                    originX: 'center',
+                    originY: 'center',
                     globalCompositeOperation: 'source-atop',
                     //todo sometime font family is null
                     fontFamily: custom_text_item.font_family ? custom_text_item.font_family : 'Ubuntu',
