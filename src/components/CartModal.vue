@@ -1,6 +1,6 @@
 <template>
   <modal :minWidth="1000" width="100%" :minHeight="600" height="auto"
-    name="cart-modal absolute-modals" ref="cart-modal" id="cart-center-lockerroom" size="xl" class="cart-modal" modal-class="modal-fullscreen2"
+    name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" class="cart-modal absolute-modals" modal-class="modal-fullscreen2"
     content-class="lockerroom-modal" @closed="customer_reference_no = null" @before-open="getAddresses">
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Cart</span>

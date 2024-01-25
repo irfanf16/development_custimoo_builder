@@ -86,16 +86,16 @@
     </div>
 
     <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px" v-if="getSvgGroupColors(svgGroups[selectAccordionIndex].id)">
-      <div class="color_circle" :key="`color-main-${index}`" @click="color.value == svgGroups[selectAccordionIndex].color ? null : setColor(color)"
+      <div class="color_circle mobile_circle" :key="`color-main-${index}`" @click="color.value == svgGroups[selectAccordionIndex].color ? null : setColor(color)"
            v-for="(color, index) in getSvgGroupColors(svgGroups[selectAccordionIndex].id).json_data"
-           :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}"></div>
+           :style="{background: color.value}" style="border: 2px solid #fff !important; box-shadow: none; outline: 1px solid #000"></div>
     </div>
 
     <template v-else>
       <div v-if="selectTypeIndex == productColors.length" class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
         <template v-for="(ext_color, ext_index) in logoColorsInfo">
-          <div v-if="ext_color.hex"  class="color_circle" @click="ext_color.hex == svgGroups[selectAccordionIndex].color ? null : setColor({value: ext_color.hex, ...ext_color})"
-               :title="ext_color.name" :style="{background: ext_color.hex, boxShadow: `0 0 0 3px white, 0 0 0 4px ${ext_color.hex}`}" :key="'base-color' +ext_index + ext_color.name">
+          <div v-if="ext_color.hex"  class="color_circle mobile_circle" @click="ext_color.hex == svgGroups[selectAccordionIndex].color ? null : setColor({value: ext_color.hex, ...ext_color})"
+               :title="ext_color.name" :style="{background: ext_color.hex}" style="border: 2px solid #fff !important; box-shadow: none; outline: 1px solid #000" :key="'base-color' +ext_index + ext_color.name">
             <!--                    <span v-if="ext_color.hex == svgGroups[selectAccordionIndex].color || (gradient_index !== undefined && svgGroups[selectAccordionIndex].gradient_colors && svgGroups[selectAccordionIndex].gradient_colors[gradient_index].color == ext_color.hex)" class="selected" style="z-index: 100; opacity: 1">-->
             <!--                      <BIconCheck />-->
             <!--                    </span>-->
@@ -104,9 +104,9 @@
       </div>
       <template v-if="selectTypeIndex == (productColors.length + 1)">
         <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px">
-          <div class="color_circle" @click="setColor(color)" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`"
+          <div class="color_circle mobile_circle" @click="setColor(color)" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`"
                v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)"
-               :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}">
+               :style="{background: color.value}" style="border: 2px solid #fff !important; box-shadow: none; outline: 1px solid #000">
             <!--            <span v-if="color.value == svgGroups[selectAccordionIndex].color" class="selected" style="z-index: 100; opacity: 1">-->
             <!--                          <BIconCheck />-->
             <!--                        </span>-->
@@ -115,9 +115,9 @@
       </template>
 
       <div class="mt-2 overflow-auto hide-scroll d-flex gap-1" style="padding:6px" v-if="productColors[selectTypeIndex]">
-        <div class="color_circle" :key="`color-main-${index}`" @click="color.value == svgGroups[selectAccordionIndex].color ? null : setColor(color)"
+        <div class="color_circle mobile_circle" :key="`color-main-${index}`" @click="color.value == svgGroups[selectAccordionIndex].color ? null : setColor(color)"
              v-for="(color, index) in productColors[selectTypeIndex].color_text"
-             :style="{background: color.value, boxShadow: `0 0 0 3px white, 0 0 0 4px ${color.value}`}"></div>
+             :style="{background: color.value}" style="border: 2px solid #fff !important; box-shadow: none; outline: 1px solid #000"></div>
       </div>
     </template>
 
