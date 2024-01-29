@@ -796,7 +796,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
 }
 
 @Component
-export class RosterDetailsGlobal extends Mixins(){
+export class RosterDetailsGlobal extends Vue {
 
   get active_roster_index():number{
     return this.$store.getters.getActiveRosterIndex;

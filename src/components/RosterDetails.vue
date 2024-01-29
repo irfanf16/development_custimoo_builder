@@ -529,21 +529,6 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
     this.syncRosterWithCustomText('name', this.rosterDetails[this.active_roster_index].text)
   }
 
-  public async syncRosterWithCustomText(type: string, text_number_value: string) {
-    const self: Record<any, any> = this;
-    let product_custom_texts = self.$store.getters.selectedProductCustomTexts();
-    const custom_name_number_index = type == 'name' ? this.custom_name_index : this.custom_number_index;
-    //The custom text first item of type name or number depending upon type is synced with the first row input with label name or number.
-    if(custom_name_number_index >= 0) {
-      let custom_text_synced_with_roster = JSON.parse(JSON.stringify(product_custom_texts[custom_name_number_index]));
-      custom_text_synced_with_roster.value = text_number_value
-      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_name_number_index, value: custom_text_synced_with_roster})
-      self.$eventBus.$emit("customTextUpdated", {
-        emitter: "input", custom_text_index: custom_name_number_index, value: custom_text_synced_with_roster
-      });
-    }
-  }
-
   public handleLockerUpdate(updated_val: Record<any, any>[]) {
     this.selected_locker_roster = null
     if(updated_val) {

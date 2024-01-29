@@ -344,7 +344,7 @@
             this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
               editing: true, type: "locker_product", filters: { customized: is_customized, personalized: is_personalized, search_products: ''},
               locker_product_info: { product_id: locker.product_id, locker_product_id: res.data.data.product_locker_id, style_id: locker.style_id,
-                design_id: locker.design_id},
+                design_id: locker.design_id, locker_product_name: locker.product_name},
               cart_product_info: getEditModeDefaultObj('cart_product_info'), order_product_info: getEditModeDefaultObj('order_product_info')
             })
 

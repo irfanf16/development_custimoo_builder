@@ -1,6 +1,6 @@
 <template>
   <div class="customization-text-area">
-    <div class="px-3 pt-3 p-lg-4" v-for="(product_custom_text, customTextIndex) in product_custom_texts" :key="`parent-${selectedProductId+customTextIndex}`">
+    <div class="px-3 pt-3" v-for="(product_custom_text, customTextIndex) in product_custom_texts" :key="`parent-${selectedProductId+customTextIndex}`">
 
       <h2 :key="`header-${selectedProductId+customTextIndex}`" class="fw-bold mb-2 fz-18 d-flex align-items-center justify-content-between">
         <span>{{ product_custom_text.label }}</span>
@@ -235,7 +235,7 @@
         </div>
       </b-collapse>
     </div>
-    <div class="px-3 pt-3 p-lg-4 text-right" v-if="selectedProduct.allow_extra_text">
+    <div class="px-3 pt-3 text-right" v-if="selectedProduct.allow_extra_text">
       <b-button class="add-logo-btn" @click="addCustomText(productColors)">
         +
       </b-button>
@@ -371,6 +371,6 @@ export default class CustomizationText extends Mixins(TextCustomizationTab) {
   }
 }
 .customization-tabs .customization-text-area .text-color-holder .color-holder {
-  min-height: 125px;
+  padding: 1px;
 }
 </style>

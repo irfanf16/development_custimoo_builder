@@ -3,7 +3,8 @@
     <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: number_of_slides, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
       <template v-for="(product, index) in products">
-        <a ref="products" v-on:click="productDesigns(index)" :class="{'selected_item': selectedItemIndex == index}" :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
+        <a :title="product.display_name" ref="products" v-b-tooltip v-on:click="productDesigns(index)" :class="{'selected_item': selectedItemIndex == index}"
+           :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
           <template v-for="design in product.productstyles[0].productdesigns.filter(product_design => product_design.is_default)">
             <div class="image-holder" :key="'front'+design.id">
               <Scene canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio" :key="`scene${product.id}`"
@@ -18,7 +19,7 @@
                      :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id" :product_index="index" :products_fonts="products_fonts"/>
             </div>
           </template>
-          <h3 class="text-center" :title="product.product_name">{{ product.display_name }}</h3>
+          <h3 class="text-center">{{ product.display_name }}</h3>
         </a>
       </template>
     </slither-slider>

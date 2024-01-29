@@ -112,6 +112,8 @@
           <li @click="addLogoTab" class="add_text_tab" style="font-size: 0.9em">Add <BIconPlus/></li>
         </template>
         <div v-if="showRecentLogos" class="mobile-other recent-logos-mobile">
+          <span class="dragControl" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
+
           <span class="close" @click="showRecentLogos = false"><BIconX /></span>
           <div>
             <template v-if="customLogos && customLogos.length > 0">
@@ -136,7 +138,7 @@ import LogoUploaderMobile from "@/components/Logo/LogoUploaderMobile.vue";
 import {LogoPlacementTabMixin} from "@/mixins/LogoPlacementTabMixin";
 import Vue from "vue";
 import LogoExtractedColors from "@/components/Logo/LogoExtractedColors.vue";
-import {getProductColors} from "@/helpers/Helpers";
+import {getDomDocument, getProductColors} from "@/helpers/Helpers";
 
 @Component<LogoPlacementMobile>({
   components: {
@@ -176,6 +178,24 @@ export default class LogoPlacementMobile extends Mixins(LogoUploaderColors, Logo
     this.showRecentLogos = false
     this.$emit('showOther', false);
   }
+
+  private resizeTab(idx: number){
+    return (e:Record<any, any>) => {
+      let cursorPosition = e.changedTouches && e.changedTouches[0].clientY;
+      if(cursorPosition <= 15){
+        cursorPosition = 15
+      }else if(cursorPosition >= window.screen.availHeight - 190){
+        cursorPosition = window.screen.availHeight - 190
+      }
+      const main_doc = getDomDocument() as Record<any, any>
+      let element = main_doc.querySelector('.recent-logos-mobile') as Record<any, any>;
+      if(!element){
+        let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
+        element = shadow_dom.querySelector('.recent-logos-mobile') as Record<any, any>;
+      }
+      element.style.top = cursorPosition + 'px';
+    }
+  }
 }
 </script>
 
@@ -184,5 +204,24 @@ export default class LogoPlacementMobile extends Mixins(LogoUploaderColors, Logo
   @media (max-width: 600px) {
     display: flex;
   }
+}
+
+.dragControl{
+  position: absolute;
+  height: 13px;
+  width: 100px;
+  top: 7px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  background: #dbdbdb;
+  border-radius: 10px;
+  z-index: 10;
+  box-shadow: 1px 1px 0 0px #ccc, inset 0 0 3px 1px #eee;
+  display: block;
+}
+.dragControl.active{
+  background: lightblue;
+  box-shadow: 1px 1px 0 0px #ccc, inset 0 0 3px 1px aliceblue;
 }
 </style>

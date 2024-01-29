@@ -2,7 +2,7 @@
 <!--  <div class="grid grid-mobile-4 gap-2 pick-item mt-3">-->
   <div class="d-flex gap-1 pick-item mt-1 hide-scroll overflow-auto" :class="{'mt-3': !mobileScreen}">
     <HorizontalScroll v-if="showItems && !animPlayed" />
-    <div v-for="(product, index) in products" :key="index">
+    <div v-for="(product, index) in products" :key="index" class="select_product" :class="{'selected_item': selectedItemIndex == index}">
       <div ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
         <template v-for="design in product.productstyles[0].productdesigns.filter(product_design => product_design.is_default)">
           <div class="image-holder" :key="'front'+design.id">
@@ -19,7 +19,7 @@
                    :product_index="index" :products_fonts="products_fonts" />
           </div>
         </template>
-        <h3 class="text-center">{{ product.product_name }}</h3>
+        <h3 class="text-center product_name" :title="product.display_name">{{ product.display_name }}</h3>
       </div>
     </div>
   </div>
@@ -49,6 +49,10 @@ export default class ItemsGrid extends Vue {
   public renderComponent = true
   public animPlayed = false
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+
+  get selectedItemIndex() {
+    return this.$store.getters.getSelectedIndex;
+  }
 
   get products() {
     return this.$store.getters.getProducts
@@ -89,14 +93,17 @@ export default class ItemsGrid extends Vue {
     }
   }
 }
-.select-item-slider{
-  h3{
+.select_product{
+  .product_name{
     overflow: hidden;
     width: 100%;
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.7rem;
     margin-top: 5px;
+  }
+  &.selected_item{
+    background: rgba(24, 144, 118, 0.1);
   }
 }
 </style>

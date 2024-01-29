@@ -4,6 +4,7 @@ import {handleProductPriceUpdate} from "@/helpers/Helpers";
 import readXlsxFile from "read-excel-file";
 import ModalAction from "@/mixins/ModalAction";
 import {http} from "@/httpCommon";
+import {findIndex} from "lodash";
 
 @Component
 export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAction){
@@ -26,6 +27,23 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
 
   public addPlayer(obj: Record<any, any>) {
     this.$emit('addPlayer', this.rosterDetails.length);
+  }
+
+  public async syncRosterWithCustomText(type: string, text_number_value: string) {
+    const self: Record<any, any> = this;
+    const product_custom_texts = self.$store.getters.selectedProductCustomTexts();
+    const custom_name_index = findIndex(product_custom_texts, { type: 'name' });
+    const custom_number_index = findIndex(product_custom_texts, { type: 'number' });
+    const custom_name_number_index = type == 'name' ? custom_name_index : custom_number_index;
+    //The custom text first item of type name or number depending upon type is synced with the first row input with label name or number.
+    if(custom_name_number_index >= 0) {
+      const custom_text_synced_with_roster = JSON.parse(JSON.stringify(product_custom_texts[custom_name_number_index]));
+      custom_text_synced_with_roster.value = text_number_value
+      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_name_number_index, value: custom_text_synced_with_roster})
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index: custom_name_number_index, value: custom_text_synced_with_roster
+      });
+    }
   }
 
   public async addRosterItem(productSizes:Record<any, any>[]) {

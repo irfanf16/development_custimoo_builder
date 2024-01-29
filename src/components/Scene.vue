@@ -86,14 +86,13 @@ import rgbHex from 'rgb-hex'
 import {
   checkIsEmpty, getColorType,
   getRandom,
-  getSelectedProductPantones,
+  getSelectedProductPantones, hideLockerProductUpdateButton,
   setUndoRedoItems,
   unitConversion
 } from '@/helpers/Helpers'
 import {find, unset} from "lodash";
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
-
 @Component<Scene>({
   async mounted() {
     let self: Record<any, any> = this;
@@ -208,8 +207,8 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         else {
           self.removeLogo(target.logo_index)
         }
-        canvas.remove(target);
-        canvas.requestRenderAll();
+        canvas.remove(target)
+        canvas.requestRenderAll()
       }
 
       function handleFabricCustomTextRemoved(target: Record<any, any>) {
@@ -240,6 +239,7 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
           emitter: "checkbox", custom_text_index:custom_text_index, custom_text_item_index: null,
           value: self.allProductsCustomTexts[selected_product_id][custom_text_index]
         });
+        hideLockerProductUpdateButton(false)
       }
 
       function handleCustomTextDeletedFromCanvas(custom_text_index: number) {
@@ -352,6 +352,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] | null[] = []
   private storage_url = process.env.VUE_APP_STORAGE_URL
+  private front_time
+  private back_time
+  private isFrontRenderInProgress = false
+  private isBackRenderInProgress = false
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -441,7 +445,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
 
     object.setCoords()
-    this.frontCanvas.requestRenderAll()
+    this.frontCanvasRender()
   }
 
   public getSvgGroupColors(svg_group: string) {
@@ -514,7 +518,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
         })
-        this.frontCanvas.requestRenderAll()
+        this.frontCanvasRender()
         if (this.back) {
           design = this.backDesign._objects ? this.backDesign._objects : [this.backDesign]
           design.forEach((item: Record<any, any>) => {
@@ -567,7 +571,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
             }
           })
-          this.backCanvas.requestRenderAll()
+          this.backCanvasRender()
         }
         this.unHideColorGrouping()
       }
@@ -659,7 +663,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
         })
-        this.frontCanvas.requestRenderAll()
+        this.frontCanvasRender()
 
         if (this.back) {
           design = this.backDesign._objects ? this.backDesign._objects : [this.backDesign]
@@ -676,11 +680,49 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
             }
           })
-          this.backCanvas.requestRenderAll()
+          this.backCanvasRender()
         }
-        this.unHideColorGrouping()
+        // this.unHideColorGrouping()
       }
     }
+  }
+
+  public frontCanvasRender() :void {
+    if (this.isFrontRenderInProgress) {
+      // If already in progress, do nothing or handle accordingly
+      return;
+    }
+
+    // Set the flag to indicate that the function is in progress
+    this.isFrontRenderInProgress = true;
+
+    if (this.front_time) clearTimeout(this.front_time);
+    this.front_time = setTimeout(() => {
+      // console.log('call frontCanvasRender')
+      this.frontCanvas.requestRenderAll()
+
+      // Reset the flag when rendering is complete
+      this.isFrontRenderInProgress = false;
+    }, 100);
+  }
+
+  public backCanvasRender() :void {
+    if (this.isBackRenderInProgress) {
+      // If already in progress, do nothing or handle accordingly
+      return;
+    }
+
+    // Set the flag to indicate that the function is in progress
+    this.isBackRenderInProgress = true;
+
+    if (this.back_time) clearTimeout(this.back_time);
+    this.back_time = setTimeout(() => {
+      // console.log('call backCanvasRender')
+      this.backCanvas.requestRenderAll()
+
+      // Reset the flag when rendering is complete
+      this.isBackRenderInProgress = false;
+    }, 100);
   }
 
   public setInitialColors(): void {
@@ -724,7 +766,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
     })
-    this.frontCanvas.requestRenderAll()
+    this.frontCanvasRender()
 
     if (this.back) {
       design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
@@ -741,7 +783,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       })
-      this.backCanvas.requestRenderAll()
+      this.backCanvasRender()
     }
   }
 
@@ -781,7 +823,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 item.set('fill', changeColor.value);
               }
             })
-            this.frontCanvas.requestRenderAll()
+            this.frontCanvasRender()
             if (this.back) {
               design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
               design.forEach((item: Record<any, any>) => {
@@ -790,7 +832,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   item.set('fill', changeColor.value);
                 }
               })
-              this.backCanvas.requestRenderAll()
+              this.backCanvasRender()
             }
             let svgIndex = 0
             let svgGroupId = null;
@@ -947,7 +989,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if (side === 'back') {
         element = this.$refs.back as HTMLCanvasElement
       }
-      let canvas = new fabric.Canvas(element)
+      let canvas = new fabric.Canvas(element, {
+        enableRetinaScaling: true
+      })
       if (side == 'back') {
         this.backCanvas = canvas
       } else {
@@ -999,10 +1043,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         if (side == 'back') {
           canvas.add(self.dimTextBack)
+          this.backCanvasRender()
         } else {
           canvas.add(self.dimTextFront)
+          this.frontCanvasRender()
         }
-        canvas.requestRenderAll()
 
         if(side == 'front') {
           this.addBoundary([ImageData.safe_zone_url, ImageData.boundary_url], side)
@@ -1067,6 +1112,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         canvas.on('object:modified', async (e: Record<any, any>) => {
           const fabric_object = e.target;
           if(fabric_object.get("type") == "text") {
+            await setUndoRedoItems('customTexts', 'modified')
             this.handleCustomTextModifiedEvent(e.target)
           } else {
             await setUndoRedoItems('customLogos', 'modified')
@@ -1215,10 +1261,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }
 
       if(selected.side == 'back' || selected.side == 'Back'){
-        this.frontCanvas.discardActiveObject().requestRenderAll()
+        this.frontCanvas.discardActiveObject()
+        this.frontCanvasRender()
       }else{
         if(this.back) {
-          this.backCanvas.discardActiveObject().requestRenderAll()
+          this.backCanvas.discardActiveObject()
+          this.backCanvasRender()
         }
       }
     }
@@ -1320,7 +1368,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: []
       })
-      canvas.requestRenderAll()
     }
     else {
       vertical_line.set({
@@ -1328,7 +1375,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [5, 5]
       })
-      canvas.requestRenderAll()
     }
 
     if (parseInt(top) >= relativeHeight - 2 && parseInt(top) <= relativeHeight + 2) {
@@ -1337,7 +1383,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [],
       })
-      canvas.requestRenderAll();
     }
     else {
       horizontal_line.set({
@@ -1345,7 +1390,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         strokeWidth: 4,
         strokeDashArray: [5, 5],
       })
-      canvas.requestRenderAll();
     }
   }
 
@@ -1593,11 +1637,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       }, zoom);
     }
     e.target.scaleX = e.target.scaleX + 0.0000000000000001
-    canvas.requestRenderAll()
 
     let dimText = this.dimTextFront
-    if (e.target.side == 'back' || e.target.side == 'Back') {
+    if (side == 'back') {
       dimText = this.dimTextBack
+      this.backCanvasRender()
+    } else {
+      this.frontCanvasRender()
     }
     this.showDimensions(e, dimText)
   }
@@ -1788,10 +1834,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           otherSideObjects[add_index].scaleY = target.scaleY
           otherSideObjects[add_index].angle = -target.angle
           if (side == 'back') {
-            this.frontCanvas.requestRenderAll()
+            this.frontCanvasRender()
           } else {
             if (this.back) {
-              this.backCanvas.requestRenderAll()
+              this.backCanvasRender()
             }
           }
         } else {
@@ -1827,7 +1873,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 model.bringToFront()
               })
             }
-            this.frontCanvas.requestRenderAll()
+            this.frontCanvasRender()
           } else {
             if (this.back) {
               // objectAdd.clipPath = this.clip_path_back
@@ -1837,7 +1883,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   model.bringToFront()
                 })
               }
-              this.backCanvas.requestRenderAll()
+              this.backCanvasRender()
             }
           }
         }
@@ -1852,11 +1898,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         if (otherSideObjects[add_index]) {
           if (side == 'back') {
             this.frontCanvas.remove(otherSideObjects[add_index])
-            this.frontCanvas.requestRenderAll()
+            this.frontCanvasRender()
           } else {
             if (this.back) {
               this.backCanvas.remove(otherSideObjects[add_index])
-              this.backCanvas.requestRenderAll()
+              this.backCanvasRender()
             }
           }
           delete otherSideObjects[add_index]
@@ -1913,7 +1959,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             lockMovementX: true,
             lockMovementY: true,
             originX: 'center',
-            originY: 'center',
+            originY: 'center'
           })
 
           // img._objects.forEach((element: any) => {
@@ -2170,7 +2216,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           type: 'fixed_logo'
         })
         this.fixed_logo_objects.push(img)
-        canvas.requestRenderAll()
+        if (logo.side == 'back') {
+          this.backCanvasRender()
+        } else {
+          this.frontCanvasRender()
+        }
         this.addToOtherSide(img, logo.side)
       })
     }
@@ -2214,9 +2264,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       }
-      this.frontCanvas.requestRenderAll()
+      this.frontCanvasRender()
       if(this.back && this.backCanvas) {
-        this.backCanvas.requestRenderAll()
+        this.backCanvasRender()
       }
       this.fixed_logo_objects = []
     }
@@ -2312,7 +2362,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               model.bringToFront()
             })
           }
-          canvas.requestRenderAll()
+          if (logo.side == 'back') {
+            this.backCanvasRender()
+          } else {
+            this.frontCanvasRender()
+          }
 
           if (this.mainPreview && this.selectedProductId == this.product_id) {
             const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
@@ -2347,9 +2401,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           })
 
           this.addToOtherSide(img, logo.side)
-          if(this.mainPreview && this.mounted) {
-            this.$store.commit('SET_UPDATING_LOGO', false)
-          }
+          this.$store.commit('SET_UPDATING_LOGO', false)
         }, { crossOrigin: 'Anonymous' })
       }
     }
@@ -2373,9 +2425,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       }
-      this.frontCanvas.requestRenderAll()
+      this.frontCanvasRender()
       if(this.back && this.backCanvas) {
-        this.backCanvas.requestRenderAll()
+        this.backCanvasRender()
       }
       this.custom_logo_objects = []
     }
@@ -2397,9 +2449,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           this.other_side_logos[custom_logo_index] = null
         }
-        this.frontCanvas.requestRenderAll()
+        this.frontCanvasRender()
         if (this.back) {
-          this.backCanvas.requestRenderAll()
+          this.backCanvasRender()
         }
       }
       this.custom_logo_objects[custom_logo_index] = null
@@ -2447,9 +2499,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       }
-      this.frontCanvas.requestRenderAll()
+      this.frontCanvasRender()
       if(this.back && this.backCanvas) {
-        this.backCanvas.requestRenderAll()
+        this.backCanvasRender()
       }
       this.product_custom_text_objects = []
     }
@@ -2472,9 +2524,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       }
-      this.frontCanvas.requestRenderAll()
+      this.frontCanvasRender()
       if (this.back) {
-        this.backCanvas.requestRenderAll()
+        this.backCanvasRender()
       }
     }
     /*
@@ -2620,9 +2672,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                           })
                         })
                       }
-                      this.frontCanvas.renderAll()
                       if(this.back) {
-                        this.backCanvas.renderAll()
+                        this.backCanvasRender()
+                      } else {
+                        this.frontCanvasRender()
                       }
                       this.addToOtherSide(fabric_text, custom_text_item.placement, true)
                     })
@@ -2690,7 +2743,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 model.bringToFront()
               })
             }
-            this.frontCanvas.requestRenderAll()
+            this.frontCanvasRender()
           }
           if (render_back_canvas) {
             if (this.productType == 'customized') {
@@ -2698,7 +2751,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 model.bringToFront()
               })
             }
-            this.backCanvas.requestRenderAll()
+            this.backCanvasRender()
           }
         }
       }
@@ -2724,7 +2777,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
-    this.frontCanvas.requestRenderAll()
+    this.frontCanvasRender()
     const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
     const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
     const converted_width = unitConversion(width)

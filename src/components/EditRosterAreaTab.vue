@@ -24,7 +24,9 @@
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
-          <RosterDetails :productSizes="sizeOptions" ref="rostermodal" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" :lockers="lockers" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts" />
+          <RosterDetails :productSizes="sizeOptions" ref="rostermodal"
+                         @addToCartAnimation="()=>this.$emit('addToCartAnimation')"
+                         :lockers="lockers" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts" />
           <div class="roster-preview-area">
             <CustomizationPreview :fromRosterModal="true" :designs="products[designsIndex]" :products_fonts="products_fonts" />
             <div class="d-flex py-2 fs-3 justify-content-end">
@@ -173,7 +175,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   get customText(): Record<any, any>[] {
-    return this.$store.getters.getCustomTexts();
+    return this.$store.getters.selectedProductCustomTexts();
   }
 
   get custom_name_index() : number {

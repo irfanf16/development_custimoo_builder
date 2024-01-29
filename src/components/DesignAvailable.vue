@@ -1,8 +1,8 @@
 <template>
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[styleIndex]">
-      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :class="{'selected_design': design.id == selectedDesignId}">
-        <a @click="changeDesign(index); showPreview()" v-if="index < itemsPerRow || loadDesigns">
+      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
+        <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{
                     textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
@@ -17,6 +17,7 @@
                  :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
                  :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
         </a>
+        <div v-else :style="{width: design_width+ 'px', height: design_height+ 'px'}"></div>
         <h3>{{ design.design_name }}</h3>
       </div>
     </template>
@@ -33,15 +34,35 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
     Scene
   },
   mounted() {
-    (this.$refs['designs'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
-    (this.$refs['designs'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
-    (this.$refs['designs'] as Record<any, any>).addEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
-    this.itemsPerRow = Math.round((this.$refs['designs'] as Record<any, any>).clientHeight / 130) * 4;
-  },
-  beforeDestroy() {
-    (this.$refs['designs'] as Record<any, any>).removeEventListener('scroll', ($event:Record<any, any>)=>{this.loadIt($event)});
-    (this.$refs['designs'] as Record<any, any>).removeEventListener('mousewheel', ($event:Record<any, any>)=>{this.loadIt($event)});
-    (this.$refs['designs'] as Record<any, any>).removeEventListener('touchmove', ($event:Record<any, any>)=>{this.loadIt($event)});
+    this.first_load = true
+    this.design_width = (this.$refs['design_canvas'] as Record<any, any>)[0].clientWidth
+    this.design_height = (this.$refs['design_canvas'] as Record<any, any>)[0].clientHeight;
+    setTimeout(() => {
+      (this.$refs['design_item'] as Record<any, any>[]).forEach((design_element: HTMLDivElement) => {
+        observer.observe(design_element);
+      })
+    }, 1000)
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        // Check if the target element is in view
+        if (entry.isIntersecting) {
+          if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
+          const time_out = this.first_load? 0 : 800
+          this.design_times[entry.target.id] = setTimeout(() => {
+            // Load the content or perform your lazy loading logic
+            Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[entry.target.id], 'design_show_on_scroll', 1)
+          }, time_out)
+        } else {
+          if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
+          // elements are hiding here
+          Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[entry.target.id], 'design_show_on_scroll', 0)
+        }
+      })
+      setTimeout(() => {
+        this.first_load = false
+      }, 1000)
+    })
   }
 })
 
@@ -51,7 +72,10 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   @Prop() activeTab!: number;
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-  public itemsPerRow = 16
+  public first_load = true
+  public design_width = 0
+  public design_height = 0
+  public design_times = []
 
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
@@ -76,21 +100,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getLastActiveProductData
   }
 
-  public loadDesigns = false
-
-  public loadIt($event:Record<any, any>) {
-    $event.stopPropagation()
-
-    let designHt = 1
-    if(designHt <= $event.target.scrollTop){
-      this.loadDesigns = true
-    }else if(this.mobileScreen){
-      this.loadDesigns = true
-    }
-  }
-
   public changeDesign(index: number) {
-    let self: Record<any, any> = this;
     this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
       design_index: index, design_id: this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id
     })

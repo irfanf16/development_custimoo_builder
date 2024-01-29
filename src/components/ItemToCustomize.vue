@@ -1,5 +1,6 @@
 <template>
   <div class="item-to-customize text-left">
+    <!--  For mobile start  -->
     <div class="px-3 py-1" style="border-bottom: 1px solid #eee" v-if="mobileScreen" >
       <h2 class="fw-bold p-lg-0 mb-lg-4 fz-18 bg-transparent d-flex align-items-center justify-content-between" @click="toggleItems">
         <span style="font-size: 16px">Select Item to Customize</span>
@@ -48,6 +49,7 @@
         <ItemsGrid :showItems="showItems" :products_fonts="products_fonts" />
       </div>
     </div>
+    <!--  For mobile start  -->
 
     <template v-else>
       <div class="collection-btn mb-2 mt-3 d-flex gap-1">
@@ -110,7 +112,6 @@
       </div>
 
       <SelectItemCarousel ref="itemsCarousel" :products_fonts="products_fonts" />
-
     </template>
 
     <h2 v-if="mobileScreen" class="fw-bold px-3 py-1 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">

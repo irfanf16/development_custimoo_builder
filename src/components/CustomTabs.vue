@@ -32,7 +32,7 @@
 
       <Collars/>
     </div>
-    <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-show="this.$store.getters.getActiveTab === 4">
+    <div class="customize_controls players-data pt-4" :class="{'setMax': !playersDataHeight}" v-show="this.$store.getters.getActiveTab === 4" :style="{'top': `${screenHeight/1.3}px`}">
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
@@ -72,7 +72,7 @@
             </template>
           <span class="addPlayer" @click="shareRoster"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Link</span></span>
         </div>
-        <div class="players-table mt-2 hide-scroll h-100">
+        <div class="players-table mt-2 theme-scroll-v h-100">
           <RosterTableMobile :productSizes="productSizes" ref="mobile-roster" @addPlayer="rosterDetailsInit" />
         </div>
       </div>
@@ -107,7 +107,7 @@ import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {getRosterDetailDefaultObject, getSelectedProductPantones, getDomDocument} from "@/helpers/Helpers";
-import {cartModalData} from "@/mixins/LockerProduct";
+import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationTabsMixin from '../mixins/CustomizationTabsMixin'
 import ColorAccordionMobile from "@/components/mobile/ColorAccordionMobile.vue";
@@ -127,11 +127,12 @@ import ColorAccordionMobile from "@/components/mobile/ColorAccordionMobile.vue";
     this.fontsColorsManipulation()
     this.fontsList()
     let tabIndex = this.selectedProduct.is_logo_allowed ? 0 : 1
-    this.switchTabs(tabIndex)
+    this.switchTabs(tabIndex);
+    this.screenHeight = window ? window.screen.availHeight : 0;
   }
 })
 
-export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsMixin) {
+export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsMixin, RosterDetailsGlobal) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
   @Prop() activeTab!: number
   @Prop() sideTabIndex!: number
@@ -151,6 +152,7 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
   public productName = ''
   public showLoader = false
   public designsIndex = 0;
+  public screenHeight = 0;
   private tabTitles = [
     'Logo Uploader',
     'Change Colors',
@@ -180,7 +182,11 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
   }
 
   private addToCart() {
-    this.addToCartMixin(this.products_fonts);
+    this.handleRosterItemFocus(0);
+
+    setTimeout(()=>{
+      this.addToCartMixin(this.products_fonts);
+    },500)
   }
 
   get cartLoading(): Record<any, any> {

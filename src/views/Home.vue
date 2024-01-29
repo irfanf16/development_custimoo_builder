@@ -1713,14 +1713,54 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public toggleFullScreen() {
+    const doc = getDomDocument(true);
+    console.log('doc', doc)
+    let root_elem:Record<any, any> = {};
+    if(doc){
+      const customizer_elem = doc.querySelector('v-customizer');
+      console.log('customizer_elem', customizer_elem)
+
+      if(customizer_elem){
+        root_elem = this.findTopParentExceptBody(customizer_elem);
+        console.log('root_elem', root_elem)
+      }
+    }
+
     this.fullScreen=!this.fullScreen
 
     if(this.fullScreen){
-      this.showToast('Fullscreen mode', 'SUCCESS')
+      this.showToast('Fullscreen mode', 'SUCCESS');
+
+      if(root_elem){
+        console.log('root_elem 2', root_elem)
+        root_elem.style.position = 'relative';
+        root_elem.style.background = 'white';
+        root_elem.style.zIndex = '999999';
+      }
     }else{
-      this.showToast('Exit fullscreen', 'SUCCESS')
+      this.showToast('Exit fullscreen', 'SUCCESS');
+
+      if(root_elem){
+        root_elem.style.zIndex = 'auto';
+        root_elem.style.background = 'auto';
+      }
     }
   }
+
+  public findTopParentExceptBody(element:any) {
+    let parent = element.parentNode.tagName.toLowerCase() === 'body' ? false : element.parentNode;
+
+    // Traverse up the DOM tree until reaching an element that is not a div
+    // and is not the body tag
+    if(parent){
+      while (parent.parentNode.tagName.toLowerCase() !== 'body') {
+        parent = parent.parentNode;
+      }
+    }
+
+    return parent;
+  }
+
 
   public changeSide(index: number) {
     const payload = {
