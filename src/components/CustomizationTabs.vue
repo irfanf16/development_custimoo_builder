@@ -82,8 +82,14 @@
             </template>
             <div class="team-roaster-area p-4" v-if="hideTab.teamHide">
               <h2 class="fw-bold mb-2 fz-18">{{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</h2>
-              <EditRosterAreaTab @open-add-to-locker="openAddToLocker"
-                                 :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
+              <div class="d-flex gap-2" v-show="!getProductEditInfoObject.editing || ( getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product')">
+                <b-button class="d-none d-lg-block" @click="show">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</b-button>
+                <!--      <button class="btn btn-secondary light" v-if="isCustomerAuthenticated && company.platform != 'cdnExceptLogin'" @click="shareRoster">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'roster' }} url</button>-->
+              </div>
+
+              <div>
+                <OrderSummary :products_fonts="products_fonts" :product-sizes="productSizes" />
+              </div>
             </div>
           </b-tab>
         </div>
@@ -104,9 +110,12 @@ import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import CustomizationTabsMixin from "@/mixins/CustomizationTabsMixin";
 import {filter} from "lodash"
+import ModalAction from "@/mixins/ModalAction";
+import OrderSummary from "@/components/OrderSummary.vue";
 
 @Component<CustomizationTabs>({
   components: {
+    OrderSummary,
     RecentLogos,
     ColorAccordion,
     LogoPlacementTab,
@@ -129,7 +138,7 @@ import {filter} from "lodash"
     this.setTotalTabs();
   },
 })
-export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, CustomizationTabsMixin) {
+export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, CustomizationTabsMixin, ModalAction) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) isColorShuffled!: boolean
   @Prop({required: true}) customTextIndex!: number
@@ -168,16 +177,19 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, Custo
     return this.$store.getters.getCustomTexts()
   }
 
+  get productSizes(){
+    return this.selectedProduct.sizes[0].json_data
+  }
+
   get products(): [Record<any, any>] {
     return this.$store.getters.getProducts
   }
 
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject
+  }
   get productNames() {
     return this.$store.getters.getSelectedProduct.productnames;
-  }
-
-  get productSizes(){
-    return this.selectedProduct.sizes[0].json_data
   }
 
   get vectorImageConstraint():boolean{
@@ -238,12 +250,13 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, Custo
     this.productColorsManipulation()
   }
 
-  public setTotalTabs() {
-    this.$store.dispatch('setMainTotalTabs', (this.$refs['customization-tabs'] as Record<any, any>)?.getTabs().length-2)
+  public async show(){
+    this.showVModal('rostermodal')
   }
 
-  public openAddToLocker () {
-    this.$emit('open-add-to-locker')
+
+  public setTotalTabs() {
+    this.$store.dispatch('setMainTotalTabs', (this.$refs['customization-tabs'] as Record<any, any>)?.getTabs().length-2)
   }
 
   public setHideTab(index: string, value: boolean) {

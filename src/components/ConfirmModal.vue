@@ -4,7 +4,7 @@
          :scrollable="true"
          height="auto"
          :reset="true"
-         :shiftY="0"  :name="name" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" class="confirm-modal">
+         :shiftY="0"  :name="name" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" class="confirm-modal absolute-modals">
    <div class="modal-body">
     <div class="text-center">
         <span class="btn btn-secondary light rounded-circle confirm-icon">

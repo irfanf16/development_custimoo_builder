@@ -182,7 +182,7 @@
             :scrollable="true"
             height="auto"
             :reset="true"
-            :shiftY="0" name="forgotPasswordModal" ref="forgotPasswordModal" id="modal-login" class="login-modal" size="sm" hide-title hide-footer>
+            :shiftY="0" name="forgotPasswordModal" ref="forgotPasswordModal" id="modal-login" class="login-modal absolute-modals" size="sm" hide-title hide-footer>
       <div class="modal-header bg-light d-flex justify-content-between">
         <span class="fs-5 font-weight-bold d-inline-flex p-2">Forgot Password?</span>
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="backToLoginModal"><BIconX /></span>

@@ -4,11 +4,7 @@
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
 
     <ShareDesignModal :product="product" :loader="shareDesignLoader" />
-    <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
-    <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
-    <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
     <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
-    <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
     <modal name="product-rejection-info-modal" class="absolute-modals" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
       <h1>
         {{getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].message}}
@@ -17,6 +13,14 @@
         <img width="250" :src="`${storageUrl}${activity_file.url}`" alt="" :key="`activity-file-${activity_file_index}`">
       </template>
     </modal>
+
+    <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
+    <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
+    <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+    <EditRosterAreaTab @open-add-to-locker="getLockers(true)"
+                       :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
+    <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
+    <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink"/>
 
     <b-container fluid>
       <b-row>
@@ -442,7 +446,6 @@
                 </div>
               </div>
             </div>
-            <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink"/>
             <div class="sideNav" v-if="mobileScreen">
               <ul>
                 <li v-if="selectedProduct.is_logo_allowed">
@@ -570,6 +573,8 @@ import AddToCartButton from "@/components/AddToCartButton.vue";
 import ShareDesignModal from "@/components/ShareDesignModal.vue";
 import ThreeDScene from "@/components/ThreeDScene.vue";
 import Scene3d from "@/components/3d/scene-3d.vue";
+import EditRosterAreaTab from "@/components/EditRosterAreaTab.vue";
+import LogoEditorModal from "@/components/LogoEditorModal.vue";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -579,6 +584,8 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    LogoEditorModal,
+    EditRosterAreaTab,
     ShareDesignModal,
     Scene3d,
     ThreeDScene,
@@ -848,6 +855,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const msrp_label = this.settings("msrp_label");
     const msrp_label_admin = this.settings("msrp_label_admin");
     return msrp_label.is_custom_msrp_label?msrp_label.msrp_label:msrp_label_admin;
+  }
+
+  get productSizes(){
+    return this.selectedProduct.sizes[0].json_data
   }
 
   get application_mounted() {

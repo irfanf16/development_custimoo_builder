@@ -5,6 +5,7 @@
            height="auto"
            :reset="true"
            :shiftY="0"
+           class="absolute-modals"
            @before-open="showUploader = -1"
            name="replace-logo" ref="replace-logo" id="modal-center-lockerroom" size="xl" :hide-footer="true">
       <div class="modal-header d-flex justify-content-between">

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <LoginForm ref="loginModal"   />
+<!--    <LoginForm ref="loginModal"   />-->
 <!--    <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="shared_url">-->
     <div class="well custom d-flex gap-1 mt-3 position-relative" v-if="false">
       <b-input-group class="w-100">

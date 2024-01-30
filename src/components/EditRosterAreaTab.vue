@@ -1,10 +1,5 @@
 <template>
   <div>
-    <div class="d-flex gap-2" v-show="!getProductEditInfoObject.editing || ( getProductEditInfoObject.editing && getProductEditInfoObject.type != 'order_product')">
-      <b-button class="d-none d-lg-block" @click="show">Edit {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</b-button>
-<!--      <button class="btn btn-secondary light" v-if="isCustomerAuthenticated && company.platform != 'cdnExceptLogin'" @click="shareRoster">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'roster' }} url</button>-->
-    </div>
-
     <modal id="modal-scrollable" :width="screenWidth"
            :resizable="true"
            :scrollable="true"
@@ -12,7 +7,7 @@
            :reset="true"
            :shiftY="0"
            @opened="setRosterOpen(true), getLockerProductsRosters()"
-           name="rostermodal" class="roster-modal" size="xl"
+           name="rostermodal" class="roster-modal absolute-modals" size="xl"
            footer-class="hide-modal-footer d-none"
            @before-close="handleRosterModalBeforeClose"
         >
@@ -37,38 +32,6 @@
         </div>
       </div>
     </modal>
-<!--    <modal :width="screenWidth"-->
-<!--           :resizable="true"-->
-<!--           :scrollable="true"-->
-<!--           height="auto"-->
-<!--           :reset="true"-->
-<!--           :shiftY="0" name="rosterfilemodal"  content-class="upload-logo-disclaimer roster-msg" id="modal-center-uploadroster" centered  size="lg">-->
-<!--      <div class="modal-body">-->
-<!--        <p class="mb-4">The {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Team Roster' | TitleCase}} can be automatically imported from an excel sheet. Please download and use the excel sheet below. No other excel sheets or documents can be used to import data.</p>-->
-<!--        <div class="roster-template-area">-->
-<!--          <b-button @click="downloadTemplate" class="btn btn-secondary fw-bold">Download {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template <a  v-b-tooltip.hover-->
-<!--                                                                                                             title="Enter roster in excel file">-->
-<!--            <font-awesome-icon :icon="['fas', 'info-circle']"/>-->
-<!--          </a></b-button>-->
-
-<!--          <b-button type="upload" name="Upload Template" @change="onChange" class="btn btn-secondary fw-bold" accept="image/x-png,image/jpeg,pdf">Upload {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Template-->
-<!--            <b-form-file  class="mb-2"></b-form-file>-->
-<!--            <a href="#" v-b-tooltip.hover title="Upload the template here to populate the roster">-->
-<!--              <font-awesome-icon :icon="['fas', 'info-circle']"/>-->
-<!--            </a></b-button>-->
-<!--        </div>-->
-<!--      </div>-->
-<!--    </modal>-->
-
-    <div class="d-lg-none">
-      <RosterDetails @addToCartAnimation="()=>this.$emit('addToCartAnimation')"
-                     :products_fonts="products_fonts" :lockers="lockers"
-                     @addPlayer="rosterDetailsInit" :productSizes="productSizes"
-                     ref="roster-detail"/>
-    </div>
-    <div class="team-order-details">
-      <OrderDetailsTab :products_fonts="products_fonts" @open-add-to-locker="openAddToLocker" ref="order-details" />
-    </div>
   </div>
 </template>
 
@@ -228,10 +191,6 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   public openAddToLocker () {
     this.$emit('open-add-to-locker')
-  }
-
-  public async show(){
-    this.showVModal('rostermodal')
   }
 
   public hide(){
@@ -408,6 +367,30 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
         color: #fff;
       }
     }
+  }
+}
+
+
+.loader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1030;
+
+  img {
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
   }
 }
 </style>

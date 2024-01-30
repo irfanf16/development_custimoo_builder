@@ -864,7 +864,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     let roster = this.$store.getters.getProductRosters();
     if (roster.some(el => (el.quantity > 0 &&  (el.size=="" || el.size == null || parseInt(el.size_index) < 0)  ))) {
       this.showToast(`Please provide size for all roster items`, "error");
-      this.showVModal('rostermodal');
+      const is_mobile_screen = this.$store.getters.getMobileScreen
+      if(!is_mobile_screen){
+        this.showVModal('rostermodal');
+      }
       return false;
     }
     // check is the sum of roster items(collectively) is greater than sku's 'minimum order quantity'

@@ -64,3 +64,29 @@
   }
 </script>
 
+
+<style lang="scss">
+
+.loader {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 1030;
+
+  img {
+    max-width: 7%;
+    display: block;
+    margin: 0 auto;
+    height: auto;
+  }
+}
+</style>
