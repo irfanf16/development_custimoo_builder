@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper position-relative m-lg-4" :class="{'mobile-full-screen': fullScreen}" v-cloak style="margin-top: 0 !important;" >
+  <div class="page-wrapper position-relative m-lg-4" :class="{'mobile-full-screen': fullScreen}" v-cloak style="margin-top: 0 !important; font-size: 15px" >
     <meta name="viewport" content="width=device-width">
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
 
@@ -18,7 +18,7 @@
     <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
     <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
     <EditRosterAreaTab @open-add-to-locker="getLockers(true)"
-                       :productSizes="productSizes" ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
+                       ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
     <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
     <ReplaceLogos @hidePopper="hidePopper" :popperID="popperID" :product="product" @shareDesign="shareDesign" :shareDesignLoader="shareDesignLoader" @copyLink="copyLink"/>
 
@@ -855,10 +855,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const msrp_label = this.settings("msrp_label");
     const msrp_label_admin = this.settings("msrp_label_admin");
     return msrp_label.is_custom_msrp_label?msrp_label.msrp_label:msrp_label_admin;
-  }
-
-  get productSizes(){
-    return this.selectedProduct.sizes[0].json_data
   }
 
   get application_mounted() {

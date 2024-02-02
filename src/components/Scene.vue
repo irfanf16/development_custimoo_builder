@@ -682,7 +682,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           })
           this.backCanvasRender()
         }
-        // this.unHideColorGrouping()
+        this.unHideColorGrouping()
       }
     }
   }
@@ -703,7 +703,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
       // Reset the flag when rendering is complete
       this.isFrontRenderInProgress = false;
-    }, 100);
+    }, 0);
   }
 
   public backCanvasRender() :void {
@@ -722,7 +722,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
       // Reset the flag when rendering is complete
       this.isBackRenderInProgress = false;
-    }, 100);
+    }, 0);
   }
 
   public setInitialColors(): void {

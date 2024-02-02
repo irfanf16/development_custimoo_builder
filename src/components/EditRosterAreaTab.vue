@@ -55,8 +55,8 @@ import {AxiosError, AxiosResponse} from "axios";
     RosterDetails,
     Scene
   },
-    async mounted() {
-    this.setProductSizes()
+  async mounted() {
+    await this.setProductSizes()
     await this.getLockerProductsRosters()
 
     await this.setRosterTotal(this.productRosters)
@@ -69,7 +69,6 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   * */
 
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
-  @Prop({required: true}) productSizes!: any
 
   /*
   * props ends
@@ -162,6 +161,14 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 * watcher starts
 * */
 
+  get productSizes(){
+    const selectedProduct = this.$store.getters.getSelectedProduct
+    if(selectedProduct) {
+      return selectedProduct.sizes[0].json_data
+    } else {
+      return []
+    }
+  }
   @Watch('productSizes')
   productSizeChanged(){
     this.setProductSizes();
@@ -231,10 +238,12 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
 
   public setProductSizes() {
     this.sizeOptions = [];
-    this.productSizes.forEach((size: any, key: number) => {
-      let sizes = {value: size.name, text: size.name}
-      this.sizeOptions = this.sizeOptions.concat([sizes])
-    })
+    if(this.productSizes){
+      this.productSizes.forEach((size: any, key: number) => {
+        let sizes = {value: size.name, text: size.name}
+        this.sizeOptions = this.sizeOptions.concat([sizes])
+      })
+    }
   }
 
   public setRosterTotal(roster:Record<any, any>[]){
