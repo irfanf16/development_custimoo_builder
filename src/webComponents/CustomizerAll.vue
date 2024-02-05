@@ -38,6 +38,10 @@ export default {
       // run time adding css for mooressports.com as it is not accept any direct css
       ele = getWindowObject().document.getElementById('2afb678d-9823-4fba-a546-506062145325')?.querySelector('[data-ux="Container"]')
     }
+    if(!ele) {
+      // run time adding css for mooressports.com as it is not accept any direct css
+      ele = getWindowObject().document.getElementById('df7a18b7-68cc-4c97-8ee7-4ee261b7544d')?.querySelector('[data-ux="Container"]')
+    }
     if(ele) {
       ele.style.width = '100%'
       ele.style.paddingLeft = '0'
