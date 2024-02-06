@@ -87,10 +87,8 @@
                   <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2 fs-2">PDF</a>
                   <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2 fs-2">Details</router-link>
                   <template v-for="(item, index) in order.items">
-                    <button class="btn btn-dark mx-2 d-none cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
-                            v-if="item.status == 'order_approve' || item.status == 'order_cancel'" @click.stop="cancelOrder(order)">Cancel</button>
-                    <button class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
-                            v-else @click.stop="cancelOrder(order)">Cancel</button>
+                      <button class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
+                              v-show="item.status !== 'submitted_for_factory_review'" @click.prevent="cancelOrder(order)">Cancel</button>
                   </template>
                   <div class="btn d-inline-flex accordion-icon">
                     <b-icon
