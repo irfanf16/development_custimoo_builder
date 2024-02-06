@@ -1041,7 +1041,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         cart_edit_mode = true;
         (post_data as Record<any,any>).factory_product.id = product_edit_info_object.cart_product_info.cart_item_product.id
         url = `carts/cart-items/${product_edit_info_object.cart_product_info.cart_item_id}/update`
-        this.showVModal('cart-modal')
+        let no_cart_modal_platforms = ['wordpress','shopify'];
+        if(!no_cart_modal_platforms.includes(platform)){
+          this.showVModal('cart-modal')
+        }
       }
 
       let santacart = true;

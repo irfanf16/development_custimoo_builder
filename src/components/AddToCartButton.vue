@@ -132,8 +132,12 @@ export default class AddToCartButton extends Mixins(cartModalData) {
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       let no_cart_modal_platforms = ['wordpress','shopify'];
 
-      if(!no_cart_modal_platforms.includes(this.company.platform))
+      if(no_cart_modal_platforms.includes(this.company.platform)) {
+        this.hideVModal('cart-modal')
+      }else{
         this.showVModal('cart-modal')
+      }
+
     }
   }
   public gotoLogin() {
