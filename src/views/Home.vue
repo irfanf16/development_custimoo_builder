@@ -15,7 +15,7 @@
     </modal>
 
     <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
-    <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
+    <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer && $store.getters.getCartItems.length > 0"/>
     <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
     <EditRosterAreaTab @open-add-to-locker="getLockers(true)"
                        ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
