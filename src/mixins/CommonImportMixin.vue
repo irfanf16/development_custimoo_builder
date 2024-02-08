@@ -286,12 +286,13 @@ export default class CommonImportMixin extends Vue{
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
-
+  
   private saveBeforeExit(e: Event){
     let self: Record<any, any> = this;
-    if(self.$store.getters.getUndoItems.length > 0 || self.$store.getters.getRedoItems.length > 0){
+    if((self.$store.getters.getUndoItems.length > 0 || self.$store.getters.getRedoItems.length > 0) && !self.$store.getters.getNagivationToCartEcommerce){
       const confirmationMessage = "You have unsaved changes. Are you sure you want to leave?";
       alert(confirmationMessage);
+      self.$store.commit("SET_NAVIGATE_TO_CART", false);
       (e as any).returnValue = confirmationMessage;
       return confirmationMessage;
     }

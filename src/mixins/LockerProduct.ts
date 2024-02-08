@@ -994,6 +994,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let company = this.$store.getters.getCompany;
       self.$store.dispatch('setCartLoading',false);
       if(!collection_view) {
+        self.$store.commit("SET_NAVIGATE_TO_CART", true);
         window.location.replace(company.company_domain + '/cart');
       }
     }).catch(err => {
@@ -1139,6 +1140,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               http.post(ecom_url, update_cart_id_data).then((res: any) => {
                 self.$store.dispatch('setCartLoading',false);
                 if(!collection_view) {
+                  self.$store.commit("SET_NAVIGATE_TO_CART", true);
                   window.location.replace(company_domain + '/cart');
                 }
               }).catch(err => {

@@ -11,6 +11,7 @@ const Cart:Module<any, any> = {
     added_to_cart: false,
     cart_loading:false,
     cart_icon_show:false,
+    navigate_to_cart_ecommerce:false
   },
   getters: {
     getCartItemsCount(state:Record<any, any>){
@@ -38,6 +39,9 @@ const Cart:Module<any, any> = {
     getCartIconShow(state:Record<any,any>){
       return state.cart_icon_show;
     },
+    getNagivationToCartEcommerce(state:Record<any, any>){
+      return state.navigate_to_cart_ecommerce;
+    }
   },
   mutations: {
     ADD_TO_CART(state: Record<any, any>, payload: boolean){
@@ -58,6 +62,9 @@ const Cart:Module<any, any> = {
     SET_CART_ICON_SHOW(state:Record<any,any>, payload:boolean){
       state.cart_icon_show = payload;
     },
+    SET_NAVIGATE_TO_CART(state:Record<any, any>, payload:boolean){
+      state.navigate_to_cart_ecommerce = payload
+    }
   },
   actions: {
     addToCart({commit},payload){
