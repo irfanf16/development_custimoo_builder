@@ -1911,6 +1911,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private async cancelCart() {
     let self: Record<any, any> = this;
     this.showLoader = true;
+    this.$store.commit('SET_INDEX_DB_STORE_TIME',0);
     await this.handleCancelEditMode();
     const categories_promise = this.fetchCategories();
     categories_promise.then(async (cat_response) => {

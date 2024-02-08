@@ -1126,6 +1126,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             self.$store.dispatch('addToCart',api_res.items)
             // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
             // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+            self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
             await self.exitFromEditMode()
             self.showToast(res.data.message, 'success');
             self.$store.dispatch('addedToCart', true)
@@ -1135,6 +1136,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id as string);
               update_cart_id_data.append('action', 'add_custimoo_cart_id');
               if(cart_edit_mode) {
+                self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
                 await self.exitFromEditMode()
               }
               http.post(ecom_url, update_cart_id_data).then((res: any) => {

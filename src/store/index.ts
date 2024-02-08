@@ -50,7 +50,7 @@ const plugins = [
         })
         // console.log(stateToPersist)
         saveState(stateToPersist)
-      }, 2000)
+      }, state.Main.index_db_store_time)
     })
   },
 ];

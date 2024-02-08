@@ -24,7 +24,8 @@ const Main:Module<any, any> = {
     },
     tabIndexMain: 0,
     mainTotalTabs: 3,
-    popperID: ''
+    popperID: '',
+    index_db_store_time:1000
 
   },
   mutations: {
@@ -56,6 +57,9 @@ const Main:Module<any, any> = {
     },
     SET_MAIN_TOTAL_TABS(state: Record<any, any>, payload: number) {
       state.mainTotalTabs = payload
+    },
+    SET_INDEX_DB_STORE_TIME(state: Record<any, any>, payload: number) {
+      state.index_db_store_time = payload
     }
   },
   getters: {
