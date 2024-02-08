@@ -298,7 +298,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
   }
 
   get goBackToCart():boolean{
-    return this.getProductEditInfoObject.cart_product_info!.back_to_cart
+    return this.getProductEditInfoObject.cart_product_info!.meta_info!.back_to_cart
   }
 
   get notVectorLogosCount(){
@@ -548,11 +548,11 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,car
 
   public handleRosterClose() {
     const edit_product_info_obj = this.getProductEditInfoObject;
-    if(edit_product_info_obj.type == 'cart_product' && edit_product_info_obj.cart_product_info!.back_to_cart) {
+    if(edit_product_info_obj.type == 'cart_product' && edit_product_info_obj.cart_product_info!.meta_info!.back_to_cart) {
       this.cancelCart();
       const updated_product_info = {
         ...edit_product_info_obj.locker_product_info,
-        cart_product_info: {...edit_product_info_obj.locker_product_info.cart_product_info, back_to_cart: false}
+        cart_product_info: {...edit_product_info_obj.locker_product_info.cart_product_info, meta_info : {back_to_cart: false}}
       }
       this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', {locker_product_info:updated_product_info});
     }else if(edit_product_info_obj.type == 'locker_product' && this.isEditingFromLocker) {

@@ -291,9 +291,9 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
 
           if(cart_items[cart_item_index].factory_products[factory_item_index]){
             if(this.$route.query.roster){
-              this.editCartItem(cart_item_index, factory_item_index, false);
+              this.editCartItem(cart_item_index, factory_item_index, false, true);
             }else{
-              this.editCartItem(cart_item_index, factory_item_index, true);
+              this.editCartItem(cart_item_index, factory_item_index, true, true);
             }
           }
         }
@@ -467,7 +467,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         editing: true,  type: "cart_product", filters: {search_products: "", private_product: is_private},
         locker_product_info: getEditModeDefaultObj('locker_product_info'), cart_product_info: {
           cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index,
-          cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item, back_to_cart: backToCart
+          cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item, meta_info: {back_to_cart: backToCart}
         },
         order_product_info: getEditModeDefaultObj('order_product_info')
       })

@@ -976,7 +976,7 @@ const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[],
 }
 //type could be locker_product, cart_product, order_product, reorder_product
 const getEditModeDefaultObj = (prop='') => {
-  const cart_product_info = { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null }
+  const cart_product_info = { cart_item_index: null, cart_item_id: null, cart_item_product_index: null, cart_item_product: null, meta_info: null }
   const order_product_info =  {
     activity_items: [], factory_id: null, factory_products: [], active_product_id: null, item_id: null, activity_id: null,
     style_id :null, design_id : null, factory_product_active_index : 0, paginate: false
@@ -1569,7 +1569,7 @@ const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", lastActiveProductDefaultObject())
 }
 
-const exitFromEditMode = () => {
+const exitFromEditMode = async () => {
   Store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", getEditModeDefaultObj())
 }
 

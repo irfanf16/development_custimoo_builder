@@ -526,7 +526,7 @@ img{
     justify-content: center;
     display: flex;
     align-items: center;
-    justify-content: start;
+    justify-content: flex-start;
     overflow: hidden;
     padding: 0 9px;
     gap: 10px;

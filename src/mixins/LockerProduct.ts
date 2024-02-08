@@ -160,19 +160,19 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
   public async handleCancelEditMode(persist_last_active_product_data = true) {
     let self: Record<any, any> = this;
     const last_active_product_data = JSON.parse(JSON.stringify(this.$store.getters.getLastActiveProductData))
-    exitFromEditMode()
-    this.$emit('update:search');
-    eventBus.$emit('useProductOriginalColors')
+    await exitFromEditMode()
+    await this.$emit('update:search');
+    await eventBus.$emit('useProductOriginalColors')
     await hideLockerProductUpdateButton()
-    this.$store.commit('RESET_CUSTOM_TEXTS');
-    this.$store.commit('RESET_CUSTOM_LOGOS');
-    this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true});
-    eventBus.$emit('resetTextsCanvas');
-    eventBus.$emit('resetLogosCanvas');
-    self.$root.$emit('sliderEvent', 0);
+    await this.$store.commit('RESET_CUSTOM_TEXTS');
+    await this.$store.commit('RESET_CUSTOM_LOGOS');
+    await this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true});
+    await eventBus.$emit('resetTextsCanvas');
+    await eventBus.$emit('resetLogosCanvas');
+    await self.$root.$emit('sliderEvent', 0);
     await this.$store.dispatch('setTabMain', {value: 0});
     if(persist_last_active_product_data) {
-      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_data)
+      await this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_product_data)
     }
     await this.$store.dispatch("setProductsRosters");
   }
@@ -663,7 +663,9 @@ export class ProductsQueryParamsMixin extends Vue {
             `item_id=${route_query_object.update_cart}`, `ecommerce_cart_id=${route_query_object.update_item}`)
         edit_mode_default_obj.editing = true
         edit_mode_default_obj.type = "cart_product"
+
         edit_mode_default_obj.cart_product_info = {...edit_mode_default_obj.cart_product_info, ...route_query_object}
+        edit_mode_default_obj.cart_product_info.meta_info = {back_to_cart: true}
         this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', edit_mode_default_obj)
 
       } else {

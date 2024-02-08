@@ -19,7 +19,7 @@
       </div>
       <div class="modal-body">
         <div class="d-flex flex-wrap justify-content-between">
-          <RosterDetails :productSizes="sizeOptions" ref="rostermodal"
+          <RosterDetails :productSizes="sizeOptions" ref="roster-detail"
                          @addToCartAnimation="()=>this.$emit('addToCartAnimation')"
                          :lockers="lockers" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts" />
           <div class="roster-preview-area">
@@ -153,7 +153,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   get goBackToCart():boolean{
-    return this.getProductEditInfoObject.cart_product_info!.back_to_cart
+    return this.getProductEditInfoObject.cart_product_info!.meta_info!.back_to_cart
   }
   /* getters/computed props ends */
 
