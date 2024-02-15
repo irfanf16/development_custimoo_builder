@@ -680,7 +680,22 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       } else {
         reorder_data = null
       }
-      const { product_price, total_quantity: quantity, active_currency: {code: currency_code, symbol: currency_symbol} }:Record<any, any> = Store.getters.getProductPriceObject;
+
+      const productPriceObject: Record<any, any> | null = Store.getters.getProductPriceObject;
+      let product_price = 0;
+      let quantity = 0;
+      let currency_code = "";
+      let currency_symbol = "";
+      if (productPriceObject !== null && productPriceObject !== undefined) {
+
+        product_price = productPriceObject.product_price ? productPriceObject.product_price : 0;
+        quantity = productPriceObject.quantity ? productPriceObject.quantity : 0;
+        if (productPriceObject.active_currency) {
+          currency_code = productPriceObject.active_currency.code ? productPriceObject.active_currency.code : '';
+          currency_symbol = productPriceObject.active_currency.symbol ? productPriceObject.active_currency.symbol : '';
+        }
+      }
+
       const post_data: Record<any, any> = {
         back_image: back_image,
         custom_logos: custom_logos_filtered,
