@@ -3,7 +3,7 @@
   <div style="font-family: 'Ubuntu', sans-serif;">
     <Header />
     <Navbar v-if="company.status" />
-    <router-view/>
+    <router-view :key="$route.name"/>
   </div>
 </template>
 

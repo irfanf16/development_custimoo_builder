@@ -1,6 +1,6 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
-    <router-view/>
+    <router-view :key="$route.name"/>
   </div>
 </template>
 <script>

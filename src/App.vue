@@ -2,7 +2,7 @@
   <div id="santa" v-cloak>
     <Header />
     <Navbar v-if="company.status" />
-    <router-view/>
+    <router-view :key="$route.name"/>
   </div>
 </template>
 
