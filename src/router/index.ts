@@ -137,11 +137,20 @@ router.beforeEach(async (to, from, next) => {
   let lastUrl = location.href;
   new MutationObserver(() => {
     const url = location.href;
+    console.log('observer', location.href)
+    console.log('observer1', location)
     if (url !== lastUrl) {
       lastUrl = url;
       history.pushState(null, 'customizer', window.location.href.replace('!', ''));
     }
-  }).observe(document, {subtree: true, childList: true});
+  }).observe(document, {subtree: false, childList: true});
+  window.onhashchange = () => {
+    console.log('hash updated')
+    if(window.location.hash.startsWith('#/share')) {
+      console.log('inside hash reload')
+      window.location.reload()
+    }
+  }
 
   await checkCompanyStatus(to, from, next)
   next();

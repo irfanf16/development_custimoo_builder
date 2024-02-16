@@ -612,7 +612,94 @@ Vue.filter('formatDate', function(value:string) {
 
   async mounted() {
     localStorage.removeItem('custimo')
-    this.handleMountedEvent()
+    let self: Record<any, any> = this;
+    self.$gtag.pageview({ page_path: '/home' })
+    self.$gtag.pageview('/about')
+    self.$gtag.pageview(self.$route)
+    self.$gtag.event(self.$route)
+    await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
+      await this.initProductsFonts(products, resolve)
+    })
+
+    await http.get(`/get-settings`).then((res) => {
+      const response_data = res.data;
+      const { settings: company_settings,  factory_settings } = response_data.result
+      this.$store.commit('SET_SETTING', company_settings)
+      this.$store.commit('SET_FACTORY_SETTING', factory_settings)
+      if(company_settings && company_settings.currencies) {
+        const company_currency_obj = company_settings.currencies
+        this.$store.commit('SET_PRODUCT_PRICE_OBJECT', {
+          show_price: company_currency_obj.visible,  active_currency: company_currency_obj.currencies[0]
+        })
+      }
+    });
+    this.setRecentLogos()
+
+    if (this.hideColorSection){
+      this.$store.commit('hideColorSection', false)
+    }
+
+    //set jwtToken
+    await this.$store.dispatch('setCustomToken');
+
+    if (this.isCustomerAuthenticated){
+      await this.$store.dispatch("getLockers");
+      await this.$store.dispatch('getLockerRoomColors')
+      await this.$store.dispatch('getCartServer', {})
+    }
+    let {sync_id, customizer_preview} = self.$route.query;
+    if(sync_id) {
+      await resetLastActiveProductData()
+    }
+
+    let sendCategoryCall = true;
+    let active_product_type = this.$route.query.active_product_type;
+    let product_edit_info_object = self.$store.getters.getProductEditInfoObject
+    if(product_edit_info_object.editing && product_edit_info_object.type != 'locker_product') {
+      sendCategoryCall = false;
+    }else if(this.$route.query.is_reorder || this.$route.query.update_cart ||
+      (active_product_type && active_product_type != 'locker_product')) {
+      sendCategoryCall = false;
+    }
+
+    if(sendCategoryCall) {
+      const categories_promise = this.fetchCategories();
+      categories_promise.then(async (cat_response: Record<any, any>) => {
+        if(cat_response.no_product_found || cat_response.no_search_product_found) {
+          this.noProductFoundAction()
+        } else {
+          await this.afterCategoriesCallOnMounted();
+        }
+      });
+    } else {
+      await this.afterCategoriesCallOnMounted();
+    }
+
+    await self.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
+      await this.getLockers(false,false,resolve);
+    })
+    await self.$eventBus.$on('saveRosterToLocker', (backToLocker=true)=>{
+      this.getLockers(false,false,null,backToLocker)
+    })
+    self.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
+    await self.$eventBus.$on('cancelLocker', ()=>{
+      this.cancelLocker()
+    })
+    await self.$eventBus.$on('cancelCart', ()=>{
+      this.cancelCart()
+    })
+    await self.$eventBus.$on('updateCart', async (resolve: any) => {
+      await this.addToCart(resolve);
+    })
+
+    if(!this.isCustomerAuthenticated){
+      setTimeout(async ()=>{
+        const ok = await this.ref['login-reminder'].showConfirm();
+        if(ok){
+          this.gotoLogin();
+        }
+      }, this.mobileScreen ? 100000 : 50000)
+    }
   },
   async beforeRouteEnter(to, from, next) {
     next((vm:Record<any, any>) => {

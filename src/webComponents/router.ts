@@ -54,6 +54,13 @@ router.beforeEach(async (to, from, next) => {
       history.pushState(null, 'customizer', window.location.href.replace('!', ''));
     }
   }).observe(document, {subtree: true, childList: true});
+  window.onhashchange = () => {
+    console.log('hash updated')
+    if(window.location.hash.startsWith('#/share')) {
+      console.log('inside hash reload')
+      window.location.reload()
+    }
+  }
 
   await checkCompanyStatus(to, from, next)
   next()
