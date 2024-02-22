@@ -143,9 +143,9 @@
   <!--            </b-form-checkbox>-->
   <!--          </b-form-group>-->
 
-            <div class="pb-3">By creating an account, I acknowledge that I have read and agreed with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
+            <div class="pb-3" v-if="false">By creating an account, I acknowledge that I have read and agreed with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
 
-            <b-button @click="signUp" variant="primary">Create Account and Login</b-button>
+            <b-button @click="signUp" variant="primary" class="mb-5">Create Account and Login</b-button>
 
           </b-form>
         </div>
@@ -223,6 +223,7 @@
   import ErrorMessages from "@/mixins/ErrorMessages";
   import {getPermissions} from "@/helpers/Helpers";
   import {http} from "@/httpCommon";
+  import ModalAction from "@/mixins/ModalAction";
 
   @Component<LoginForm>({
     mounted(){
@@ -237,7 +238,7 @@
         });
     }
   })
-  export default class LoginForm extends Mixins(ErrorMessages) {
+  export default class LoginForm extends Mixins(ErrorMessages, ModalAction) {
 
     public ref = this.$refs as Record<any, any>
     private screenWidth = (window.screen.availWidth - 100)
@@ -310,7 +311,7 @@
           for (let key in this.form) {
             Vue.set(this.form, key, '')
           }
-          this.ref['loginModal'].hide();
+          this.hideVModal('loginModal');
         }
       }catch (error){
         this.showError(error)
