@@ -87,7 +87,7 @@ export class FetchCategories extends Vue {
     const self: Record<any, any> = this
     return new Promise((resolve,reject) => {
       let categories_promise;
-      let query_params_obj = self.$route.query
+      const query_params_obj = self.$route.query
       if(!product_filter){
         const getProductEditInfoObject = this.$store.getters.getProductEditInfoObject;
         const last_active_product_obj = this.$store.getters.getLastActiveProductData;
@@ -174,6 +174,15 @@ export class FetchCategories extends Vue {
       categories_promise.then((cat_response: Record<any, any>) => {
         if(cat_response.no_product_found) {
           self.showError('Product is no more available')
+        }
+        if('customized' in cat_response) {
+          this.$store.commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: cat_response.customized})
+        }
+        if('personalized' in cat_response) {
+          this.$store.commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: cat_response.personalized})
+        }
+        if('private_product' in cat_response) {
+          this.$store.commit('SET_PRODUCT_TYPE',{prd_type: 'private_product', value: cat_response.private_product})
         }
         resolve(cat_response);
       })

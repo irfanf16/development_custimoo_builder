@@ -1,5 +1,5 @@
 <template>
-  <div v-if="recentLogos.length > 0 && customLogo"  style="position:relative;">
+  <div v-if="recentLogos.length > 0 && customLogo && canvasReady"  style="position:relative;">
     <h4 class="mb-2" style="font-weight: 700">Recent Logos</h4>
     <div class="grid grid-5 gap-2 py-2 px-3 rounded" style="background: rgb(205, 205, 205)">
       <div v-for="(recent_logo, recentLogoIndex) in recentLogos" :key="recentLogoIndex" style="position:relative;"
@@ -75,6 +75,10 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
   /*
   * computed props starts
   * */
+
+  get canvasReady(): boolean {
+    return this.$store.getters.getCanvasReady
+  }
 
   get customLogos(): [Record<any, any>] {
     return this.$store.getters.getCustomLogos()
@@ -152,6 +156,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
     hideLockerProductUpdateButton(false)
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
+    this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: false, is_shuffled: false}})
   }
 
   /*

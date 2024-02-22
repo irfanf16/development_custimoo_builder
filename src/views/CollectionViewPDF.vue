@@ -392,7 +392,7 @@
               let fontNameParam = font.path.split('/').reverse()
               fontNameParam = fontNameParam[0].split('.')
               const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-              const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}?num=${getRandom()}`
+              const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}?nocache=11`
               if(!this.products_fonts[fontNameParam[0]]) {
                 const font_object = await this.loadFont(url)
                 if(font_object) {

@@ -54,9 +54,11 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
             Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[entry.target.id], 'design_show_on_scroll', 1)
           }, time_out)
         } else {
-          if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
           // elements are hiding here
-          Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[entry.target.id], 'design_show_on_scroll', 0)
+          if (!this.first_load) {
+            if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
+            Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[entry.target.id], 'design_show_on_scroll', 0)
+          }
         }
       })
       setTimeout(() => {
@@ -71,14 +73,13 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   @Prop() activeTab!: number;
-  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public first_load = true
   public design_width = 0
   public design_height = 0
   public design_times = []
 
-  get manageComponents(): Record<any, any> {
-    return this.$store.getters.getManageComponents
+  get mobileScreen(): boolean {
+    return this.$store.getters.getManageComponents.mobileScreen
   }
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
@@ -119,10 +120,9 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   }
 
   public showPreview() {
-    if(this.manageComponents.mobileScreen){
+    if(this.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
-      // this.$store.dispatch('setManageComponents', {index: 'CustomizationTabs', value: true})
     }
   }
 }
@@ -182,8 +182,8 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
 
   .design-col {
     margin-bottom: 10px;
-    flex-basis: 25%;
-    max-width: 25%;
+    flex-basis: 33.33%;
+    max-width: 33.33%;
     padding: 5px;
     border-radius: 5px;
 

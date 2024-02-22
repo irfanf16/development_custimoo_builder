@@ -186,6 +186,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
       await hideLockerProductUpdateButton(false)
       this.showLoader = false;
       this.$store.commit('SET_UPDATING_LOGO', false)
+      this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: false, is_shuffled: false}})
     })
       .catch((error: any) => {
         const inputRef = this.$refs.logoUploadInput as Record<any, any>

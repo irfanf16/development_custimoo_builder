@@ -796,6 +796,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           })
 
           this.renderScene()
+
+          this.addGetPointerToFabricPrototype()
         }, { crossOrigin: 'Anonymous' })
       }
     }
@@ -1142,8 +1144,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       let array = getMousePosition(self.container, evt.e.clientX, evt.e.clientY);
       self.onClickPosition.fromArray(array);
       let intersects = getIntersects(self.onClickPosition, self.scene.children);
-      if(intersects.length === 0)
-      {
+      if(intersects.length === 0) {
         //return to the last known position
         let active_object = self.canvas.getActiveObject()
         if(active_object) {

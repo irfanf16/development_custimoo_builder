@@ -28,12 +28,11 @@
       </div>
       <div class="d-flex align-items-center justify-content-center gap-1">
         <b-button @click="useOriginalColors" class="use-btn flex-shrink-1" v-if="logoColorsInfo.using_logo_colors"
-                  :class="{'pulse-animation': pulse_info.original_colors}"
                   style="white-space: nowrap; max-width: 200px">
           Use Original Colors
         </b-button>
         <b-button v-else="" @click="useLogoColors" class="use-btn flex-shrink-1" style="white-space: nowrap;
-         max-width: 200px" :class="{'pulse-animation': pulse_info.use_logo_colors}">
+         max-width: 200px" :class="{'pulse-animation': !logoColorsInfo.using_logo_colors}">
           Use Logo Colors
         </b-button>
         <b-button class="use-btn flex-shrink-1" @click="shuffleLogoColors" v-if="logoColorsInfo.using_logo_colors"

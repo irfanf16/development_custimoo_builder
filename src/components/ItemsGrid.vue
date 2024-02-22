@@ -29,8 +29,9 @@
 
 import Scene from '@/components/Scene.vue'
 import HorizontalScroll from '@/components/mobile/animations/HorizontalScroll.vue';
-import { Component, Prop, Vue } from 'vue-property-decorator'
-import {handleProductPriceUpdate} from "@/helpers/Helpers";
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
+import {handleProductPriceUpdate, setDefaultColors} from "@/helpers/Helpers";
+import {changeSelectedProduct, exitEditMode} from "@/mixins/LockerProduct";
 
 @Component<ItemsGrid>({
   components: {
@@ -42,29 +43,16 @@ import {handleProductPriceUpdate} from "@/helpers/Helpers";
   }
 })
 
-export default class ItemsGrid extends Vue {
+export default class ItemsGrid extends Mixins(changeSelectedProduct) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({ required: false }) readonly showItems!: boolean
   public storageUrl = process.env.VUE_APP_STORAGE_URL
   public renderComponent = true
   public animPlayed = false
-  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-
   get selectedItemIndex() {
     return this.$store.getters.getSelectedIndex;
   }
 
-  get products() {
-    return this.$store.getters.getProducts
-  }
-
-  async productDesigns(index: number) {
-    this.$store.commit('CHANGE_STYLE_INDEX', 0);
-    await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
-    await handleProductPriceUpdate()
-    await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
-    await this.$store.dispatch('setColorSectionVisibility')
-  }
 }
 
 </script>

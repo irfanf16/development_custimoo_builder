@@ -1790,10 +1790,10 @@ const classObserver = (elems:Record<any, any>, callMethod:any, disconnect = fals
 
 const getDefaultColorsObject = () => {
   return [
-    {title: 'Color One', color: null, pantone: null, name: null},
-    {title: 'Color Two', color: null, pantone: null, name: null},
-    {title: 'Color Three', color: null, pantone: null, name: null},
-    {title: 'Color Four', color: null, pantone: null, name: null}]
+    {color: null, pantone: null, name: null},
+    {color: null, pantone: null, name: null},
+    {color: null, pantone: null, name: null},
+    {color: null, pantone: null, name: null}]
 }
 
 const setDefaultColors = () => {

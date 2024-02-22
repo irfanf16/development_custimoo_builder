@@ -7,9 +7,6 @@ import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 @Component
 export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
   public active_logo_color_index = -1
-  public pulse_info: Record<any, any> = {
-    use_original_colors: true, shuffle: true, use_logo_colors: true
-  }
 
   get logoColorsInfo() {
     return this.$store.getters.getLogoColorsInfo()
@@ -37,7 +34,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
 
   public useOriginalColors() {
     const self: Record<any, any> = this
-    this.pulse_info.use_original_colors = false
     this.logoColorsInfo.colors = JSON.parse(JSON.stringify(this.logoColorsInfo.extracted_colors))
     this.logoColorsInfo.using_logo_colors = false
     this.logoColorsInfo.is_shuffled = false
@@ -48,7 +44,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
 
   public async useLogoColors() {
     const self: Record<any, any> = this
-    this.pulse_info.use_logo_colors = false
     await setUndoRedoItems('defaultColors', 'use_logo_colors')
     setDefaultColors()
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
@@ -58,9 +53,11 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
 
   public async shuffleLogoColors() {
     const self: Record<any, any> = this
-    this.pulse_info.shuffle = false
     await setUndoRedoItems('defaultColors', 'logo_colors_shuffled')
-    const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
+    let shuffled = [...this.logoColorsInfo.colors].sort(() => Math.random() - 0.5)
+    while (JSON.stringify(shuffled) === JSON.stringify(this.logoColorsInfo.colors)) { // make sure that after shuffled the colors orders are different
+      shuffled = [...this.logoColorsInfo.colors].sort(() => Math.random() - 0.5)
+    }
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {colors: shuffled, is_shuffled: true}})
     setDefaultColors()
     self.$eventBus.$emit('changeDefaultColors')

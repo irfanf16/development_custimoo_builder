@@ -109,6 +109,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
 @Component
 export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLockerButton, ErrorMessages) {
   public async retrieveProductsNew(query_params: string[] = []) {
+    this.$store.commit('SET_START_LOAD_DESIGNS', false)
     let self: Record<any, any> = this;
     let url = '/list/products';
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
@@ -794,6 +795,69 @@ export class exitEditMode extends Mixins(ErrorMessages) {
       }
       this.$store.commit('RESET_UNDO_REDO_ITEMS')
     });
+  }
+}
+
+@Component
+export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLockerButton) {
+  get products() {
+    return this.$store.getters.getProducts
+  }
+  get selectedProduct() {
+    return this.$store.getters.getSelectedProduct;
+  }
+  get mobileScreen(): boolean {
+    return this.$store.getters.getManageComponents.mobileScreen
+  }
+  get selectedProductIndex(): number{
+    return this.$store.getters.getSelectedIndex
+  }
+  async productDesigns(index: number) {
+    if (index != this.selectedProductIndex) {
+      this.$store.commit('RESET_UNDO_REDO_ITEMS')
+      let style_index = 0;
+      const confirmed_value = await this.editModeConfirmation();
+      const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+      if(edit_info_obj.type == "reorder_product" && confirmed_value) {
+        return false;
+      }
+      this.$store.commit('Change_Locker_Tabs_Index', undefined)
+      await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
+      await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
+      await handleProductPriceUpdate()
+      this.$store.dispatch('setColorSectionVisibility')
+      this.hideLockerProductUpdateButton()
+      this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
+      let design_index = 0;
+      let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
+        if (product_design.design_show === 1) {
+          design_index = product_design_index;
+        }
+        return product_design.design_show === 1
+      })[0];
+      if (selected_product_design) {
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+          design_index: design_index,
+          design_id: selected_product_design.id,
+          product_index: index,
+          product_id: this.selectedProduct.id,
+          style_index: style_index,
+          style_id: this.selectedProduct.productstyles[style_index].id
+        });
+
+        await this.$store.dispatch('setSelectedProductDesignID', selected_product_design.id);
+      }
+      this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+      const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
+      this.$store.commit('SET_SETTING', factory_setting)
+      if(!this.mobileScreen) {
+        this.$store.commit('SET_START_LOAD_DESIGNS', false)
+      }
+
+      if (this.mobileScreen) {
+        await this.$store.dispatch('setColorSectionVisibility')
+      }
+    }
   }
 }
 

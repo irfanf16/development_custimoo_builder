@@ -25,21 +25,21 @@
           <div class="collection-btn mt-1 px-1 d-flex align-items-center checkbox_buttons gap-2">
             <template v-if="CustomizedCount > 0">
               <button type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                      @click="changeProductType(!$store.getters.getCustomized, 'customized')">
+                      @click="changeProductType('customized')">
                 <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
                 Customized
               </button>
             </template>
             <template v-if="PersonalizedCount > 0">
               <button type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                      @click="changeProductType(!$store.getters.getPersonalized, 'personalized')">
+                      @click="changeProductType('personalized')">
                 <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
                 Stock
               </button>
             </template>
             <template v-if="PrivateProductCount > 0">
               <button v-if="isCustomerAuthenticated && PrivateProductCount" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                      @click="changeProductType(!$store.getters.getPrivateProduct, 'private_product')">
+                      @click="changeProductType('private_product')">
                 <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
                 Private
               </button>
@@ -66,21 +66,21 @@
             <div class="px-1 d-flex align-items-center checkbox_buttons gap-2"  >
               <template v-if="CustomizedCount > 0">
                 <button style="white-space: nowrap" type="button" :class="$store.getters.getCustomized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                        @click="changeProductType(true, 'customized')">
+                        @click="changeProductType('customized')">
                   <span v-if="$store.getters.getCustomized"><b-icon icon="check-circle-fill"></b-icon></span>
                   Customized
                 </button>
               </template>
               <template v-if="PersonalizedCount > 0">
                 <button style="white-space: nowrap" type="button" :class="$store.getters.getPersonalized ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                        @click="changeProductType(true, 'personalized')">
+                        @click="changeProductType('personalized')">
                   <span v-if="$store.getters.getPersonalized"><b-icon icon="check-circle-fill"></b-icon></span>
                   Stock
                 </button>
               </template>
 
               <button v-if="isCustomerAuthenticated && PrivateProductCount > 0" style="white-space: nowrap" type="button" :class="$store.getters.getPrivateProduct ? 'btn btn-secondary active' : 'btn btn-secondary'"
-                      @click="changeProductType(true, 'private_product')">
+                      @click="changeProductType('private_product')">
                 <span v-if="$store.getters.getPrivateProduct"><b-icon icon="check-circle-fill"></b-icon></span>
                 Private
               </button>
@@ -122,7 +122,7 @@
       <span style="font-size: 16px">Designs Available</span>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable :key="this.selectedProduct.productstyles[styleIndex]? this.selectedProduct.productstyles[styleIndex].id : ''" :products_fonts="products_fonts" />
+      <DesignAvailable v-if="startLoadDesigns" :key="this.selectedProduct.productstyles[styleIndex]? this.selectedProduct.productstyles[styleIndex].id : ''" :products_fonts="products_fonts" />
     </div>
   </div>
 </template>
@@ -186,7 +186,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   public showLoader = false;
   public timeout = 0;
 
-
+  get startLoadDesigns(): boolean {
+    return this.$store.getters.getStartLoadDesigns
+  }
 
   private toggleItems () {
     this.showItems = !this.showItems
@@ -223,38 +225,47 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   public async searchProducts(isClear:boolean) {
-    let self: Record<any, any> = this;
-    await this.editModeConfirmation();
     if(isClear) {
       this.search = "";
-      this.$emit('update:search_products', self.search)
+      this.$emit('update:search_products', this.search)
     }
-    await resetLastActiveProductData()
+
     if(this.timeout) {
       clearTimeout(this.timeout)
     }
     this.timeout = setTimeout(async () => {
-      self.showLoader = true;
-      let product_filter : string | null = null;
-      if(self.search_products) {
-        product_filter = `title=${self.search_products}`;
+      const confirmed_value = await this.editModeConfirmation();
+      const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+
+      if (edit_info_obj.type === "reorder_product" && confirmed_value) {
+        return false;
+      }
+
+      this.showLoader = true;
+      let product_filter = 'customized=true';
+      if(this.search_products) {
+        product_filter = `title=${this.search_products}`;
       }
       const categories_promise =  this.fetchCategories(product_filter);
-      let query_params: string[] = [];
-      query_params.push(`customized=${self.$store.getters.getCustomized}`, `personalized=${self.$store.getters.getPersonalized}`)
+
       categories_promise.then(async (cat_response: Record<any, any>) => {
         if(cat_response.no_search_product_found) {
           this.showError('No product found against your search')
         }
         else {
+          let query_params: string[] = [];
+          query_params.push(
+            `customized=${this.$store.getters.getCustomized}`,
+            `personalized=${this.$store.getters.getPersonalized}`,
+            `private=${this.$store.getters.getPrivateProduct}`
+          )
           if(this.getSelectedCategory && this.getSelectedCategory.category_id){
             query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
           }
           if(product_filter){
             query_params.push(product_filter)
           }
-          await self.retrieveProductsNew(query_params)
-
+          await this.retrieveProductsNew(query_params)
         }
       });
     }, 700);
@@ -262,62 +273,44 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   //  public doSearchDebounced = this.debounce(this.searchProducts,1000);
 
-  public async changeProductType(new_val:boolean, prd_type:string) {
-    let self:Record<string, any> = this;
-    let customized = this.$store.getters.getCustomized
-    let personalized = this.$store.getters.getPersonalized
-    let private_product = this.$store.getters.getPrivateProduct
-    let retrieve_products = false;
-    await this.editModeConfirmation();
+  public async changeProductType(prd_type: string) {
+    let isCustomized = this.$store.getters.getCustomized;
+    let isPersonalized = this.$store.getters.getPersonalized;
+    let isPrivate = this.$store.getters.getPrivateProduct;
 
-    let check = ()=>{
-      if(prd_type == "customized"){
-        customized = new_val
-        personalized = false
-        private_product = false
-      }
-
-      if(prd_type == "personalized"){
-        personalized = new_val
-        customized = false
-        private_product = false
-      }
-
-      if(prd_type == "private_product"){
-        personalized = false
-        customized = false
-        private_product = new_val;
-      }
+    if (prd_type === "customized" && isCustomized) {
+      return; // No further processing needed if customized is already true
     }
-    let categories_promise;
-    if(prd_type == 'customized' && customized == false){
-      retrieve_products = true
-      check()
-      categories_promise =  this.fetchCategories('customized');
-    } else if(prd_type == 'personalized' && personalized == false){
-      retrieve_products = true
-      check()
-      categories_promise = this.fetchCategories('personalized');
-    }
-    else {
-      retrieve_products = true
-      check()
-      categories_promise = this.fetchCategories('private_product');
-    }
-    categories_promise.then( async (cat_response) => {
-      if(retrieve_products) {
-        await this.handleCancelEditMode()
-        let query_params: string[] = [];
-        if(this.getSelectedCategory && this.getSelectedCategory.category_id) {
-          query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
-        }
-        query_params.push(
-          `customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`,
-          `private=${this.$store.getters.getPrivateProduct}`
-        )
-        await self.retrieveProductsNew(query_params)
 
-      }
+    if (prd_type === "personalized" && isPersonalized) {
+      return; // No further processing needed if personalized is already true
+    }
+
+    if (prd_type === "private_product" && isPrivate) {
+      return; // No further processing needed if private_product is already true
+    }
+
+    isCustomized = prd_type === "customized";
+    isPersonalized = prd_type === "personalized";
+    isPrivate = prd_type === "private_product";
+
+    const confirmed_value = await this.editModeConfirmation();
+    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+
+    if (edit_info_obj.type === "reorder_product" && confirmed_value) {
+      return false;
+    }
+
+    const categories_promise = this.fetchCategories(prd_type);
+
+    categories_promise.then(async (cat_response) => {
+      const query_params = [
+        `category_id=${this.getSelectedCategory.category_id || ''}`,
+        `customized=${isCustomized}`,
+        `personalized=${isPersonalized}`,
+        `private=${isPrivate}`,
+      ];
+      await this.retrieveProductsNew(query_params);
     });
   }
 

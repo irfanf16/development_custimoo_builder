@@ -42,7 +42,7 @@
 
         <template v-if="application_mounted && selectedProduct">
           <b-col cols="12" lg="3" class="text-left border-right py-lg-3">
-            <template v-if="manageComponents.mobileScreen">
+            <template v-if="mobileScreen">
               <CustomTabs v-if="manageComponents.CustomizationPreview" @maximizeTab="maximizeTab" :tabIcons="tabIcons" :maximized="maximized" :sideTabIndex="sideTabIndex"
                           @switchTabs="switchTabs" @open-add-to-locker="getLockers(true)" ref="custom-mobile-tabs"
                           :products_fonts="products_fonts" />
@@ -575,6 +575,7 @@ import ThreeDScene from "@/components/ThreeDScene.vue";
 import Scene3d from "@/components/3d/scene-3d.vue";
 import EditRosterAreaTab from "@/components/EditRosterAreaTab.vue";
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
+import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -711,7 +712,7 @@ Vue.filter('formatDate', function(value:string) {
   }
 })
 
-export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction,
+export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, LogoUploaderColors,
   ProductsQueryParamsMixin, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories, CustomLogosMixin) {
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
@@ -726,7 +727,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public product_id !: number
   public logoUrl = ''
   public ref = this.$refs as Record<any, any>
-  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
   public mounted = false
@@ -780,9 +780,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   ]
   private order_update_data:Record<any, any>[]= []
   public is_admin_token = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
-  public pulse_info: Record<any, any> = {
-    use_original_colors: true, shuffle: true, use_logo_colors: true
-  }
 
   private async afterCategoriesCallOnMounted() {
 
@@ -836,6 +833,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.frontPreview = getImageFromCanvas('front') as string
       this.backPreview = getImageFromCanvas('back') as string
     }
+  }
+
+  get mobileScreen(): boolean {
+      return this.$store.getters.getManageComponents.mobileScreen
   }
 
   get mainTabIndex() {
@@ -1290,36 +1291,47 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public async initProductsFonts(products: Record<any, any>[], resolve: any) {
+    const fontPromises: Promise<void>[] = [];
+
     for (let product_index = 0; product_index < products.length; product_index++) {
-      const product = products[product_index]
+      const product = products[product_index];
       const productFonts = product.namefonts;
+
       if (productFonts.length) {
-        const item = productFonts[0].json_data
+        const item = productFonts[0].json_data;
+
         if (item) {
           for (let i = 0; i < item.length; i++) {
-            const font = item[i]
-            let fontNameParam = font.path.split('/').reverse()
-            fontNameParam = fontNameParam[0].split('.')
-            const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-            const url = this.storageUrl + font.path + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
+            const font = item[i];
+            let fontNameParam = font.path.split('/').reverse();
+            fontNameParam = fontNameParam[0].split('.');
+            const fontName = fontNameParam[0].replace('-', ' ').toUpperCase();
+            const url = this.storageUrl + font.path + '?nocache=11';
 
             if (!this.products_fonts[fontNameParam[0]]) {
-              const font_object = await this.loadFont(url)
-              if (font_object) {
-                const final_font = {
-                  value: fontNameParam[0] as string,
-                  text: fontName as string,
-                  url: `${process.env.VUE_APP_STORAGE_URL}${font.path}`,
-                  opentype_font: font_object
-                }
-                Vue.set(this.products_fonts, fontNameParam[0], final_font)
-              }
+              const fontPromise = this.loadFont(url)
+                .then((font_object) => {
+                  if (font_object) {
+                    const final_font = {
+                      value: fontNameParam[0] as string,
+                      text: fontName as string,
+                      url: `${process.env.VUE_APP_STORAGE_URL}${font.path}`,
+                      opentype_font: font_object,
+                    };
+                    Vue.set(this.products_fonts, fontNameParam[0], final_font);
+                  }
+                });
+
+              fontPromises.push(fontPromise);
             }
           }
         }
       }
-      resolve('done')
     }
+
+    // Wait for all font promises to resolve
+    await Promise.all(fontPromises)
+    resolve('done');
   }
 
   public loadFont(url: string) {
@@ -1791,33 +1803,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       value: this.customLogos[index].side
     }
     this.$store.dispatch('updateCustomLogoAttribute', payload)
-  }
-
-  useLogoColors() {
-    this.logoColorUsed = true
-    this.$store.dispatch('setGroupColors', {})
-    for (let i = 0; i < 4; i++) {
-      if (this.imageColors[i]) {
-        this.$store.dispatch('setDefaultColor', {
-          index: i,
-          color: this.imageColors[i].hex,
-          pantone: this.imageColors[i].pantone
-        })
-      } else {
-        this.$store.dispatch('setDefaultColor', {index: i, color: '', pantone: ''})
-      }
-    }
-  }
-
-  async shuffleLogoColors() {
-    let self: Record<any, any> = this
-    this.pulse_info.shuffle = false
-    await setUndoRedoItems('defaultColors', 'logo_colors_shuffled')
-    const shuffled  = this.logoColorsInfo.colors.sort(() =>  0.5 - Math.random())
-    this.logoColorsInfo.colors = shuffled
-    this.logoColorsInfo.is_shuffled = true
-    setDefaultColors()
-    self.$eventBus.$emit('changeDefaultColors')
   }
 
   public rollbackPreviousColors(): void {

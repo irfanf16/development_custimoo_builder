@@ -111,6 +111,7 @@ const ProductAttributes:Module<any, any> = {
     },
     editLockerProduct: [],
     canvas_ready: false,
+    start_load_designs: false,
     notifications:[],
     customLogoObjects:[],
     cartItemId:'',
@@ -990,6 +991,9 @@ const ProductAttributes:Module<any, any> = {
     SET_CANVAS_READY(state:Record<any, any>, payload: boolean){
       state.canvas_ready = payload
     },
+    SET_START_LOAD_DESIGNS(state:Record<any, any>, payload: boolean){
+      state.start_load_designs = payload
+    },
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.scene.$refs.front
       state.canvasImage.ref_back = payload.scene.$refs.back
@@ -1230,6 +1234,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getCanvasReady: state => {
       return state.canvas_ready
+    },
+    getStartLoadDesigns: state => {
+      return state.start_load_designs
     },
     getCanvasImage: state => {
       return state.canvasImage
@@ -1692,6 +1699,7 @@ const ProductAttributes:Module<any, any> = {
       commit('RESET_STORE')
       commit('RESET_CUSTOM_TEXTS')
       commit('RESET_CUSTOM_LOGOS')
+      commit('SET_START_LOAD_DESIGNS', false)
     },
     undoAction({commit}){
       commit('DO_UNDO');

@@ -1,7 +1,7 @@
 <template>
   <div class="loading-holder">
     <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
-    <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }"
+    <div class="canvas-area-holder" :class="{ 'fix-space': !mobileScreen }"
       style="display: flex; justify-content: space-between;">
       <a @click="setShowSmall('back')" class="scene-container" :class="{ 'show-small': showSmall.front }">
         <canvas ref="front" id="scene-front" class="canvas" :width="canvasWidth" :height="canvasHeight"></canvas>
@@ -24,11 +24,11 @@
               </g>
             </svg>
 
-            <span class="ml-1" style="font-size: smaller"><template v-if="!manageComponents.mobileScreen">Size </template>Guide</span>
+            <span class="ml-1" style="font-size: smaller"><template v-if="!mobileScreen">Size </template>Guide</span>
           </a>
 
           <h2>Front</h2>
-          <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': manageComponents.mobileScreen}">
+          <div v-if="mainPreview" style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': mobileScreen}">
             <a class="zoom_in_out" @click="zoomInOut('front', 'in')">
               <b-icon-zoom-in />
             </a>
@@ -43,7 +43,7 @@
         <canvas v-if="back" ref="back" id="scene-back" class="canvas" :width="canvasWidth"
           :height="canvasHeight"></canvas>
         <div class="d-flex gap-2 align-items-center justify-content-center position-relative">
-          <a v-if="sku_information.image_url && mainPreview && manageComponents.mobileScreen" class="btn btn-secondary fs-2 btn-sm main_size_guide_btn"
+          <a v-if="sku_information.image_url && mainPreview && mobileScreen" class="btn btn-secondary fs-2 btn-sm main_size_guide_btn"
              title="Size Guide"
              :href="`${storage_url}${sku_information.image_url}`"
              target="_blank"
@@ -61,10 +61,10 @@
               </g>
             </svg>
 
-            <span class="ml-1" style="font-size: smaller"><template v-if="!manageComponents.mobileScreen">Size </template>Guide</span>
+            <span class="ml-1" style="font-size: smaller"><template v-if="!mobileScreen">Size </template>Guide</span>
           </a>
           <h2>Back</h2>
-          <div style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': manageComponents.mobileScreen}" v-if="mainPreview">
+          <div style="margin-top: 20px" class="d-flex align-items-center gap-1" :class="{'zooming-controls': mobileScreen}" v-if="mainPreview">
             <a class="zoom_in_out" @click="zoomInOut('back', 'in')">
               <b-icon-zoom-in />
             </a>
@@ -84,7 +84,7 @@ import {fabric} from 'fabric'
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import {
-  checkIsEmpty, getColorType,
+  checkIsEmpty, getColorType, getDefaultColorsObject,
   getRandom,
   getSelectedProductPantones, hideLockerProductUpdateButton,
   setUndoRedoItems,
@@ -93,22 +93,28 @@ import {
 import {find, unset} from "lodash";
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
+import Store from "@/store";
 @Component<Scene>({
+  beforeDestroy() {
+    const self: Record<any, any> = this;
+    self.$eventBus.$off("customTextUpdated", this.addTextsNew)
+    self.$eventBus.$off("customTextRemoved", this.deleteExistingTextsFromCanvas)
+    self.$eventBus.$off("resetTextsCanvas", this.resetTextsFromCanvas)
+    self.$eventBus.$off("handleCustomLogoUpdatedEvent", this.addLogo)
+    self.$eventBus.$off("customLogoResetAndAdd", this.resetAndAddLogos)
+    self.$eventBus.$off("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
+    self.$eventBus.$off("customLogoRemoved", this.deleteExistingLogoFromCanvas)
+    self.$eventBus.$off("resetLogosCanvas", this.resetLogosFromCanvas)
+    self.$eventBus.$off("changeDefaultColors", this.changeDefaultColorsEvent)
+    self.$eventBus.$off("changeGroupColors", this.changeGroupColors)
+    self.$eventBus.$off("useProductOriginalColors", this.setInitialColors)
+    self.$eventBus.$off("changeColors", this.changeColors)
+    self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
+    self.$eventBus.$off("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
+    self.$eventBus.$off("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
+  },
   async mounted() {
     let self: Record<any, any> = this;
-    self.$eventBus.$on("customTextUpdated", this.addTextsNew)
-    self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
-    self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
-    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
-    self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
-    self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
-    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
-    self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
-    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
-    self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
-    self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
-    self.$eventBus.$on("changeColors", this.changeColors)
-    self.$eventBus.$on("storeCanvasImage", this.storeCanvasImage)
     if (this.back) {
       this.dimTextBack = new fabric.Text('', {
         fontSize: 20,
@@ -248,27 +254,6 @@ import CustomLogosMixin from '@/mixins/CustomLogosMixin'
         updated_custom_text.value = "";
         self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
       }
-
-      self.$eventBus.$on("customTextStoreUpdated", (indexes: Record<any, any>) => {
-        if(!this.mainPreview && this.selectedProductId == this.product_id) {
-          const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
-          if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
-            const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
-            const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
-            this.eventAction(text, textObject, otherSideObject)
-          }
-        }
-      })
-      self.$eventBus.$on("customLogoStoreUpdated", (logo_index: number) => {
-        if(!this.mainPreview && this.selectedProductId == this.product_id) {
-          const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
-          if(logo && this.custom_logo_objects[logo_index]) {
-            const logoObject = this.custom_logo_objects[logo_index]
-            const otherSideObject = this.other_side_logos[logo_index]
-            this.eventAction(logo, logoObject, otherSideObject)
-          }
-        }
-      })
     })
   }
 })
@@ -297,6 +282,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   @Prop({ required: false }) readonly colorGrouping!: Record<any, any>;
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>;
   @Prop({required: false, default: false}) readonly fromRosterModal!: boolean;
+  @Prop({required: false, default: false}) readonly selectedDesign!: boolean;
 
   private frontCanvas !: fabric.Canvas
   private backCanvas !: fabric.Canvas
@@ -316,7 +302,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private mounted = false
   private front_models: fabric.Image[]= []
   private back_models: fabric.Image[] = []
-  private showSmall = { front: false, back: this.manageComponents.mobileScreen }
+  private showSmall = { front: false, back: this.mobileScreen }
   private svgGroups: any[] = []
   private initialSvgGroups: any[] = []
   public dimTextFront = new fabric.Text('', {
@@ -354,8 +340,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private storage_url = process.env.VUE_APP_STORAGE_URL
   private front_time
   private back_time
-  private isFrontRenderInProgress = false
-  private isBackRenderInProgress = false
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -370,12 +354,25 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getCustomLogos(product_id)
   }
 
-  get manageComponents(): Record<any, any> {
-    return this.$store.getters.getManageComponents
+  get mobileScreen(): boolean {
+    return this.$store.getters.getManageComponents.mobileScreen
   }
 
   get defaultColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => { return defaultColor.color })
+  }
+
+  get logoColors(): Record<any, any>[] {
+    const defaultColorsObject = getDefaultColorsObject();
+    const logoColors = this.$store.getters.getLogoColorsInfo('extracted_colors')
+
+    logoColors.forEach((logo_color, logoColorIndex) => {
+      defaultColorsObject[logoColorIndex].color = logo_color.hex
+      defaultColorsObject[logoColorIndex].pantone = logo_color.pantone
+      defaultColorsObject[logoColorIndex].name = logo_color.name
+    })
+
+    return this.areColorsEqual(this.defaultColors, defaultColorsObject) ? defaultColorsObject : this.defaultColors
   }
 
   get groupColors(): [Record<any, any>] {
@@ -401,11 +398,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   get allProductsCustomTexts(): Record<any, any> {
     return this.$store.getters.productCustomTexts()
   }
-
-  get is_safari(): boolean {
-    return this.$store.getters.getIsSafari
-  }
-
   get sku_information(){
     return this.$store.getters.getSkuInformation
   }
@@ -608,20 +600,31 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return final_color
   }
 
-  public changeDefaultColorsEvent() {
+  public areColorsEqual(defaultColors, logoColors, property = 'color') {
+    const sortedDefaultColors = JSON.stringify(defaultColors.slice().sort((a, b) => (a[property] > b[property] ? 1 : -1)))
+    const sortedLogoColors = JSON.stringify(logoColors.slice().sort((a, b) => (a[property] > b[property] ? 1 : -1)))
+
+    return sortedDefaultColors === sortedLogoColors;
+  }
+  public changeDefaultColorsEvent(is_shuffle = false) {
     if(this.mainPreview && (Object.keys(this.groupColors).length)) {
       this.$store.dispatch('setGroupColors', {})
     }
-    this.changeDefaultColors()
+    if(!is_shuffle || this.mainPreview) {
+      this.changeDefaultColors()
+    }
   }
 
   public async changeDefaultColors(): Promise<void> {
     if(this.productType == 'customized') {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+      if(defaultColors.length && !this.mainPreview) {
+        defaultColors = this.logoColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+      }
       if (defaultColors.length) {
         let appliedDefaultColors: string[]|string[][] = []
         let useColorIndex = 0
-        this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+        this.svgGroups.forEach((svgGroup: Record<any, any>) => {
           if(svgGroup.gradient_colors) {
             let gradient_colors: string[] = []
             svgGroup.gradient_colors.forEach((gradient_color, gradient_color_index) => {
@@ -688,41 +691,27 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public frontCanvasRender() :void {
-    if (this.isFrontRenderInProgress) {
-      // If already in progress, do nothing or handle accordingly
-      return;
-    }
-
-    // Set the flag to indicate that the function is in progress
-    this.isFrontRenderInProgress = true;
-
     if (this.front_time) clearTimeout(this.front_time);
     this.front_time = setTimeout(() => {
-      // console.log('call frontCanvasRender')
       this.frontCanvas.requestRenderAll()
 
-      // Reset the flag when rendering is complete
-      this.isFrontRenderInProgress = false;
-    }, 0);
+      if((this.mainPreview && !this.back) || this.mobileScreen) {
+        this.$store.commit('SET_START_LOAD_DESIGNS', true)
+      }
+    }, 200);
   }
 
   public backCanvasRender() :void {
-    if (this.isBackRenderInProgress) {
-      // If already in progress, do nothing or handle accordingly
-      return;
-    }
+    if (this.back_time) clearTimeout(this.back_time)
 
-    // Set the flag to indicate that the function is in progress
-    this.isBackRenderInProgress = true;
-
-    if (this.back_time) clearTimeout(this.back_time);
     this.back_time = setTimeout(() => {
-      // console.log('call backCanvasRender')
       this.backCanvas.requestRenderAll()
 
-      // Reset the flag when rendering is complete
-      this.isBackRenderInProgress = false;
-    }, 0);
+      if(this.mainPreview || this.mobileScreen) {
+        console.log('this is it')
+        this.$store.commit('SET_START_LOAD_DESIGNS', true)
+      }
+    }, 500);
   }
 
   public setInitialColors(): void {
@@ -1011,7 +1000,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       let promises = []
       if (this.productType == 'customized') {
         ImageData.models.forEach((model) => {
-          promises.push(this.addModel(model.file_url, model.composition, side) as never)
+          let url = model.thumb_sm_url
+          if(this.mainPreview) {
+            url = model.file_url
+          }
+          promises.push(this.addModel(url, model.composition, side) as never)
         })
       }
 
@@ -1101,6 +1094,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 this.$store.commit('SET_CANVAS_READY', true);
               }, 500)
             }
+            this.listenEvents()
             this.mounted = true
           })
         }
@@ -1242,6 +1236,48 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         })
       }
     })
+  }
+
+  public listenEvents() {
+    const self: Record<any, any> = this;
+    self.$eventBus.$on("customTextUpdated", this.addTextsNew)
+    self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
+    self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
+    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
+    self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+    self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
+    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
+    self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
+    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
+    self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
+    self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
+    self.$eventBus.$on("changeColors", this.changeColors)
+    self.$eventBus.$on("storeCanvasImage", this.storeCanvasImage)
+    self.$eventBus.$on("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
+    self.$eventBus.$on("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
+  }
+
+  public customTextStoreUpdatedHandler(indexes: Record<any, any>) {
+    const self: Record<any, any> = this;
+    if(!this.mainPreview && this.selectedProductId == this.product_id) {
+      const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
+      if(text && self.product_custom_text_objects[indexes.custom_text_index] && self.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
+        const textObject = self.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
+        const otherSideObject = self.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
+        this.eventAction(text, textObject, otherSideObject)
+      }
+    }
+  }
+
+  public customLogoStoreUpdatedHandler(logo_index: number) {
+    if(!this.mainPreview && this.selectedProductId == this.product_id) {
+      const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
+      if(logo && this.custom_logo_objects[logo_index]) {
+        const logoObject = this.custom_logo_objects[logo_index]
+        const otherSideObject = this.other_side_logos[logo_index]
+        this.eventAction(logo, logoObject, otherSideObject)
+      }
+    }
   }
 
   public setActiveTab(selected: Record<any, any>) {
@@ -2178,7 +2214,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public addSvgLogos(logo: Record<any, any>) {
     if (logo.side == 'front' || (logo.side == 'back' && this.back)) {
-      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
+      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
       fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
         options.crossOrigin = 'Anonymous'
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
@@ -2300,15 +2336,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
       if (logo.url && (logo.side == 'front' || (logo.side == 'back' && this.back)) && !this.custom_logo_objects[logo.logo_index as number]) {
-       if(this.mainPreview) {
+       if(this.mainPreview && !from_load) {
          this.$store.commit('SET_UPDATING_LOGO', true)
        }
         if (logo.customLogo) {
           this.custom_logo_objects[logo.logo_index as number] = true
         }
         logo.haveControls = Boolean(logo.haveControls)
-        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
-        fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
+        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
+        fabric.Image.fromURL(logoUrl, async (img: any) => {
           const aspect_ratio = img.width / img.height
           if(aspect_ratio > 1) {
             img.scaleToWidth(this.canvasHeight / this.mainCanvasHeight * logo.height as number)
@@ -2816,7 +2852,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public setShowSmall(side: string): void {
-    if (this.manageComponents.mobileScreen && this.backCanvas) {
+    if (this.mobileScreen && this.backCanvas) {
       if (side == 'back') {
         Vue.set(this.showSmall, 'back', true)
         Vue.set(this.showSmall, 'front', false)
