@@ -957,7 +957,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.showLoader = true
     const base64_files = await urlToBase64(activity_files_paths)
     this.showLoader = false
-    const dom_document = getDomDocument()
+    const dom_document = getDomDocument(true)
       base64_files.forEach((base64_file, base64_file_index) => {
         let activity_file = dom_document.createElement("a");
         activity_file.href = base64_file;
