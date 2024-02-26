@@ -222,7 +222,7 @@ import AddToCartButton from "@/components/AddToCartButton.vue";
     this.fontsList()
   }
 })
-export default class RosterDetails extends Mixins(ErrorMessages, ModalAction,cartModalData, HideUpdateLockerButton, RosterTabMixin) {
+export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, cartModalData, HideUpdateLockerButton, RosterTabMixin) {
   /*
   * component props starts
   * */

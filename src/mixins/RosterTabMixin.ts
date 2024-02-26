@@ -41,7 +41,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
       const custom_text_synced_with_roster = JSON.parse(JSON.stringify(product_custom_texts[custom_name_number_index]));
       custom_text_synced_with_roster.value = text_number_value
       self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_name_number_index, value: custom_text_synced_with_roster})
-      self.$eventBus.$emit("customTextUpdated", {
+      self.$eventBus.$emit("rosterTextUpdated", {
         emitter: "input", custom_text_index: custom_name_number_index, value: custom_text_synced_with_roster
       });
     }

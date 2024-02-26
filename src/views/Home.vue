@@ -1315,6 +1315,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
             const url = this.storageUrl + font.path + '?nocache=11';
 
             if (!this.products_fonts[fontNameParam[0]]) {
+              Vue.set(this.products_fonts, fontNameParam[0], {})
               const fontPromise = this.loadFont(url)
                 .then((font_object) => {
                   if (font_object) {

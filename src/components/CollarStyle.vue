@@ -104,6 +104,7 @@ import {handleProductPriceUpdate, hideLockerProductUpdateButton} from "@/helpers
       }
 
       public changeStyleIndex(i: number) {
+        this.$store.commit('SET_START_LOAD_DESIGNS', false)
         const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
           return item.design_show
         })

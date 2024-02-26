@@ -98,6 +98,9 @@ import Store from "@/store";
   beforeDestroy() {
     const self: Record<any, any> = this;
     self.$eventBus.$off("customTextUpdated", this.addTextsNew)
+    if(this.mainPreview) {
+      self.$eventBus.$off("rosterTextUpdated", this.addTextsNew)
+    }
     self.$eventBus.$off("customTextRemoved", this.deleteExistingTextsFromCanvas)
     self.$eventBus.$off("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$off("handleCustomLogoUpdatedEvent", this.addLogo)
@@ -106,7 +109,7 @@ import Store from "@/store";
     self.$eventBus.$off("customLogoRemoved", this.deleteExistingLogoFromCanvas)
     self.$eventBus.$off("resetLogosCanvas", this.resetLogosFromCanvas)
     self.$eventBus.$off("changeDefaultColors", this.changeDefaultColorsEvent)
-    self.$eventBus.$off("changeGroupColors", this.changeGroupColors)
+    self.$eventBus.$off("changeGroupColors", this.changeGroupColorsEvent)
     self.$eventBus.$off("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$off("changeColors", this.changeColors)
     self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
@@ -454,7 +457,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public async changeGroupColors() {
+  public changeGroupColorsEvent() {
+    let render_time = 0
+    if(!this.mainPreview) {
+      render_time = getRandom(2) as number
+    }
+    this.changeGroupColors(render_time)
+  }
+
+  public async changeGroupColors(render_time = 300) {
     if(this.productType == 'customized') {
       if (Object.keys(this.groupColors).length) {
         let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
@@ -510,7 +521,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
         })
-        this.frontCanvasRender()
+        this.frontCanvasRender(render_time)
         if (this.back) {
           design = this.backDesign._objects ? this.backDesign._objects : [this.backDesign]
           design.forEach((item: Record<any, any>) => {
@@ -563,7 +574,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
             }
           })
-          this.backCanvasRender()
+          this.backCanvasRender(render_time)
         }
         this.unHideColorGrouping()
       }
@@ -611,11 +622,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       this.$store.dispatch('setGroupColors', {})
     }
     if(!is_shuffle || this.mainPreview) {
-      this.changeDefaultColors()
+      let render_time = 0
+      if(!this.mainPreview) {
+        render_time = getRandom(2) as number
+      }
+      this.changeDefaultColors(render_time)
     }
   }
 
-  public async changeDefaultColors(): Promise<void> {
+  public async changeDefaultColors(render_time = 300): Promise<void> {
     if(this.productType == 'customized') {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       if(defaultColors.length && !this.mainPreview) {
@@ -666,7 +681,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
         })
-        this.frontCanvasRender()
+        this.frontCanvasRender(render_time)
 
         if (this.back) {
           design = this.backDesign._objects ? this.backDesign._objects : [this.backDesign]
@@ -683,14 +698,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               }
             }
           })
-          this.backCanvasRender()
+          this.backCanvasRender(render_time)
         }
         this.unHideColorGrouping()
       }
     }
   }
 
-  public frontCanvasRender() :void {
+  public frontCanvasRender(render_time = 200) :void {
     if (this.front_time) clearTimeout(this.front_time);
     this.front_time = setTimeout(() => {
       this.frontCanvas.requestRenderAll()
@@ -698,10 +713,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if((this.mainPreview && !this.back) || this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', true)
       }
-    }, 200);
+    }, render_time);
   }
 
-  public backCanvasRender() :void {
+  public backCanvasRender(render_time = 300) :void {
     if (this.back_time) clearTimeout(this.back_time)
 
     this.back_time = setTimeout(() => {
@@ -711,7 +726,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         console.log('this is it')
         this.$store.commit('SET_START_LOAD_DESIGNS', true)
       }
-    }, 500);
+    }, render_time);
   }
 
   public setInitialColors(): void {
@@ -755,7 +770,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
     })
-    this.frontCanvasRender()
+    let render_time = 0
+    if(!this.mainPreview) {
+      render_time = getRandom(2) as number
+    }
+    this.frontCanvasRender(render_time)
 
     if (this.back) {
       design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
@@ -772,7 +791,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         }
       })
-      this.backCanvasRender()
+      this.backCanvasRender(render_time)
     }
   }
 
@@ -1241,6 +1260,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public listenEvents() {
     const self: Record<any, any> = this;
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
+    if(this.mainPreview) {
+      self.$eventBus.$on("rosterTextUpdated", this.addTextsNew)
+    }
     self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
     self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
@@ -1962,7 +1984,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           originX: 'center',
           originY: 'center',
           globalCompositeOperation: composition
-          // globalCompositeOperation: 'overlay'
         })
 
         img.center().setCoords()
@@ -2013,7 +2034,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           resolve('done')
         })
       } else {
-        fabric.Image.fromURL(designUrl + '?nocache=2', async (img: any) => {
+        fabric.Image.fromURL(designUrl, async (img: any) => {
           if(img.width > img.height) {
             img.scaleToWidth(this.canvasWidth - 10)
           } else {
@@ -2603,6 +2624,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         let add_custom_text = await this.isCustomTextAllowed(custom_text_index);
         if(add_custom_text) {
+          let render_time = 0
+          if(from_load) {
+            render_time = 300
+          } else if(!this.mainPreview) {
+            render_time = getRandom(2) as number
+          }
           let custom_text = this.allProductsCustomTexts[this.product_id][custom_text_index];
           let render_front_canvas = false;
           let render_back_canvas = false;
@@ -2617,7 +2644,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               if ((custom_text_item.placement == 'Back' && self.backCanvas) || custom_text_item.placement == 'Front') {
                 let fabric_text: fabric.Text | fabric.Group | Record<any, any>
                 if (this.mainPreview && this.selectedProductId == this.product_id) {
-                  //todo there are some cases where font does not found then load first font. sometime custom text font family is null or font does not exists
                   let font = this.products_fonts[custom_text.font_family]
                   if(!font) {
                     font = this.products_fonts[Object.keys(this.products_fonts)[0]]
@@ -2708,9 +2734,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         })
                       }
                       if(this.back) {
-                        this.backCanvasRender()
+                        this.backCanvasRender(render_time)
                       } else {
-                        this.frontCanvasRender()
+                        this.frontCanvasRender(render_time)
                       }
                       this.addToOtherSide(fabric_text, custom_text_item.placement, true)
                     })
@@ -2778,7 +2804,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 model.bringToFront()
               })
             }
-            this.frontCanvasRender()
+            this.frontCanvasRender(render_time)
           }
           if (render_back_canvas) {
             if (this.productType == 'customized') {
@@ -2786,7 +2812,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 model.bringToFront()
               })
             }
-            this.backCanvasRender()
+            this.backCanvasRender(render_time)
           }
         }
       }

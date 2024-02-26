@@ -912,17 +912,21 @@ export class RosterDetailsGlobal extends Vue {
     if(this.custom_number_index >= 0) {
       let custom_number_text = product_custom_texts[this.custom_number_index]
       custom_number_text.value = active_roster.number
-      self.$eventBus.$emit("customTextUpdated", {
-        emitter: "input", custom_text_index:self.custom_number_index, value: custom_number_text
-      });
+      setTimeout(() => {
+        self.$eventBus.$emit("rosterTextUpdated", {
+          emitter: "input", custom_text_index:self.custom_number_index, value: custom_number_text
+        })
+      }, 200)
     }
 
     if(this.custom_name_index >= 0) {
       let custom_name_text = product_custom_texts[this.custom_name_index]
       custom_name_text.value = active_roster.text
-      self.$eventBus.$emit("customTextUpdated", {
-        emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
-      });
+      setTimeout(() => {
+        self.$eventBus.$emit("rosterTextUpdated", {
+          emitter: "input", custom_text_index:self.custom_name_index, value: custom_name_text
+        })
+      }, 200)
     }
   }
 }

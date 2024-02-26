@@ -61,6 +61,9 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     return this.$store.getters.getProductEditInfoObject;
   }
 
+  get selectedProduct() {
+    return this.$store.getters.getSelectedProduct;
+  }
   get selectedItemIndex() {
     return this.$store.getters.getSelectedIndex;
   }

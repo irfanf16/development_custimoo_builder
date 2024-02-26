@@ -60,7 +60,7 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     }
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {colors: shuffled, is_shuffled: true}})
     setDefaultColors()
-    self.$eventBus.$emit('changeDefaultColors')
+    self.$eventBus.$emit('changeDefaultColors', true)
     this.hideLockerProductUpdateButton()
   }
 
