@@ -5,9 +5,10 @@ import readXlsxFile from "read-excel-file";
 import ModalAction from "@/mixins/ModalAction";
 import {http} from "@/httpCommon";
 import {findIndex} from "lodash";
+import ErrorMessages from "@/mixins/ErrorMessages";
 
 @Component
-export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAction){
+export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAction, ErrorMessages){
   public show_roster_change_warning = false
   public handle_text_change_timer!: number
   public fileData: Record<any, any>[] = []
@@ -178,6 +179,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
       this.$store.dispatch('setProductsRosters', {roster_data: updated_roster, product_id: this.selectedProduct.id});
       handleProductPriceUpdate()
       this.showLoader = false;
+      this.showToast('Excel file uploaded successfully', 'success');
       (this.$refs['upload_excel'] as Record<any, any>).reset();
     })
   }

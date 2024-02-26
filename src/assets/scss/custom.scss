@@ -5014,6 +5014,29 @@ $fontSize: 0.5;
         .icon {
             left: 7px;
         }
+
+        &.no-icon{
+            padding: 7px 8px;
+        }
+
+        &.excelFileUploader{
+            position: relative;
+            overflow: hidden;
+
+            input{
+                -webkit-appearance: none;
+                appearance: none;
+                opacity: 0;
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 1000px;
+                width: 1000px;
+                z-index: 100;
+            }
+        }
     }
 
     .table {

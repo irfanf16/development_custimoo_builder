@@ -37,17 +37,17 @@
       <span class="dragControl" @dblclick="setMinMax(3)" v-touch:start="setPlayersDataHeight(3)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(3)"></span>
 
       <div class="d-flex mt-2 flex-column h-100">
-        <div class="d-flex align-items-center justify-content-between fs-2 font-weight-bold">
+        <div class="d-flex align-items-center justify-content-between fs-2 gap-2 font-weight-bold">
             <template v-if="isCustomerAuthenticated">
               <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
                 <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                  <span v-if="!cartLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer">
-                    <span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                  <span v-if="!cartLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer no-icon">
+                    <span class="fs-2 icon position-absolute" v-if="false"><b-icon-cart-plus /></span> <span class="d-inline-block ml-1">
                     Add to cart
                     </span>
                   </span>
-                  <span v-else class="addPlayer" style="background: #a9a9a9; color: #fff">
-                    <span class="fs-2 icon position-absolute"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
+                  <span v-else class="addPlayer no-icon" style="background: #a9a9a9; color: #fff">
+                    <span class="fs-2 icon position-absolute" v-if="false"><i class="fa fa-spinner fa-spin"></i></span> <span class="d-inline-block ml-1">
                       Please wait
                     </span>
                   </span>
@@ -56,21 +56,37 @@
             </template>
             <template v-else>
               <template v-if="company.platform !== 'self'">
-                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer">
-                  <span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer no-icon">
+                  <span class="fs-2 icon position-absolute" v-if="false"><b-icon-cart-plus /></span> <span class="d-inline-block ml-1">
                     Add to cart
                   </span>
                 </span>
               </template>
               <template v-else>
-                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer">
-                  <span class="fs-2 icon position-absolute"><b-icon-cart /></span> <span class="d-inline-block ml-1">
+                <span v-b-modal.modal-login @click="$eventBus.$emit('setActionBeforeLogin', 'addToCart')" :key="'loginmodal'" class="addPlayer no-icon">
+                  <span class="fs-2 icon position-absolute" v-if="false"><b-icon-cart-plus /></span> <span class="d-inline-block ml-1">
                     Add to cart
                   </span>
                 </span>
               </template>
             </template>
-          <span class="addPlayer" @click="shareRoster"><span class="fs-2 icon position-absolute"><BIconShare /></span> <span class="d-inline-block ml-1">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}} Link</span></span>
+          <span class="addPlayer no-icon" @click="shareRoster"><span class="fs-2 icon position-absolute" v-if="false"><BIconShare /></span> <span class="d-inline-block ml-1">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span></span>
+          <span class="addPlayer no-icon" @click="downloadTemplate(selectedProduct.id)">
+            <span v-if="false" class="fs-2 icon position-absolute"><BIconDownload /></span>
+            Download sample
+          </span>
+
+          <span v-if="!showLoader" class="addPlayer no-icon excelFileUploader">
+            <span class="fs-2 icon position-absolute" v-if="false"><BIconFileEarmarkExcel /></span>
+            Upload excel
+            <form name="upload_excel" ref="upload_excel">
+              <input type="file" @input="uploadExcelFile($event)">
+            </form>
+          </span>
+          <span v-else class="addPlayer no-icon" style="background: #a9a9a9; color: #fff">
+            <span v-if="false" class="fs-2 icon position-absolute"><BIconDownload /></span>
+            Please wait
+          </span>
         </div>
         <div class="players-table mt-2 theme-scroll-v h-100">
           <RosterTableMobile :productSizes="productSizes" ref="mobile-roster" @addPlayer="rosterDetailsInit" />
@@ -111,6 +127,7 @@ import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationTabsMixin from '../mixins/CustomizationTabsMixin'
 import ColorAccordionMobile from "@/components/mobile/ColorAccordionMobile.vue";
+import RosterTabMixin from "@/mixins/RosterTabMixin";
 
 
 @Component<CustomTabs>({
@@ -132,7 +149,7 @@ import ColorAccordionMobile from "@/components/mobile/ColorAccordionMobile.vue";
   }
 })
 
-export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsMixin, RosterDetailsGlobal) {
+export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsMixin, RosterDetailsGlobal, RosterTabMixin) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
   @Prop() activeTab!: number
   @Prop() sideTabIndex!: number
@@ -340,17 +357,7 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
       }
     })
   }
-  public async downloadTemplate(){
-    await http.get('template/download',{
-      responseType: 'blob',
-    }).then((res) => {
-      let blob = new Blob([res.data],{type:res.headers['content-type']})
-      let link = document.createElement('a')
-      link.href = window.URL.createObjectURL(blob)
-      link.download = 'roster_template.xlsx';
-      link.click();
-    })
-  }
+
   public homeScreen(){
     this.$router.push('/')
   }
