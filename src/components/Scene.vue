@@ -2131,7 +2131,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       const checkPointY = logo_or_text.top as number
 
       const boundaries_clip = fabric.util.groupSVGElements(boundaries) as fabric.Group
-      canvas.viewportCenterObject(boundaries_clip)
       boundaries_clip.set({
         scaleX: design.scaleX,
         scaleY: design.scaleY,
@@ -2145,8 +2144,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         absolutePositioned: true,
         inverted: true,
       })
-
-      boundaries_clip.center().setCoords();
+      boundaries_clip.center().setCoords()
+      canvas.viewportCenterObject(boundaries_clip)
 
       let clipped_parts
       if(excluded_clip_id) {
@@ -2162,7 +2161,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     if(apply_boundary) {
       const clip = fabric.util.groupSVGElements(apply_boundary) as fabric.Group
-      canvas.viewportCenterObject(clip)
       clip.set({
         scaleX: design.scaleX,
         scaleY: design.scaleY,
@@ -2176,8 +2174,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         absolutePositioned: true,
         inverted: true,
       })
+      clip.center().setCoords()
+      canvas.viewportCenterObject(clip)
 
-      clip.center().setCoords();
       logo_or_text.clipPath = clip
 
       if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
