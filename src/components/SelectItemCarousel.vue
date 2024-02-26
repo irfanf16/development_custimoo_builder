@@ -31,9 +31,10 @@ import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import SlitherSlider from 'slither-slider';
 import Scene from '@/components/Scene.vue'
 import {http} from "@/httpCommon";
-import {handleMainProducts, exitEditMode, changeSelectedProduct} from "@/mixins/LockerProduct";
-import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
-import {handleProductPriceUpdate, setDefaultColors} from "@/helpers/Helpers";
+import {handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
+import {FetchCategories, HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import {exitFromEditMode, handleProductPriceUpdate, isGetCategories} from "@/helpers/Helpers";
+import ErrorMessages from "@/mixins/ErrorMessages"
 
 Vue.use(SlitherSlider)
 
@@ -47,7 +48,7 @@ Vue.use(SlitherSlider)
 })
 
 
-export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton, exitEditMode, changeSelectedProduct) {
+export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton,exitEditMode, FetchCategories) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
@@ -64,6 +65,54 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
     return this.$store.getters.getSelectedIndex;
   }
 
+  public async productDesigns(index: number) {
+    let self: Record<any, any> = this;
+    if(this.selectedItemIndex == index) {
+      this.showToast("Product already selected", "info");
+      return false;
+    }
+    this.$store.commit('RESET_UNDO_REDO_ITEMS')
+    let style_index = 0;
+    const confirmed_value = await this.editModeConfirmation();
+    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+    if(edit_info_obj.type == "reorder_product" && confirmed_value) {
+      return false;
+    }
+
+    this.$store.commit('Change_Locker_Tabs_Index', undefined)
+    await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
+    await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
+    await handleProductPriceUpdate()
+    this.$store.dispatch('setColorSectionVisibility')
+    this.setRosterOpen(false)
+    this.hideLockerProductUpdateButton()
+    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
+    let design_index = 0;
+    let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
+      if(product_design.design_show === 1) {
+        design_index = product_design_index;
+      }
+      return product_design.design_show === 1
+    })[0];
+    if(selected_product_design) {
+      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+        design_index: design_index, design_id: selected_product_design.id, product_index: index, product_id: this.selectedProduct.id, style_index: style_index,
+        style_id:  this.selectedProduct.productstyles[style_index].id
+      });
+
+      await this.$store.dispatch('setSelectedProductDesignID',selected_product_design.id);
+    }
+    if(this.getProductEditInfoObject.type == "locker_product" && this.getProductEditInfoObject.locker_product_info.product_id != this.selectedProduct.id) {
+      await this.exitFromEditMode()
+    }
+    this.$store.commit('CHANGE_STYLE_INDEX', style_index);
+    const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
+    this.$store.commit('SET_SETTING', factory_setting)
+  }
+
+  private setRosterOpen(val: boolean) {
+    this.$store.commit('SET_IS_ROSTER_OPEN', val)
+  }
   public setSliderIndex(slide_no = 0) {
     if(this.$refs && this.$refs.slider)
       (this.$refs as Record<any,any>).slider.goToIndex(slide_no);
@@ -71,16 +120,26 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
 
   public async loadMoreProduct(slide_index: number) {
     let self = this;
-    // let main_products_info = await self.$store.getters.getMainProductsInfo;
     let next_page_no = self.$store.getters.getProductsNextPageNo;
     if(next_page_no) {
-      let url = `/list/products?customized=${this.$store.getters.getCustomized}${this.$store.getters.getPrivateProduct? '&private=' + this.$store.getters.getPrivateProduct : '' }&personalized=${this.$store.getters.getPersonalized}&page=${next_page_no}`;
-      if(self.getProductEditInfoObject.editing && ["locker_product", 'share_product'].includes(self.getProductEditInfoObject.type)) {
-        url += `&active_product_id=${self.getProductEditInfoObject.locker_product_info.product_id}&offset=${self.$store.getters.getProducts.length}&active_product_type=locker_product`
+      const is_customized = this.$store.getters.getCustomized;
+      const is_personalized = this.$store.getters.getPersonalized;
+      const is_private = this.$store.getters.getPrivateProduct;
+      const edit_info_object = this.getProductEditInfoObject;
+      const selected_category = this.$store.getters.getSelectedCategory;
+      let url = `/list/products?customized=${is_customized}&private=${is_private}&personalized=${is_personalized}&page=${next_page_no}`;
+      if(edit_info_object.editing) {
+        if(["locker_product", 'share_product'].includes(edit_info_object.type)) {
+          url += `&active_product_id=${edit_info_object.locker_product_info.product_id}&offset=${this.$store.getters.getProducts.length}&active_product_type=locker_product`
+        }
+        if(edit_info_object.type == "reorder_product") {
+          url += "&is_reorder=true&active_product_type=reorder_product&paginate=false&get_product_detail=false";
+          url += `&active_product_id=${edit_info_object.reorder_product_info.active_product_id}&offset=${this.$store.getters.getProducts.length}`
+          if(selected_category.category_id) {
+            url += `&category_id=${selected_category.category_id}`
+          }
+        }
       }
-      // if(main_products_info.active_product_id) {
-      //   url += `&active_product_id=${main_products_info.active_product_id}`
-      // }
       http.get(url).then(async (response: Record<any, any>) => {
         await self.handleMainProducts(response);
       }, (error) => {

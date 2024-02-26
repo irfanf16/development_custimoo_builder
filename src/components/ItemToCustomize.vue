@@ -225,6 +225,13 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   public async searchProducts(isClear:boolean) {
+    let self: Record<any, any> = this;
+    const confirmed_value = await this.editModeConfirmation();
+    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+    if(edit_info_obj.type == "reorder_product" && confirmed_value) {
+      this.search = "";
+      return false;
+    }
     if(isClear) {
       this.search = "";
       this.$emit('update:search_products', this.search)
@@ -315,7 +322,11 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   public async handleCategoryUpdate(category_index:number) {
-    await this.editModeConfirmation();
+    const confirmed_value = await this.editModeConfirmation();
+    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+    if(edit_info_obj.type == "reorder_product" && confirmed_value) {
+      return false;
+    }
     let selected_category = this.categories[category_index]
     await resetLastActiveProductData()
     this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { category_index: category_index, category_id: selected_category.id });

@@ -65,8 +65,7 @@
               <div class="customization-preview-process w-100">
                 <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                   <div class="buttons-preview text-left">
-                    <template v-if="getProductEditInfoObject.editing == false || getProductEditInfoObject.type == 'locker_product'">
-<!--                    <template>-->
+                    <template v-if="getProductEditInfoObject.editing == false || ['locker_product', 'reorder_product'].includes(getProductEditInfoObject.type)">
                       <template v-if="isCustomerAuthenticated">
                         <b-button :key="'lockerRoom'" v-if="lockers.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                         <template v-if="getProductEditInfoObject.type == 'locker_product'">
@@ -74,6 +73,8 @@
                                     @click="getLockers">
                             Save
                           </b-button>
+                        </template>
+                        <template v-if="['locker_product', 'reorder_product'].includes(getProductEditInfoObject.type)">
                           <b-button :key="'savetolocker'" variant="outline-secondary" @click="getLockers(false, true)">
                             Save As
                           </b-button>
@@ -560,7 +561,7 @@ import {
   santaClone,
   getCustomizerIframe,
   getLockerColors,
-  getDomDocument, processColorsCustom, exitFromEditMode, hideLockerProductUpdateButton
+  getDomDocument, processColorsCustom, exitFromEditMode, hideLockerProductUpdateButton, isGetCategories
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -648,23 +649,19 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch('getLockerRoomColors')
       await this.$store.dispatch('getCartServer', {})
     }
-    let {sync_id, customizer_preview} = self.$route.query;
+    let { sync_id } = this.$route.query;
     if(sync_id) {
       await resetLastActiveProductData()
     }
-
-    let sendCategoryCall = true;
-    let active_product_type = this.$route.query.active_product_type;
-    let product_edit_info_object = self.$store.getters.getProductEditInfoObject
-    if(product_edit_info_object.editing && product_edit_info_object.type != 'locker_product') {
-      sendCategoryCall = false;
-    }else if(this.$route.query.is_reorder || this.$route.query.update_cart ||
-      (active_product_type && active_product_type != 'locker_product')) {
-      sendCategoryCall = false;
-    }
+    const sendCategoryCall = await isGetCategories()
+    
 
     if(sendCategoryCall) {
-      const categories_promise = this.fetchCategories();
+      let category_product_id = null;
+      if(this.$route.query.is_reorder && this.$route.query.active_product_id) {
+        category_product_id = this.$route.query.active_product_id;
+      }
+      const categories_promise = this.fetchCategories(null, category_product_id);
       categories_promise.then(async (cat_response: Record<any, any>) => {
         if(cat_response.no_product_found || cat_response.no_search_product_found) {
           this.noProductFoundAction()
@@ -871,6 +868,15 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const msrp_label = this.settings("msrp_label");
     const msrp_label_admin = this.settings("msrp_label_admin");
     return msrp_label.is_custom_msrp_label?msrp_label.msrp_label:msrp_label_admin;
+  }
+
+  get productSizes(){
+    const selected_product = this.selectedProduct;
+    if(selected_product) {
+      return this.selectedProduct.sizes[0].json_data;
+    } else {
+      return [];
+    }
   }
 
   get application_mounted() {

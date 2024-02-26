@@ -12,6 +12,7 @@ import {Canvas} from "fabric/fabric-impl";
 import {eventBus} from "@/event/eventBus"
 import VueRouter from 'vue-router'
 import LZString from 'lz-string';
+import Router from '../router/index'
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
@@ -2224,6 +2225,16 @@ const initiateLocalStorageKeys = async ():Promise<void> => {
   }
 }
 
+const isGetCategories = async () => {
+  const product_edit_info_object = Store.getters.getProductEditInfoObject
+  const { type: editing_product_type } = product_edit_info_object;
+  let get_categories = true;
+  if(['cart_product', 'order_product'].includes(editing_product_type) || Router.currentRoute.query.update_cart) {
+    get_categories = false;
+  }
+  return get_categories;
+}
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2238,5 +2249,6 @@ export {
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, getDeviceInfo, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
-  updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys
+  updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
+  isGetCategories
 };

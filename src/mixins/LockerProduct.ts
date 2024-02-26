@@ -195,8 +195,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       active_product_detail, products: response_products_obj, products: { data: retrieved_products },
       products: {next_page_url: next_page_url}, products: {current_page: current_page},
     } = response_data;
-    let active_product: Record<any, any> = retrieved_products[active_product_index]
-    let product_custom_texts: Record<any, any>[] = active_product.product_custom_texts;
     let append_products: boolean =  response_products_obj.current_page > 1;
     this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", next_page_url ? current_page + 1 : null)
 
@@ -210,6 +208,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           this.$store.commit('SET_APPLICATION_MOUNTED')
           return false;
         }
+        let active_product: Record<any, any> = retrieved_products[active_product_index]
+        let product_custom_texts: Record<any, any>[] = active_product.product_custom_texts;
 
         this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
         await this.$store.dispatch("getSkuInformation", active_product_id);
@@ -611,10 +611,13 @@ export class ProductsQueryParamsMixin extends Vue {
       } else if(active_product_type == "reorder_product") {
         let reorder_product_info_obj: Record<any, any> = edit_product_info_obj.reorder_product_info
         query_params = [
-          'is_reorder=true', 'active_product_type=reorder_product', `item_id=${reorder_product_info_obj.order_item_id}`,
+          `customized=${is_customized}`, `personalized=${is_personalized}`, `private=${is_private}`, 'is_reorder=true', 'active_product_type=reorder_product', `item_id=${reorder_product_info_obj.order_item_id}`,
           `factory_product_id=${reorder_product_info_obj.factory_product_id}`, `active_product_id=${reorder_product_info_obj.active_product_id}`,
           `style_id=${reorder_product_info_obj.style_id}`, `design_id=${reorder_product_info_obj.design_id}`, 'paginate=false',
         ];
+        if(selected_category.category_id) {
+          query_params.push(`category_id=${selected_category.category_id}`)
+        }
       }
     } else {
       let last_active_product_data = self.getLastActiveProductData;
@@ -780,6 +783,21 @@ export class exitEditMode extends Mixins(ErrorMessages) {
               }
               else {
                 self.showToast('Changes Discarded, Exiting from Editing State', 'info');
+                exitFromEditMode()
+                resolve(false)
+              }
+            });
+            break;
+          case 'reorder_product':
+            self.$santaModal.show({
+              icon: 'confirm', title: 'Are You Sure!', text: 'This will discard reordering product', confirm_text: 'Continue Re Order Product', cancel_text: 'Cancel Re Order Product',
+            },self).then((confirmation) => {
+              if(confirmation) {
+                self.$santaModal.hide();
+                resolve(true)
+              }
+              else {
+                self.showToast('Product re order cancelled', 'info');
                 exitFromEditMode()
                 resolve(false)
               }

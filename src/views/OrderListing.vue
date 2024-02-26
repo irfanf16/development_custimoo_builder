@@ -185,7 +185,7 @@ import moment from "moment";
 import {
   CustimooOrderFlowStatuses,
   exitFromEditMode,
-  handleResponseException,
+  handleResponseException, isGetCategories,
   resetLastActiveProductData
 } from '@/helpers/Helpers';
 import Search from '@/components/Search.vue';

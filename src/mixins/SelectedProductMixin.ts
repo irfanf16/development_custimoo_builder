@@ -92,14 +92,19 @@ export class FetchCategories extends Vue {
         const getProductEditInfoObject = this.$store.getters.getProductEditInfoObject;
         const last_active_product_obj = this.$store.getters.getLastActiveProductData;
         const {sync_id} = self.$route.query
-        const shared_url = getUrlParameter()
-        if (shared_url?.includes('share')) {
+        const url_query_string = getUrlParameter()
+        const url_query_object = new URLSearchParams((url_query_string as string))
+        if (url_query_string?.includes('share')) {
           categories_promise = this.$store.dispatch('setCategories',{
-            query_params:`share_url=${encodeURIComponent(shared_url)}`
+            query_params:`share_url=${encodeURIComponent((url_query_string as string))}`
+          });
+        }
+        else if(url_query_string?.includes('is_reorder') && url_query_object.get('active_product_id')) {
+          categories_promise = this.$store.dispatch('setCategories',{
+            query_params:`product_id=`+url_query_object.get('active_product_id')
           });
         }
         else if(getProductEditInfoObject.editing && !product_id){
-
           switch(getProductEditInfoObject.type)
           {
             case "locker_product":
@@ -142,7 +147,8 @@ export class FetchCategories extends Vue {
             categories_promise = this.$store.dispatch('setCategories',{
               query_params:`product_id=${product_id}`
             });
-          } else if(last_active_product_obj.product_id) {
+          }
+          else if(last_active_product_obj.product_id) {
             categories_promise = this.$store.dispatch('setCategories',{
               query_params:`product_id=${last_active_product_obj.product_id}`
             });
