@@ -18,13 +18,14 @@ import {
   hideLockerProductUpdateButton,
   checkIsEmpty,
   getProductById,
-  handleProductPriceUpdate,
+  handleProductPriceUpdate, getSelectedProductPantones, getColorType,
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
 import {FetchCategories, HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import {eventBus} from "@/event/eventBus";
+import {getClosestColor} from "@/pantoneColor";
 
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
@@ -427,6 +428,16 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
    if(group_colors) {
      if(group_colors.constructor.name == "Array" && group_colors.length == 0) {
        group_colors = {}
+     }
+     if(group_colors.constructor.name == "Object") {
+       for(const groupColor in group_colors) {
+         const has_pantone_property = 'pantone' in group_colors[groupColor]
+         if(!has_pantone_property) {
+           const selectProductPantonesList = getSelectedProductPantones(active_product_id, groupColor)
+           const closest_color = getClosestColor(group_colors[groupColor].color as string, selectProductPantonesList, getColorType(groupColor, active_product_id))
+           group_colors[groupColor].pantone = closest_color.pantone
+         }
+       }
      }
      emit_color_change_event = true
      await this.$store.dispatch('overRideGroupColors', group_colors);

@@ -6,7 +6,7 @@
       <div class="color-holder">
         <div class="color-container pt-2">
           <div class="color-box" v-for="(logo_color, logoColorIndex) in logoColorsInfo.colors"
-               @click="selectLogoColor(logo_color, logoColorIndex)" :title="logo_color.name"
+               @click="selectLogoColor(logo_color, logoColorIndex)" :title="logo_color.pantone ? logo_color.pantone : logo_color.name"
                :class="{'active-swatch' : logoColorIndex == active_logo_color_index, 'noColor': !logo_color.hex}"
                :style="{background: logo_color.hex ? logo_color.hex : '#fff', cursor: 'pointer'}" :key="logoColorIndex + logo_color.name">
             <template v-if="logo_color.hex">

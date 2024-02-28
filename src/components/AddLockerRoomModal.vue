@@ -310,7 +310,7 @@
           let unique:any = [];
           for( let i = 0; i < svgGroups.length; i++ ){
             if( !unique[svgGroups[i].color]){
-              distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
+              distinct.push({value: svgGroups[i].color, name: svgGroups[i].name, pantone: svgGroups[i].pantone});
               unique[svgGroups[i].color] = 1;
             }
           }
@@ -397,7 +397,7 @@
         let unique:any = [];
         for( let i = 0; i < svgGroups.length; i++ ){
           if( !unique[svgGroups[i].color]){
-            distinct.push({value: svgGroups[i].color, name: svgGroups[i].name});
+            distinct.push({value: svgGroups[i].color, name: svgGroups[i].name, pantone: svgGroups[i].pantone});
             unique[svgGroups[i].color] = 1;
           }
         }
