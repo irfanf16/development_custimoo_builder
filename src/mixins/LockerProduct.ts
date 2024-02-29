@@ -110,7 +110,6 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
 @Component
 export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLockerButton, ErrorMessages) {
   public async retrieveProductsNew(query_params: string[] = []) {
-    this.$store.commit('SET_START_LOAD_DESIGNS', false)
     let self: Record<any, any> = this;
     let url = '/list/products';
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
@@ -187,6 +186,10 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     return this.$store.getters.getLastActiveProductData
   }
 
+  get selectedProductId(): number {
+    return this.$store.getters.getSelectedProductId
+  }
+
   public async handleMainProducts(response: Record<any, any>){
     let self: Record<any, any> = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject
@@ -196,6 +199,9 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       active_product_detail, products: response_products_obj, products: { data: retrieved_products },
       products: {next_page_url: next_page_url}, products: {current_page: current_page},
     } = response_data;
+    if(response_products_obj.current_page == 1 && active_product_id != this.selectedProductId) {
+      this.$store.commit('SET_START_LOAD_DESIGNS', false)
+    }
     let append_products: boolean =  response_products_obj.current_page > 1;
     this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", next_page_url ? current_page + 1 : null)
 
@@ -843,6 +849,9 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   }
   async productDesigns(index: number) {
     if (index != this.selectedProductIndex) {
+      if(!this.mobileScreen) {
+        this.$store.commit('SET_START_LOAD_DESIGNS', false)
+      }
       this.$store.commit('RESET_UNDO_REDO_ITEMS')
       let style_index = 0;
       const confirmed_value = await this.editModeConfirmation();
@@ -879,9 +888,6 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
       this.$store.commit('CHANGE_STYLE_INDEX', style_index);
       const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
       this.$store.commit('SET_SETTING', factory_setting)
-      if(!this.mobileScreen) {
-        this.$store.commit('SET_START_LOAD_DESIGNS', false)
-      }
 
       if (this.mobileScreen) {
         await this.$store.dispatch('setColorSectionVisibility')

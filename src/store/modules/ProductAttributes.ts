@@ -801,7 +801,7 @@ const ProductAttributes:Module<any, any> = {
       state.redoItems = []
       state.edit_locker_product = []
       //state.customTexts.map((item:Record<any, any>) => item.text = '' );
-      state.defaultColors = [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}];
+      state.defaultColors = [{color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}];
       state.groupColors = {};
       state.using_logo_colors = false;
       state.logoEditor = {
@@ -828,9 +828,9 @@ const ProductAttributes:Module<any, any> = {
 
       state.products_rosters = {}
 
-      state.selectedIndex = 0;
-      state.styleIndex = 0 ;
-      state.categories = []
+      // state.selectedIndex = 0;
+      // state.styleIndex = 0 ;
+      // state.categories = []
     },
     RESET_CUSTOM_TEXTS: (state: Record<any, any>) => {
       state.product_custom_texts = {}
@@ -844,7 +844,7 @@ const ProductAttributes:Module<any, any> = {
       eventBus.$emit('set-logo-tab-index')
     },
     RESET_ALL_COLORS: (state: Record<any, any>) => {
-      state.defaultColors =  [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}]
+      state.defaultColors =  [{color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}]
       updateLastActiveProductData({ default_colors: state.defaultColors })
     },
     UPDATE_UNDO:(state:Record<any, any>, payload:Record<any, any>)=>{
@@ -1699,7 +1699,6 @@ const ProductAttributes:Module<any, any> = {
       commit('RESET_STORE')
       commit('RESET_CUSTOM_TEXTS')
       commit('RESET_CUSTOM_LOGOS')
-      commit('SET_START_LOAD_DESIGNS', false)
     },
     undoAction({commit}){
       commit('DO_UNDO');

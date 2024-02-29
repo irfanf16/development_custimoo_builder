@@ -31,10 +31,8 @@ import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import SlitherSlider from 'slither-slider';
 import Scene from '@/components/Scene.vue'
 import {http} from "@/httpCommon";
-import {handleMainProducts, exitEditMode} from "@/mixins/LockerProduct";
+import {handleMainProducts, exitEditMode, changeSelectedProduct} from "@/mixins/LockerProduct";
 import {FetchCategories, HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
-import {exitFromEditMode, handleProductPriceUpdate, isGetCategories} from "@/helpers/Helpers";
-import ErrorMessages from "@/mixins/ErrorMessages"
 
 Vue.use(SlitherSlider)
 
@@ -48,7 +46,7 @@ Vue.use(SlitherSlider)
 })
 
 
-export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton,exitEditMode, FetchCategories) {
+export default class SelectItemCarousel extends Mixins(handleMainProducts, exitEditMode, HideUpdateLockerButton,exitEditMode, FetchCategories, changeSelectedProduct) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
@@ -66,51 +64,6 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
   }
   get selectedItemIndex() {
     return this.$store.getters.getSelectedIndex;
-  }
-
-  public async productDesigns(index: number) {
-    let self: Record<any, any> = this;
-    if(this.selectedItemIndex == index) {
-      this.showToast("Product already selected", "info");
-      return false;
-    }
-    this.$store.commit('RESET_UNDO_REDO_ITEMS')
-    let style_index = 0;
-    const confirmed_value = await this.editModeConfirmation();
-    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
-    if(edit_info_obj.type == "reorder_product" && confirmed_value) {
-      return false;
-    }
-
-    this.$store.commit('Change_Locker_Tabs_Index', undefined)
-    await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
-    await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
-    await handleProductPriceUpdate()
-    this.$store.dispatch('setColorSectionVisibility')
-    this.setRosterOpen(false)
-    this.hideLockerProductUpdateButton()
-    this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
-    let design_index = 0;
-    let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
-      if(product_design.design_show === 1) {
-        design_index = product_design_index;
-      }
-      return product_design.design_show === 1
-    })[0];
-    if(selected_product_design) {
-      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-        design_index: design_index, design_id: selected_product_design.id, product_index: index, product_id: this.selectedProduct.id, style_index: style_index,
-        style_id:  this.selectedProduct.productstyles[style_index].id
-      });
-
-      await this.$store.dispatch('setSelectedProductDesignID',selected_product_design.id);
-    }
-    if(this.getProductEditInfoObject.type == "locker_product" && this.getProductEditInfoObject.locker_product_info.product_id != this.selectedProduct.id) {
-      await this.exitFromEditMode()
-    }
-    this.$store.commit('CHANGE_STYLE_INDEX', style_index);
-    const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
-    this.$store.commit('SET_SETTING', factory_setting)
   }
 
   private setRosterOpen(val: boolean) {

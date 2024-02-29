@@ -705,7 +705,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public frontCanvasRender(render_time = 200) :void {
+  public frontCanvasRender(render_time = 300) :void {
     if (this.front_time) clearTimeout(this.front_time);
     this.front_time = setTimeout(() => {
       this.frontCanvas.requestRenderAll()

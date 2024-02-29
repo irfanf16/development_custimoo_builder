@@ -1840,51 +1840,62 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async resetStore() {
     const self: Record<any, any> = this;
-    const editConfirmation = this.editModeConfirmation();
-    editConfirmation.then(async (response) => {
+    const confirmed_value = this.editModeConfirmation()
+    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+    if(edit_info_obj.type == "reorder_product" && confirmed_value) {
+      return false;
+    }
+
+    confirmed_value.then(async (response) => {
       const ok = await this.ref['reset-changes'].showConfirm()
       if (ok) {
         this.search_products = '';
-       if(this.$refs['ItemToCustomize']) {
-         (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
-       }
+        if(this.$refs['ItemToCustomize']) {
+          (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
+        }
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
-        await self.$eventBus.$emit('useProductOriginalColors')
         await this.$store.dispatch('resetStore')
-        const categories_promise = this.fetchCategories();
-        categories_promise.then(async (cat_response) => {
-          await this.exitFromEditMode()
-          hideLockerProductUpdateButton()
-          this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
-          await self.$eventBus.$emit('resetTextsCanvas')
-          await self.$eventBus.$emit('resetLogosCanvas')
-          await this.$store.dispatch('setTabMain', {value: 0});
-          if(this.$refs['ItemToCustomize']) {
-            (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+
+        if(edit_info_obj.type == 'cart_product' || edit_info_obj.type == 'order_product') {
+          let product_id
+          if(edit_info_obj.type == 'order_product') {
+            product_id = edit_info_obj.order_product_info.active_product_id
+          } else {
+            product_id = edit_info_obj.cart_product_info.cart_item_product.product_id
           }
-          await this.$store.dispatch('SET_LOGO_COLORS', [])
-          this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
-          await this.$store.dispatch("setProductsRosters")
-          let query_params = await this.setQueryParams()
-          await this.retrieveProductsNew(query_params)
-          if (this.mobileScreen) {
-            this.showDesign()
-            this.switchTabs(0, true)
-          }
-          this.setRosterOpen(false)
-        })
-      } else {
-        if (response === true || response === false) {
-          await self.$eventBus.$emit('useProductOriginalColors')
-          await this.$store.dispatch('resetStore')
-          const categories_promise = this.fetchCategories();
+          const categories_promise = this.fetchCategories(null, product_id)
           categories_promise.then(async (cat_response) => {
             let query_params = await this.setQueryParams()
             await this.retrieveProductsNew(query_params)
-          });
+            this.resetActions()
+          })
+        } else {
+          this.resetActions()
         }
       }
     })
+  }
+
+  public async resetActions() {
+    const self: Record<any, any> = this;
+    hideLockerProductUpdateButton()
+    await self.$eventBus.$emit('useProductOriginalColors')
+    this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
+    await self.$eventBus.$emit('resetTextsCanvas')
+    await self.$eventBus.$emit('resetLogosCanvas')
+    await this.$store.dispatch('setTabMain', {value: 0});
+    if(this.$refs['ItemToCustomize']) {
+      (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();
+    }
+    await this.$store.dispatch('SET_LOGO_COLORS', [])
+    this.$store.commit('SET_INITIAL_LOGO_COLORS', [])
+    await this.$store.dispatch("setProductsRosters")
+
+    if (this.mobileScreen) {
+      this.showDesign()
+      this.switchTabs(0, true)
+    }
+    this.setRosterOpen(false)
   }
 
   public async noProductFoundAction() {
