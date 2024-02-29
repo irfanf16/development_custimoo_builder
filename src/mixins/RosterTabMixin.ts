@@ -172,6 +172,9 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
             updated_roster.push(roster)
           }
         })
+       setTimeout(() => {
+         this.handleRosterItemFocus(0)
+        }, 500)
       }else{
         alert('Please upload the file with valid pattern');
         this.showLoader = false;
