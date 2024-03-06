@@ -809,9 +809,14 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   get styleIndex():number{
     return this.$store.getters.getCurrentStyleIndex;
   }
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo();
+  }
   public changeStyleIndex(i: number) {
     if(this.styleIndex != i) {
-      this.useLogoColors()
+      if(this.logoColorsInfo.using_logo_colors) {
+        this.useLogoColors()
+      }
       if (this.mobileScreen) {
         (this.$parent!.$parent as Record<any, any>).isFront = true
       } else {
@@ -858,7 +863,9 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   }
   async productDesigns(index: number) {
     if (index != this.selectedProductIndex) {
-      this.useLogoColors()
+      if(this.logoColorsInfo.using_logo_colors) {
+        this.useLogoColors()
+      }
       if(!this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', false)
       }

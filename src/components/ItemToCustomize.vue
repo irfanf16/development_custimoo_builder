@@ -247,7 +247,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         return false;
       }
 
-      this.useLogoColors()
+      if(this.logoColorsInfo.using_logo_colors) {
+        this.useLogoColors()
+      }
       this.showLoader = true;
       let product_filter = 'customized=true';
       if(this.search_products) {
@@ -305,7 +307,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     if (edit_info_obj.type === "reorder_product" && confirmed_value) {
       return false;
     }
-    this.useLogoColors()
+    if(this.logoColorsInfo.using_logo_colors) {
+        this.useLogoColors()
+      }
     const categories_promise = this.fetchCategories(prd_type);
 
     categories_promise.then(async (cat_response) => {
@@ -326,7 +330,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       if (edit_info_obj.type == "reorder_product" && confirmed_value) {
         return false;
       }
-      this.useLogoColors()
+      if(this.logoColorsInfo.using_logo_colors) {
+        this.useLogoColors()
+      }
       let selected_category = this.categories[category_index]
       await resetLastActiveProductData()
       this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { category_index: category_index, category_id: selected_category.id })
@@ -342,6 +348,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       }
       await this.retrieveProductsNew(query_params)
     }
+  }
+
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo();
   }
 
   /* getters/computed props starts */

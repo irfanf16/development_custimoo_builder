@@ -102,9 +102,15 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     return this.$store.getters.getLastActiveProductData
   }
 
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo();
+  }
+
   public changeDesign(index: number) {
     if(this.selectedDesignId != this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id) {
-      this.useLogoColors()
+      if(this.logoColorsInfo.using_logo_colors) {
+        this.useLogoColors()
+      }
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
         design_index: index, design_id: this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id
       })
