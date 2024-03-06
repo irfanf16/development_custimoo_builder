@@ -73,7 +73,7 @@
                       <div :key="`cart-addon-${addon.addon_id}`" class="d-flex w-100" :class="{'border-top mt-1': addonIndex > 0}">
                         {{ addon.title }}
                         <template v-if="product_price_object.show_price">
-                          :<strong class="font-weight-bold ml-auto">{{ addon.currencies[0].symbol }} {{addon.currencies[0].price }}</strong>
+                          :<strong class="font-weight-bold ml-auto">{{ addon.currencies[0].symbol }} {{Number(addon.currencies[0].price).toFixed(2) }}</strong>
                         </template>
                       </div>
                     </template>
@@ -174,12 +174,12 @@
                         <td :class="{highlightMOQ: (factory_product.roster_product_count < factory_product.minimum_order_quantity)}">
                           <template>
                             <span>{{ factory_product.product_price_object.currency_symbol }}{{
-                                factory_product.product_price_object.product_price
+                                Number(factory_product.product_price_object.product_price).toFixed(2)
                               }} </span>
                           </template>
                         </td>
                         <td>
-                          {{ factory_product.product_price_object.currency_symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(factory_product.product_price_object.product_price) }}
+                          {{ factory_product.product_price_object.currency_symbol }}{{ parseInt(factory_product.product_price_object.quantity) * Number(factory_product.product_price_object.product_price).toFixed(2) }}
                         </td>
                       </template>
                     </tr>
@@ -193,10 +193,10 @@
                         </td>
                         <template v-if="product_price_object.show_price">
                           <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
-                            {{ addon.currencies[0].symbol }}{{ addon.currencies[0].price }}
+                            {{ addon.currencies[0].symbol }}{{ Number(addon.currencies[0].price).toFixed(2) }}
                           </td>
                           <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
-                            {{ addon.currencies[0].symbol }}{{ parseInt(factory_product.product_price_object.quantity) * parseFloat(addon.currencies[0].price) }}
+                            {{ addon.currencies[0].symbol }}{{ parseInt(factory_product.product_price_object.quantity) * Number(addon.currencies[0].price).toFixed(2) }}
                           </td>
                         </template>
                       </tr>
@@ -208,7 +208,7 @@
                   <td></td>
                   <td colspan="2" class="font-weight-bold">Total Price</td>
                   <td colspan="2" class="font-weight-bold">
-                    {{ product_price_object.active_currency.symbol }}{{ cartTotalPrice }}
+                    {{ product_price_object.active_currency.symbol }}{{ Number(cartTotalPrice).toFixed(2) }}
                   </td>
                 </tr>
               </tbody>
