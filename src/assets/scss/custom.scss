@@ -6214,6 +6214,13 @@ $fontSize: 0.5;
     &.absolute-modals{
         position: absolute;
         padding-bottom: 100px;
+
+        .absolute-modals{
+            position: fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     }
 }
 

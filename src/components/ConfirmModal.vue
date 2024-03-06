@@ -4,7 +4,7 @@
          :scrollable="true"
          height="auto"
          :reset="true"
-         :shiftY="0"  :name="name" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" class="confirm-modal absolute-modals">
+         :shiftY="0"  :name="name" id="reset-confirm" size="md" :hide-footer="true" :hide-header="true" class="confirm-modal" :class="{'absolute-modals': absolute_modal}">
    <div class="modal-body">
     <div class="text-center">
         <span class="btn btn-secondary light rounded-circle confirm-icon">
@@ -35,7 +35,8 @@ export default class  ConfirmModal extends Vue{
   @Prop({ type: String, default: "No" }) private cancel_text!: string;
   @Prop({ type: String, default: "Yes" }) private confirm_text!: string;
   @Prop({ type: String, default: "reset-changes" }) private name!: string;
-  @Prop({required: false, default: 'question'})  popup_icon !: string;
+  @Prop({ required: false, default: 'question'})  popup_icon !: string;
+  @Prop({ required: false, default: true})  absolute_modal !: boolean;
   private ref = this.$refs as Record<any, any>
 
   // Private variables
