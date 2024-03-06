@@ -831,6 +831,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.activity_navigation_index][0];
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
+    activityObj.files[ref_index].marker_ref = markerArea
     markerArea.addEventListener('render', (event:Record<any,any>) => {
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
@@ -885,21 +886,40 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.markerActive = false
     setTimeout(() => {
       let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+      let show_message = false;
       if(action == 'reject'){
         if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
           this.showToast('Please provide feedback before rejection','error');
-        }else{
-          this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-          this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
-          this.navigateActivitySlider('next')
+          show_message = true;
         }
-      }else if(action == 'accept'){
-        this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
-        this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
-        this.navigateActivitySlider('next')
+      }
+
+      if(!show_message) {
+        this.renderMarkerJsImages().then(marker_js_base64_images => {
+          marker_js_base64_images.forEach((marker_js_base64_image_item, marker_js_base64_image_index) => {
+            this.activity_items.activity_item_data[this.activity_navigation_index].files[marker_js_base64_image_index].file = marker_js_base64_image_item
+            this.activity_items.activity_item_data[this.activity_navigation_index].files[marker_js_base64_image_index].file_type = 'encode'
+          })
+          this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
+          if(action === "reject") {
+            this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+          } else {
+            this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
+          }
+          this.navigateActivitySlider('next')
+        })
       }
     },1000)
 
+  }
+
+  public renderMarkerJsImages() {
+    let marker_js_render_events: any[] = [];
+    this.activity_items.activity_item_data[this.activity_navigation_index].files.forEach(marker_js_item => {
+      marker_js_render_events.push(marker_js_item.marker_ref.render())
+      delete marker_js_item.marker_ref
+    })
+    return Promise.all(marker_js_render_events)
   }
 
   updateOrderProducts(order_item: Record<any, any>, order_item_status_activity: number) {
