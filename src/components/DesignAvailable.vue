@@ -2,7 +2,7 @@
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[styleIndex]">
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
-        <a @click="changeDesign(index); showPreview()" v-if="design.design_show_on_scroll" ref="design_canvas">
+        <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{
                     textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
