@@ -1797,9 +1797,12 @@ const getDefaultColorsObject = () => {
     {color: null, pantone: null, name: null}]
 }
 
-const setDefaultColors = () => {
+const setDefaultColors = (again_from_logo = false) => {
   const default_colors_object = getDefaultColorsObject()
-  const logo_colors = Store.getters.getLogoColorsInfo('colors')
+  let logo_colors = Store.getters.getLogoColorsInfo('colors')
+  if(again_from_logo) {
+    logo_colors = [ ...Store.getters.getLogoColorsInfo('extracted_colors') ]
+  }
   logo_colors.forEach((logo_color, logoColorIndex) => {
     default_colors_object[logoColorIndex].color = logo_color.hex
     default_colors_object[logoColorIndex].pantone = logo_color.pantone

@@ -2,7 +2,7 @@
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[styleIndex]">
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
-        <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
+        <a @click="changeDesign(index); showPreview()" v-if="design.design_show_on_scroll" ref="design_canvas">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{
                     textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
@@ -28,6 +28,7 @@
 import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
 import Scene from '@/components/Scene.vue'
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 
 @Component<DesignAvailable>({
   components: {
@@ -68,7 +69,7 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
   }
 })
 
-export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
+export default class DesignAvailable extends Mixins(HideUpdateLockerButton, LogoUploaderColors) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
@@ -102,21 +103,24 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton) {
   }
 
   public changeDesign(index: number) {
-    this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
-      design_index: index, design_id: this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id
-    })
-    this.$store.commit('Change_Locker_Tabs_Index', undefined)
-    this.$store.dispatch('setActiveTab', -1)
-    this.$store.commit('SET_SHUFFLE', false)
-    this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
-      if (index == key) {
-        Vue.set(design, 'design_show', 1)
-        this.$store.dispatch('setSelectedProductDesignID',design.id);
-      } else {
-        Vue.set(design, 'design_show', 0)
-      }
-    })
-    this.hideLockerProductUpdateButton()
+    if(this.selectedDesignId != this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id) {
+      this.useLogoColors()
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
+        design_index: index, design_id: this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id
+      })
+      this.$store.commit('Change_Locker_Tabs_Index', undefined)
+      this.$store.dispatch('setActiveTab', -1)
+      this.$store.commit('SET_SHUFFLE', false)
+      this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
+        if (index == key) {
+          Vue.set(design, 'design_show', 1)
+          this.$store.dispatch('setSelectedProductDesignID', design.id);
+        } else {
+          Vue.set(design, 'design_show', 0)
+        }
+      })
+      this.hideLockerProductUpdateButton()
+    }
   }
 
   public showPreview() {

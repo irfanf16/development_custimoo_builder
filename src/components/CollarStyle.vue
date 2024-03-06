@@ -62,14 +62,13 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
-import {findIndex} from "lodash";
-import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
-import {handleProductPriceUpdate, hideLockerProductUpdateButton} from "@/helpers/Helpers";
+import {Component, Mixins} from 'vue-property-decorator'
+import {changeSelectedProduct} from "@/mixins/LockerProduct"
+import {handleProductPriceUpdate} from "@/helpers/Helpers";
     @Component<CollarStyle>({
     })
 
-    export default class CollarStyle extends Mixins(HideUpdateLockerButton) {
+    export default class CollarStyle extends Mixins(changeSelectedProduct) {
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       private viewPrices = false
       private items = [
@@ -101,45 +100,6 @@ import {handleProductPriceUpdate, hideLockerProductUpdateButton} from "@/helpers
 
       get productPriceObject() {
         return this.$store.getters.getProductPriceObject
-      }
-
-      public changeStyleIndex(i: number) {
-        this.$store.commit('SET_START_LOAD_DESIGNS', false)
-        const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-          return item.design_show
-        })
-        if(currentDesign.length){
-          const design_name = currentDesign[0].design_name
-          let designFound = false;
-          const newDesign = this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
-            if(item.design_name.toLowerCase() == design_name.toLowerCase()) {
-              designFound  = true
-              Vue.set(item, 'design_show', 1)
-              this.$store.dispatch('setSelectedProductDesignID',item.id)
-            } else {
-              Vue.set(item, 'design_show', 0)
-            }
-          })
-          this.hideLockerProductUpdateButton(true)
-          if (!designFound){
-            if(!this.selectedProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
-              this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
-                if (index ==0 ){
-                  Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
-                  this.$store.dispatch('setSelectedProductDesignID',this.selectedProduct.productstyles[i].productdesigns[0].id)
-                }else{
-                  Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
-                }
-              })
-            }
-          }
-        }
-        this.$store.commit('CHANGE_STYLE_INDEX', i);
-        let design_index = findIndex(this.selectedProduct.productstyles[i].productdesigns, "design_show")
-        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.selectedProduct.productstyles[i].id,
-          design_index:   design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
-        })
-        hideLockerProductUpdateButton(false)
       }
       handleAddonSelectionUpdate(): void {
         handleProductPriceUpdate()

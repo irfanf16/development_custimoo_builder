@@ -138,6 +138,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import {ProductsQueryParamsMixin, exitEditMode, handleMainProducts} from "@/mixins/LockerProduct";
 
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
+import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 
 @Component<ItemToCustomize>({
   components: {
@@ -169,8 +170,7 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
 })
 
 
-export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, FetchCategories, handleMainProducts) {
-  // @Prop({required: true}) categories!: any;
+export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, exitEditMode, FetchCategories, handleMainProducts, LogoUploaderColors) {
   @Prop({required: true}) uploaderOpened!: any;
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({default: ''}) search_products!: any;
@@ -225,7 +225,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   public async searchProducts(isClear:boolean) {
-    let self: Record<any, any> = this;
     const confirmed_value = await this.editModeConfirmation();
     const edit_info_obj = this.$store.getters.getProductEditInfoObject;
     if(edit_info_obj.type == "reorder_product" && confirmed_value) {
@@ -248,6 +247,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         return false;
       }
 
+      this.useLogoColors()
       this.showLoader = true;
       let product_filter = 'customized=true';
       if(this.search_products) {
@@ -278,8 +278,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     }, 700);
   }
 
-  //  public doSearchDebounced = this.debounce(this.searchProducts,1000);
-
   public async changeProductType(prd_type: string) {
     let isCustomized = this.$store.getters.getCustomized;
     let isPersonalized = this.$store.getters.getPersonalized;
@@ -307,7 +305,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     if (edit_info_obj.type === "reorder_product" && confirmed_value) {
       return false;
     }
-
+    this.useLogoColors()
     const categories_promise = this.fetchCategories(prd_type);
 
     categories_promise.then(async (cat_response) => {
@@ -322,25 +320,28 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   public async handleCategoryUpdate(category_index:number) {
-    const confirmed_value = await this.editModeConfirmation();
-    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
-    if(edit_info_obj.type == "reorder_product" && confirmed_value) {
-      return false;
+    if(this.getSelectedCategory.id != this.categories[category_index].id) {
+      const confirmed_value = await this.editModeConfirmation();
+      const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+      if (edit_info_obj.type == "reorder_product" && confirmed_value) {
+        return false;
+      }
+      this.useLogoColors()
+      let selected_category = this.categories[category_index]
+      await resetLastActiveProductData()
+      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { category_index: category_index, category_id: selected_category.id })
+      this.$store.commit('SET_SELECTED_CATEGORY', {category_id: selected_category.id, category_index: category_index})
+      let query_params: string[] = [
+        `customized=${this.getCustomized}`, `personalized=${this.getPersonalized}`
+      ];
+      if (selected_category && selected_category.id) {
+        query_params.push(`category_id=${selected_category.id}`);
+      }
+      if (this.search_products) {
+        query_params.push(`title=${this.search_products}`);
+      }
+      await this.retrieveProductsNew(query_params)
     }
-    let selected_category = this.categories[category_index]
-    await resetLastActiveProductData()
-    this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { category_index: category_index, category_id: selected_category.id });
-    this.$store.commit('SET_SELECTED_CATEGORY', { category_id:selected_category.id, category_index: category_index })
-    let query_params: string[] = [
-      `customized=${this.getCustomized}`, `personalized=${this.getPersonalized}`
-    ];
-    if (selected_category && selected_category.id){
-      query_params.push(`category_id=${selected_category.id}`);
-    }
-    if(this.search_products){
-      query_params.push(`title=${this.search_products}`);
-    }
-    await this.retrieveProductsNew(query_params)
   }
 
   /* getters/computed props starts */
@@ -383,7 +384,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   get selectedCategory() {
-    let self = this;
     return { index: this.getSelectedCategory.category_index, id: this.getSelectedCategory.category_id }
   }
 

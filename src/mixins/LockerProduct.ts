@@ -26,6 +26,7 @@ import ModalAction from "@/mixins/ModalAction";
 import {FetchCategories, HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import {eventBus} from "@/event/eventBus";
 import {getClosestColor} from "@/pantoneColor";
+import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
@@ -524,48 +525,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     }
     return logo_colors
   }
-
-  get choosenProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct;
-  }
-
-  public changeStyleIndex(i: number) {
-    const currentDesign = this.choosenProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-      return item.design_show
-    })
-    if(currentDesign.length){
-      const design_name = currentDesign[0].design_name
-      let designFound = false;
-      const newDesign = this.choosenProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
-        if(item.design_name.toLowerCase() == design_name.toLowerCase()) {
-          designFound  = true
-          Vue.set(item, 'design_show', 1)
-          this.$store.dispatch('setSelectedProductDesignID',item.id)
-        } else {
-          Vue.set(item, 'design_show', 0)
-        }
-      })
-      this.hideLockerProductUpdateButton(true)
-      if (!designFound){
-        if(!this.choosenProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
-          this.choosenProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
-            if (index ==0 ){
-              Vue.set(this.choosenProduct.productstyles[i].productdesigns[0], 'design_show', 1)
-              this.$store.dispatch('setSelectedProductDesignID',this.choosenProduct.productstyles[i].productdesigns[0].id)
-            }else{
-              Vue.set(this.choosenProduct.productstyles[i].productdesigns[index], 'design_show', 0);
-            }
-          })
-        }
-      }
-    }
-    this.$store.commit('CHANGE_STYLE_INDEX', i);
-    let design_index = findIndex(this.choosenProduct.productstyles[i].productdesigns, "design_show")
-    this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {style_index: i, style_id: this.choosenProduct.productstyles[i].id,
-      design_index:   design_index, design_id: this.choosenProduct.productstyles[i].productdesigns[design_index].id
-    })
-  }
-
 }
 
 @Component
@@ -834,7 +793,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
 }
 
 @Component
-export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLockerButton) {
+export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLockerButton, LogoUploaderColors) {
   get products() {
     return this.$store.getters.getProducts
   }
@@ -847,8 +806,59 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   get selectedProductIndex(): number{
     return this.$store.getters.getSelectedIndex
   }
+  get styleIndex():number{
+    return this.$store.getters.getCurrentStyleIndex;
+  }
+  public changeStyleIndex(i: number) {
+    if(this.styleIndex != i) {
+      this.useLogoColors()
+      if (this.mobileScreen) {
+        (this.$parent!.$parent as Record<any, any>).isFront = true
+      } else {
+        this.$store.commit('SET_START_LOAD_DESIGNS', false)
+      }
+
+      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
+        return item.design_show
+      })
+      if (currentDesign.length) {
+        const design_name = currentDesign[0].design_name
+        let designFound = false;
+        this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
+          if (item.design_name.toLowerCase() == design_name.toLowerCase()) {
+            designFound = true
+            Vue.set(item, 'design_show', 1)
+            this.$store.dispatch('setSelectedProductDesignID', item.id)
+          } else {
+            Vue.set(item, 'design_show', 0)
+          }
+        })
+        this.hideLockerProductUpdateButton(true)
+        if (!designFound) {
+          if (!this.selectedProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
+            this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>, index: number) => {
+              if (index == 0) {
+                Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
+                this.$store.dispatch('setSelectedProductDesignID', this.selectedProduct.productstyles[i].productdesigns[0].id)
+              } else {
+                Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
+              }
+            })
+          }
+        }
+      }
+      this.$store.commit('CHANGE_STYLE_INDEX', i);
+      let design_index = findIndex(this.selectedProduct.productstyles[i].productdesigns, "design_show")
+      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+        style_index: i, style_id: this.selectedProduct.productstyles[i].id,
+        design_index: design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
+      })
+      hideLockerProductUpdateButton(false)
+    }
+  }
   async productDesigns(index: number) {
     if (index != this.selectedProductIndex) {
+      this.useLogoColors()
       if(!this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', false)
       }

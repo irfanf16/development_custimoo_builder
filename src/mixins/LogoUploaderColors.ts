@@ -25,7 +25,6 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     this.hideLockerProductUpdateButton()
   }
 
-
   public deleteLogoColor(logo_color_index: number) {
     this.logoColorsInfo.colors[logo_color_index] = { hex: null, name: null, pantone: null }
     this.$set(this.logoColorsInfo.colors, logo_color_index, { hex: null, name: null, pantone: null })
@@ -42,10 +41,11 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     this.hideLockerProductUpdateButton()
   }
 
+  // todo need to work on this code on every where
   public async useLogoColors() {
     const self: Record<any, any> = this
     await setUndoRedoItems('defaultColors', 'use_logo_colors')
-    setDefaultColors()
+    setDefaultColors(true)
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
     self.$eventBus.$emit('changeDefaultColors')
     this.hideLockerProductUpdateButton()

@@ -52,32 +52,30 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import {
   checkIsEmpty, getColorType, getDeviceInfo,
-  getRandom,
   getSelectedProductPantones,
-  setUndoRedoItems,
   unitConversion
 } from '@/helpers/Helpers'
-import {find, unset} from "lodash";
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
-import {Mesh, Object3D, Texture} from "three";
+import {Object3D, Texture} from "three";
 
 @Component<ThreeDScene>({
-  async mounted() {
+  beforeDestroy() {
     const self = this
-    self.$eventBus.$on("customTextUpdated", this.addTextsNew)
-    self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
-    self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
-    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
-    self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
-    self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
-    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
-    self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
-    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
-    self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
-    self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
-    self.$eventBus.$on("changeColors", this.changeColors)
-
+    self.$eventBus.$off("customTextUpdated", this.addTextsNew)
+    self.$eventBus.$off("customTextRemoved", this.deleteExistingTextsFromCanvas)
+    self.$eventBus.$off("resetTextsCanvas", this.resetTextsFromCanvas)
+    self.$eventBus.$off("handleCustomLogoUpdatedEvent", this.addLogo)
+    self.$eventBus.$off("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+    self.$eventBus.$off("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
+    self.$eventBus.$off("customLogoRemoved", this.deleteExistingLogoFromCanvas)
+    self.$eventBus.$off("resetLogosCanvas", this.resetLogosFromCanvas)
+    self.$eventBus.$off("changeDefaultColors", this.changeDefaultColorsEvent)
+    self.$eventBus.$off("changeGroupColors", this.changeGroupColors)
+    self.$eventBus.$off("useProductOriginalColors", this.setInitialColors)
+    self.$eventBus.$off("changeColors", this.changeColors)
+  },
+  async mounted() {
     this.loadScene(this.imageData)
   }
 })
@@ -597,9 +595,26 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       this.controls.update()
       this.animate()
 
+      this.listenEvents()
       this.showLoader = false
       this.mounted = true
     })
+  }
+
+  public listenEvents() {
+    const self: Record<any, any> = this;
+    self.$eventBus.$on("customTextUpdated", this.addTextsNew)
+    self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
+    self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
+    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
+    self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+    self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
+    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
+    self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
+    self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
+    self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
+    self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
+    self.$eventBus.$on("changeColors", this.changeColors)
   }
 
   public async addModel(modelUrl: string, designUrl: string) {
@@ -678,7 +693,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   public addSvgLogos(logo: Record<any, any>) {
-    let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari? getRandom(3) : '11')
+    let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
     fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
       options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
@@ -752,8 +767,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           this.custom_logo_objects[logo.logo_index as number] = true
         }
         logo.haveControls = Boolean(logo.haveControls)
-        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=' + (this.is_safari ? getRandom(3) : '11')
-        fabric.Image.fromURL(logoUrl, async (img: any) => { //always add random string to url as cors issue only solve in safari by doing that
+        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
+        fabric.Image.fromURL(logoUrl, async (img: any) => {
           const aspect_ratio = img.width / img.height
           if(aspect_ratio > 1) {
             img.scaleToWidth(this.canvasResolution / this.canvasResolution * (logo.height) as number)

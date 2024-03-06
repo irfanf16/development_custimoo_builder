@@ -124,6 +124,10 @@ import OrderSummary from "@/components/OrderSummary.vue";
     EditRosterAreaTab,
     ColorTabs,
   },
+  beforeDestroy() {
+    const self: Record<any, any> = this;
+    self.$eventBus.$off("setTotalTabs", this.setTotalTabs)
+  },
   mounted() {
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('scroll', ($event:Record<any, any>)=>{$event.stopPropagation()});
     (this.$refs['myscroll'] as Record<any, any>).addEventListener('mousewheel', ($event:Record<any, any>)=>{$event.stopPropagation()});

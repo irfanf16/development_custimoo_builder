@@ -52,15 +52,14 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Vue} from 'vue-property-decorator'
-import {http} from "@/httpCommon";
-import {default as $} from "jquery";
+import {Component, Mixins} from 'vue-property-decorator'
+import {changeSelectedProduct} from "@/mixins/LockerProduct"
 import {handleProductPriceUpdate} from "@/helpers/Helpers";
 
 @Component<Collars>({
 })
 
-export default class Collars extends Vue {
+export default class Collars extends Mixins(changeSelectedProduct) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private show_read_more = false;
 
@@ -80,40 +79,6 @@ export default class Collars extends Vue {
 
   get productPriceObject() {
     return this.$store.getters.getProductPriceObject
-  }
-
-  public changeStyleIndex(i: number) {
-    (this.$parent!.$parent as Record<any, any>).isFront = true
-
-    const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-      return item.design_show
-    })
-    if(currentDesign.length){
-      const design_name = currentDesign[0].design_name
-      let designFound = false;
-      this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
-        if(item.design_name.toLowerCase() == design_name.toLowerCase()) {
-          designFound  = true
-          Vue.set(item, 'design_show', 1)
-          this.$store.dispatch('setSelectedProductDesignID',item.id)
-        } else {
-          Vue.set(item, 'design_show', 0)
-        }
-      })
-      if (!designFound){
-        if(!this.selectedProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
-          this.selectedProduct.productstyles[i].productdesigns.forEach((item:Record<any, any>, index:number) =>{
-            if (index ==0 ){
-              Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
-              this.$store.dispatch('setSelectedProductDesignID',this.selectedProduct.productstyles[i].productdesigns[0].id)
-            }else{
-              Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
-            }
-          })
-        }
-      }
-    }
-    this.$store.commit('CHANGE_STYLE_INDEX', i);
   }
 
   handleAddonSelectionUpdate(): void {

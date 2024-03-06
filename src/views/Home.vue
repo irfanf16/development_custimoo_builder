@@ -368,7 +368,10 @@
                       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <template v-if="selectedProduct.is_3d_product && selectedProduct.show_3d">
-                            <ThreeDScene :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url, texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url, design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
+                            <ThreeDScene :key="'main3dScene'+design.id"
+                                         :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url,
+                                            texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url,
+                                            design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
                                          :measurement-ratio="selectedProduct.measurement_ratio"
                                          :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
                                          :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
@@ -377,7 +380,7 @@
                                          :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"></ThreeDScene>
                           </template>
                           <div v-show="!selectedProduct.show_3d">
-                            <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
+                            <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
                                    :front="{
                                       textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                                       safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -397,7 +400,7 @@
                                    :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
                             />
 
-                            <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
+                            <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
                                    :front="{
                                       textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                                       safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -520,13 +523,11 @@ import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
 import ChooseColor from '@/components/ChooseColor.vue'
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
-import ChooseInterest from '@/components/ChooseInterest.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import SaveColorModal from "@/components/SaveColorModal.vue"
 // import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
-import ExtractedColors from '@/components/ExtractedColors.vue'
 import LoginForm from '@/components/LoginForm.vue'
 import {http} from "@/httpCommon"
 import DesignCollectionModal from "@/components/DesignCollectionModal.vue";
@@ -541,27 +542,23 @@ import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import ClickOutside from 'vue-click-outside';
-import {isEqual} from 'lodash'
 
 import {
   logData,
   getActiveProductData,
   getPermissions,
   handleResponseException,
-  parseSvgStringFile,
-  fetchUrlContent,
-  getRandom,
   resetLastActiveProductData,
-  lastActiveProductDefaultObject,
   getUrlParameter,
   routerPush,
   getImageFromCanvas,
-  setDefaultColors,
   setUndoRedoItems,
   santaClone,
   getCustomizerIframe,
   getLockerColors,
-  getDomDocument, processColorsCustom, exitFromEditMode, hideLockerProductUpdateButton, isGetCategories
+  getDomDocument,
+  hideLockerProductUpdateButton,
+  isGetCategories
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -600,28 +597,41 @@ Vue.filter('formatDate', function(value:string) {
     ChooseColor,
     CustomizationPreview,
     ItemToCustomize,
-    ChooseInterest,
     ReplaceLogos,
     CustomizationTabs,
     // UploadLogo,
     LockerRoomModal,
     AddLockerRoomModal,
     SaveColorModal,
-    ExtractedColors,
     LoginForm,
     Scene
   },
 
+  beforeDestroy() {
+    const self: Record<any, any> = this;
+    self.$eventBus.$off('initProductsFonts', this.initProductsFontsEvent)
+    self.$eventBus.$off('saveToLockerProduct', this.saveToLockerProductEvent)
+    self.$eventBus.$off('saveRosterToLocker', this.saveRosterToLockerEvent)
+    self.$eventBus.$off('updateCart', this.updateCartEvent)
+    self.$eventBus.$off("setActionBeforeLogin", this.setActionBeforeLogin)
+    self.$eventBus.$off('cancelLocker', this.cancelLocker)
+    self.$eventBus.$off('cancelCart', this.cancelCart)
+  },
   async mounted() {
     localStorage.removeItem('custimo')
-    let self: Record<any, any> = this;
-    self.$gtag.pageview({ page_path: '/home' })
+    const self: Record<any, any> = this;
+    self.$gtag.pageview({ page_path: '/home'})
     self.$gtag.pageview('/about')
     self.$gtag.pageview(self.$route)
     self.$gtag.event(self.$route)
-    await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
-      await this.initProductsFonts(products, resolve)
-    })
+
+    await self.$eventBus.$on('initProductsFonts', this.initProductsFontsEvent)
+    await self.$eventBus.$on('saveToLockerProduct', this.saveToLockerProductEvent)
+    await self.$eventBus.$on('saveRosterToLocker', this.saveRosterToLockerEvent)
+    await self.$eventBus.$on('updateCart', this.updateCartEvent)
+    self.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
+    await self.$eventBus.$on('cancelLocker', this.cancelLocker)
+    await self.$eventBus.$on('cancelCart', this.cancelCart)
 
     await http.get(`/get-settings`).then((res) => {
       const response_data = res.data;
@@ -654,7 +664,6 @@ Vue.filter('formatDate', function(value:string) {
       await resetLastActiveProductData()
     }
     const sendCategoryCall = await isGetCategories()
-    
 
     if(sendCategoryCall) {
       let category_product_id = null;
@@ -672,23 +681,6 @@ Vue.filter('formatDate', function(value:string) {
     } else {
       await this.afterCategoriesCallOnMounted();
     }
-
-    await self.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
-      await this.getLockers(false,false,resolve);
-    })
-    await self.$eventBus.$on('saveRosterToLocker', (backToLocker=true)=>{
-      this.getLockers(false,false,null,backToLocker)
-    })
-    self.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
-    await self.$eventBus.$on('cancelLocker', ()=>{
-      this.cancelLocker()
-    })
-    await self.$eventBus.$on('cancelCart', ()=>{
-      this.cancelCart()
-    })
-    await self.$eventBus.$on('updateCart', async (resolve: any) => {
-      await this.addToCart(resolve);
-    })
 
     if(!this.isCustomerAuthenticated){
       setTimeout(async ()=>{
@@ -749,6 +741,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private showDD = false;
   private fullScreen = false;
   private customTextIndex = -1
+  private saveToLockerProductEvent = async (resolve: any) => {
+    await this.getLockers(false,false,resolve);
+  }
+  private saveRosterToLockerEvent = (backToLocker= true)=>{
+    this.getLockers(false,false,null,backToLocker)
+  }
+  private updateCartEvent = async (resolve: any) => {
+    await this.addToCart(resolve);
+  }
+  private initProductsFontsEvent = async (products: Record<any, any>[], resolve: any) => {
+    await this.initProductsFonts(products, resolve)
+  }
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -839,21 +843,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get mainTabIndex() {
     return this.$store.getters.getMainTab
   }
-
-   get router_info() {
-    console.log('inside, router_info')
-    if(this.$route.name == "ShareUrl") {
-      this.handleMountedEvent(true)
-    }
-    return this.$route
-  }
-
-  // @Watch('router_info')
-  // routerInfoChanged(newVal: Record<any, any>, oldVal: Record<any, any>) {
-  //   if(newVal.name == "ShareUrl") {
-  //     this.handleMountedEvent()
-  //   }
-  // }
 
   @Watch('mainTabIndex')
   mainTabIndexChanged(newVal: number) {
@@ -2158,99 +2147,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     setTimeout(() => {
       dom_document.body.removeChild(anchor);
     },5000);
-  }
-
-  public async handleMountedEvent(show_loader = false) {
-    console.log('handleMountedEvent')
-    this.showLoader = show_loader
-    let self: Record<any, any> = this;
-    self.$gtag.pageview({ page_path: '/home' })
-    self.$gtag.pageview('/about')
-    self.$gtag.pageview(self.$route)
-    self.$gtag.event(self.$route)
-    await self.$eventBus.$on('initProductsFonts', this.initProductsFonts, async (products: Record<any, any>[], resolve: any) => {
-      await this.initProductsFonts(products, resolve)
-    })
-
-    await http.get(`/get-settings`).then((res) => {
-      const response_data = res.data;
-      const { settings: company_settings,  factory_settings } = response_data.result
-      this.$store.commit('SET_SETTING', company_settings)
-      this.$store.commit('SET_FACTORY_SETTING', factory_settings)
-      if(company_settings && company_settings.currencies) {
-        const company_currency_obj = company_settings.currencies
-        this.$store.commit('SET_PRODUCT_PRICE_OBJECT', {
-          show_price: company_currency_obj.visible,  active_currency: company_currency_obj.currencies[0]
-        })
-      }
-    });
-    this.setRecentLogos()
-
-    if (this.hideColorSection){
-      this.$store.commit('hideColorSection', false)
-    }
-
-    //set jwtToken
-    await this.$store.dispatch('setCustomToken');
-
-    if (this.isCustomerAuthenticated){
-      await this.$store.dispatch("getLockers");
-      await this.$store.dispatch('getLockerRoomColors')
-      await this.$store.dispatch('getCartServer', {})
-    }
-    let {sync_id, customizer_preview} = self.$route.query;
-    if(sync_id) {
-      await resetLastActiveProductData()
-    }
-
-    let sendCategoryCall = true;
-    let active_product_type = this.$route.query.active_product_type;
-    let product_edit_info_object = self.$store.getters.getProductEditInfoObject
-    if(product_edit_info_object.editing && product_edit_info_object.type != 'locker_product') {
-      sendCategoryCall = false;
-    }else if(this.$route.query.is_reorder || this.$route.query.update_cart ||
-      (active_product_type && active_product_type != 'locker_product')) {
-      sendCategoryCall = false;
-    }
-
-    if(sendCategoryCall) {
-      const categories_promise = this.fetchCategories();
-      categories_promise.then(async (cat_response: Record<any, any>) => {
-        if(cat_response.no_product_found || cat_response.no_search_product_found) {
-          this.noProductFoundAction()
-        } else {
-          await this.afterCategoriesCallOnMounted();
-        }
-      });
-    } else {
-      await this.afterCategoriesCallOnMounted();
-    }
-
-    await self.$eventBus.$on('saveToLockerProduct', async (resolve: any) => {
-      await this.getLockers(false,false,resolve);
-    })
-    await self.$eventBus.$on('saveRosterToLocker', (backToLocker=true)=>{
-      this.getLockers(false,false,null,backToLocker)
-    })
-    self.$eventBus.$on("setActionBeforeLogin", this.setActionBeforeLogin)
-    await self.$eventBus.$on('cancelLocker', ()=>{
-      this.cancelLocker()
-    })
-    await self.$eventBus.$on('cancelCart', ()=>{
-      this.cancelCart()
-    })
-    await self.$eventBus.$on('updateCart', async (resolve: any) => {
-      await this.addToCart(resolve);
-    })
-
-    if(!this.isCustomerAuthenticated){
-      setTimeout(async ()=>{
-        const ok = await this.ref['login-reminder'].showConfirm();
-        if(ok){
-          this.gotoLogin();
-        }
-      }, this.mobileScreen ? 100000 : 50000)
-    }
   }
 }
 </script>
