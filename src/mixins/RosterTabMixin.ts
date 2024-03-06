@@ -153,13 +153,24 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
         this.showLoader = false;
         return false
       }else if(check_cols){
-        rows.forEach((row:Record<any, any>[], index:number)=>{
+        rows.forEach((row: any[], index:number)=>{
           if(index){
             this.selectedProduct.sizes[0].json_data.forEach((size_item:Record<any, any>, size_index:number)=>{
               if(size_item.name ==row[2]){
                 derived_size_index = size_index
               }
             })
+            const typeof_number = typeof row[1];
+            if(typeof_number === "number") {
+              row[1] = row[1].toString();
+            }
+            //object type means the value is null
+            if(typeof_number === "object") {
+              row[1] = '';
+            }
+            if(row[1].constructor.name == "Number") {
+              row[1] = row[1].toString()
+            }
             const roster:any = {
               "text": row[0],
               "number": row[1],
