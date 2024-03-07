@@ -451,6 +451,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         console.log('not reslove')
         return
       }
+      clearInterval(interval)
       const selected_product = Store.getters.getSelectedProduct;
       const productCustomTexts = Store.getters.productCustomTexts(selected_product.id)
       const roster_details = Store.getters.getProductRosters()
@@ -742,7 +743,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       const production_file = await parseSvgStringFile(svg_content, post_data);
       post_data.svg_content = production_file
 
-      clearInterval(interval)
       resolve(post_data)
     }, 500)
   })
@@ -1760,16 +1760,15 @@ const getImageFromCanvas = (side: string, options={}) => {
   if(canvas) {
     canvas.discardActiveObject().renderAll()
     const original_transform = canvas.viewportTransform
-    const original_zoom = canvas.getZoom()
     canvas.setHeight(canvas_options.height)
     canvas.setWidth(canvas_options.width)
-    canvas.viewportTransform = Store.getters.getCanvasImage.scene.default_view_port
-    canvas.setZoom(canvas_options.zoom)
+    canvas.viewportTransform = [2, 0, 0, 2, 0, 0]
+    canvas.requestRenderAll()
     const base64_image = canvas.toDataURL(canvas_options.image_type)
     canvas.setHeight(canvas_options.original_height)
     canvas.setWidth(canvas_options.original_width)
     canvas.viewportTransform = original_transform
-    canvas.setZoom(original_zoom)
+    canvas.requestRenderAll()
     return base64_image
   }
   return ""
