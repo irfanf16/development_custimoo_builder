@@ -438,11 +438,24 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
      }
      if(group_colors.constructor.name == "Object") {
        for(const groupColor in group_colors) {
-         const has_pantone_property = 'pantone' in group_colors[groupColor]
-         if(!has_pantone_property) {
-           const selectProductPantonesList = getSelectedProductPantones(active_product_id, groupColor)
-           const closest_color = getClosestColor(group_colors[groupColor].color as string, selectProductPantonesList, getColorType(groupColor, active_product_id))
-           group_colors[groupColor].pantone = closest_color.pantone
+         const is_gradient = 'gradient_colors' in group_colors[groupColor]
+         if(is_gradient) {
+           group_colors[groupColor].gradient_colors.forEach((gradinet) => {
+             const has_pantone_property = 'pantone' in gradinet
+             if (!has_pantone_property) {
+               const selectProductPantonesList = getSelectedProductPantones(active_product_id, groupColor)
+               console.log('groupColor', groupColor, gradinet.color)
+               const closest_color = getClosestColor(gradinet.color as string, selectProductPantonesList, getColorType(groupColor, active_product_id))
+               gradinet.pantone = closest_color.pantone
+             }
+           })
+         } else {
+           const has_pantone_property = 'pantone' in group_colors[groupColor]
+           if (!has_pantone_property) {
+             const selectProductPantonesList = getSelectedProductPantones(active_product_id, groupColor)
+             const closest_color = getClosestColor(group_colors[groupColor].color as string, selectProductPantonesList, getColorType(groupColor, active_product_id))
+             group_colors[groupColor].pantone = closest_color.pantone
+           }
          }
        }
      }
