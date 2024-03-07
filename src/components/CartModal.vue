@@ -179,7 +179,7 @@
                           </template>
                         </td>
                         <td>
-                          {{ factory_product.product_price_object.currency_symbol }}{{ parseInt(factory_product.product_price_object.quantity) * Number(factory_product.product_price_object.product_price).toFixed(2) }}
+                          {{ factory_product.product_price_object.currency_symbol }}{{ Number(parseInt(factory_product.product_price_object.quantity) * Number(factory_product.product_price_object.product_price).toFixed(2)).toFixed(2) }}
                         </td>
                       </template>
                     </tr>
@@ -196,7 +196,7 @@
                             {{ addon.currencies[0].symbol }}{{ Number(addon.currencies[0].price).toFixed(2) }}
                           </td>
                           <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
-                            {{ addon.currencies[0].symbol }}{{ parseInt(factory_product.product_price_object.quantity) * Number(addon.currencies[0].price).toFixed(2) }}
+                            {{ addon.currencies[0].symbol }}{{ Number(parseInt(factory_product.product_price_object.quantity) * Number(addon.currencies[0].price).toFixed(2)).toFixed(2) }}
                           </td>
                         </template>
                       </tr>
