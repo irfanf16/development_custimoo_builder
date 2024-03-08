@@ -41,13 +41,14 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     this.hideLockerProductUpdateButton()
   }
 
-  // todo need to work on this code on every where
-  public async useLogoColors() {
+  public async useLogoColors(fire_event = true) {
     const self: Record<any, any> = this
     await setUndoRedoItems('defaultColors', 'use_logo_colors')
     setDefaultColors(true)
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
-    self.$eventBus.$emit('changeDefaultColors')
+    if(fire_event) {
+      self.$eventBus.$emit('changeDefaultColors')
+    }
     this.hideLockerProductUpdateButton()
   }
 

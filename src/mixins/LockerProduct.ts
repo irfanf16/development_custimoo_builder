@@ -828,7 +828,7 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   public changeStyleIndex(i: number) {
     if(this.styleIndex != i) {
       if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors()
+        this.useLogoColors(false)
       }
       if (this.mobileScreen) {
         (this.$parent!.$parent as Record<any, any>).isFront = true
@@ -877,7 +877,7 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   async productDesigns(index: number) {
     if (index != this.selectedProductIndex) {
       if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors()
+        this.useLogoColors(false)
       }
       if(!this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', false)

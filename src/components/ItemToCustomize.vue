@@ -248,7 +248,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       }
 
       if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors()
+        this.useLogoColors(false)
       }
       this.showLoader = true;
       let product_filter = 'customized=true';
@@ -308,7 +308,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       return false;
     }
     if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors()
+        this.useLogoColors(false)
       }
     const categories_promise = this.fetchCategories(prd_type);
 
@@ -331,7 +331,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         return false;
       }
       if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors()
+        this.useLogoColors(false)
       }
       let selected_category = this.categories[category_index]
       await resetLastActiveProductData()
