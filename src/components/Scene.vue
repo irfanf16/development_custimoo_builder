@@ -395,6 +395,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getSelectedProduct
   }
 
+  get product(): Record<any, any> {
+    return this.$store.getters.getProductByIndex(this.product_index)
+  }
+
   get styleIndex():number{
     return this.$store.getters.getCurrentStyleIndex;
   }
@@ -449,10 +453,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public getSvgGroupColors(svg_group: string) {
-    if(svg_group && this.selectedProduct.svg_group_color_container && this.selectedProduct.svg_group_color_container[svg_group]) {
-      return this.selectedProduct.svg_group_color_container[svg_group]
+    if(svg_group && this.product.svg_group_color_container && this.product.svg_group_color_container[svg_group]) {
+      return this.product.svg_group_color_container[svg_group]
     }
-    return false
+    return this.productColors[0]
   }
 
   public async changeColors() {
@@ -480,31 +484,47 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if(item.id) {
             item.id = item.id.toLowerCase()
             if (groupColors[item.id]) {
-              if (item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
-                groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
-                  if(item.fill.colorStops[gradient_color_index]) {
-                    const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
-                    item.fill.colorStops[gradient_color_index].color = final_color.color
+              if (item.fill && item.fill.gradientUnits) {
+                if(groupColors[item.id].gradient_colors) {
+                  groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                    if (item.fill.colorStops[gradient_color_index]) {
+                      const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
+                      item.fill.colorStops[gradient_color_index].color = final_color.color
+                    }
+                  })
+                } else {
+                  if (item.fill.colorStops[0]) {
+                    const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                    item.fill.colorStops[0].color = final_color.color
                   }
-                })
+                }
                 item.set('fill', new fabric.Gradient(item.fill))
               } else {
-                const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
                 item.set('fill', final_color.color)
               }
               this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
                 if (svgGroup.id == item.id) {
                   if (svgGroup.gradient_colors) {
-                    groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
-                      if(item.fill.colorStops[gradient_color_index]) {
-                        const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
-                        svgGroup.gradient_colors[gradient_color_index].color = final_color.color
-                        svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
-                        svgGroup.gradient_colors[gradient_color_index].name = final_color.name
+                    if(groupColors[item.id].gradient_colors) {
+                      groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                        if (item.fill.colorStops[gradient_color_index]) {
+                          const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
+                          svgGroup.gradient_colors[gradient_color_index].color = final_color.color
+                          svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
+                          svgGroup.gradient_colors[gradient_color_index].name = final_color.name
+                        }
+                      })
+                    } else { // here we are changing color for first gradient if other product same group change color without gradient
+                      if (svgGroup.gradient_colors[0]) {
+                        const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                        svgGroup.gradient_colors[0].color = final_color.color
+                        svgGroup.gradient_colors[0].pantone = final_color.pantone
+                        svgGroup.gradient_colors[0].name = final_color.name
                       }
-                    })
+                    }
                   } else {
-                    const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                    const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
                     svgGroup.color = final_color.color
                     svgGroup.name = final_color.name
                     svgGroup.pantone = final_color.pantone
@@ -537,31 +557,47 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if(item.id) {
               item.id = item.id.toLowerCase()
               if (groupColors[item.id]) {
-                if (item.fill && item.fill.gradientUnits && groupColors[item.id].gradient_colors) {
-                  groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
-                    if(item.fill.colorStops[gradient_color_index]) {
-                      const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
-                      item.fill.colorStops[gradient_color_index].color = final_color.color
+                if (item.fill && item.fill.gradientUnits) {
+                  if(groupColors[item.id].gradient_colors) {
+                    groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                      if (item.fill.colorStops[gradient_color_index]) {
+                        const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
+                        item.fill.colorStops[gradient_color_index].color = final_color.color
+                      }
+                    })
+                  } else {
+                    if (item.fill.colorStops[0]) {
+                      const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                      item.fill.colorStops[0].color = final_color.color
                     }
-                  })
+                  }
                   item.set('fill', new fabric.Gradient(item.fill));
                 } else {
-                  const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                  const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
                   item.set('fill', final_color.color)
                 }
                 this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
                   if (svgGroup.id == item.id) {
                     if (svgGroup.gradient_colors) {
-                      groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
-                        if(item.fill.colorStops[gradient_color_index]) {
-                          const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
-                          svgGroup.gradient_colors[gradient_color_index].color = final_color.color
-                          svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
-                          svgGroup.gradient_colors[gradient_color_index].name = final_color.name
+                      if(groupColors[item.id].gradient_colors) {
+                        groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                          if (item.fill.colorStops[gradient_color_index]) {
+                            const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
+                            svgGroup.gradient_colors[gradient_color_index].color = final_color.color
+                            svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
+                            svgGroup.gradient_colors[gradient_color_index].name = final_color.name
+                          }
+                        })
+                      } else { // here we are changing color for first gradient if other product same group change color without gradient
+                        if (item.fill.colorStops[0]) {
+                          const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                          svgGroup.gradient_colors[0].color = final_color.color
+                          svgGroup.gradient_colors[0].pantone = final_color.pantone
+                          svgGroup.gradient_colors[0].name = final_color.name
                         }
-                      })
+                      }
                     } else {
-                      const final_color = this.getGroupColorBySvgGroup(item.id as string)
+                      const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
                       svgGroup.color = final_color.color
                       svgGroup.name = final_color.name
                       svgGroup.pantone = final_color.pantone
@@ -745,7 +781,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       this.backCanvas.requestRenderAll()
 
       if(this.mainPreview || this.mobileScreen) {
-        console.log('this is it')
         this.$store.commit('SET_START_LOAD_DESIGNS', true)
       }
     }, render_time);

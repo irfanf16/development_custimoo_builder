@@ -1301,6 +1301,9 @@ const ProductAttributes:Module<any, any> = {
     getProduct: (state) => (product_id:number = state.selectedPrdId) => {
       return state.products.find((product: Record<any, any>) => product.id == product_id)
     },
+    getProductByIndex: (state) => (index: number = state.selectedIndex) => {
+      return state.products[index]
+    },
     getProducts: (state: any) => state.products,
     getSelectedIndex: (state: any) => state.selectedIndex,
     getSelectedProduct: (state => {

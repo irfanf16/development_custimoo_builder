@@ -432,48 +432,25 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       emit_color_change_event = true
       await this.$store.dispatch('overRideDefaultColors', default_colors);
     }
-   if(group_colors) {
-     if(group_colors.constructor.name == "Array" && group_colors.length == 0) {
-       group_colors = {}
+    if(group_colors) {
+      if(group_colors.constructor.name == "Array" && group_colors.length == 0) {
+        group_colors = {}
+      }
+      emit_color_change_event = true
+      await this.$store.dispatch('overRideGroupColors', group_colors);
+    }
+     if(emit_color_change_event) {
+       self.$eventBus.$emit("changeColors")
      }
-     if(group_colors.constructor.name == "Object") {
-       for(const groupColor in group_colors) {
-         const is_gradient = 'gradient_colors' in group_colors[groupColor]
-         if(is_gradient) {
-           group_colors[groupColor].gradient_colors.forEach((gradinet) => {
-             const has_pantone_property = 'pantone' in gradinet
-             if (!has_pantone_property) {
-               const selectProductPantonesList = getSelectedProductPantones(active_product_id, groupColor)
-               console.log('groupColor', groupColor, gradinet.color)
-               const closest_color = getClosestColor(gradinet.color as string, selectProductPantonesList, getColorType(groupColor, active_product_id))
-               gradinet.pantone = closest_color.pantone
-             }
-           })
-         } else {
-           const has_pantone_property = 'pantone' in group_colors[groupColor]
-           if (!has_pantone_property) {
-             const selectProductPantonesList = getSelectedProductPantones(active_product_id, groupColor)
-             const closest_color = getClosestColor(group_colors[groupColor].color as string, selectProductPantonesList, getColorType(groupColor, active_product_id))
-             group_colors[groupColor].pantone = closest_color.pantone
-           }
-         }
+
+     if(product_roster_detail) {
+       if(product_roster_detail.constructor.name == "Array" && product_roster_detail.length > 0) {
+         this.$store.dispatch("setProductsRosters", {product_id: active_product_id, roster_data: product_roster_detail});
+       }
+       if(product_roster_detail.constructor.name == "Object" && Object.keys(product_roster_detail).length > 0) {
+         this.$store.dispatch("setProductsRosters", {set_all: true, roster_data: product_roster_detail});
        }
      }
-     emit_color_change_event = true
-     await this.$store.dispatch('overRideGroupColors', group_colors);
-   }
-   if(emit_color_change_event) {
-     self.$eventBus.$emit("changeColors")
-   }
-
-   if(product_roster_detail) {
-     if(product_roster_detail.constructor.name == "Array" && product_roster_detail.length > 0) {
-       this.$store.dispatch("setProductsRosters", {product_id: active_product_id, roster_data: product_roster_detail});
-     }
-     if(product_roster_detail.constructor.name == "Object" && Object.keys(product_roster_detail).length > 0) {
-       this.$store.dispatch("setProductsRosters", {set_all: true, roster_data: product_roster_detail});
-     }
-   }
   }
 
   public async setLastActiveProductData(response_products_obj: Record<any, any>) {
