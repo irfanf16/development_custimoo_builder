@@ -503,7 +503,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
                 item.set('fill', final_color.color)
               }
-              this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+              this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
                 if (svgGroup.id == item.id) {
                   if (svgGroup.gradient_colors) {
                     if(groupColors[item.id].gradient_colors) {
@@ -529,22 +529,35 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     svgGroup.name = final_color.name
                     svgGroup.pantone = final_color.pantone
                   }
+                  if (this.mainPreview) {
+                    this.$store.dispatch('updateSvgGroups', {
+                      index: svgIndex,
+                      ...svgGroup
+                    })
+                  }
                 }
               })
             } else if (!defaultColors.length) {
-              this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+              this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
                 if (svgGroup.id == item.id) {
                   if (item.fill && item.fill.gradientUnits) {
                     item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                      if (this.initialSvgGroups[index][gradient_index]) {
-                        gradient.color = this.initialSvgGroups[index][gradient_index].color
+                      if (this.initialSvgGroups[svgIndex][gradient_index]) {
+                        gradient.color = this.initialSvgGroups[svgIndex][gradient_index].color
                       }
                     })
                     item.set('fill', new fabric.Gradient(item.fill));
                   } else {
-                    item.set('fill', this.initialSvgGroups[index].color)
+                    item.set('fill', this.initialSvgGroups[svgIndex].color)
                   }
-                  Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+                  Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
+
+                  if (this.mainPreview) {
+                    this.$store.dispatch('updateSvgGroups', {
+                      index: svgIndex,
+                      ...svgGroup
+                    })
+                  }
                 }
               })
             }
@@ -576,7 +589,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
                   item.set('fill', final_color.color)
                 }
-                this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
                   if (svgGroup.id == item.id) {
                     if (svgGroup.gradient_colors) {
                       if(groupColors[item.id].gradient_colors) {
@@ -602,22 +615,34 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                       svgGroup.name = final_color.name
                       svgGroup.pantone = final_color.pantone
                     }
+                    if (this.mainPreview) {
+                      this.$store.dispatch('updateSvgGroups', {
+                        index: svgIndex,
+                        ...svgGroup
+                      })
+                    }
                   }
                 })
               } else if (!defaultColors.length) {
-                this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+                this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
                   if (svgGroup.id == item.id) {
                     if (item.fill && item.fill.gradientUnits) {
                       item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
-                        if (this.initialSvgGroups[index][gradient_index]) {
-                          gradient.color = this.initialSvgGroups[index][gradient_index].color
+                        if (this.initialSvgGroups[svgIndex][gradient_index]) {
+                          gradient.color = this.initialSvgGroups[svgIndex][gradient_index].color
                         }
                       })
                       item.set('fill', new fabric.Gradient(item.fill));
                     } else {
-                      item.set('fill', this.initialSvgGroups[index].color)
+                      item.set('fill', this.initialSvgGroups[svgIndex].color)
                     }
-                    Object.assign(this.svgGroups[index], this.initialSvgGroups[index])
+                    Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
+                    if (this.mainPreview) {
+                      this.$store.dispatch('updateSvgGroups', {
+                        index: svgIndex,
+                        ...svgGroup
+                      })
+                    }
                   }
                 })
               }
@@ -693,7 +718,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if (defaultColors.length) {
         let appliedDefaultColors: string[]|string[][] = []
         let useColorIndex = 0
-        this.svgGroups.forEach((svgGroup: Record<any, any>) => {
+        this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex) => {
           if(svgGroup.gradient_colors) {
             let gradient_colors: string[] = []
             svgGroup.gradient_colors.forEach((gradient_color, gradient_color_index) => {
@@ -718,6 +743,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if (useColorIndex >= defaultColors.length) {
               useColorIndex = 0
             }
+          }
+          if (this.mainPreview) {
+            this.$store.dispatch('updateSvgGroups', {
+              index: svgIndex,
+              ...svgGroup
+            })
           }
         })
 
@@ -897,26 +928,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 }
               })
             }
-            let svgIndex = 0
-            let svgGroupId = null;
-            this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
+
+            this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
               if (svgGroup.id == key.toLowerCase()) {
-                svgIndex = index
-                svgGroupId = svgGroup.id
                 svgGroup.color = changeColor.value
                 svgGroup.name = changeColor.name
                 svgGroup.pantone = changeColor.pantone
+
+                if (this.mainPreview) {
+                  this.$store.dispatch('updateSvgGroups', {
+                    index: svgIndex,
+                    ...svgGroup
+                  })
+                }
               }
             })
-            if (this.mainPreview) {
-              this.$store.dispatch('updateSvgGroups', {
-                index: svgIndex,
-                id:svgGroupId,
-                color: changeColor.value,
-                name: changeColor.name,
-                pantone: changeColor.pantone
-              })
-            }
           }
         })
       }
