@@ -784,7 +784,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
 
 @Component
 export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLockerButton, LogoUploaderColors) {
-  get products() {
+  get products(): Record<any, any>[] {
     return this.$store.getters.getProducts
   }
   get selectedProduct() {

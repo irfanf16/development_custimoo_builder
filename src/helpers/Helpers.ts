@@ -1886,7 +1886,7 @@ const showError = (err) => {
     })
   }
 }
-
+//todo when changing props in this method make sure to update the same method in admin project helper.ts file
 const getLogoUpdatedProps = (updated_logo: Record<any, any>) => {
   const updated_props: Record<any, any> = {
     id: updated_logo.id, url: updated_logo.url, original_logo: updated_logo.original_logo_url, original_logo_url: updated_logo.original_logo_url,

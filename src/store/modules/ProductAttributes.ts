@@ -1189,6 +1189,12 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_UPDATING_LOGO(state: Record<any, any>, payload: boolean) {
       state.updating_logo = payload
+    },
+    UPDATE_PRODUCT(state, payload){
+      let product = state.products[payload.product_index]
+      if(product) {
+        Vue.set(state.products[payload.product_index], 'show_product_in_list', payload.product_data.show_product_in_list)
+      }
     }
   },
   getters: {

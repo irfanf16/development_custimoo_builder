@@ -554,7 +554,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       }
 
       setTimeout(()=>{
-        if('target' in edit_product_info_obj.locker_product_info!.meta_info){
+        if(edit_product_info_obj.locker_product_info!.meta_info && 'target' in edit_product_info_obj.locker_product_info!.meta_info){
           const {activeLocker, lockerActiveTabIndex, lockerActiveDesignIndex} = edit_product_info_obj.locker_product_info!.meta_info;
           this.tabIndex = activeLocker;
           this.lockerActiveTabIndex = lockerActiveTabIndex;

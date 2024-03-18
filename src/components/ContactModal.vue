@@ -110,7 +110,7 @@ export default class ContactModal extends Mixins(ErrorMessages) {
   get getContacts(){
 
     const lockerProducts = this.$store.getters.getLockerProducts;
-    let contacts = lockerProducts[this.room_index].contacts;
+    let contacts = lockerProducts[this.room_index] ? lockerProducts[this.room_index].contacts : [];
     return contacts;
  }
 

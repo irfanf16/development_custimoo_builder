@@ -286,7 +286,7 @@ export default class CommonImportMixin extends Vue{
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
-  
+
   private saveBeforeExit(e: Event){
     let self: Record<any, any> = this;
     if((self.$store.getters.getUndoItems.length > 0 || self.$store.getters.getRedoItems.length > 0) && !self.$store.getters.getNagivationToCartEcommerce){
