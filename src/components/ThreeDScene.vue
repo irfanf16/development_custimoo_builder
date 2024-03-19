@@ -668,26 +668,31 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
       img.scaleToHeight(this.canvasResolution / this.canvasResolution * logo.height as number)
-      img.set({
-        left: this.canvasResolution / this.mainCanvasResolution * logo.x_axis,
-        top: this.canvasResolution / this.mainCanvasResolution * logo.y_axis,
-        angle: logo.rotation < 0? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation)  as number,
-        hasControls: false,
-        selectable: false,
-        evented: false,
-        lockMovementX: true,
-        lockMovementY: true,
-        globalCompositeOperation: 'source-atop',
+      const threeDXPosition = this.containerWidth / this.twoDCanvasWidth * logo.x_axis
+      const threeDYPosition = this.containerHeight / this.twoDCanvasHeight * logo.y_axis
+      const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, logo.side)
+      fabricJSPointPromis.then((fabricJSPoint) => {
+        img.set({
+          left: fabricJSPoint.x,
+          top: fabricJSPoint.y,
+          angle: logo.rotation < 0 ? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation) as number,
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true,
+          globalCompositeOperation: 'source-atop',
+        })
+        
+        this.canvas.add(img)
+        Object.assign(img, {
+          fixed_logo_index: logo.fixed_logo_index,
+          side: logo.side,
+          type: 'fixed_logo'
+        })
+        this.fixed_logo_objects.push(img)
+        this.canvas.requestRenderAll()
       })
-
-      this.canvas.add(img)
-      Object.assign(img, {
-        fixed_logo_index: logo.fixed_logo_index,
-        side: logo.side,
-        type: 'fixed_logo'
-      })
-      this.fixed_logo_objects.push(img)
-      this.canvas.requestRenderAll()
     })
   }
 
