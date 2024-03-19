@@ -554,42 +554,46 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       path.strokeWidth = parseInt(custom_text_item.outline_width)
                       // path.scale = custom_text_item.scaleX / selected_product.measurement_ratio + ' ' + custom_text_item.scaleY / selected_product.measurement_ratio
 
-                      const boundingBox = path.getBoundingBox()
-                      boundingBox.y1 = Math.abs(boundingBox.y1)
+                      const boundingBox = path.getBoundingBox();
+                      const ascenderHeight = Math.abs(boundingBox.y1);
+                      const descenderHeight = Math.abs(boundingBox.y2);
+
                       const width = boundingBox.x2 - boundingBox.x1 + parseInt(custom_text_item.outline_width)
-                      const height = boundingBox.y1 + boundingBox.y2 + parseInt(custom_text_item.outline_width)
+                      const height = ascenderHeight + descenderHeight + parseInt(custom_text_item.outline_width);
+
                       const svg_string = path.toSVG()
                       const parser = new DOMParser();
                       const dom_svg = parser.parseFromString(svg_string, "text/html").body.firstChild as SVGElement;
                       // dom_svg.style.translate = '0px ' + height + 'px'
-                      text_item_object.svg_height = height
-                      let transform_height = height - parseInt(custom_text_item.outline_width) / 2; // As Transform needs half of the stroke width to show top and bottom equally of stroke
-                      if (custom_text.type == 'name') {
+                      text_item_object.svg_height = height.toString()
 
-                        let minus_height = false;
-                        if (text_for_test_char.indexOf('y') > -1) {
-                          minus_height = true
-                        } else if (text_for_test_char.indexOf('q') > -1) {
-                          minus_height = true
-                        } else if (text_for_test_char.indexOf('j') > -1) {
-                          minus_height = true
-                        } else if (text_for_test_char.indexOf('p') > -1) {
-                          minus_height = true
-                        } else if (text_for_test_char.indexOf('g') > -1) {
-                          minus_height = true
-                        }
+                      // Define padding values (adjust these as needed)
+                      const paddingTop = 5; // Adjust top padding
+                      const paddingLeft = 5; // Adjust left padding
+                      const paddingRight = 5; // Adjust right padding
+                      const paddingBottom = 5; // Adjust bottom padding
 
-                        if (minus_height)
-                          transform_height -= 15;
-                      }
-                      dom_svg.setAttribute('transform', 'translate(0 ' + transform_height + ')')
+                      // Calculate the total height and width including padding
+                      const totalHeight = ascenderHeight + descenderHeight + parseInt(custom_text_item.outline_width) + paddingTop + paddingBottom;
+                      const totalWidth = boundingBox.x2 - boundingBox.x1 + paddingLeft + paddingRight;
+
+                      // Calculate the translation to position the text properly within the SVG
+                      const translateY = ascenderHeight + parseInt(custom_text_item.outline_width) / 2 + paddingTop;
+                      const translateX = -boundingBox.x1 + paddingLeft;
+
+                      // Apply the translation to the SVG
+                      dom_svg.setAttribute('transform', 'translate(' + translateX + ' ' + translateY + ')');
+
+                      // Set SVG width and height to accommodate the padded text
+                      dom_svg.setAttribute('width', totalWidth.toString());
+                      dom_svg.setAttribute('height', totalHeight.toString());
+
                       dom_svg.setAttribute('paint-order', 'stroke')
                       dom_svg.setAttribute('stroke-location', 'outside')
 
                       const svg_with_tag = '<?xml version="1.0" encoding="utf-8"?>\n' +
                         '<svg stroke-location="outside" paint-order="outside" style="width:100%; height: auto;" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
-                        'viewBox="0 0 ' + width + ' ' + height + '"> \n' + dom_svg.outerHTML + '\n</svg>'
-
+                        'viewBox="0 0 ' + totalWidth + ' ' + totalHeight + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
                       const converted_width = unitConversion((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
                       const converted_height = unitConversion((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
