@@ -11,38 +11,6 @@
 </template>
 
 <script lang="ts">
-const logo = { //test logo object
-  "id": 36361,
-  "rotation": 0,
-  "originalWidth": "5.8",
-  "originalHeight": "5.8",
-  "width": 0,
-  "height": 40,
-  "name_of_placement": "Chest",
-  "side": "front",
-  "x_axis": 282.2173913043478,
-  "y_axis": 209.26086956521738,
-  "is_locked": 0,
-  "logo_name": "A9cfihbb_811utg_5lk.png",
-  "original_logo": "1/guest/logos/A9cfihbb811utg5lk16956300077MtG2DXUnZ.png",
-  "transparent_logo": "1/guest/logos/A9cfihbb811utg5lk16956300077MtG2DXUnZ_transparent.png",
-  "smart_transparent_logo": "1/guest/logos/A9cfihbb811utg5lk16956300077MtG2DXUnZ_smart_transparent.png",
-  "original_logo_url": "1/guest/logos/A9cfihbb811utg5lk16956300077MtG2DXUnZ.png",
-  "is_smart_transparent": false,
-  "url": "1/guest/logos/A9cfihbb811utg5lk16956300077MtG2DXUnZ_png.png",
-  "haveControls": true,
-  "is_replace_success": false,
-  "logo_index": 0,
-  "is_vector": false,
-  "logos_follows_product": 0,
-  "created_at": "2023-10-31T15:32:39.000000Z",
-  "updated_at": "2023-10-31T15:32:39.000000Z",
-  "actualWidth": 543,
-  "actualHeight": 542,
-  "scaleX": 0.07366482504604217,
-  "scaleY": 0.07366482504604052
-}
-
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import * as THREE from "three";
@@ -95,6 +63,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   @Prop({ required: false, default: 2048 }) readonly canvasResolution!: number;
   @Prop({ required: false, default: 512 }) readonly containerWidth!: number;
   @Prop({ required: false, default: 512 }) readonly containerHeight!: number;
+  @Prop({ required: false, default: 600 }) readonly twoDCanvasWidth!: number;
+  @Prop({ required: false, default: 600 }) readonly twoDCanvasHeight!: number;
   @Prop({ required: false, default: false }) readonly mainPreview!: boolean;
   @Prop({ required: false, default: true }) readonly canvasSelection!: boolean;
   @Prop({ required: false, default: 'customized' }) readonly productType!: string;
@@ -754,12 +724,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }
   }
 
-  public addLogo(logo: Record<any, any>, from_load = false, testing = false) {
-    if(!testing) {
-      logo = this.custom_logos ? this.custom_logos[logo.logo_index] : {}
-    }
-    if(testing || (!checkIsEmpty(logo) && logo && logo.product_id == this.product_id && (this.mounted || from_load))) {
-      if(this.custom_logo_objects[logo.logo_index as number]) {
+  public async addLogo(logo: Record<any, any>, from_load = false) {
+    logo = this.custom_logos ? this.custom_logos[logo.logo_index] : {}
+    if (!checkIsEmpty(logo) && logo && logo.product_id == this.product_id && (this.mounted || from_load)) {
+      if (this.custom_logo_objects[logo.logo_index as number]) {
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
       if (logo.url && !this.custom_logo_objects[logo.logo_index as number]) {
@@ -775,47 +743,108 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           } else {
             img.scaleToHeight(this.canvasResolution / this.canvasResolution * (logo.height) as number)
           }
-          img.set({
-            left: 1120,
-            top: 1340,
-            angle: logo.rotation < 0? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation)  as number,
-            selectable: true,
-            hasControls: true,
-            hasBorders: true,
-            evented: true,
-            globalCompositeOperation: 'source-atop',
-            padding: 15,
-            cornerSize: 30,
-            flipX: true,
-            type: "logo",
-          })
 
-          img.setControlsVisibility(this.fabric_control_visibility)
-
+          this.custom_logo_objects[logo.logo_index as number] = img
           Object.assign(img, {
             logo_index: logo.logo_index,
             side: logo.side
           })
-          this.canvas.add(img)
-          // if (this.productType == 'customized') {
-          //   models.forEach((model: fabric.Image) => {
-          //     model.bringToFront()
-          //   })
-          // }
-          this.canvas.requestRenderAll()
 
-          this.custom_logo_objects[logo.logo_index as number] = img
+          const threeDXPosition = this.containerWidth / this.twoDCanvasWidth * logo.x_axis
+          const threeDYPosition = this.containerHeight / this.twoDCanvasHeight * logo.y_axis
+          const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, logo.side, from_load)
 
-          img.on('selected', (e: Record<any, any>) => {
-            this.$root.$emit('changeLogoTabIndex', logo.logo_index)
+          fabricJSPointPromis.then((fabricJSPoint) => {
+            img.set({
+              left: fabricJSPoint.x,
+              top: fabricJSPoint.y,
+              angle: logo.rotation < 0 ? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation) as number,
+              selectable: true,
+              hasControls: true,
+              hasBorders: true,
+              evented: true,
+              globalCompositeOperation: 'source-atop',
+              padding: 15,
+              cornerSize: 30,
+              flipX: true,
+              type: "logo",
+            })
+
+            if (logo.scaleX && logo.scaleY) {
+              img.scaleX = this.containerWidth / this.twoDCanvasWidth * logo.scaleX
+              img.scaleY = this.containerHeight / this.twoDCanvasHeight * logo.scaleY
+            }
+
+            img.setControlsVisibility(this.fabric_control_visibility)
+            this.canvas.add(img)
+            this.canvas.requestRenderAll()
+
+            img.on('selected', (e: Record<any, any>) => {
+              this.$root.$emit('changeLogoTabIndex', logo.logo_index)
+            })
+
+            this.renderScene()
+
+            this.addGetPointerToFabricPrototype()
           })
-
-          this.renderScene()
-
-          this.addGetPointerToFabricPrototype()
         }, { crossOrigin: 'Anonymous' })
       }
     }
+  }
+
+
+  private getIntersects(point, objects) {
+    this.mouse.set(point.x * 2 - 1, -(point.y * 2) + 1);
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+    return this.raycaster.intersectObjects(objects, false);
+  }
+  private getMousePosition(dom, x, y): [number, number] {
+    let rect = dom.getBoundingClientRect();
+
+    return [x / rect.width, y / rect.height]
+  }
+  private getRealPosition(axis, value) {
+    const CORRECTION_VALUE = axis === "x" ? 4.5 : 5.5;
+    // Value * number(should be equal to canvas width)
+    return Math.round(value * this.canvasResolution) - CORRECTION_VALUE;
+  }
+
+  // Function to find intersection point in Three.js and map to Fabric.js
+  private async findIntersectionAndMapToFabricJS(x: number, y: number, side: string, from_load= false) {
+    if(side.toLowerCase() == 'back') {
+      await this.moveCamera({x: 0, y: 0, z: -11.5}, 400)
+    } else {
+      await this.moveCamera({x: 0, y: 0, z: 11.5}, 800)
+    }
+
+    const point = this.getMousePosition(this.container, x, y)
+    this.onClickPosition.fromArray(point)
+
+    const intersects = this.getIntersects(this.onClickPosition, this.scene.children)
+
+
+    if (intersects.length > 0 && intersects[0].uv) {
+      const uv = intersects[0].uv
+      intersects[0].object['material'].map.transformUv(uv)
+      return {
+        x: this.getRealPosition('x', uv.x),
+        y: this.getRealPosition('y', uv.y)
+      }
+    }
+
+    return { x: 0, y: 0 };
+  }
+
+  private moveCamera(position: Record<any, any>, move_time = 100) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.camera.position.set(position.x, position.y, position.z); // Move the camera backward
+      }, move_time / 2)
+      // Optionally, you can wait for a short delay to ensure the camera position change takes effect
+      setTimeout(() => {
+        resolve('');
+      }, move_time); // Adjust the delay time as needed
+    });
   }
 
   public oppositeAngle(angle) {
@@ -954,54 +983,65 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                 textSvg += path.toSVG()
                 textSvg += '\n</svg>'
 
+                if (!this.product_custom_text_objects[custom_text_index]) {
+                  this.product_custom_text_objects[custom_text_index] = []
+                  self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null
+                }
+
                 fabric.loadSVGFromString(textSvg, (objects: any) => {
                   fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group | Record<any, any>
-                  fabric_text.scaleToHeight(custom_text_item.height as number)
-                  fabric_text.set({
-                    left: 1120,
-                    top: 1240,
-                    angle: custom_text_item.rotation < 0? this.oppositeAngle(360 - custom_text_item.rotation) : this.oppositeAngle(custom_text_item.rotation)  as number,
-                    flipX: true,
-                    centeredScaling: true,
-                    selectable: true,
-                    hasControls: true,
-                    hasBorders: true,
-                    evented: true,
-                    globalCompositeOperation: 'source-atop',
-                    fill: custom_text_item.color,
-                    stroke: custom_text_item.outline_color,
-                    strokeWidth: parseInt(custom_text_item.outline_width),
-                    paintFirst: 'stroke',
-                    lockScalingFlip: true,
-                    padding: 15,
-                    cornerSize: 30,
-                    placement: custom_text_item.placement,
-                    visible: custom_text_item.selected,
-                    custom_text_index: custom_text_index,
-                    custom_text_item_index: customTextItemIndex,
-                    type: "text",
-                    side: custom_text_item.placement,
-                    text_index: custom_text_index,
-                    manually_added: custom_text.manually_added
-                  })
-
-                  fabric_text.setControlsVisibility(this.fabric_control_visibility)
-
-                  if(this.product_id == this.selectedProductId) {
-                    this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: this.product_custom_texts[custom_text_index].items }})
-                  }
-
-                  if (!this.product_custom_text_objects[custom_text_index]) {
-                    this.product_custom_text_objects[custom_text_index] = []
-                    self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null
-                  }
                   self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
+                  const threeDXPosition = this.containerWidth / this.twoDCanvasWidth * custom_text_item.x_axis
+                  const threeDYPosition = this.containerHeight / this.twoDCanvasHeight * custom_text_item.y_axis
+                  const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, custom_text_item.placement, from_load)
+                  fabricJSPointPromis.then((fabricJSPoint) => {
+                    fabric_text.scaleToHeight(custom_text_item.height as number)
+                    fabric_text.set({
+                      left: fabricJSPoint.x,
+                      top: fabricJSPoint.y,
+                      angle: custom_text_item.rotation < 0? this.oppositeAngle(360 - custom_text_item.rotation) : this.oppositeAngle(custom_text_item.rotation)  as number,
+                      flipX: true,
+                      centeredScaling: true,
+                      selectable: true,
+                      hasControls: true,
+                      hasBorders: true,
+                      evented: true,
+                      globalCompositeOperation: 'source-atop',
+                      fill: custom_text_item.color,
+                      stroke: custom_text_item.outline_color,
+                      strokeWidth: parseInt(custom_text_item.outline_width),
+                      paintFirst: 'stroke',
+                      lockScalingFlip: true,
+                      padding: 15,
+                      cornerSize: 30,
+                      placement: custom_text_item.placement,
+                      visible: custom_text_item.selected,
+                      custom_text_index: custom_text_index,
+                      custom_text_item_index: customTextItemIndex,
+                      type: "text",
+                      side: custom_text_item.placement,
+                      text_index: custom_text_index,
+                      manually_added: custom_text.manually_added
+                    })
 
-                  self.canvas.add(fabric_text)
-                  fabric_text.bringToFront()
-                  this.canvas.renderAll()
+                    if (custom_text_item.scaleX && custom_text_item.scaleY) {
+                      fabric_text.scaleX = custom_text_item.scaleX
+                      fabric_text.scaleY = custom_text_item.scaleY
+                    } else {
+                      custom_text_item.scaleX = fabric_text.scaleX
+                      custom_text_item.scaleY = fabric_text.scaleY
+                      custom_text_item.width = fabric_text.width
+                      custom_text_item.height = fabric_text.height
+                    }
 
-                  this.addGetPointerToFabricPrototype()
+                    fabric_text.setControlsVisibility(this.fabric_control_visibility)
+
+                    self.canvas.add(fabric_text)
+                    fabric_text.bringToFront()
+                    this.canvas.renderAll()
+
+                    this.addGetPointerToFabricPrototype()
+                  })
                 })
               }
             })
@@ -1150,7 +1190,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.canvas.on('mouse:down', function (event) {
       const x = event.e.clientX - self.canvas['_offset'].left
       const y = event.e.clientY - self.canvas['_offset'].top
-      // console.log(`X: ${x}, Y: ${y}`)
+      console.log(`X: ${x}, Y: ${y}`)
     });
 
 
@@ -1229,6 +1269,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
      * Three.js Helper functions
      */
     function getPositionOnScene(sceneContainer, evt) {
+      // console.log(evt.clientX, evt.clientY, evt.offsetX, evt.offsetY, 'offset one is good')
       let array = getMousePosition(self.container, evt.clientX, evt.clientY)
       self.onClickPosition.fromArray(array)
       let intersects = getIntersects(self.onClickPosition, self.scene.children)
