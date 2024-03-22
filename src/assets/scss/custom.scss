@@ -7018,7 +7018,7 @@ $fontSize: 0.5;
 
 html, body{
     @media (max-width: 768px){
-        height: 100%;
+        height: min-content;
     }
 }
 

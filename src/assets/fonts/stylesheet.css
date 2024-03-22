@@ -114,6 +114,7 @@
 }
 
 .loader img {
+    width: 10%;
     max-width: 7%;
     display: block;
     margin: 0 auto;
