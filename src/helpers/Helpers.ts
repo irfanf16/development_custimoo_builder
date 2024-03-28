@@ -447,9 +447,9 @@ const pathInfo = (file_path: string, ) => {
 const getActiveProductData = (products_fonts: Record<any, any>) => {
   return new Promise((resolve) => {
     const interval = setInterval(async () => {
-      eventBus.$emit("storeCanvasImage")
       const scene_ref = Store.getters.getCanvasImage.scene
       if (!(scene_ref && scene_ref.mounted)) {
+        eventBus.$emit("storeCanvasImage")
         console.log('not reslove')
         return
       }
@@ -1757,7 +1757,6 @@ const getSelectedProductData = (selected_product_custom_texts = true) => {
 }
 
 const getImageFromCanvas = (side: string, options={}) => {
-  eventBus.$emit("storeCanvasImage")
   const canvas_options = {...{original_width: 600, original_height: 600, image_type: 'image/png', width: 1200, height: 1200, zoom: 2}, ...options}
   let canvas = Store.getters.getCanvasImage.scene.frontCanvas
   if(side == 'back') {

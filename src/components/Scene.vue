@@ -100,6 +100,9 @@ import Store from "@/store";
     if((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
       self.$eventBus.$off("rosterTextUpdated", this.addTextsNew)
     }
+    if(this.mainPreview) {
+      self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
+    }
     self.$eventBus.$off("customTextRemoved", this.deleteExistingTextsFromCanvas)
     self.$eventBus.$off("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$off("handleCustomLogoUpdatedEvent", this.addLogo)
@@ -111,7 +114,6 @@ import Store from "@/store";
     self.$eventBus.$off("changeGroupColors", this.changeGroupColorsEvent)
     self.$eventBus.$off("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$off("changeColors", this.changeColors)
-    self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
     self.$eventBus.$off("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
     self.$eventBus.$off("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
     if (this.front_time) {
@@ -415,13 +417,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public storeCanvasImage() {
-    if (this.mainPreview && this.mounted) {
-      this.$store.commit('STORE_CANVAS_IMAGE', {
-        front: this.$refs.front,
-        back: this.$refs.back,
-        scene: this
-      })
-    }
+    this.$store.commit('STORE_CANVAS_IMAGE', {
+      front: this.$refs.front,
+      back: this.$refs.back,
+      scene: this
+    })
   }
 
   public eventAction(item: Record<any, any>, object: Record<any, any>, otherSideObject: Record<any, any>) {
@@ -1189,11 +1189,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
             if (this.mainPreview && this.selectedProductId == this.product_id) {
               this.setProductionSVG()
-              this.$store.commit('STORE_CANVAS_IMAGE', {
-                front: this.$refs.front,
-                back: this.$refs.back,
-                scene: this
-              })
+              this.storeCanvasImage()
               setTimeout(() => {
                 this.$store.commit('SET_CANVAS_READY', true);
               }, 500)
@@ -1348,6 +1344,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
       self.$eventBus.$on("rosterTextUpdated", this.addTextsNew)
     }
+    if(this.mainPreview) {
+      self.$eventBus.$on("storeCanvasImage", this.storeCanvasImage)
+    }
     self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
     self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
     self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
@@ -1359,7 +1358,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.$eventBus.$on("changeGroupColors", this.changeGroupColorsEvent)
     self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$on("changeColors", this.changeColors)
-    self.$eventBus.$on("storeCanvasImage", this.storeCanvasImage)
     self.$eventBus.$on("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
     self.$eventBus.$on("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
   }

@@ -219,10 +219,10 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         let active_product: Record<any, any> = retrieved_products[active_product_index]
         let product_custom_texts: Record<any, any>[] = active_product.product_custom_texts;
 
+        this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
         this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
         await this.$store.dispatch("getSkuInformation", active_product_id);
         await this.$store.dispatch('setSelectedIndex', {selectedIndex: active_product_index, selected_id: active_product_id});
-        this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
         let fixed_logo_index = active_product.productstyles[this.styleIndex].logo.findIndex(logo => logo.is_default === 1);
         let last_active_prod_data = self.$store.getters.getLastActiveProductData;
         if(active_product_detail) {
