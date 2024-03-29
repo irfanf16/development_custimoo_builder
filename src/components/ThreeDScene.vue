@@ -42,6 +42,10 @@ import {Object3D, Texture} from "three";
     self.$eventBus.$off("changeGroupColors", this.changeGroupColors)
     self.$eventBus.$off("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$off("changeColors", this.changeColors)
+
+    //restore fabricjs function after remove
+    self.removeGetPointerFromFabricPrototype();
+
   },
   async mounted() {
     this.loadScene(this.imageData)
@@ -497,21 +501,36 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     this.scene.background = new THREE.Color(0xffffff);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7);
+
+
+    const intensity = 0.7;
+    const directionalLight = new THREE.DirectionalLight(0xffffff, intensity);
     directionalLight.position.set(0, 20, 50);
     this.scene.add(directionalLight);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.7);
+    // const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
+    // this.scene.add( helper );
+
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, intensity);
     directionalLight2.position.set(0, 20, -50);
     this.scene.add(directionalLight2);
 
-    const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.7);
+    // const helper2 = new THREE.DirectionalLightHelper( directionalLight2, 5 );
+    // this.scene.add( helper2 );
+
+    const directionalLight3 = new THREE.DirectionalLight(0xffffff, intensity);
     directionalLight3.position.set(-20, 20, 0);
     this.scene.add(directionalLight3);
 
-    const directionalLight4 = new THREE.DirectionalLight(0xffffff, 0.7);
+    // const helper3 = new THREE.DirectionalLightHelper( directionalLight3, 5 );
+    // this.scene.add( helper3 );
+
+    const directionalLight4 = new THREE.DirectionalLight(0xffffff, intensity);
     directionalLight4.position.set(20, 20, 0);
     this.scene.add(directionalLight4);
+
+    // const helper4 = new THREE.DirectionalLightHelper( directionalLight4, 5 );
+    // this.scene.add( helper4);
 
     const element = this.$refs.canvas as HTMLCanvasElement
     this.canvas = new fabric.Canvas(element)
@@ -587,6 +606,86 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.$eventBus.$on("changeColors", this.changeColors)
   }
 
+
+
+
+  public fitCameraToCenteredObject (camera, object, offset, orbitControls ) {
+    const boundingBox = new THREE.Box3();
+    boundingBox.setFromObject( object );
+
+    var middle = new THREE.Vector3();
+    var size = new THREE.Vector3();
+    boundingBox.getSize(size);
+
+    // figure out how to fit the box in the view:
+    // 1. figure out horizontal FOV (on non-1.0 aspects)
+    // 2. figure out distance from the object in X and Y planes
+    // 3. select the max distance (to fit both sides in)
+    //
+    // The reason is as follows:
+    //
+    // Imagine a bounding box (BB) is centered at (0,0,0).
+    // Camera has vertical FOV (camera.fov) and horizontal FOV
+    // (camera.fov scaled by aspect, see fovh below)
+    //
+    // Therefore if you want to put the entire object into the field of view,
+    // you have to compute the distance as: z/2 (half of Z size of the BB
+    // protruding towards us) plus for both X and Y size of BB you have to
+    // figure out the distance created by the appropriate FOV.
+    //
+    // The FOV is always a triangle:
+    //
+    //  (size/2)
+    // +--------+
+    // |       /
+    // |      /
+    // |     /
+    // | F° /
+    // |   /
+    // |  /
+    // | /
+    // |/
+    //
+    // F° is half of respective FOV, so to compute the distance (the length
+    // of the straight line) one has to: `size/2 / Math.tan(F)`.
+    //
+    // FTR, from https://threejs.org/docs/#api/en/cameras/PerspectiveCamera
+    // the camera.fov is the vertical FOV.
+
+    const fov = camera.fov * ( Math.PI / 180 );
+    const fovh = 2*Math.atan(Math.tan(fov/2) * camera.aspect);
+    let dx = size.z / 2 + Math.abs( size.x / 2 / Math.tan( fovh / 2 ) );
+    let dy = size.z / 2 + Math.abs( size.y / 2 / Math.tan( fov / 2 ) );
+    let cameraZ = Math.max(dx, dy);
+
+    // offset the camera, if desired (to avoid filling the whole canvas)
+    if( offset !== undefined && offset !== 0 ) cameraZ *= offset;
+
+    camera.position.set( 0, 0, cameraZ );
+
+    // set the far plane of the camera so that it easily encompasses the whole object
+    const minZ = boundingBox.min.z;
+    const cameraToFarEdge = ( minZ < 0 ) ? -minZ + cameraZ : cameraZ - minZ;
+
+    camera.far = cameraToFarEdge * 3;
+    camera.updateProjectionMatrix();
+
+    if ( orbitControls !== undefined ) {
+        // set camera to rotate around the center
+        orbitControls.target = new THREE.Vector3(0, 0, 0);
+
+        // prevent camera from zooming out far enough to create far plane cutoff
+        orbitControls.maxDistance = cameraToFarEdge * 2;
+    }
+};
+
+
+
+
+
+
+
+
   public async addModel(modelUrl: string, designUrl: string) {
     return new Promise((resolve, reject) => {
       const gltfLoader = new GLTFLoader(undefined)
@@ -596,6 +695,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         this.model['material'].shininess = 10
         this.model['material'].needsUpdate = true
 
+        this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls);
+        
 
         this.canvas.on("after:render", () => {
           this.model['material'].needsUpdate = true
@@ -819,7 +920,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     if(side.toLowerCase() == 'back') {
       await this.moveCamera({x: 0, y: 0, z: -11.5}, 400)
     } else {
-      await this.moveCamera({x: 0, y: 0, z: 11.5}, 800)
+      //await this.moveCamera({x: this.camera.position.x, y: this.camera.position.y, z: 11.5}, 800)
+      this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls);
     }
 
     const point = this.getMousePosition(this.container, x, y)
@@ -844,6 +946,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         this.camera.position.set(position.x, position.y, position.z); // Move the camera backward
+        this.controls.update();
       }, move_time / 2)
       // Optionally, you can wait for a short delay to ensure the camera position change takes effect
       setTimeout(() => {
@@ -1086,6 +1189,61 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
 
+
+
+  removeGetPointerFromFabricPrototype () {
+
+    //restore fabric js function
+    fabric.Canvas.prototype.getPointer = function (e, ignoreZoom) {
+      // return cached values if we are in the event processing chain
+      if (this._absolutePointer && !ignoreZoom) {
+        return this._absolutePointer;
+      }
+      if (this._pointer && ignoreZoom) {
+        return this._pointer;
+      }
+      var pointer = fabric.util.getPointer(e, this.upperCanvasEl),
+          upperCanvasEl = this.upperCanvasEl,
+          bounds = upperCanvasEl.getBoundingClientRect(),
+          boundsWidth = bounds.width || 0,
+          boundsHeight = bounds.height || 0,
+          cssScale;
+      if (!boundsWidth || !boundsHeight ) {
+        if ('top' in bounds && 'bottom' in bounds) {
+          boundsHeight = Math.abs( bounds.top - bounds.bottom );
+        }
+        if ('right' in bounds && 'left' in bounds) {
+          boundsWidth = Math.abs( bounds.right - bounds.left );
+        }
+      }
+      this.calcOffset();
+      pointer.x = pointer.x - this._offset.left;
+      pointer.y = pointer.y - this._offset.top;
+      if (!ignoreZoom) {
+        pointer = this.restorePointerVpt(pointer);
+      }
+      var retinaScaling = this.getRetinaScaling();
+      if (retinaScaling !== 1) {
+        pointer.x /= retinaScaling;
+        pointer.y /= retinaScaling;
+      }
+      if (boundsWidth === 0 || boundsHeight === 0) {
+        // If bounds are not available (i.e. not visible), do not apply scale.
+        cssScale = { width: 1, height: 1 };
+      }
+      else {
+        cssScale = {
+          width: upperCanvasEl.width / boundsWidth,
+          height: upperCanvasEl.height / boundsHeight
+        };
+      }
+      return {
+        x: pointer.x * cssScale.width,
+        y: pointer.y * cssScale.height
+      };
+    }
+
+  }
 
   addGetPointerToFabricPrototype() {
     const self = this
