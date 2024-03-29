@@ -20,7 +20,7 @@ import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import {
   checkIsEmpty, getColorType, getDeviceInfo,
-  getSelectedProductPantones,
+  getSelectedProductPantones, setUndoRedoItems,
   unitConversion
 } from '@/helpers/Helpers'
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
@@ -696,7 +696,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         this.model['material'].needsUpdate = true
 
         this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls);
-        
+
 
         this.canvas.on("after:render", () => {
           this.model['material'].needsUpdate = true
@@ -783,8 +783,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           lockMovementX: true,
           lockMovementY: true,
           globalCompositeOperation: 'source-atop',
+          originX: 'center',
+          originY: 'center',
         })
-        
+
         this.canvas.add(img)
         Object.assign(img, {
           fixed_logo_index: logo.fixed_logo_index,
@@ -874,6 +876,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
               cornerSize: 30,
               flipX: true,
               type: "logo",
+              centeredScaling: true,
+              originX: 'center',
+              originY: 'center',
             })
 
             if (logo.scaleX && logo.scaleY) {
@@ -898,17 +903,18 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }
   }
 
-
   private getIntersects(point, objects) {
     this.mouse.set(point.x * 2 - 1, -(point.y * 2) + 1);
     this.raycaster.setFromCamera(this.mouse, this.camera);
     return this.raycaster.intersectObjects(objects, false);
   }
+
   private getMousePosition(dom, x, y): [number, number] {
     let rect = dom.getBoundingClientRect();
 
     return [x / rect.width, y / rect.height]
   }
+
   private getRealPosition(axis, value) {
     const CORRECTION_VALUE = axis === "x" ? 4.5 : 5.5;
     // Value * number(should be equal to canvas width)
@@ -1109,7 +1115,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                       top: fabricJSPoint.y,
                       angle: custom_text_item.rotation < 0? this.oppositeAngle(360 - custom_text_item.rotation) : this.oppositeAngle(custom_text_item.rotation)  as number,
                       flipX: true,
-                      centeredScaling: true,
                       selectable: true,
                       hasControls: true,
                       hasBorders: true,
@@ -1129,7 +1134,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                       type: "text",
                       side: custom_text_item.placement,
                       text_index: custom_text_index,
-                      manually_added: custom_text.manually_added
+                      manually_added: custom_text.manually_added,
+                      centeredScaling: true,
+                      originX: 'center',
+                      originY: 'center',
                     })
 
                     if (custom_text_item.scaleX && custom_text_item.scaleY) {
@@ -1169,12 +1177,39 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }
   }
 
+  public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
+    let self: Record<any, any> = this;
+    const logo_index =  fabric_object.get("logo_index");
+    if(this.custom_logos[logo_index]) {
+      const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
+      const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
+      const converted_width = unitConversion(width)
+      const converted_height = unitConversion(height)
+
+      this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
+        custom_logo_index: fabric_object.get("logo_index"),
+        data: {
+          // x_axis: fabric_object.get("left"),
+          // y_axis: fabric_object.get("top"),
+          rotation: fabric_object.get("angle"),
+          scaleX: fabric_object.get("scaleX"),
+          scaleY: fabric_object.get("scaleY"),
+          actualWidth: fabric_object.get('width'),
+          actualHeight: fabric_object.get('height'),
+          originalWidth: converted_width!.value,
+          originalHeight: converted_height!.value,
+        }
+      })
+    }
+    self.$eventBus.$emit("customLogoStoreUpdated", logo_index);
+  }
+
   public handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
     let self: Record<any, any> = this;
     const custom_text_index =  fabric_object.get("custom_text_index");
     const custom_text_item_index =  fabric_object.get("custom_text_item_index");
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
+    // self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
+    // self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
@@ -1189,10 +1224,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
 
-
-
-  removeGetPointerFromFabricPrototype () {
-
+  public removeGetPointerFromFabricPrototype () {
     //restore fabric js function
     fabric.Canvas.prototype.getPointer = function (e, ignoreZoom) {
       // return cached values if we are in the event processing chain
@@ -1319,6 +1351,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             pointer.y = positionOnScene.y;
           }
         }
+        // console.log(e.offsetX, e.offsetY)
       }
       /* END PATCH CODE */
       if (!ignoreZoom) {
@@ -1340,8 +1373,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         y: pointer.y * cssScale.height
       };
     }
-
-
 
     //container.addEventListener('mousedown', onMouseEvt, ![]),
     self.container.addEventListener('mousedown', onMouseEvt, false)
@@ -1373,6 +1404,18 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       } else {
         self.last_known_image_pos = {left: evt.target? evt.target.left as number : 0, top: evt.target? evt.target.top as number : 0}
       }
+    })
+
+    self.canvas.on('object:modified', async (e: Record<any, any>) => {
+      const fabric_object = e.target;
+      if(fabric_object.get("type") == "text") {
+        await setUndoRedoItems('customTexts', 'modified')
+        this.handleCustomTextModifiedEvent(e.target)
+      } else {
+        await setUndoRedoItems('customLogos', 'modified')
+        self.handleCustomLogoModifiedEvent(e.target)
+      }
+      this.hideLockerProductUpdateButton()
     })
 
 
