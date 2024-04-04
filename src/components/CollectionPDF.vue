@@ -25,12 +25,12 @@
       <div class="pdf_page" v-for="(groupOfFourProducts, fourIndex) in groupProducts" :key="fourIndex">
         <div v-if="groupOfFourProducts">
           <div class="pdf_page_header pt-5 px-4">
-            <h1 class="header_left" style="width: 70%; text-align: left; letter-spacing: 1px">
+            <h1 class="header_left" style="width: 70%; text-align: left;">
               {{ groupOfFourProducts[0].product_locker_room.product.sku.sku_id }}
             </h1>
             <div class="pdf_headers_logos">
               <div v-for="(logo, idx) in collection.logos" :key="idx">
-                <img style="height: 100px; width: 100px" :src="`${storageUrl}${logo.path}?q=133`"
+                <img style="max-height: 100px; width: auto; height: auto" :src="`${storageUrl}${logo.path}?q=133`"
                      crossorigin="anonymous" alt=""/>
               </div>
             </div>
@@ -39,12 +39,12 @@
             <div style="max-width: 30%" class="px-4">
               <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 5%;">
                 <div>
-                  <h3 style="text-align: start; width: 100%">Technical &nbsp;&nbsp;Details:</h3>
+                  <h3 style="text-align: start; width: 100%">Technical Details:</h3>
                   <p v-html="groupOfFourProducts[0].product_locker_room.product.sku.description"
                      style="text-align: start"></p>
                 </div>
                 <div>
-                  <h3 style="text-align: start">Size &nbsp;Guide:</h3>
+                  <h3 style="text-align: start">Size Guide:</h3>
                   <div style="column-count: 2" v-if="groupOfFourProducts[0]?.product_locker_room.product.sizes?.length > 0">
                     <p v-for="(size, index) in groupOfFourProducts[0].product_locker_room.product.sizes[0]?.json_data"
                        :key="index" style="text-align: start">
@@ -93,11 +93,11 @@
                       </div>
                     </template>
                     <div v-if="collection_product.product_note != ''" class="pdf_description border-0">
-                      <strong>Description&nbsp;:</strong>
+                      <strong>Description:</strong>
                       {{ collection_product.product_note }}
                     </div>
                     <div class="pdf_price border-0" v-if="collection_product.product_price">
-                      <strong>Price&nbsp;: </strong>
+                      <strong>Price: </strong>
                       {{ collection_product.product_price }}
                     </div>
                   </b-container>
