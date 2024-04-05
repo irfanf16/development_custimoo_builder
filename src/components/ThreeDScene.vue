@@ -25,7 +25,7 @@ import {
 } from '@/helpers/Helpers'
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
-import {Object3D, Texture} from "three";
+import {Object3D, Texture, Vector2, Vector3} from "three";
 
 @Component<ThreeDScene>({
   beforeDestroy() {
@@ -79,6 +79,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private fabric_canvas_resolution: 1200
   private scene = new THREE.Scene()
   private camera !: THREE.Camera
+  private frontCamera !: THREE.Camera
+  private backCamera !: THREE.Camera
   private renderer = new THREE.WebGLRenderer({ 'alpha': false, 'antialias': true })
   private container!: HTMLDivElement
   private controls!: OrbitControls
@@ -103,6 +105,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   public product_custom_text_objects: Record<any, any>[] | null[] = []
   private storage_url = process.env.VUE_APP_STORAGE_URL
   public fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
+  public originalCameraPosition = {x: 0, y: 0, z: 0} as Vector3
 
   get fillColors(): [Record<any, any>] {
     return this.$store.getters.getDefaultFilledColors
@@ -158,6 +161,14 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   get sku_information(){
     return this.$store.getters.getSkuInformation
+  }
+
+  get canvasWidthRatio() {
+    return this.containerWidth / this.twoDCanvasWidth
+  }
+
+  get canvasHeightRatio() {
+    return this.containerHeight / this.twoDCanvasHeight
   }
 
   public getSvgGroupColors(svg_group: string) {
@@ -488,7 +499,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     this.container = this.$refs.renderer as HTMLDivElement
 
-    this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000)
     this.camera.position.set(0, 0.5, 11.5);
 
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -677,14 +688,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         // prevent camera from zooming out far enough to create far plane cutoff
         orbitControls.maxDistance = cameraToFarEdge * 2;
     }
-};
-
-
-
-
-
-
-
+  }
 
   public async addModel(modelUrl: string, designUrl: string) {
     return new Promise((resolve, reject) => {
@@ -697,6 +701,14 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
         this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls);
 
+        this.frontCamera = this.camera.clone()
+        this.backCamera = this.camera.clone()
+        this.backCamera.position.z = -this.camera.position.z
+        this.backCamera.lookAt(0, 0, 0);
+        this.scene.add(this.frontCamera)
+        this.scene.add(this.backCamera)
+
+        this.originalCameraPosition = this.camera.position.clone()
 
         this.canvas.on("after:render", () => {
           this.model['material'].needsUpdate = true
@@ -715,6 +727,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
         this.model['material'].needsUpdate = true
         this.model['material'].map.needsUpdate = true
+
+        this.container.addEventListener('pointerup', (evt) => {
+          // Resetting the front and back camera positions to their original positions
+          this.frontCamera.position.set(this.originalCameraPosition.x, this.originalCameraPosition.y, this.originalCameraPosition.z)
+          this.backCamera.position.set(this.originalCameraPosition.x, this.originalCameraPosition.y, -this.originalCameraPosition.z)
+
+        })
 
         resolve('done')
       })
@@ -768,9 +787,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
       options.crossOrigin = 'Anonymous'
       const img = fabric.util.groupSVGElements(objects) as fabric.Group
-      img.scaleToHeight(this.canvasResolution / this.canvasResolution * logo.height as number)
-      const threeDXPosition = this.containerWidth / this.twoDCanvasWidth * logo.x_axis
-      const threeDYPosition = this.containerHeight / this.twoDCanvasHeight * logo.y_axis
+      img.scaleToHeight(logo.height as number)
+      const threeDXPosition = this.canvasWidthRatio * logo.x_axis
+      const threeDYPosition = this.canvasHeightRatio * logo.y_axis
       const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, logo.side)
       fabricJSPointPromis.then((fabricJSPoint) => {
         img.set({
@@ -847,9 +866,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         fabric.Image.fromURL(logoUrl, async (img: any) => {
           const aspect_ratio = img.width / img.height
           if(aspect_ratio > 1) {
-            img.scaleToWidth(this.canvasResolution / this.canvasResolution * (logo.height) as number)
+            img.scaleToWidth(logo.height as number)
           } else {
-            img.scaleToHeight(this.canvasResolution / this.canvasResolution * (logo.height) as number)
+            img.scaleToHeight(logo.height as number)
           }
 
           this.custom_logo_objects[logo.logo_index as number] = img
@@ -858,10 +877,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             side: logo.side
           })
 
-          const threeDXPosition = this.containerWidth / this.twoDCanvasWidth * logo.x_axis
-          const threeDYPosition = this.containerHeight / this.twoDCanvasHeight * logo.y_axis
-          const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, logo.side, from_load)
-
+          const threeDXPosition = this.canvasWidthRatio * logo.x_axis
+          const threeDYPosition = this.canvasHeightRatio * logo.y_axis
+          const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, logo.side)
           fabricJSPointPromis.then((fabricJSPoint) => {
             img.set({
               left: fabricJSPoint.x,
@@ -882,8 +900,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             })
 
             if (logo.scaleX && logo.scaleY) {
-              img.scaleX = this.containerWidth / this.twoDCanvasWidth * logo.scaleX
-              img.scaleY = this.containerHeight / this.twoDCanvasHeight * logo.scaleY
+              img.scaleX = this.canvasWidthRatio * logo.scaleX
+              img.scaleY = this.canvasHeightRatio * logo.scaleY
             }
 
             img.setControlsVisibility(this.fabric_control_visibility)
@@ -903,9 +921,11 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }
   }
 
-  private getIntersects(point, objects) {
+  private getIntersects(point, objects, camera) {
     this.mouse.set(point.x * 2 - 1, -(point.y * 2) + 1);
-    this.raycaster.setFromCamera(this.mouse, this.camera);
+    this.raycaster.setFromCamera(this.mouse, camera)
+    // Debugging projection rays
+    // this.scene.add(new THREE.ArrowHelper( this.raycaster.ray.direction, this.raycaster.ray.origin, 100, Math.random() * 0xffffff ));
     return this.raycaster.intersectObjects(objects, false);
   }
 
@@ -922,19 +942,15 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   // Function to find intersection point in Three.js and map to Fabric.js
-  private async findIntersectionAndMapToFabricJS(x: number, y: number, side: string, from_load= false) {
+  private async findIntersectionAndMapToFabricJS(x: number, y: number, side: string) {
+    let camera = this.frontCamera
     if(side.toLowerCase() == 'back') {
-      await this.moveCamera({x: 0, y: 0, z: -11.5}, 400)
-    } else {
-      //await this.moveCamera({x: this.camera.position.x, y: this.camera.position.y, z: 11.5}, 800)
-      this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls);
+      camera = this.backCamera
     }
-
     const point = this.getMousePosition(this.container, x, y)
     this.onClickPosition.fromArray(point)
 
-    const intersects = this.getIntersects(this.onClickPosition, this.scene.children)
-
+    const intersects = this.getIntersects(this.onClickPosition, this.scene.children, camera)
 
     if (intersects.length > 0 && intersects[0].uv) {
       const uv = intersects[0].uv
@@ -946,19 +962,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }
 
     return { x: 0, y: 0 };
-  }
-
-  private moveCamera(position: Record<any, any>, move_time = 100) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        this.camera.position.set(position.x, position.y, position.z); // Move the camera backward
-        this.controls.update();
-      }, move_time / 2)
-      // Optionally, you can wait for a short delay to ensure the camera position change takes effect
-      setTimeout(() => {
-        resolve('');
-      }, move_time); // Adjust the delay time as needed
-    });
   }
 
   public oppositeAngle(angle) {
@@ -1105,9 +1108,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                 fabric.loadSVGFromString(textSvg, (objects: any) => {
                   fabric_text = fabric.util.groupSVGElements(objects) as fabric.Group | Record<any, any>
                   self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-                  const threeDXPosition = this.containerWidth / this.twoDCanvasWidth * custom_text_item.x_axis
-                  const threeDYPosition = this.containerHeight / this.twoDCanvasHeight * custom_text_item.y_axis
-                  const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, custom_text_item.placement, from_load)
+                  const threeDXPosition = this.canvasWidthRatio * custom_text_item.x_axis
+                  const threeDYPosition = this.canvasHeightRatio * custom_text_item.y_axis
+                  const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, custom_text_item.placement)
                   fabricJSPointPromis.then((fabricJSPoint) => {
                     fabric_text.scaleToHeight(custom_text_item.height as number)
                     fabric_text.set({
@@ -1177,7 +1180,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }
   }
 
-  public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>) {
+  public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>, x_axis: number, y_axis: number) {
     let self: Record<any, any> = this;
     const logo_index =  fabric_object.get("logo_index");
     if(this.custom_logos[logo_index]) {
@@ -1185,15 +1188,15 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
       const converted_width = unitConversion(width)
       const converted_height = unitConversion(height)
-
+      const angle = fabric_object.get("angle") < 0 ? this.oppositeAngle(360 - fabric_object.get("angle")) : this.oppositeAngle(fabric_object.get("angle")) as number
       this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
         custom_logo_index: fabric_object.get("logo_index"),
         data: {
-          // x_axis: fabric_object.get("left"),
-          // y_axis: fabric_object.get("top"),
-          rotation: fabric_object.get("angle"),
-          scaleX: fabric_object.get("scaleX"),
-          scaleY: fabric_object.get("scaleY"),
+          x_axis: x_axis,
+          y_axis: y_axis,
+          rotation: angle,
+          scaleX: fabric_object.get("scaleX")  / this.canvasWidthRatio,
+          scaleY: fabric_object.get("scaleY") / this.canvasHeightRatio,
           actualWidth: fabric_object.get('width'),
           actualHeight: fabric_object.get('height'),
           originalWidth: converted_width!.value,
@@ -1201,18 +1204,19 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         }
       })
     }
-    self.$eventBus.$emit("customLogoStoreUpdated", logo_index);
+    self.$eventBus.$emit("customLogoStoreUpdated", logo_index, true);
   }
 
   public handleCustomTextModifiedEvent(fabric_object: Record<any, any>) {
     let self: Record<any, any> = this;
+    const angle = fabric_object.get("angle") < 0 ? this.oppositeAngle(360 - fabric_object.get("angle")) : this.oppositeAngle(fabric_object.get("angle")) as number
     const custom_text_index =  fabric_object.get("custom_text_index");
     const custom_text_item_index =  fabric_object.get("custom_text_item_index");
     // self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = fabric_object.get("left");
     // self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = fabric_object.get("top");
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = fabric_object.get("angle");
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX");
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY");
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].rotation = angle;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX")  / this.canvasWidthRatio;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY") / this.canvasHeightRatio;
     this.canvas.requestRenderAll()
     const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
     const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
@@ -1221,7 +1225,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width!.value;
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height!.value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
+    self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index}, true);
   }
 
   public removeGetPointerFromFabricPrototype () {
@@ -1351,7 +1355,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             pointer.y = positionOnScene.y;
           }
         }
-        // console.log(e.offsetX, e.offsetY)
       }
       /* END PATCH CODE */
       if (!ignoreZoom) {
@@ -1381,13 +1384,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       self.container.addEventListener("touchstart", onTouch, false)
     }
 
-    self.canvas.on('mouse:down', function (event) {
-      const x = event.e.clientX - self.canvas['_offset'].left
-      const y = event.e.clientY - self.canvas['_offset'].top
-      console.log(`X: ${x}, Y: ${y}`)
-    });
-
-
     //fixing bug when object is dropped outside of 3d model
     self.canvas.on('object:moving', function(evt) {
       let array = getMousePosition(self.container, evt.e.clientX, evt.e.clientY);
@@ -1406,14 +1402,16 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       }
     })
 
-    self.canvas.on('object:modified', async (e: Record<any, any>) => {
-      const fabric_object = e.target;
+    self.canvas.on('object:modified', async (evt: Record<any, any>) => {
+      const fabric_object = evt.target
+      const x_axis = evt.e.offsetX / this.canvasWidthRatio
+      const y_axis = evt.e.offsetY / this.canvasHeightRatio
       if(fabric_object.get("type") == "text") {
         await setUndoRedoItems('customTexts', 'modified')
-        this.handleCustomTextModifiedEvent(e.target)
+        this.handleCustomTextModifiedEvent(evt.target)
       } else {
         await setUndoRedoItems('customLogos', 'modified')
-        self.handleCustomLogoModifiedEvent(e.target)
+        self.handleCustomLogoModifiedEvent(evt.target, x_axis, y_axis)
       }
       this.hideLockerProductUpdateButton()
     })

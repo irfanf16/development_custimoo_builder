@@ -1362,9 +1362,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.$eventBus.$on("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
   }
 
-  public customTextStoreUpdatedHandler(indexes: Record<any, any>) {
+  public customTextStoreUpdatedHandler(indexes: Record<any, any>, from_3d = false) {
     const self: Record<any, any> = this;
-    if(!this.mainPreview && this.selectedProductId == this.product_id) {
+    if((from_3d || !this.mainPreview) && this.selectedProductId == this.product_id) {
       const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
       if(text && self.product_custom_text_objects[indexes.custom_text_index] && self.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
         const textObject = self.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
@@ -1374,8 +1374,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public customLogoStoreUpdatedHandler(logo_index: number) {
-    if(!this.mainPreview && this.selectedProductId == this.product_id) {
+  public customLogoStoreUpdatedHandler(logo_index: number, from_3d = false) {
+    if((from_3d || !this.mainPreview) && this.selectedProductId == this.product_id) {
       const logo = this.$store.getters.selectedProductCustomLogos[logo_index]
       if(logo && this.custom_logo_objects[logo_index]) {
         const logoObject = this.custom_logo_objects[logo_index]
