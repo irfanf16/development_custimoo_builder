@@ -449,6 +449,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
 
     object.setCoords()
+
+    this.applyClipPath(object as fabric.Image|fabric.Group, object.side)
     this.frontCanvasRender()
   }
 
@@ -1321,7 +1323,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
         canvas.on('object:scaling', (e: Record<any, any>) => {
           let dimText = this.dimTextFront
-          if (e.target.side == 'back' || e.target.side == 'Back') {
+          if (e.target.side.toLowerCase() == 'back') {
             dimText = this.dimTextBack
           }
           this.showDimensions(e, dimText)
@@ -1401,7 +1403,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         (this as Record<any, any>).$eventBus.$emit('setActiveJerseyPart', active_text_index, active_jersey_part);
       }
 
-      if(selected.side == 'back' || selected.side == 'Back'){
+      if(selected.side.toLowerCase() == 'back'){
         this.frontCanvas.discardActiveObject()
         this.frontCanvasRender()
       }else{
@@ -2734,7 +2736,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
           if (Object.keys(custom_text).length && custom_text.value) {
             custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
-              if ((custom_text_item.placement == 'Back' && self.backCanvas) || custom_text_item.placement == 'Front') {
+              if ((custom_text_item.placement.toLowerCase() == 'back' && self.backCanvas) || custom_text_item.placement.toLowerCase() == 'front') {
                 let fabric_text: fabric.Text | fabric.Group | Record<any, any>
                 if (this.mainPreview && this.selectedProductId == this.product_id) {
                   let font = this.products_fonts[custom_text.font_family]
@@ -2801,7 +2803,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         self.product_custom_text_objects[custom_text_index][customTextItemIndex] = null;
                       }
                       self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
-                      if (custom_text_item.placement == 'Front') {
+                      if (custom_text_item.placement.toLowerCase() == 'front') {
                         self.frontCanvas.add(fabric_text)
                         fabric_text.bringToFront()
                         render_front_canvas = true
@@ -2880,7 +2882,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   }
                   self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
-                  if (custom_text_item.placement == 'Front') {
+                  if (custom_text_item.placement.toLowerCase() == 'front') {
                     self.frontCanvas.add(fabric_text)
                     render_front_canvas = true
                     this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
