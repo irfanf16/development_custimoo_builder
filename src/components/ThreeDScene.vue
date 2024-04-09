@@ -1494,12 +1494,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       let side_changed = false
       if(evt.action == 'drag') {
         // minus correction values
-        const x = evt.e.offsetX + 4.5
-        const y = evt.e.offsetY + 5.5
-        const point = this.getMousePosition(this.container, x, y)
-        this.onClickPosition.fromArray(point)
+        const x = evt.e.clientX + 4.5
+        const y = evt.e.clientY + 5.5
 
-        const intersects = this.getIntersects(this.onClickPosition, this.scene.children, self.camera)
+        let array = getMousePosition(self.container, x, y)
+        self.onClickPosition.fromArray(array)
+        let intersects = getIntersects(self.onClickPosition, self.scene.children)
+
         let side = "front"
         // this vector will store 2d screen cooridantes, 3d dimension will be 0
         if (intersects.length > 0) {
