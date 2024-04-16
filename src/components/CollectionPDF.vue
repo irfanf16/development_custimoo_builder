@@ -92,6 +92,10 @@
                         </template>
                       </div>
                     </template>
+                    <div class="pdf_nickname border-0" v-if="collection_product.product_nickname">
+                      <strong>Product&nbsp; Nickname&nbsp;: </strong>
+                      {{ collection_product.product_nickname }}
+                    </div>
                     <div v-if="collection_product.product_note != ''" class="pdf_description border-0">
                       <strong>Description:</strong>
                       {{ collection_product.product_note }}

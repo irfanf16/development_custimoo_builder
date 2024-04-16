@@ -507,8 +507,10 @@ img{
 }
 .pdf_page .pdf_description,
 .pdf_page .pdf_price,
+.pdf_page .pdf_nickname,
 .pdf_page .pdf_description strong,
-.pdf_page .pdf_price strong{
+.pdf_page .pdf_price strong,
+.pdf_page .pdf_nickname strong{
     color: #333;
 }
 
@@ -519,6 +521,14 @@ img{
 .pdf_page .pdf_description *{
     font-size: inherit !important;
     font-weight: normal !important;
+}
+
+.pdf_page .pdf_nickname {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .pdf_page .pdf_description strong,
