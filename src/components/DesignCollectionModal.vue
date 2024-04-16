@@ -319,8 +319,12 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   }
 
   public async saveCollectionForm() {
-    this.showLoader = true;
     let collectionItems = this.collectionItems;
+    if (!collectionItems.name) {
+      this.showError("Collection name is required");
+      return;
+    }
+    this.showLoader = true;
     let form_data = new FormData();
     form_data.append("name", collectionItems.name)
     form_data.append("link", collectionItems.link)

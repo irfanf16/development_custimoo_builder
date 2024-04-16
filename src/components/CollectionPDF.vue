@@ -117,7 +117,6 @@ import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 
 @Component<CollectionPDF>({
   created() {
-    this.groupProductsById();
     this.getCoverImage();
   }
 })
@@ -154,7 +153,7 @@ export default class CollectionPDF extends Vue {
     let groupedByProductId = {};
     let groupKeys = {}
     let key = 0
-    collectionProducts.forEach((product: Record<any, any>) => {
+    collectionProducts?.forEach((product: Record<any, any>) => {
       if(!groupKeys[product.product_locker_room.product_id]) {
         groupKeys[product.product_locker_room.product_id] = JSON.stringify(key)
         key++
