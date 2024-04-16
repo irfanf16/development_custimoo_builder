@@ -21,9 +21,9 @@
         <div style="background-color: silver; flex: 1"></div>
       </div>
     </div>
-    <div v-for="(groupProducts, idx) in groupProductsById()" :key="idx">
-      <div class="pdf_page" v-for="(groupOfFourProducts, fourIndex) in groupProducts" :key="fourIndex">
-        <div v-if="groupOfFourProducts">
+    <template v-for="(groupProducts) in groupProductsById()">
+      <template  v-for="(groupOfFourProducts) in groupProducts">
+        <div class="pdf_page" v-if="groupOfFourProducts">
           <div class="pdf_page_header pt-5 px-4">
             <h1 class="header_left" style="width: 70%; text-align: left;">
               {{ groupOfFourProducts[0].product_locker_room.product.sku.sku_id }}
@@ -110,8 +110,8 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </template>
+    </template>
   </div>
 </template>
 
