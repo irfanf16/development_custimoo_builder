@@ -44,6 +44,9 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
   public async useLogoColors(fire_event = true) {
     const self: Record<any, any> = this
     await setUndoRedoItems('defaultColors', 'use_logo_colors')
+    if(fire_event) { // fire event true means its the first time we use logo colors so update logo colors in extracted colors so on product change we got the same color as shown
+      this.logoColorsInfo.extracted_colors = JSON.parse(JSON.stringify(this.logoColorsInfo.colors))
+    }
     setDefaultColors(true)
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
     if(fire_event) {
