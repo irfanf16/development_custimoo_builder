@@ -23,7 +23,7 @@
             </div>
 
             <div class="d-flex gap-2 mt-1">
-              <button @click="downloadTemplate(product_id)" class="btn btn-secondary btn-sm"
+              <button @click="downloadSampleTemplate(product_id)" class="btn btn-secondary btn-sm"
                       v-b-tooltip="'Download the sample file of microsoft excel to fill the data to upload it later'">
                 <b-icon-download /><br>
                 Download sample
@@ -272,6 +272,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   public show_roster_change_warning = false;
   public custom_name_exists = true;
   public custom_number_exists = true;
+  public display_name = null;
 
   public loading = false;
   get company() {
@@ -308,6 +309,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
    this.size_image_url = null
    this.allow_name_number = true;
    this.show_roster_change_warning = false;
+   this.display_name = null;
    this.hide()
   }
 
@@ -468,13 +470,25 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
     });
   }
 
+  public async downloadSampleTemplate(prod_id:any){
+    await http.get(`template/download/${prod_id}`,{
+      responseType: 'blob',
+    }).then((res) => {
+      const blob = new Blob([res.data],{type:res.headers['content-type']})
+      const link = document.createElement('a')
+      link.href = window.URL.createObjectURL(blob)
+      link.download = 'product_'+ this.display_name +'_template.xlsx';
+      link.click();
+    })
+  }
+
 
 
   public setEditRosterMounted(){
     setTimeout(()=> {
       if(this.locker_id){
         http.get(`get-product-locker-roster/${this.locker_id}`).then((res) => {
-          const{product_locker_detail, sizes, size_image_url, allow_name_number  } = res.data.result
+          const{product_locker_detail, sizes, size_image_url, allow_name_number, display_name  } = res.data.result
           const {product_roster_detail, product_back_url, product_front_url, product_id } = product_locker_detail;
           const {json_data} = sizes;
           this.product_back_url = product_back_url
@@ -482,6 +496,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
           this.product_id =  product_id
           this.size_image_url = size_image_url;
           this.allow_name_number = allow_name_number === 1 ? true: false;
+          this.display_name = display_name;
           json_data.forEach((size: any, key: number) => {
             let sizes: Record<any, any> = { value: size.name, text: size.name };
             this.productSizes = this.productSizes.concat([sizes]);
