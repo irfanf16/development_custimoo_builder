@@ -1,6 +1,6 @@
 <template>
   <div v-if="collection" class="position-relative">
-    <div class="pdf_background_container">
+    <div v-if="getCoverImage()" class="pdf_background_container" :ref="'pdf_page_header'">
       <div v-if="!fullWidthCoverImage" class="cover-image-banner" :style="{ width: coverImageDimensions.width + 'px', height: coverImageDimensions.height + 'px' }">
         <img style="height: 100%; width: 100%" :src="`${storageUrl}${getCoverImage()}?q=11`" crossorigin="anonymous">
         <h2 class="collection_title_cover">{{ collection.name }}</h2>
@@ -23,7 +23,7 @@
     </div>
     <template v-for="(groupProducts) in groupProductsById()">
       <template  v-for="(groupOfFourProducts) in groupProducts">
-        <div class="pdf_page" v-if="groupOfFourProducts">
+        <div class="pdf_page" v-if="groupOfFourProducts" :ref="'pdf_page'">
           <div class="pdf_page_header pt-5 px-4">
             <h1 class="header_left" style="width: 70%; text-align: left;">
               {{ groupOfFourProducts[0].product_locker_room.product.sku.sku_id }}
@@ -71,7 +71,7 @@
                         </div>
                       </b-col>
                       <b-col style="padding: 0 !important;">
-                        <div class="position-relative overflow-hidden download-design">
+                        <div v-if="collection_product.product_locker_room.design.back_design_id" class="position-relative overflow-hidden download-design">
                           <img
                             :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string + '1'}`"
                             crossorigin="anonymous" alt=""/>
@@ -120,9 +120,6 @@ import {Component, Prop, Vue} from 'vue-property-decorator';
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
 
 @Component<CollectionPDF>({
-  created() {
-    this.getCoverImage();
-  }
 })
 
 export default class CollectionPDF extends Vue {

@@ -132,8 +132,8 @@
         </div>
       </div>
     </div>
-    <div ref="collection">
-      <CollectionPDF v-show="showNewPdf" :collection="collection" :company="company"/>
+    <div>
+      <CollectionPDF v-show="showNewPdf" ref="collection" :collection="collection" :company="company"/>
     </div>
     <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()"/>
     <template>
@@ -649,7 +649,7 @@ async saveToLockerRoom(collection,product) {
   public generateCollectionPDF() {
     this.showNewPdf = true;
     this.showLoader = true;
-    const element = this.$refs.collection
+    const element = this.$refs.collection as Record<any, any>
     const options = {
       margin: [0, 0, 0, 0],
       filename: this.collection.name + '.pdf',
@@ -666,11 +666,14 @@ async saveToLockerRoom(collection,product) {
         orientation: 'landscape'
       }
     };
-
-    html2pdf().set(options).from(element).toPdf().output('datauristring').save().then(async (pdf) => {
-      let arr = pdf.split(',');
-      return arr[1];
-    });
+    const pages: Record<any, any>[] = element.$refs.pdf_page
+    let doc = html2pdf().set(options).from(element.$refs.pdf_page_header).toPdf()
+    for (let j = 1; j < pages.length; j++) {
+      doc = doc.get('pdf').then(
+        pdf => { pdf.addPage() }
+      ).from(pages[j]).toContainer().toCanvas().toPdf()
+    }
+    doc.save()
 
     setTimeout(() => {
       this.showNewPdf = false;
