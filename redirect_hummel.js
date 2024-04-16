@@ -1,7 +1,8 @@
 async function checkAndRedirect() {
   const countries = [
     'CA', 'MX', 'US', 'BZ', 'CR', 'SV', 'GT', 'HN', 'NI', 'PA', 'AI', 'AG', 'AW', 'BS', 'BB', 'BM', 'BQ', 'VG', 'KY', 'CU',
-    'CW', 'DM', 'DO', 'GF', 'GD', 'GP', 'GY', 'HT', 'JM', 'MQ', 'MS', 'PR', 'KN', 'LC', 'MF', 'VC', 'SX', 'SR', 'TT', 'TC', 'VI'
+    'CW', 'DM', 'DO', 'GF', 'GD', 'GP', 'GY', 'HT', 'JM', 'MQ', 'MS', 'PR', 'KN', 'LC', 'MF', 'VC', 'SX', 'SR', 'TT', 'TC', 'VI',
+    'PK'
   ];
 
   const ip_request = await fetch("https://api.custimoo.com/api/ip-whitelist");
