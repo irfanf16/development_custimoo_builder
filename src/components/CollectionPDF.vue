@@ -21,97 +21,99 @@
         <div style="background-color: silver; flex: 1"></div>
       </div>
     </div>
-    <template v-for="(groupProducts) in groupProductsById()">
-      <template  v-for="(groupOfFourProducts) in groupProducts">
-        <div class="pdf_page" v-if="groupOfFourProducts" :ref="'pdf_page'">
-          <div class="pdf_page_header pt-5 px-4">
-            <h1 class="header_left" style="width: 70%; text-align: left;">
-              {{ groupOfFourProducts[0].product_locker_room.product.sku.sku_id }}
-            </h1>
-            <div class="pdf_headers_logos">
-              <div v-for="(logo, idx) in collection.logos" :key="idx">
-                <img style="max-height: 100px; width: auto; height: auto" :src="`${storageUrl}${logo.path}?q=133`"
-                     crossorigin="anonymous" alt=""/>
-              </div>
-            </div>
-          </div>
-          <div style="display: flex">
-            <div style="max-width: 30%" class="px-4">
-              <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 5%;">
-                <div>
-                  <h3 style="text-align: start; width: 100%">Technical Details:</h3>
-                  <p v-html="groupOfFourProducts[0].product_locker_room.product.sku.description"
-                     style="text-align: start"></p>
-                </div>
-                <div>
-                  <h3 style="text-align: start">Size Guide:</h3>
-                  <div style="column-count: 2" v-if="groupOfFourProducts[0]?.product_locker_room.product.sizes?.length > 0">
-                    <p v-for="(size, index) in groupOfFourProducts[0].product_locker_room.product.sizes[0]?.json_data"
-                       :key="index" style="text-align: start">
-                      {{ size.name }}
-                    </p>
-                  </div>
-                  <div v-else>
-                    <p style="text-align: start">No sizes available</p>
-                  </div>
+    <div :ref="'pdf_pages_wrapper'">
+      <template v-for="(groupProducts) in groupProductsById()">
+        <template v-for="(groupOfFourProducts) in groupProducts">
+          <div :ref="'pdf_page'" class="pdf_page" v-if="groupOfFourProducts">
+            <div class="pdf_page_header pt-5 px-4">
+              <h1 class="header_left" style="width: 70%; text-align: left;">
+                {{ groupOfFourProducts[0].product_locker_room.product.sku.sku_id }}
+              </h1>
+              <div class="pdf_headers_logos">
+                <div v-for="(logo, idx) in collection.logos" :key="idx">
+                  <img style="max-height: 100px; width: auto; height: auto" :src="`${storageUrl}${logo.path}?q=133`"
+                       crossorigin="anonymous" alt=""/>
                 </div>
               </div>
             </div>
-            <div
-              style="max-width: 80%; display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); grid-template-columns: repeat(2, minmax(0, 1fr));">
-              <div v-for="(collection_product, idxs) in groupOfFourProducts" :key="idxs" class="product_page pt-3">
-                <div>
-                  <b-container>
-                    <b-row>
-                      <b-col style="padding: 0 !important;">
-                        <div class="position-relative overflow-hidden download-design">
-                          <img
-                            :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/front.png?q=${collection_product.product_locker_room.random_string + '33'}`"
-                            alt="" crossorigin="anonymous"/>
+            <div style="display: flex">
+              <div style="max-width: 30%" class="px-4">
+                <div style="display: flex; flex-direction: column; gap: 20px; margin-top: 5%;">
+                  <div>
+                    <h3 style="text-align: start; width: 100%">Technical Details:</h3>
+                    <p v-html="groupOfFourProducts[0].product_locker_room.product.sku.description"
+                       style="text-align: start"></p>
+                  </div>
+                  <div>
+                    <h3 style="text-align: start">Size Guide:</h3>
+                    <div style="column-count: 2" v-if="groupOfFourProducts[0]?.product_locker_room.product.sizes?.length > 0">
+                      <p v-for="(size, index) in groupOfFourProducts[0].product_locker_room.product.sizes[0]?.json_data"
+                         :key="index" style="text-align: start">
+                        {{ size.name }}
+                      </p>
+                    </div>
+                    <div v-else>
+                      <p style="text-align: start">No sizes available</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="max-width: 80%; display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); grid-template-columns: repeat(2, minmax(0, 1fr));">
+                <div v-for="(collection_product, idxs) in groupOfFourProducts" :key="idxs" class="product_page pt-3">
+                  <div>
+                    <b-container>
+                      <b-row>
+                        <b-col style="padding: 0 !important;">
+                          <div class="position-relative overflow-hidden download-design">
+                            <img
+                              :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/front.png?q=${collection_product.product_locker_room.random_string + '33'}`"
+                              alt="" crossorigin="anonymous"/>
+                          </div>
+                        </b-col>
+                        <b-col style="padding: 0 !important;">
+                          <div v-if="collection_product.product_locker_room.design.back_design_id" class="position-relative overflow-hidden download-design">
+                            <img
+                              :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string + '1'}`"
+                              crossorigin="anonymous" alt=""/>
+                          </div>
+                        </b-col>
+                      </b-row>
+                      <template
+                        v-if="collection_product.product_locker_room && collection_product.product_locker_room.model_description">
+                        <div v-if="collection_product.allow_description &&
+                             (collection_product.product_locker_room.model_description.product_model_description ||
+                              collection_product.product_locker_room.model_description.product_model_description != '')"
+                             class="pdf_description">
+                          <strong>Product Info: </strong>
+                          <template
+                            v-if="collection_product.product_locker_room.model_description.product_model_description">
+                            <span
+                              v-html="collection_product.product_locker_room.model_description.product_model_description"></span>
+                          </template>
                         </div>
-                      </b-col>
-                      <b-col style="padding: 0 !important;">
-                        <div v-if="collection_product.product_locker_room.design.back_design_id" class="position-relative overflow-hidden download-design">
-                          <img
-                            :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string + '1'}`"
-                            crossorigin="anonymous" alt=""/>
-                        </div>
-                      </b-col>
-                    </b-row>
-                    <template
-                      v-if="collection_product.product_locker_room && collection_product.product_locker_room.model_description">
-                      <div v-if="collection_product.allow_description &&
-                           (collection_product.product_locker_room.model_description.product_model_description ||
-                            collection_product.product_locker_room.model_description.product_model_description != '')"
-                           class="pdf_description">
-                        <strong>Product Info: </strong>
-                        <template
-                          v-if="collection_product.product_locker_room.model_description.product_model_description">
-                          <span
-                            v-html="collection_product.product_locker_room.model_description.product_model_description"></span>
-                        </template>
+                      </template>
+                      <div class="pdf_nickname border-0" v-if="collection_product.product_nickname">
+                        <strong>Product&nbsp; Nickname&nbsp;: </strong>
+                        {{ collection_product.product_nickname }}
                       </div>
-                    </template>
-                    <div class="pdf_nickname border-0" v-if="collection_product.product_nickname">
-                      <strong>Product&nbsp; Nickname&nbsp;: </strong>
-                      {{ collection_product.product_nickname }}
-                    </div>
-                    <div v-if="collection_product.product_note != ''" class="pdf_description border-0">
-                      <strong>Description:</strong>
-                      {{ collection_product.product_note }}
-                    </div>
-                    <div class="pdf_price border-0" v-if="collection_product.product_price">
-                      <strong>Price: </strong>
-                      {{ collection_product.product_price }}
-                    </div>
-                  </b-container>
+                      <div v-if="collection_product.product_note != ''" class="pdf_description border-0">
+                        <strong>Description:</strong>
+                        {{ collection_product.product_note }}
+                      </div>
+                      <div class="pdf_price border-0" v-if="collection_product.product_price">
+                        <strong>Price: </strong>
+                        {{ collection_product.product_price }}
+                      </div>
+                    </b-container>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </template>
       </template>
-    </template>
+    </div>
   </div>
 </template>
 
