@@ -133,7 +133,7 @@
       </div>
     </div>
     <div>
-      <CollectionPDF ref="collection" :collection="collection" :company="company"/>
+      <CollectionPDF v-show="showNewPdf" ref="collection" :collection="collection" :company="company"/>
     </div>
     <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()"/>
     <template>
