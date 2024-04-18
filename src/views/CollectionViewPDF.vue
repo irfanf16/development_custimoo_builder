@@ -8,6 +8,129 @@
             Download PDF
           </span>
       </button>
+      <div id="collectionPdfContainer">
+        <div class="pdf_cover"
+             :style="{ 'background': `url(${storageUrl + getCoverImage()}) no-repeat center` }"
+             :class="{'design_hummel_us': company.id == 45}">
+          <h1 class="text-white p-4" style="text-align: center">{{ collection.name }} </h1>
+
+          <div v-if="company.id == 1 || company.id == 45"  class="logo">
+            <img src="../../src/assets/logo.png" alt="Logo">
+          </div>
+
+          <div class="collection_logos">
+            <template v-for="(collection_logo, clIdx) in collection.logos">
+              <div :key="`collection_logo_${clIdx}`">
+                <img style="width: 100%" :src="`${storageUrl}${collection_logo.path}`" alt="Logo">
+              </div>
+            </template>
+          </div>
+        </div>
+        <div class="pdf_page" v-for="(products_chunks,idx)  in convertCollection()" :key="idx"
+             :style="{ background: company.id == 1? `url('img/page_background.png') no-repeat center` : `url('img/page_background_2.png') no-repeat center` }">
+          <table class="print-table">
+            <tbody>
+            <tr>
+              <td v-for="(collection_product, idxs) in products_chunks" :key="idxs">
+                <template v-if="collection_product.allow_title && collection_product.product_locker_room && collection_product.product_locker_room.model_description">
+                  <div style="font-weight: 600; font-size: larger; word-wrap: break-word" v-html="collection_product.product_locker_room.model_description.model_name">
+                  </div>
+                </template>
+
+                <div style="word-wrap: break-word">
+                  {{collection_product.product_nickname ? collection_product.product_nickname : '' }}
+                </div>
+                <div>
+                  <table class="images-holder">
+                    <tbody>
+                    <tr>
+                      <td>
+                        <div class="position-relative overflow-hidden download-design">
+                          <a :href="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/front.png?q=${collection_product.product_locker_room.random_string}`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
+                          <img :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/front.png?q=${collection_product.product_locker_room.random_string}`" alt="">
+                        </div>
+                      </td>
+                      <td>
+                        <div class="position-relative overflow-hidden download-design">
+                          <a :href="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string}`" download v-b-tooltip title="Download image" target="_blank" class="rounded-circle btn btn-secondary light"><BIconDownload /></a>
+                          <img :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string}`" alt="">
+                        </div>
+                      </td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <template v-if="collection_product.product_locker_room && collection_product.product_locker_room.model_description">
+                  <div class="pdf_description" v-if="collection_product.allow_description && (collection_product.product_locker_room.model_description.product_model_description
+                         || collection_product.product_locker_room.model_description.product_model_description != '')">
+                    <strong>Product Info: </strong>
+                    <template v-if="collection_product.product_locker_room.model_description.product_model_description">
+                      <span v-html="collection_product.product_locker_room.model_description.product_model_description"></span>
+                    </template>
+                  </div>
+                </template>
+                <div v-if="collection_product.product_note != ''" class="pdf_description"><strong>Description: </strong>
+                  {{ collection_product.product_note }}
+                </div>
+                <div class="pdf_price" v-if="collection_product.allow_price && collection_product.product_price"><strong>Price: </strong>
+                  {{collection_product.product_price}}
+                </div>
+                <div class="pdf_price d-flex justify-content-center" style="border: none" >
+                  <template v-if="isAuthenticated">
+                    <template v-if="company.platform !== 'self'  || (company.platform == 'self' && company.id !== 1)
+                                || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+                      <button class="btn btn-secondary mx-2" v-if="active_product_index !== idxs"
+                              @click="addToCart(collection_product,idxs)">
+                        Purchase
+                      </button>
+                      <button v-else class="btn btn-secondary mx-2" :disabled="true">
+                        <img width="20" height="20" src="@assets/images/loading.gif"/>
+                      </button>
+                    </template>
+                    <template>
+                      <button class="btn btn-secondary mx-2" v-if="active_product_index !== idxs"
+                              @click="saveToLockerRoom(collection,collection_product)">
+                        Save To Locker
+                      </button>
+                      <button v-else class="btn btn-secondary mx-2" :disabled="true">
+                        <img width="20" height="20" src="@assets/images/loading.gif"/>
+                      </button>
+                    </template>
+                  </template>
+                  <template v-else>
+                    <template v-if="company.platform !== 'self'">
+                      <button class="btn btn-secondary" v-if="active_product_index !== idxs"
+                              @click="setActionBeforeLogin('addToCart', collection, collection_product, idxs)">
+                        Purchase
+                      </button>
+                      <button v-else class="btn btn-secondary" :disabled="true">
+                        <img width="20" height="20" src="@assets/images/loading.gif"/>
+                      </button>
+                    </template>
+                    <template>
+                      <button class="btn btn-secondary mx-2" v-if="active_product_index !== idxs"
+                              @click="setActionBeforeLogin('saveToLockerRoom', collection, collection_product, idxs)">
+                        Save To Locker
+                      </button>
+                      <button v-else class="btn btn-secondary mx-2" :disabled="true">
+                        <img width="20" height="20" src="@assets/images/loading.gif"/>
+                      </button>
+                    </template>
+                  </template>
+                </div>
+              </td>
+              <template v-if="products_chunks.length == 1">
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+              </template>
+              <template v-else-if="products_chunks.length === 2">
+                <td>&nbsp;</td>
+              </template>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
     <div>
       <CollectionPDF ref="collection" :collection="collection" :company="company"/>

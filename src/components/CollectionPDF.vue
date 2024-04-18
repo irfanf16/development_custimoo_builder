@@ -61,7 +61,7 @@
               <div
                 style="max-width: 80%; display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); grid-template-columns: repeat(2, minmax(0, 1fr));">
                 <div v-for="(collection_product, idxs) in groupOfFourProducts" :key="idxs" class="product_page pt-3">
-                  <div>
+                  <div style="font-family: sans-serif;">
                     <b-container>
                       <b-row>
                         <b-col style="padding: 0 !important;">
@@ -94,11 +94,11 @@
                         </div>
                       </template>
                       <div class="pdf_nickname border-0" v-if="collection_product.product_nickname">
-                        <strong>Product&nbsp; Nickname&nbsp;: </strong>
+                        <strong>Product Nickname: </strong>
                         {{ collection_product.product_nickname }}
                       </div>
                       <div v-if="collection_product.product_note != ''" class="pdf_description border-0">
-                        <strong>Description:</strong>
+                        <strong>Description: </strong>
                         {{ collection_product.product_note }}
                       </div>
                       <div class="pdf_price border-0" v-if="collection_product.product_price">
