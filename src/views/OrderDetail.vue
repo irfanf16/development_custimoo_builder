@@ -661,11 +661,20 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         if(response_data.success == true) {
           self.order = response_data.result;
         } else {
-          self.showToast(response_data.message, "error")
-          self.$router.push({name: "CustomerOrders"})
+          if(this.company.platform != "wordpress" && this.company.platform != "shopify") {
+            self.showToast(response_data.message, "error")
+            self.$router.push({name: "CustomerOrders"})
+          } else {
+            console.log('Custimoo Order : ', response_data.message)
+          }
+
         }
       }).catch((errorResponse: any) => {
-      handleResponseException(errorResponse)
+      if(this.company.platform != "wordpress" && this.company.platform != "shopify") {
+        handleResponseException(errorResponse)
+      } else {
+        console.log('Custimoo Order : ', errorResponse)
+      }
     });
   }
 
