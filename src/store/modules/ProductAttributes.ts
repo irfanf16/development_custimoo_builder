@@ -17,7 +17,7 @@ import {
   getDefaultColorsObject,
   setDefaultColors,
   santaClone,
-  updateLastActiveProductData, getSelectedProductData
+  updateLastActiveProductData/*, getSelectedProductData*/
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
@@ -1024,10 +1024,10 @@ const ProductAttributes:Module<any, any> = {
     {
       // logic of set the whole last active data is on reset of product we remove the last active data and we are not setting it again and this is
       // a requirement so on refresh application goes to initial state. but if user do any changes then we need to set it again.
-      if(!state.last_active_product_data.product_id) {
-        const active_product_data = getSelectedProductData(true)
-        payload = lastActiveProductDefaultObject(active_product_data)
-      }
+      // if(!state.last_active_product_data.product_id) {
+      //   const active_product_data = getSelectedProductData(true)
+      //   payload = lastActiveProductDefaultObject(active_product_data)
+      // }
       const updated_payload: Record<any, any> = {};
       for (const [payload_key, payload_value] of Object.entries(payload)) {
         if(payload_key == 'product_custom_texts') {
