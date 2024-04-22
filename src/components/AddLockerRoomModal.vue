@@ -63,7 +63,7 @@
                         </a>
                       </div>
                     </div>
-                    <img class="w-100" :src="storageUrl+product.product_url" alt="">
+                    <img class="w-100" :src="`${storageUrl+product.product_url}?q=${product.random_string}`" alt="">
                   </div>
                 </div>
                 <div class="d-none d-lg-block product-description text-center">
