@@ -27,7 +27,6 @@ export default {
     Navbar, Header
   },
   mounted: async function() {
-    getWindowObject().document.querySelector('v-customizer')
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
     let ele = getWindowObject().document.getElementById('e88d412d-dfc3-4628-910b-8c0d7237a371')?.querySelector('[data-ux="Container"]')
     if(!ele) {
@@ -41,6 +40,10 @@ export default {
     if(!ele) {
       // run time adding css for mooressports.com as it is not accept any direct css
       ele = getWindowObject().document.getElementById('df7a18b7-68cc-4c97-8ee7-4ee261b7544d')?.querySelector('[data-ux="Container"]')
+    }
+    if(!ele) {
+      // run time adding css for royalsports1974.com as it is not accept any direct css
+      ele = getWindowObject().document.getElementById('8f0c327b-2b7b-4e88-a62a-c3cebee4bc9d')?.querySelector('[data-ux="Container"]')
     }
     if(ele) {
       ele.style.width = '100%'
