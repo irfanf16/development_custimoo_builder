@@ -1838,6 +1838,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     confirmed_value.then(async (response) => {
       const ok = await this.ref['reset-changes'].showConfirm()
       if (ok) {
+        this.$store.commit('SET_DURING_RESET', true)
         this.search_products = '';
         if(this.$refs['ItemToCustomize']) {
           (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
@@ -1856,11 +1857,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           categories_promise.then(async (cat_response) => {
             let query_params = await this.setQueryParams()
             await this.retrieveProductsNew(query_params)
-            this.resetActions()
+            await this.resetActions()
           })
         } else {
-          this.resetActions()
+          await this.resetActions()
         }
+        this.$store.commit('SET_DURING_RESET', false)
       }
     })
   }

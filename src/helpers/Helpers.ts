@@ -1587,6 +1587,50 @@ const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   return {...default_obj, ...keys_default_values}
 }
 
+const getDataToSetLastActiveProduct = () => {
+  const selected_product = Store.getters.getSelectedProduct;
+  const style_index = Store.getters.getCurrentStyleIndex;
+  const product_style = selected_product.productstyles[style_index];
+  const design_index = findIndex(product_style.productdesigns, (design: Record<any, any>) => design.design_show == 1)
+  const selected_design = product_style.productdesigns[design_index]
+  const categories = Store.getters.getCategories
+  let category_id = null
+  let category_index = 0
+  if(categories.length > 0) {
+    const selected_category = Store.getters.getSelectedCategory
+    category_id = selected_category.category_id ? selected_category.category_id : null
+    if(category_id) {
+      category_index = findIndex(categories, ['id', category_id])
+      if(category_index == -1) {
+        category_index = 0
+      }
+    }
+  }
+
+  return {
+    category_index: category_index,
+    category_id: category_id,
+    design_index: design_index,
+    design_id: selected_design.id,
+    product_index: Store.getters.getSelectedIndex,
+    product_id: selected_product.product_id,
+    search_products: null,
+    style_index: style_index,
+    style_id: product_style.id,
+    page_no: Store.getters.getProductsNextPageNo? Store.getters.getProductsNextPageNo - 1 : 1,
+    customized: Store.getters.getCustomized,
+    personalized: Store.getters.getPersonalized,
+    private_product: Store.getters.getPrivateProduct,
+    product_custom_texts: Store.getters.productCustomTexts(),
+    custom_logos: Store.getters.getCustomLogos(),
+    default_colors: Store.getters.getDefaultColors,
+    group_colors: Store.getters.getGroupColors,
+    logo_colors: Store.getters.getLogosColors,
+    roster_detail: Store.getters.getProductRosters(),
+    products_rosters: Store.getters.getProductRosters('all'),
+  }
+}
+
 const resetLastActiveProductData = async () => {
   Store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", lastActiveProductDefaultObject())
 }
@@ -1700,59 +1744,6 @@ const getTeamLogo = (product_id: number|null = null) => {
     }
   } else {
     return team_logo
-  }
-}
-
-const getSelectedProductData = (selected_product_custom_texts = true) => {
-  const selected_product = Store.getters.getSelectedProduct;
-  const style_index = Store.getters.getCurrentStyleIndex;
-  const productCustomTexts = selected_product_custom_texts ? Store.getters.productCustomTexts(selected_product.id) : Store.getters.productCustomTexts()
-  const product_style = selected_product.productstyles[style_index];
-  const design_index = findIndex(product_style.productdesigns, (design: Record<any, any>) => design.design_show == 1)
-  const selected_design = product_style.productdesigns[design_index]
-  const categories = Store.getters.getCategories
-  let category_id = null
-  let category_index = 0
-  if(categories.length > 0) {
-    const selected_category = Store.getters.getSelectedCategory
-    category_id = selected_category.category_id ? selected_category.category_id : null
-    if(category_id) {
-      category_index = findIndex(categories, ['id', category_id])
-      if(category_index == -1) {
-        category_index = 0
-      }
-    }
-  }
-  return {
-    back_image: getImageFromCanvas('back'),
-    front_image: getImageFromCanvas('front'),
-    custom_logos: Store.getters.getCustomLogos(),
-    measurement_ratio: selected_product.measurement_ratio,
-    custom_logo_svgs: [],
-    product_custom_texts: productCustomTexts,
-    colors: Store.getters.getLogosColors,
-    default_colors: Store.getters.getDefaultColors,
-    group_colors: Store.getters.getGroupColors,
-    design_index: design_index,
-    design_id: selected_design.id,
-    logo_colors: Store.getters.getLogosColors,
-    product_id: selected_product.product_id,
-    ecommerce_post_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].ecommerce_product_id:'',
-    sync_id: (selected_product.ecommerceproduct.length > 0)?selected_product.ecommerceproduct[0].sync_id:'',
-    product_type: selected_product.product_type,
-    product_name: selected_product.product_name,
-    pdf_file: null,
-    production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
-    product_roster_detail: Store.getters.getProductRosters(),
-    style_id: product_style.id,
-    style_index: style_index,
-    svg_groups: Store.getters.getSvgGroups,
-    ecommerce_cart_id:null,
-    category_index: category_index,
-    category_id: category_id,
-    customized: Store.getters.getCustomized,
-    personalized: Store.getters.getPersonalized,
-    private_product: Store.getters.getPrivateProduct,
   }
 }
 
@@ -2250,7 +2241,7 @@ export {
   getSelectedProductPantones, getColorType, setRetrievedProductsCustomTexts, getEditModeDefaultObj, fetchUrlContent,
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
-  persistToken, fetchCustomer, getTeamLogo, getSelectedProductData,getImageFromCanvas,getUrlParameter,
+  persistToken, fetchCustomer, getTeamLogo, getDataToSetLastActiveProduct, getImageFromCanvas, getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,

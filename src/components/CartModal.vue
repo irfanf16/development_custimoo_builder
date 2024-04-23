@@ -240,14 +240,10 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
-  getActiveProductData, getEditModeDefaultObj,
-  getReminderOptions,
-  getSelectedProductData,
-  lastActiveProductDefaultObject, logData,
-  processColorsCustom
+  getEditModeDefaultObj,
+  logData,
 } from "@/helpers/Helpers";
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
-import { findIndex } from "lodash";
 import ModalAction from "@/mixins/ModalAction";
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
 @Component<CartModal>({
@@ -498,19 +494,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       }
   }
 
-  public async setLastActiveProductData() {
-    let active_product_data = getSelectedProductData(false)
-    let last_active_product_object = lastActiveProductDefaultObject(active_product_data)
-    this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', last_active_product_object)
-  }
-
-
   public deleteConfirm(cart_item: Record<any, any>, factory_product: Record<any, any>) {
     this.$emit("deleteCartItem", { cart_item: cart_item, factory_product: factory_product });
   }
-
 }
-
 </script>
 
 <style lang="scss" scoped>

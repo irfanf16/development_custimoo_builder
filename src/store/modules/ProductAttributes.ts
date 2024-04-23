@@ -17,7 +17,8 @@ import {
   getDefaultColorsObject,
   setDefaultColors,
   santaClone,
-  updateLastActiveProductData/*, getSelectedProductData*/
+  updateLastActiveProductData,
+  getDataToSetLastActiveProduct
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
@@ -26,6 +27,7 @@ const MAX_UNDO_REDO_ITEMS = 3;
 const ProductAttributes:Module<any, any> = {
   state: {
     isRosterOpened: false,
+    during_reset: false,
     stock_count:0,
     personalized_count: 0 ,
     customized_count:0,
@@ -1024,10 +1026,10 @@ const ProductAttributes:Module<any, any> = {
     {
       // logic of set the whole last active data is on reset of product we remove the last active data and we are not setting it again and this is
       // a requirement so on refresh application goes to initial state. but if user do any changes then we need to set it again.
-      // if(!state.last_active_product_data.product_id) {
-      //   const active_product_data = getSelectedProductData(true)
-      //   payload = lastActiveProductDefaultObject(active_product_data)
-      // }
+      if(!state.last_active_product_data.product_id && !state.during_reset) {
+        const active_product_data = getDataToSetLastActiveProduct()
+        payload = lastActiveProductDefaultObject(active_product_data)
+      }
       const updated_payload: Record<any, any> = {};
       for (const [payload_key, payload_value] of Object.entries(payload)) {
         if(payload_key == 'product_custom_texts') {
@@ -1146,6 +1148,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SHOW_LOADER(state:Record<any,any>,payload){
       state.showLoader = payload;
+    },
+    SET_DURING_RESET(state:Record<any,any>,payload){
+      state.during_reset = payload;
     },
     SET_ACTIVE_ROSTER_INDEX(state:Record<any,any>,index){
       state.active_roster_index = index;
