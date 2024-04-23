@@ -246,7 +246,7 @@
 
 
           <CreateLockerRoomModal ref="create-modal" @lockerAdded="lockerAdded"/>
-          <ExistingCollectionModal @existingCollection="existingCollection"/>
+          <ExistingCollectionModal ref="existing-collection-modal" @existingCollection="existingCollection"/>
           <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex" @yearlyPlannerTab="yearlyPlannerTab"   />
           <ContactModal ref="contactmodal"   />
         </b-tabs>

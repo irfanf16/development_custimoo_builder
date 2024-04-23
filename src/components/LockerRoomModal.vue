@@ -33,7 +33,7 @@
       </div>
 
       <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
-        <b-button v-if="selectedCollectionProducts.length>0 && totalCollections > 0"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
+        <b-button v-if="selectedCollectionProducts.length>0 && totalCollections > 0" @click="showVModal('existing-collection-modal')"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
         <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
       </div>
       <div v-else class="text-right modal-footer">

@@ -1,5 +1,9 @@
 <template>
-    <b-modal ref="existing-collection-modal" hide-footer id="modal-center-existingCollection" centered scrollable size="xl" title="Add To Existing Collection" content-class="lockerroom-modal create-lockerroom-modal">
+    <modal ref="existing-collection-modal" name="existing-collection-modal" id="modal-center-existingCollection" size="xl" class="lockerroom-modal">
+      <div class="modal-header d-flex justify-content-between">
+        <span class="fs-4 font-weight-bold">Add To Existing Collection</span>
+        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('existing-collection-modal')"><BIconX /></span>
+      </div>
         <div class="pt-4 design-name-form">
             <b-form inline>
                 <label for="inline-form-input-productname" class="w-100 d-block mb-2">Name</label>
@@ -11,27 +15,28 @@
                 </div>
             </b-form>
         </div>
-    </b-modal>
+    </modal>
 </template>
 
 <script lang="ts">
 
 import {Component, Mixins, Vue} from 'vue-property-decorator'
     import ErrorMessages from "@/mixins/ErrorMessages";
+import ModalAction from "@/mixins/ModalAction";
 
    @Component
-    export default class ExistingCollectionModal extends Mixins(ErrorMessages) {
+    export default class ExistingCollectionModal extends Mixins(ErrorMessages, ModalAction) {
       public collections = []
       public collection_id = null;
       public ref = this.$refs as Record<any, any>
 
       get getCollections(){
-        let collections =  this.$store.getters.getCollections;
+        this.collections =  this.$store.getters.getCollections;
         let optionArray: Record<any, any>[] = [];
 
-        if(collections.length > 0){
+        if(this.collections.length > 0){
           optionArray.push({ value: null, text: 'Please select an option' })
-          collections.forEach((item:any) => {
+          this.collections.forEach((item:any) => {
             optionArray.push({ value: item.id, text: item.name })
           })
         }
@@ -44,7 +49,7 @@ import {Component, Mixins, Vue} from 'vue-property-decorator'
         }else{
           const payload = {"attribute":"collection_id","value":this.collection_id}
           this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',payload)
-          this.ref['existing-collection-modal'].hide();
+          this.hideVModal('existing-collection-modal');
           this.$emit('existingCollection')
         }
 
@@ -118,6 +123,7 @@ import {Component, Mixins, Vue} from 'vue-property-decorator'
         }
     }
     .design-name-form{
+        padding: 20px;
         label{font-size: 16px;}
         .input-group{
             flex: 0 0 55%;
