@@ -119,6 +119,10 @@ export default class LogoColorTabsNew extends Mixins(ColorsTabMixin) {
     return this.$store.getters.getLogoColorsInfo('colors')[this.logoColorIndex]
   }
 
+  get activeExtractedLogoColor() {
+    return this.$store.getters.getLogoColorsInfo('extracted_colors')[this.logoColorIndex]
+  }
+
   get getColorType(): string {
     return this.$store.getters.getSetting('color_type');
   }
@@ -153,6 +157,7 @@ export default class LogoColorTabsNew extends Mixins(ColorsTabMixin) {
       this.activeLogoColor.hex = selected_color.value
       this.activeLogoColor.name = selected_color.name
     }
+    Object.assign(this.activeExtractedLogoColor, this.activeLogoColor)
     setDefaultColors()
     if(this.logoColorsInfo.using_logo_colors){
       self.$eventBus.$emit('changeDefaultColors')
