@@ -72,7 +72,7 @@
                           </div>
                         </b-col>
                         <b-col style="padding: 0 !important;">
-                          <div v-if="collection_product.product_locker_room.design.back_design_id" class="position-relative overflow-hidden download-design">
+                          <div v-if="collection_product.product_locker_room.design?.back_design_id" class="position-relative overflow-hidden download-design">
                             <img
                               :src="`${storageUrl+collection_product.product_locker_room.locker_product_images_folder}/back.png?q=${collection_product.product_locker_room.random_string + '1'}`"
                               crossorigin="anonymous" alt=""/>
