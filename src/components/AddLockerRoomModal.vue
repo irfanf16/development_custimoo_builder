@@ -67,7 +67,7 @@
                   </div>
                 </div>
                 <div class="d-none d-lg-block product-description text-center">
-                  <p>{{ product.product_name }}</p>
+                  <p class="break-word">{{ product.product_name }}</p>
                 </div>
               </label>
             </div>

@@ -62,7 +62,7 @@
                             <div @click="($event)=>$event.stopPropagation()" class="d-flex align-items-center justify-content-center product-description gap-1 text-center">
                               <span class="cursor-pointer" @mouseenter="showTooltip" @mouseleave="hideTooltip"
                                     data-title="Rename" @click="setRenameLockerProductID(`${i + ind}${ind}`, product)"><b-icon-pencil-square /></span>
-                              <p>{{ product.product_name }}</p>
+                              <p class="break-word">{{ product.product_name }}</p>
                             </div>
 
                           <ul class="product-icons">
