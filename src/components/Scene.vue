@@ -2782,9 +2782,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         text_index: custom_text_index,
                         manually_added: custom_text.manually_added,
                       })
-
-                      this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
-
+                      setTimeout(() => {
+                        this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement)
+                      })
                       if (custom_text_item.scaleX && custom_text_item.scaleY) {
                         fabric_text.scaleX = custom_text_item.scaleX
                         fabric_text.scaleY = custom_text_item.scaleY
@@ -2811,7 +2811,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                       self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
                       if (custom_text_item.placement.toLowerCase() == 'front') {
                         self.frontCanvas.add(fabric_text)
-                        fabric_text.bringToFront()
                         render_front_canvas = true
                         fabric_text.on('selected', (e: Record<any, any>) => {
                           this.showDimensions(e, self.dimTextFront)
@@ -2823,7 +2822,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         })
                       } else {
                         self.backCanvas.add(fabric_text)
-                        fabric_text.bringToFront()
                         render_back_canvas = true
                         fabric_text.on('selected', (e: Record<any, any>) => {
                           this.showDimensions(e, self.dimTextBack)
@@ -2891,12 +2889,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   if (custom_text_item.placement.toLowerCase() == 'front') {
                     self.frontCanvas.add(fabric_text)
                     render_front_canvas = true
-                    this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
                   } else {
                     self.backCanvas.add(fabric_text)
                     render_back_canvas = true
-                    this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement);
                   }
+                  this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement)
                 }
               }
             })
