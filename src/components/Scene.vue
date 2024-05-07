@@ -2794,9 +2794,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         custom_text_item.width = fabric_text.width
                         custom_text_item.height = fabric_text.height
                       }
-                      if(this.product_id == this.selectedProductId) {
-                        self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: this.product_custom_texts[custom_text_index].items }})
-                      }
+                      const converted_width = unitConversion(fabric_text.width * fabric_text.scaleX * this.measurementRatio)
+                      const converted_height = unitConversion(fabric_text.height * fabric_text.scaleY * this.measurementRatio)
+                      custom_text_item.actualWidth = fabric_text.width
+                      custom_text_item.actualHeight = fabric_text.height
+                      custom_text_item.originalWidth = converted_width!.value
+                      custom_text_item.originalHeight = converted_height!.value
+
+                      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: custom_text.items }})
+
                       fabric_text.setControlsVisibility(this.fabric_control_visibility)
                       if (!self.product_custom_text_objects[custom_text_index]) {
                         self.product_custom_text_objects[custom_text_index] = [];
