@@ -137,6 +137,7 @@ const ProductAttributes:Module<any, any> = {
       category_index: 0,
       category_id: null
     },
+    initializing_product_data: false,
     logo_colors_info: {
       /*
       * while adding/removing property make  sure to add/remove property in helpers method logoColorInfoDefaultObject()
@@ -151,6 +152,9 @@ const ProductAttributes:Module<any, any> = {
   mutations: {
     SET_IS_ROSTER_OPEN(state:Record<any,any>, payload: boolean){
       state.isRosterOpened = payload;
+    },
+    SET_INITIALIZING_PRODUCTS_DATA(state:Record<any,any>, payload: boolean) {
+      state.initializing_product_data = payload
     },
     UPDATE_NOTIFICATION(state:Record<any, any>, payload){
      const index =  state.notifications.findIndex((item:Record<any, any>)=>{
@@ -1224,6 +1228,9 @@ const ProductAttributes:Module<any, any> = {
       } else {
         return state.product_custom_texts[product_id];
       }
+    },
+    getInitializingProductData: state => {
+      return state.initializing_product_data
     },
     allProductsCustomTexts: state => {
       return state.product_custom_texts

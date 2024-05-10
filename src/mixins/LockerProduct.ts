@@ -215,6 +215,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
           this.$store.commit('SET_APPLICATION_MOUNTED')
           return false;
+        } else {
+          this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
         }
         let active_product: Record<any, any> = retrieved_products[active_product_index]
         let product_custom_texts: Record<any, any>[] = active_product.product_custom_texts;
@@ -365,6 +367,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           this.$store.commit('SET_SETTING', factory_setting)
         }
         this.$store.commit('SET_APPLICATION_MOUNTED')
+        this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', false)
+        self.$eventBus.$emit("sceneMountedAction")
         resolve(response_data)
       })
     })
