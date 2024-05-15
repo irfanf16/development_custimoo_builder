@@ -18,6 +18,7 @@ const Dashboard = ()=> import("@/views/Dashboard.vue")
 const ThreeDView = ()=> import("@/views/ThreeDView.vue")
 const Thankyou = ()=> import("@/views/Thankyou.vue")
 const Deactive = ()=> import("@/views/Deactive.vue")
+const Payment = ()=> import("@/views/Payment.vue")
 const scene3d  = () => import("@/components/3d/scene-3d.vue")
 const GLBLoader  = () => import("@/components/3d/glb-loader.vue")
 const GLBLoaderNew  = () => import("@/components/3d/glb-loader_new.vue")
@@ -101,6 +102,11 @@ const routes: Array<RouteConfig> = [
     path:'/deactive',
     name:'Deactive',
     component: Deactive,
+  },
+  {
+    path:'/payment',
+    name:'Payment',
+    component: Payment,
   },
   {
     path:'/reset-password',

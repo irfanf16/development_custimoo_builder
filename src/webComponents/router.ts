@@ -6,7 +6,8 @@ import {checkCompanyStatus} from "../../middleware/checkCompany";
 const Home = ()=> import('../views/Home.vue')
 const ShareRoster = ()=> import('../views/ShareRoster.vue')
 const CollectionViewPDF = ()=> import('@/views/CollectionViewPDF.vue')
-
+const Deactive = ()=> import("@/views/Deactive.vue")
+const Payment = ()=> import("@/views/Payment.vue")
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -34,6 +35,16 @@ const routes: Array<RouteConfig> = [
     path:'/admin/login',
     name:'LoginAsAdmin',
     component: Home,
+  },
+  {
+    path:'/deactive',
+    name:'Deactive',
+    component: Deactive,
+  },
+  {
+    path:'/payment',
+    name:'Payment',
+    component: Payment,
   }
 ]
 

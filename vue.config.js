@@ -31,6 +31,15 @@ module.exports = {
       .tap(options => {
         // modify the options...
 
+
+
+
+
+
+
+
+
+
         return options
       })
     config.output.chunkFilename('[name].[hash].js')
