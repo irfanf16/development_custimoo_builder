@@ -115,11 +115,11 @@
     </template>
 
     <h2 v-if="mobileScreen" class="fw-bold px-3 py-1 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
-      <span style="font-size: 16px">Designs Available</span>
+      <span style="font-size: 16px">Designs</span>
       <span class="mt-1 toggleArrow" :class="[showDesigns ? 'opened' : '']"><BIconChevronDown /></span>
     </h2>
     <h2 v-else class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between">
-      <span style="font-size: 16px">Designs Available</span>
+      <span style="font-size: 16px">Designs</span> <button v-if="!allow_shuffle_colors && JSON.stringify(this.logoColorsInfo.colors) != JSON.stringify(this.logoColorsInfo.extracted_colors)" @click="useShuffledColors()" class="btn btn-secondary btn-sm">Use shuffled colors</button>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
       <DesignAvailable v-if="startLoadDesigns" :key="this.selectedProduct.productstyles[styleIndex]? this.selectedProduct.productstyles[styleIndex].id : ''" :products_fonts="products_fonts" />
@@ -276,6 +276,10 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         }
       });
     }, 700);
+  }
+
+  public useShuffledColors() {
+    this.useLogoColors(true)
   }
 
   public async changeProductType(prd_type: string) {
