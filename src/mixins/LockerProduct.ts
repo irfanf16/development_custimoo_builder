@@ -1282,7 +1282,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               const shopify_sizes = {};
               (cart_product as Record<any, any>).product_roster_detail.forEach(item => {
                 shopify_sizes[item.size] = (shopify_sizes[item.size] || 0) + parseInt(item.quantity);
-              });
+               });
 
               shopify_main_item_data['properties'] = {  // items with underscore are private properties of shopify cart object
                 '_custimoo_cart_id': api_res.new_created_id,
@@ -1304,9 +1304,12 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 shopify_main_item_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
               }
               if (Object.keys(shopify_sizes).length > 0) {
+                const size_array:Record<any, any> = [];
                 for (const shopify_size in shopify_sizes) {
                   shopify_main_item_data['properties']['_Size ' + shopify_size ] = shopify_sizes[shopify_size];
+                  size_array.push({'size':shopify_size, 'qty':shopify_sizes[shopify_size] })
                 }
+                shopify_main_item_data['properties']['_sizes_json'] = size_array;
               }
 
               ecom_url = company_domain + '/cart/add.js?token='+x_rand
