@@ -16,6 +16,14 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     return this.$store.getters.getLastActiveProductData
   }
 
+  get mobileScreen(): boolean {
+    return this.$store.getters.getManageComponents.mobileScreen
+  }
+
+  get allow_shuffle_colors() : string {
+    return this.$store.getters.getSetting('allow_shuffle_colors');
+  }
+
   public setSwatchColor(color: Record<any, any>) {
     const self: Record<any, any> = this
     const payload = {color_info : color , index : this.active_logo_color_index}
@@ -47,7 +55,11 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     if(fire_event) { // fire event true means its the first time we use logo colors so update logo colors in extracted colors so on product change we got the same color as shown
       this.logoColorsInfo.extracted_colors = JSON.parse(JSON.stringify(this.logoColorsInfo.colors))
     }
-    setDefaultColors(true)
+    let again_from_logo = true
+    if(this.mobileScreen || this.allow_shuffle_colors) {
+      again_from_logo = false
+    }
+    setDefaultColors(again_from_logo)
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
     if(fire_event) {
       self.$eventBus.$emit('changeDefaultColors')

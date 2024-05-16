@@ -226,6 +226,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getSetting('color_type');
   }
 
+  get allow_shuffle_colors() : boolean {
+    return this.$store.getters.getSetting('allow_shuffle_colors');
+  }
+
   get custom_logos(): [Record<any, any>] {
     let product_id = this.product_id ? this.product_id : this.selectedProductId
     return this.$store.getters.getCustomLogos(product_id)
@@ -708,7 +712,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if(this.mainPreview && (Object.keys(this.groupColors).length)) {
       this.$store.dispatch('setGroupColors', {})
     }
-    if(!is_shuffle || this.mainPreview) {
+    if(!is_shuffle || this.mainPreview || this.allow_shuffle_colors || this.mobileScreen) {
       let render_time = 0
       if(!this.mainPreview) {
         render_time = this.getRandom()
@@ -720,7 +724,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public async changeDefaultColors(render_time = 300): Promise<void> {
     if(this.productType == 'customized') {
       let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      if(defaultColors.length && !this.mainPreview) {
+      if(defaultColors.length && !this.mainPreview && !this.mobileScreen && !this.allow_shuffle_colors) {
         defaultColors = this.logoColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
       }
       if (defaultColors.length) {
