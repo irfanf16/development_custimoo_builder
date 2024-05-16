@@ -2,7 +2,7 @@
     <div class="preview-section p-3 d-flex flex-wrap justify-content-center align-items-center" v-if="selectedProduct">
       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
         <div class="image-holder" :key="'front'+design.id">
-          <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
+          <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{
                     textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                     safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -17,15 +17,15 @@
                  }"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
                  :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :fromRosterModal="fromRosterModal" />
 
-          <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene"
+          <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
                  models: selectedProduct.productstyles[styleIndex].front_models}"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
                  :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :fromRosterModal="fromRosterModal" />
         </div>
       </template>

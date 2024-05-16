@@ -305,13 +305,16 @@
         if (res.status == 201){
           this.$store.commit('SET_RECENT_LOGOS')
           await this.$store.dispatch('getLockerRoomColors')
+          await this.$store.dispatch('getLockers')
           await this.$store.dispatch('getNotifications')
           await  getPermissions()
+          await this.$store.dispatch('getCartServer', {})
           this.showToast(res.data.message, 'success')
           for (let key in this.form) {
             Vue.set(this.form, key, '')
           }
           this.hideVModal('loginModal');
+          this.$emit('actionAfterLogin')
         }
       }catch (error){
         this.showError(error)

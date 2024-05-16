@@ -426,13 +426,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           });
           hideLockerProductUpdateButton(false)
         }
-
-        function handleCustomTextDeletedFromCanvas(custom_text_index: number) {
-          self.product_custom_text_objects[custom_text_index] = null;
-          let updated_custom_text = self.$store.getters.selectedProductCustomTexts(custom_text_index);
-          updated_custom_text.value = "";
-          self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: updated_custom_text})
-        }
       })
     }
   }
@@ -468,7 +461,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public getSvgGroupColors(svg_group: string) {
-    if(svg_group && this.product.svg_group_color_container && this.product.svg_group_color_container[svg_group]) {
+    if(svg_group && this.product?.svg_group_color_container && this.product.svg_group_color_container[svg_group]) {
       return this.product.svg_group_color_container[svg_group]
     }
     return this.productColors[0]

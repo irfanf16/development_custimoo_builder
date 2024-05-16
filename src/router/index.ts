@@ -81,7 +81,8 @@ const routes: Array<RouteConfig> = [
   {
     path:'/thank-you',
     name: 'Thankyou',
-    component: Thankyou
+    component: Thankyou,
+    props: true
   },
   {
     path:'/collection/:collection_file_name/view',

@@ -23,6 +23,7 @@ import {
 import product from "@/store/modules/product";
 import {isEmpty, findIndex} from "lodash";
 import {eventBus} from "@/event/eventBus";
+import Store from "@/store";
 const MAX_UNDO_REDO_ITEMS = 3;
 const ProductAttributes:Module<any, any> = {
   state: {
@@ -351,7 +352,12 @@ const ProductAttributes:Module<any, any> = {
           Vue.set(state.customLogos, product_id, payload.custom_logos)
         }
       }
-      updateLastActiveProductData({ custom_logos: state.customLogos})
+      let last_active_product_data = state.last_active_product_data
+      if(last_active_product_data && last_active_product_data.custom_logos[product_id] && last_active_product_data.custom_logos[product_id].length > 0) {
+        last_active_product_data = santaClone(last_active_product_data)
+        last_active_product_data.custom_logos[product_id] = payload.custom_logos
+      }
+      updateLastActiveProductData({custom_logos: last_active_product_data.custom_logos})
     },
     SET_RECENT_LOGOS(state: Record<any, any>, payload: Record<any, any>) {
       if(payload) {
@@ -561,9 +567,13 @@ const ProductAttributes:Module<any, any> = {
         if(state.customLogos[product.id]) {
           let logo_default_setting: Record<any, any> = getLogoSettingsObject()
           if(product.logos_setting[0]) {
-            logo_default_setting = {...logo_default_setting, ...product.logos_setting[0]}
+            logo_default_setting = {...logo_default_setting, ...product.logos_setting[0], ...{id: null}}
           }
           Vue.set(state.customLogos[product.id], 0, logo_default_setting)
+          Vue.set(state.customLogos[product.id], 0, logo_default_setting)
+          if(state.last_active_product_data && state.last_active_product_data.custom_logos[product.id]) {
+            Vue.set(state.last_active_product_data.custom_logos[product.id], 0, logo_default_setting)
+          }
         }
       })
     },
@@ -1213,13 +1223,12 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
-    selectedProductCustomTexts: state => (custom_text_index = -1) =>  {
-      /*
-      * if custom_item_index is given then object will be return else array of objects will be return
-      * */
-      if(custom_text_index != -1)
-        return state.product_custom_texts[state.selectedPrdId][custom_text_index]
-      return state.product_custom_texts[state.selectedPrdId]
+    selectedProductCustomTexts: state =>  {
+      if(state.selectedPrdId) {
+        return state.product_custom_texts[state.selectedPrdId];
+      } else {
+        return []
+      }
     },
     //this is parameterized getter that's why in vue devtool it will always return function. Also it will not be cached instead it will always executed when we use getter
     productCustomTexts: state => (product_id = "all") =>  {

@@ -419,7 +419,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         this.showToast('Your pdf is generating', 'success');
         this.viewLoader = false;
         // this.hideVModal('cart-modal')
-        this.$router.push('/thank-you')
+        this.$router.push({name: 'Thankyou', params: { order: res.data.result.order } })
       }
       else {
         this.viewLoader = false

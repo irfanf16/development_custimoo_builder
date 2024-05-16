@@ -32,7 +32,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
 
   public async syncRosterWithCustomText(type: string, text_number_value: string) {
     const self: Record<any, any> = this;
-    const product_custom_texts = self.$store.getters.selectedProductCustomTexts();
+    const product_custom_texts = self.$store.getters.selectedProductCustomTexts;
     const custom_name_index = findIndex(product_custom_texts, { type: 'name' });
     const custom_number_index = findIndex(product_custom_texts, { type: 'number' });
     const custom_name_number_index = type == 'name' ? custom_name_index : custom_number_index;
@@ -51,11 +51,10 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     const self: Record<any, any> = this;
     this.show_roster_change_warning = true
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0], productSizes)));
+    let size_index = roster_items.size_index;
     roster_items = [...this.productRoster, roster_items];
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-
-
-    await this.handleRosterUpdate(roster_items.size_index, 'size', roster_items.length - 1)
+    await this.handleRosterUpdate(size_index, 'size', roster_items.length - 1)
     await handleProductPriceUpdate()
   }
 

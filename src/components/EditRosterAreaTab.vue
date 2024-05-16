@@ -137,7 +137,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   get customText(): Record<any, any>[] {
-    return this.$store.getters.selectedProductCustomTexts();
+    return this.$store.getters.selectedProductCustomTexts;
   }
 
   get custom_name_index() : number {

@@ -695,7 +695,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       let currency_code = "";
       let currency_symbol = "";
       if (productPriceObject !== null && productPriceObject !== undefined) {
-
         product_price = productPriceObject.product_price ? productPriceObject.product_price : 0;
         quantity = productPriceObject.quantity ? productPriceObject.quantity : 0;
         if (productPriceObject.active_currency) {
@@ -1794,7 +1793,7 @@ const getDefaultColorsObject = () => {
 
 const setDefaultColors = (again_from_logo = false) => {
   const default_colors_object = getDefaultColorsObject()
-  let logo_colors = Store.getters.getLogoColorsInfo('colors')
+  let logo_colors = [ ...Store.getters.getLogoColorsInfo('colors') ]
   if(again_from_logo) {
     logo_colors = [ ...Store.getters.getLogoColorsInfo('extracted_colors') ]
   }
@@ -2177,8 +2176,10 @@ const handleProductPriceUpdate = async ():Promise<void> => {
       product_price_object = {
         product_price: product_price, product_price_with_quantity: product_price_with_quantity, addons_price: addons_price,
         addons_price_with_quantity: addons_price_with_quantity, total_price: total_price, total_quantity: roster_quantity_total,
-        currency_code: product_sku.prices[0].code, active_currency: product_sku.prices[0]
+        currency_code: product_sku.prices[0].code, active_currency: product_sku.prices[0], show_price: true
       }
+    } else {
+      product_price_object = getProductPriceDefaultObject();
     }
   }
   Store.commit('SET_PRODUCT_PRICE_OBJECT', product_price_object )
