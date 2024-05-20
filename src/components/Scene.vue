@@ -2760,7 +2760,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             custom_text.items.forEach((custom_text_item: Record<any, any>, customTextItemIndex: number) => {
               if ((custom_text_item.placement.toLowerCase() == 'back' && self.backCanvas) || custom_text_item.placement.toLowerCase() == 'front') {
                 let fabric_text: fabric.Text | fabric.Group | Record<any, any>
-                if (this.mainPreview && this.selectedProductId == this.product_id) {
+                if ((this.mainPreview || this.fromRosterModal) && this.selectedProductId == this.product_id) {
                   let font = this.products_fonts[custom_text.font_family]
                   if(!font) {
                     font = this.products_fonts[Object.keys(this.products_fonts)[0]]
@@ -2879,7 +2879,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     originY: 'center',
                     globalCompositeOperation: 'source-atop',
                     //todo sometime font family is null
-                    fontFamily: custom_text_item.font_family ? custom_text_item.font_family : 'Ubuntu',
+                    fontFamily: custom_text.font_family ? custom_text.font_family : 'Ubuntu',
                     fontSize: self.canvasHeight / self.mainCanvasHeight * custom_text_item.height,
                     fill: custom_text_item.color,
                     paintFirst: 'stroke',
