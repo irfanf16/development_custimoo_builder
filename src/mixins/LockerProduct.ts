@@ -412,6 +412,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       self.$eventBus.$emit("customLogoResetAndAdd")
     }
     if(product_custom_texts) {
+      await self.$eventBus.$emit('resetTextsCanvas');
       let active_product_custom_texts = [];
       if(product_custom_texts.constructor.name == "Array" && product_custom_texts.length > 0) {
         this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {product_id: active_product_id, value: product_custom_texts});
