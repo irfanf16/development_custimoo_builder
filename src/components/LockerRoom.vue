@@ -396,7 +396,7 @@ import {
   classObserver,
   handleResponseException,
   getDomDocument,
-  getEditModeDefaultObj
+  getEditModeDefaultObj, exitFromEditMode
 } from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
@@ -928,6 +928,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public async deleteRoom($event, id: number, index: number | string) {
     $event.stopPropagation();
     if (confirm('You are going to delete associated product')) {
+      if(this.getProductEditInfoObject.type === "locker_product"){
+        let locker_product_id  = this.getProductEditInfoObject.locker_product_info.product_id;
+        if(locker_product_id === this.selectedProduct.id){
+            exitFromEditMode()
+        }
+      }
       let res = await this.$store.dispatch('deleteRoom', {id: id, index: index});
       if (res == true) {
         this.showToast('room deleted', 'success')

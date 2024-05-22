@@ -1587,47 +1587,51 @@ const lastActiveProductDefaultObject = (keys_default_values = {}) => {
 }
 
 const getDataToSetLastActiveProduct = () => {
+  let last_active_product_default_object = lastActiveProductDefaultObject();
+
   const selected_product = Store.getters.getSelectedProduct;
-  const style_index = Store.getters.getCurrentStyleIndex;
-  const product_style = selected_product.productstyles[style_index];
-  const design_index = findIndex(product_style.productdesigns, (design: Record<any, any>) => design.design_show == 1)
-  const selected_design = product_style.productdesigns[design_index]
-  const categories = Store.getters.getCategories
-  let category_id = null
-  let category_index = 0
-  if(categories.length > 0) {
-    const selected_category = Store.getters.getSelectedCategory
-    category_id = selected_category.category_id ? selected_category.category_id : null
-    if(category_id) {
-      category_index = findIndex(categories, ['id', category_id])
-      if(category_index == -1) {
-        category_index = 0
+  if(selected_product){
+    const style_index = Store.getters.getCurrentStyleIndex;
+    const product_style = selected_product.productstyles[style_index];
+    const design_index = findIndex(product_style.productdesigns, (design: Record<any, any>) => design.design_show == 1)
+    const selected_design = product_style.productdesigns[design_index]
+    const categories = Store.getters.getCategories
+    let category_id = null
+    let category_index = 0
+    if(categories.length > 0) {
+      const selected_category = Store.getters.getSelectedCategory
+      category_id = selected_category.category_id ? selected_category.category_id : null
+      if(category_id) {
+        category_index = findIndex(categories, ['id', category_id])
+        if(category_index == -1) {
+          category_index = 0
+        }
       }
     }
+    last_active_product_default_object = lastActiveProductDefaultObject({
+      category_index: category_index,
+      category_id: category_id,
+      design_index: design_index,
+      design_id: selected_design.id,
+      product_index: Store.getters.getSelectedIndex,
+      product_id: selected_product.product_id,
+      search_products: null,
+      style_index: style_index,
+      style_id: product_style.id,
+      page_no: Store.getters.getProductsNextPageNo? Store.getters.getProductsNextPageNo - 1 : 1,
+      customized: Store.getters.getCustomized,
+      personalized: Store.getters.getPersonalized,
+      private_product: Store.getters.getPrivateProduct,
+      product_custom_texts: Store.getters.productCustomTexts(),
+      custom_logos: Store.getters.getCustomLogos(),
+      default_colors: Store.getters.getDefaultColors,
+      group_colors: Store.getters.getGroupColors,
+      logo_colors: Store.getters.getLogosColors,
+      roster_detail: Store.getters.getProductRosters(),
+      products_rosters: Store.getters.getProductRosters('all'),
+    })
   }
-
-  return {
-    category_index: category_index,
-    category_id: category_id,
-    design_index: design_index,
-    design_id: selected_design.id,
-    product_index: Store.getters.getSelectedIndex,
-    product_id: selected_product.product_id,
-    search_products: null,
-    style_index: style_index,
-    style_id: product_style.id,
-    page_no: Store.getters.getProductsNextPageNo? Store.getters.getProductsNextPageNo - 1 : 1,
-    customized: Store.getters.getCustomized,
-    personalized: Store.getters.getPersonalized,
-    private_product: Store.getters.getPrivateProduct,
-    product_custom_texts: Store.getters.productCustomTexts(),
-    custom_logos: Store.getters.getCustomLogos(),
-    default_colors: Store.getters.getDefaultColors,
-    group_colors: Store.getters.getGroupColors,
-    logo_colors: Store.getters.getLogosColors,
-    roster_detail: Store.getters.getProductRosters(),
-    products_rosters: Store.getters.getProductRosters('all'),
-  }
+  return last_active_product_default_object;
 }
 
 const resetLastActiveProductData = async () => {
