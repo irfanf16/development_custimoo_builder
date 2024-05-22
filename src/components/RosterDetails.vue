@@ -176,7 +176,7 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem(productSizes)">Add Player</button>
-      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="$eventBus.$emit('saveRosterToLocker', isEditingFromLocker)">
+      <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="handleLockerProductUpdate">
         Save & close
       </button>
       <template v-else-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'cart_product' && goBackToCart">
@@ -564,6 +564,12 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
     }else{
       this.hideVModal('rostermodal')
     }
+  }
+
+  public handleLockerProductUpdate() {
+    const self: Record<any, any> = this
+    self.$eventBus.$emit('saveRosterToLocker', this.isEditingFromLocker);
+    this.hideVModal('rostermodal')
   }
 
   /*
