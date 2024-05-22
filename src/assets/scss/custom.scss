@@ -3426,8 +3426,9 @@ button {
     width: 100% !important;
     box-shadow: none;
 
-    div:nth-child(4) {
-        display: none;
+    .color-type,
+    .color-type~div {
+        display: none !important;
     }
 
     // .saturation{

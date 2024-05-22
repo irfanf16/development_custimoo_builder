@@ -1,53 +1,78 @@
 <template>
   <div class="accordion mt-1" role="tablist">
-    <b-card-body style="padding: 0 !important;">
-      <b-tabs content-class="mt-1" class="logo-placement-tabs">
-        <b-tab v-for="(productColor, productColorIndex) in productColors" :key="`color-tab-${productColorIndex}`">
-          <template #title>
-            {{ productColor.name | capitalize }}
-          </template>
-          <template>
-           <div class="color-holder pt-2">
-             <div class="color-container">
-               <template v-for="(colorObject, colorObjectIndex) in productColor.color_text">
-                 <div v-if="colorObject.value" class="color-box" @click="updateLogoActiveColor(colorObject)"
-                      :title="colorObject.name" :style="{background: colorObject.value}"
-                      :key="`product-${productColorIndex}-color-${colorObjectIndex}`"
-                 >
-                   <span v-if="activeLogoColor && activeLogoColor.hex == colorObject.value" class="selected" style="z-index: 100; opacity: 1">
-                          <BIconCheck />
-                   </span>
-                 </div>
-               </template>
-             </div>
-           </div>
-          </template>
-        </b-tab>
-        <b-tab v-if="selectedProduct.is_custom_color_allowed">
-          <template #title>
-            Others
-          </template>
-          <template>
-            <b-form class="pantone-color-field" v-on:submit.prevent>
-              <label>Pantone: (TCX Colors)</label>
-              <b-form-input
-                :value="activeLogoColor ? activeLogoColor.pantone : 'XX-XXXX'"
-                class="mb-2 mr-sm-2 mb-sm-0"
-                @input="setLogoPantoneColor($event,activeLogoColor)"
-                placeholder="XX-XXXX"
-              ></b-form-input>
-              <div class="text-danger fs-2" v-if="pantoneMessage != ''">{{pantoneMessage}}</div>
-            </b-form>
-            <div class="color-holder">
-              <div class="color-container color-picker-container">
-                <color-picker @changeColor="updateLogoActiveColor($event, 'color-picker')" :colors-default="[]" :key="activeLogoColor.hex" :color="activeLogoColor.hex" theme="light"
-                              :colors-history="false"/>
-              </div>
+    <b-tabs>
+      <b-tab>
+        <template #title>
+          {{productColors[0].name | capitalize | removeExt}}
+        </template>
+        <div class="color-holder">
+          <div class="color-container">
+            <div class="color-box" v-for="(color, colorIndex) in productColors[0].color_text" :style="{background: color.value}"
+                 :key="`product_color_${productColors[0].type}_type_color_${colorIndex}`" :title="color.name"
+                 @click="updateLogoActiveColor(color)"></div>
+          </div>
+        </div>
+      </b-tab>
+      <b-tab v-if="lockerroomColors && lockerroomColors.length && isCustomerAuthenticated">
+        <template #title>
+          Locker colors
+        </template>
+        <div class="color-holder">
+          <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 py-2">
+            <template v-for="(room, i) in lockerroomColors">
+              <b-button size="sm" class="btn-locker-color" variant="secondary" @click="setActiveLockerIndex(i)" :class="{'active': i == activeLockerIndex}"
+                        :key="`locker_${i}`">
+                <!--                  {{ room && room.folders[0].folder_name}}-->
+                {{room && room.room_name}}
+              </b-button>
+            </template>
+          </div>
+
+          <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 pb-2">
+            <b-button size="sm" class="btn-locker-folder" variant="secondary" :class="{'active': folder_i == activeFolderIndex}" @click="setActiveFolderIndex(activeLockerIndex, folder_i)"
+                      v-for="(folder, folder_i) in lockerroomColors[activeLockerIndex].folders" :key="`folder_${activeLockerIndex}${folder_i}`">
+              {{folder.folder_name}}
+            </b-button>
+          </div>
+          <div class="color-container mt-1">
+            <template v-for="(color, colorIndex) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
+              <div class="color-box" :style="{background: color.value}" v-if="color.value"
+                   :key="`text_color_${colorIndex}${color.name}`" :title="color.name"
+                   @click="updateLogoActiveColor(color)"></div>
+            </template>
+          </div>
+        </div>
+      </b-tab>
+      <b-tab v-if="selectedProduct.is_custom_color_allowed">
+        <template #title>
+          Others
+        </template>
+        <template>
+          <b-form class="pantone-color-field" v-on:submit.prevent>
+            <label>Pantone: (TCX Colors)</label>
+            <b-form-input
+              :value="activeLogoColor ? activeLogoColor.pantone : 'XX-XXXX'"
+              class="mb-2 mr-sm-2 mb-sm-0"
+              @input="setLogoPantoneColor($event,activeLogoColor)"
+              placeholder="XX-XXXX"
+            ></b-form-input>
+            <div class="text-danger fs-2" v-if="pantoneMessage != ''">{{pantoneMessage}}</div>
+          </b-form>
+          <div class="color-holder">
+            <div class="color-container color-picker-container">
+              <color-picker @changeColor="updateLogoActiveColor($event, 'color-picker')"
+                            :colors-default="[]" :key="activeLogoColor.hex" :color="activeLogoColor.hex" theme="light"
+                            :colors-history="false" :ref="`logo-color-picker`"/>
             </div>
-          </template>
-        </b-tab>
-      </b-tabs>
-    </b-card-body>
+          </div>
+        </template>
+      </b-tab>
+
+      <!--                              <template #tabs-end>-->
+      <!--                                <b-nav-item>Others</b-nav-item>-->
+      <!--                                <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>-->
+      <!--                              </template>-->
+    </b-tabs>
 
   </div>
 </template>
@@ -69,6 +94,11 @@ import ColorsTabMixin from "@/mixins/ColorsTabMixin";
       if (!value) return ''
       value = value.toString()
       return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase()
+    },
+    removeExt: (value: string) => {
+      if (!value) return ''
+      value = value.toString()
+      return value.replace(/\.[^/.]+$/, "")
     }
   },
 })
@@ -102,6 +132,10 @@ export default class LogoColorTabsNew extends Mixins(ColorsTabMixin) {
 
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
   }
 
   get colorTabs() {

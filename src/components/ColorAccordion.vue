@@ -105,7 +105,7 @@
                 </div>
               </template>
               <!-- product colors -->
-              <template v-else-if="!showOtherColors" v-for="(color, c_index) in productColors[selectTypeIndex].color_text">
+              <template v-else-if="!showOtherColors" v-for="(color, c_index) in productColors[selectTypeIndex]?.color_text">
                 <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
                   <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
