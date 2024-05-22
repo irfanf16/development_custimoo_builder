@@ -84,15 +84,19 @@ import {fabric} from 'fabric'
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import {
-  checkIsEmpty, getColorType, getDefaultColorsObject,
-  getSelectedProductPantones, hideLockerProductUpdateButton,
+  checkIsEmpty,
+  getColorType,
+  getDefaultColorsObject,
+  getSelectedProductPantones,
+  hideLockerProductUpdateButton,
   setUndoRedoItems,
   unitConversion
 } from '@/helpers/Helpers'
-import {find, unset} from "lodash";
+import {find} from "lodash";
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
-import Store from "@/store";
+import hexRgb from "hex-rgb";
+
 @Component<Scene>({
   beforeDestroy() {
     const self: Record<any, any> = this;
@@ -731,6 +735,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         let appliedDefaultColors: string[]|string[][] = []
         let useColorIndex = 0
         this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex) => {
+          if(this.product.svg_group_color_container && this.product.svg_group_color_container[svgGroup.id]) {
+            const product_part_colors = this.product.svg_group_color_container[svgGroup.id].json_data
+            useColorIndex = this.findClosestColor(product_part_colors, defaultColors)
+          }
           if(svgGroup.gradient_colors) {
             let gradient_colors: string[] = []
             svgGroup.gradient_colors.forEach((gradient_color, gradient_color_index) => {
@@ -804,6 +812,29 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         }
       }
     }
+  }
+
+  public findClosestColor(product_part_colors, defaultColors) {
+    let group_color_index
+    let least_color_difference = 765 // the color difference can not be exceeded more the 255 + 255 + 255 = 765
+    const defaultColorsRGB = defaultColors.map((color: Record<any, any>) => hexRgb(color.color))
+    const productPartColorsRGB = product_part_colors.map((color: Record<any, any>) => hexRgb(color.value))
+    defaultColorsRGB.forEach((default_color, default_color_index) => {
+      productPartColorsRGB.forEach((product_part_color) => {
+        // Calculate the Euclidean distance
+        const diff = Math.sqrt(
+          Math.pow(default_color.red - product_part_color.red, 2) +
+          Math.pow(default_color.green - product_part_color.green, 2) +
+          Math.pow(default_color.blue - product_part_color.blue, 2)
+        );
+        if(diff < least_color_difference) {
+          least_color_difference = diff
+          group_color_index = default_color_index
+        }
+      })
+    })
+
+    return group_color_index;
   }
 
   public frontCanvasRender(render_time = 300) :void {
