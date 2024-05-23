@@ -26,13 +26,13 @@
               <button @click="downloadSampleTemplate(product_id)" class="btn btn-secondary btn-sm"
                       v-b-tooltip="'Download the sample file of microsoft excel to fill the data to upload it later'">
                 <b-icon-download /><br>
-                Download sample
+                Download roster excel template
               </button>
               <form name="upload_excel" ref="upload_excel">
                 <div class="excel-file-uploader">
                   <b-icon-file-earmark-excel-fill />
-                  <div style="white-space: nowrap" class="drop-file">Drop/Select the file</div>
-                  <div style="white-space: nowrap">Upload excel file</div>
+                  <div style="white-space: nowrap" class="drop-file">Upload roster excel template</div>
+                  <div style="white-space: nowrap">Upload roster excel template</div>
                   <input type="file" @input="uploadExcelFile($event)">
                 </div>
               </form>

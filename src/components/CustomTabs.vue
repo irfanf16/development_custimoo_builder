@@ -73,12 +73,12 @@
           <span class="addPlayer no-icon" @click="shareRoster"><span class="fs-2 icon position-absolute" v-if="false"><BIconShare /></span> <span class="d-inline-block ml-1">Share {{company.login_code && company.login_code.hasOwnProperty('roster_name')? company.login_code.roster_name : 'Roster' | TitleCase}}</span></span>
           <span class="addPlayer no-icon" @click="downloadTemplate(selectedProduct.id)">
             <span v-if="false" class="fs-2 icon position-absolute"><BIconDownload /></span>
-            Download sample
+            Download roster excel template
           </span>
 
           <span v-if="!showLoader" class="addPlayer no-icon excelFileUploader">
             <span class="fs-2 icon position-absolute" v-if="false"><BIconFileEarmarkExcel /></span>
-            Upload excel
+            Upload roster excel template
             <form name="upload_excel" ref="upload_excel">
               <input type="file" @input="uploadExcelFile($event)">
             </form>
