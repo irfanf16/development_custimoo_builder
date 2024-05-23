@@ -178,12 +178,12 @@ export default class ShareRoster extends Mixins(ErrorMessages) {
     let files = event.target.files ? event.target.files[0] : null;
     let ext = files.name.split('.').pop();
     if (ext != 'xlsx'){
-      alert("please upload a valid excel file");
+      alert("The Excel file that was uploaded cannot be read, or it does not adhere to the template format. Please download the Excel template located next to the upload field, input your data there, and then attempt the upload again.");
       return false
     }
     readXlsxFile(files).then((rows: any[][]) => {
       if (rows[0].length != 8){
-        alert("please upload valid file")
+        alert("The Excel file that was uploaded cannot be read, or it does not adhere to the template format. Please download the Excel template located next to the upload field, input your data there, and then attempt the upload again.")
         return false
       }
       for (let i in rows[0]){
@@ -254,7 +254,7 @@ export default class ShareRoster extends Mixins(ErrorMessages) {
           this.ref['myModal'].hide();
         }
       }else{
-        alert("please upload a valid file");
+        alert("The Excel file that was uploaded cannot be read, or it does not adhere to the template format. Please download the Excel template located next to the upload field, input your data there, and then attempt the upload again.");
       }
     })
   }

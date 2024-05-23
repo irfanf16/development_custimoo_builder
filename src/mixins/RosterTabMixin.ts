@@ -135,7 +135,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     const updated_roster:Record<any, any>[] = []
     let derived_size_index = -1
     if (ext != 'xlsx'){
-      alert("please upload a valid excel file");
+      alert("The Excel file that was uploaded cannot be read, or it does not adhere to the template format. Please download the Excel template located next to the upload field, input your data there, and then attempt the upload again.");
       this.showLoader = false;
       return false
     }
@@ -144,7 +144,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     readXlsxFile(files).then((rows: any[][]) => {
       check_cols = rows[0][0] == 'NAME ON PRODUCT' && rows[0][1] == 'NUMBER' && rows[0][2] == 'SIZE*' && rows[0][3] == 'QUANTITY*'
       if (rows[0].length != 4){
-        alert("Please upload valid file");
+        alert("The Excel file that was uploaded cannot be read, or it does not adhere to the template format. Please download the Excel template located next to the upload field, input your data there, and then attempt the upload again.");
         this.showLoader = false;
         return false
       }else if(rows.length < 2){
