@@ -1,5 +1,8 @@
 <template>
   <span>
+    <div v-if="showLoader" class="loader">
+      <img src="@assets/images/loading.gif" />
+    </div>
     <b-tabs class="main-locker-tabs" @input="hidePopper" ref="main-locker-tabs" v-model="main_locker_tabs">
       <b-tab>
         <template #title>
@@ -109,6 +112,12 @@
                               <a style="font-size: 12px;" data-title="Edit roster" @click="editRoster(product)"
                                  @mouseleave="hideTooltip" @mouseenter="showTooltip">
                                 <b-icon-list class="fs-3" />
+                              </a>
+                            </li>
+                            <li>
+                              <a style="font-size: 12px;" data-title="Download preview images" @click="downloadProductPreviewImages(i, ind)"
+                                 @mouseleave="hideTooltip" @mouseenter="showTooltip">
+                                <b-icon-download class="fs-3" />
                               </a>
                             </li>
                             <li v-if="mobileScreen" class="swap">
@@ -396,7 +405,7 @@ import {
   classObserver,
   handleResponseException,
   getDomDocument,
-  getEditModeDefaultObj, exitFromEditMode
+  getEditModeDefaultObj, exitFromEditMode, urlToBase64
 } from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
@@ -505,6 +514,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public renameRef = "";
   public lockerToRename: Record<any, any> = {};
   public locker_roster_id: number = 0
+  public showLoader = false
 
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
@@ -1166,6 +1176,25 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       new_room_index: new_room_index,
       new_room_id: new_room_id
     };
+  }
+
+  async downloadProductPreviewImages(lockerIndex: number, productIndex: number) {
+    let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
+    let preview_file_paths = [product.product_front_url];
+    if (product.product_back_url) {
+      preview_file_paths = [...preview_file_paths, product.product_back_url];
+    }
+    this.showLoader = true;
+    const base64_files = await urlToBase64(preview_file_paths);
+    this.showLoader = false;
+    const dom_document = getDomDocument(true);
+    base64_files.forEach((base64_file, base64_file_index) => {
+      let preview_file = dom_document.createElement("a");
+      preview_file.href = base64_file;
+      const suffix = base64_file_index === 0 ? 'front' : 'back';
+      preview_file.download = `${product.product_name + `_` + suffix}`
+      preview_file.click();
+    })
   }
 
   public reArrangeLockerProducts(payload: Record<any, any>) {
