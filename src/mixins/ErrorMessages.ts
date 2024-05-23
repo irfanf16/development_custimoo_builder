@@ -46,14 +46,17 @@ export default class ErrorMessages extends Vue{
     Object.keys(errors).map((field: string) => {
       errArr.push(errors[field][0]);
     });
-    errArr.forEach(element => {
-      VsToast.show({
-        title: element,
-        variant: 'error',
-        duration: timeout,
-        position: 'bottom-left'
-      });
-    })
+    for (let i = 0; i < errArr.length; i++) {
+      const element = errArr[i];
+      setTimeout(() => {
+        VsToast.show({
+          title: element,
+          variant: 'error',
+          duration: timeout,
+          position: 'bottom-left'
+        });
+      }, i * timeout); // Delay each toast by the timeout duration
+    }
   }
 
   public showErrorValidation(errors: Record<any, any>[string], timeout=5000):void{

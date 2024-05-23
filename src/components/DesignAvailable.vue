@@ -2,6 +2,12 @@
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[styleIndex]">
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
+        <template>
+          <label :class="{ 'select-design-checkbox': !mobileScreen, 'custom-checkbox': isCustomerAuthenticated }">
+            <input v-if="isCustomerAuthenticated" type="checkbox" :value="index" @change="handleActiveProductDesignSelection($event, index)" class="design-available-product-design-selection">
+            <span></span>
+          </label>
+        </template>
         <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{
@@ -29,12 +35,14 @@ import {Component, Prop, Vue, Mixins} from 'vue-property-decorator'
 import Scene from '@/components/Scene.vue'
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
+import {getDomDocument} from "@/helpers/Helpers";
 
 @Component<DesignAvailable>({
   components: {
     Scene
   },
   mounted() {
+    this.$eventBus.$on("product_designs_selection_reset", this.handleProductDesignsSelectionInfoReset)
     this.first_load = true
     this.design_width = (this.$refs['design_canvas'] as Record<any, any>)[0].clientWidth
     this.design_height = (this.$refs['design_canvas'] as Record<any, any>)[0].clientHeight;
@@ -66,6 +74,9 @@ import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
         this.first_load = false
       }, 1000)
     })
+  },
+  beforeDestroy() {
+    this.$eventBus.$off("product_designs_selection_reset")
   }
 })
 
@@ -106,6 +117,15 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     return this.$store.getters.getLogoColorsInfo();
   }
 
+  get getProductSelectionDesignInfo(): Array<any> {
+    return this.$store.getters.getProductSelectionDesignInfo
+  }
+
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+
+
   public changeDesign(index: number) {
     if(this.selectedDesignId != this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id) {
       if(this.logoColorsInfo.using_logo_colors) {
@@ -133,6 +153,21 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     if(this.mobileScreen){
       this.$store.dispatch('setManageComponents', {index: 'CustomizationPreview', value: true})
       this.$store.dispatch('setManageComponents', {index: 'ItemToCustomize', value: false})
+    }
+  }
+
+  public handleActiveProductDesignSelection(event, design_index) {
+    const action = event.target.checked ? "add" : "remove"
+    this.$store.commit("UPDATE_product_designs_selection_info", { action, design_index })
+  }
+
+  public handleProductDesignsSelectionInfoReset() {
+    const product_design_selection_info = this.$store.getters.getProductSelectionDesignInfo
+    if(!product_design_selection_info.selection_mode) {
+      const checkedCheckboxes: NodeListOf<HTMLInputElement> = getDomDocument()?.querySelectorAll('input.design-available-product-design-selection:checked');
+      checkedCheckboxes.forEach((checkbox: HTMLInputElement) => {
+        checkbox.checked = false;
+      });
     }
   }
 }
@@ -191,6 +226,15 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   // }
 
   .design-col {
+    &:hover {
+      .select-design-checkbox {
+        opacity: 1;
+        span {
+          opacity: 1;
+        }
+      }
+    }
+
     margin-bottom: 10px;
     flex-basis: 33.33%;
     max-width: 33.33%;
@@ -231,6 +275,81 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
       height: auto;
     }
 
+  }
+  .select-design-checkbox{
+    input{
+      display: none;
+    }
+
+    span{
+      opacity: 0;
+      display: block;
+
+      &::after, &::before{
+        opacity: 0;
+        display: block;
+      }
+    }
+
+    input + span {
+      opacity: 0;
+    }
+
+    input:checked + span {
+      opacity: 1;
+
+
+      &::after, &::before{
+        opacity: 1;
+      }
+    }
+  }
+
+  .custom-checkbox{
+    input{
+      display: none;
+    }
+
+    span{
+      display: block;
+      height: 20px;
+      width: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      position: relative;
+      cursor: pointer;
+
+      &::after, &::before{
+        content: '';
+        display: none;
+        position: absolute;
+        width: 2px;
+        background-color: #fff;
+      }
+
+      &::before {
+        height: 10px;
+        left: 10px;
+        top: 4px;
+        transform: rotate(45deg);
+      }
+
+      &::after {
+        height: 6px;
+        left: 5px;
+        top: 8px;
+        transform: rotate(-45deg);
+      }
+    }
+
+    input:checked + span {
+      background: var(--theme-color);
+      border-color: var(--theme-color);
+
+      &::after, &::before{
+        display: block;
+      }
+    }
   }
 }
 </style>

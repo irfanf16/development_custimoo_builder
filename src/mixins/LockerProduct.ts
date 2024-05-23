@@ -859,6 +859,7 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   }
   async productDesigns(index: number) {
     if (index != this.selectedProductIndex) {
+      this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
       if(this.logoColorsInfo.using_logo_colors) {
         this.useLogoColors(false)
       }

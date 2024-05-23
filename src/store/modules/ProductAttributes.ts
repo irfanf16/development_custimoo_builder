@@ -149,6 +149,10 @@ const ProductAttributes:Module<any, any> = {
       colors: []
     },
     updating_logo: false,
+    product_designs_selection_info: {
+      selection_mode: false,
+      selected_designs: []
+    }
   },
   mutations: {
     SET_IS_ROSTER_OPEN(state:Record<any,any>, payload: boolean){
@@ -1220,6 +1224,25 @@ const ProductAttributes:Module<any, any> = {
       if(product) {
         Vue.set(state.products[payload.product_index], 'show_product_in_list', payload.product_data.show_product_in_list)
       }
+    },
+    UPDATE_product_designs_selection_info(state, payload) {
+      const {action, design_index} = payload
+      if (action == "remove") {
+        const index = state.product_designs_selection_info.selected_designs.indexOf(design_index);
+        if (index !== -1) {
+          state.product_designs_selection_info.selected_designs.splice(index, 1)
+          if (state.product_designs_selection_info.selected_designs.length == 0) {
+            state.product_designs_selection_info.selection_mode = false
+          }
+        }
+      } else {
+        state.product_designs_selection_info.selection_mode = true;
+        state.product_designs_selection_info.selected_designs.push(design_index)
+      }
+    },
+    RESET_PRODUCT_DESIGNS_SELECTION_INFO(state, payload) {
+      Vue.set(state, 'product_designs_selection_info', { selection_mode: false,  selected_designs: [] })
+      eventBus.$emit('product_designs_selection_reset')
     }
   },
   getters: {
@@ -1526,6 +1549,9 @@ const ProductAttributes:Module<any, any> = {
     getUpdatingLogo(state:Record<any,any>) {
       return state.updating_logo
     },
+    getProductSelectionDesignInfo(state: Record<any, any>) {
+      return state.product_designs_selection_info;
+    }
   },
   actions: {
     setLockerroomColors({commit}, payload){
@@ -1899,4 +1925,6 @@ const ProductAttributes:Module<any, any> = {
   }
 }
 export default ProductAttributes;
+
+
 

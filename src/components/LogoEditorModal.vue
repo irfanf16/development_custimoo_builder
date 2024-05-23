@@ -116,7 +116,7 @@ import { getUploadedLogoObject } from '@/helpers/Helpers'
 })
 export default class LogoEditorModal extends Mixins(ErrorMessages, ModalAction) {
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  public timeout = 0;
+  public timeout:any = 0;
   public locker_selected = true;
   public colorTabClick = false;
   public room_id = 0;

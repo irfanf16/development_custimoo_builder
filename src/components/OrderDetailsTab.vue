@@ -139,7 +139,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
 
   public font_file : Record<any,any>[] = [];
 
-  public storage_url:string = process.env.VUE_APP_STORAGE_URL;
+  public storage_url:string = process.env.VUE_APP_STORAGE_URL || '';
 
   public svg_pattern_last_value_y = 0;
 

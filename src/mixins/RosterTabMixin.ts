@@ -10,7 +10,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 @Component
 export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAction, ErrorMessages){
   public show_roster_change_warning = false
-  public handle_text_change_timer!: number
+  public handle_text_change_timer!: any
   public fileData: Record<any, any>[] = []
   public showLoader = false;
 

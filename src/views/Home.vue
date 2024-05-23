@@ -15,6 +15,8 @@
     </modal>
 
     <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
+    <!-- this component is being used in itemToCustomize component   -->
+    <AddProductWithDesignsToLockerRoom ref="add-product-designs-to-locker-room-modal" :products_fonts="products_fonts" :roster-url="generate_share_url"/>
     <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer && $store.getters.getCartItems.length > 0"/>
     <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
     <EditRosterAreaTab @open-add-to-locker="getLockers(true)"
@@ -502,7 +504,8 @@
           <b-col v-if="manageComponents.ItemToCustomize" cols="12" lg="3">
             <ItemToCustomize @switchTabs="switchTabs(0, true)" :uploaderOpened="this.$store.getters.getActiveTab === 0 && mobileScreen"
                              @hideAll="hideAll" :categories="categories"
-                             v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts" />
+                             v-bind:search_products.sync="search_products" ref="ItemToCustomize" :products_fonts="products_fonts"
+                             @show-product-design-bulk-save-modal="showProductDesignSaveModal" />
           </b-col>
         </template>
       </b-row>
@@ -574,6 +577,7 @@ import Scene3d from "@/components/3d/scene-3d.vue";
 import EditRosterAreaTab from "@/components/EditRosterAreaTab.vue";
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
+import AddProductWithDesignsToLockerRoom from "@/components/AddProductWithDesignsToLockerRoom.vue";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -583,6 +587,7 @@ Vue.filter('formatDate', function(value:string) {
 
 @Component<Home>({
   components: {
+    AddProductWithDesignsToLockerRoom,
     LogoEditorModal,
     EditRosterAreaTab,
     ShareDesignModal,
@@ -1846,6 +1851,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
         }
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
+        this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
         await this.$store.dispatch('resetStore')
 
         if(edit_info_obj.type == 'cart_product' || edit_info_obj.type == 'order_product') {
@@ -2151,6 +2157,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     setTimeout(() => {
       dom_document.body.removeChild(anchor);
     },5000);
+  }
+
+  public showProductDesignSaveModal() {
+    if(this.$refs['add-product-designs-to-locker-room-modal']) {
+      //@ts-ignore
+      this.$refs['add-product-designs-to-locker-room-modal'].showSaveToLockerRoomModal()
+    }
   }
 }
 </script>

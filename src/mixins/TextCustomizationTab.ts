@@ -11,7 +11,7 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
   public activeLockerIndex = 0
   public activeFolderIndex = 0
   public product_fonts: Record<any, any>[] = []
-  public handle_text_change_timer = 0 // this will hold the id returned by the setTimeout()
+  public handle_text_change_timer:any = 0 // this will hold the id returned by the setTimeout()
   public active_jersey_part: number[] = [];
   public text_accordion:boolean[] = [];
   public selected_font = '';

@@ -291,6 +291,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getSkuInformation
   }
 
+  get appliedDefaultColors() {
+    let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+    if(defaultColors.length && !this.mainPreview && !this.mobileScreen && !this.allow_shuffle_colors) {
+      defaultColors = this.logoColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
+    }
+    return defaultColors
+  }
+
   public storeCanvasImage() {
     this.$store.commit('STORE_CANVAS_IMAGE', {
       front: this.$refs.front,
@@ -727,10 +735,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public async changeDefaultColors(render_time = 300): Promise<void> {
     if(this.productType == 'customized') {
-      let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      if(defaultColors.length && !this.mainPreview && !this.mobileScreen && !this.allow_shuffle_colors) {
-        defaultColors = this.logoColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-      }
+      let defaultColors = this.appliedDefaultColors
       if (defaultColors.length) {
         let appliedDefaultColors: string[]|string[][] = []
         let useColorIndex = 0

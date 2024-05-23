@@ -1750,11 +1750,13 @@ const getTeamLogo = (product_id: number|null = null) => {
   }
 }
 
-const getImageFromCanvas = (side: string, options={}) => {
+const getImageFromCanvas = (side: string, options={}, scene=null) => {
   const canvas_options = {...{original_width: 600, original_height: 600, image_type: 'image/png', width: 1200, height: 1200, zoom: 2}, ...options}
-  let canvas = Store.getters.getCanvasImage.scene.frontCanvas
+  //@ts-ignore
+  let canvas = scene ? scene.frontCanvas : Store.getters.getCanvasImage.scene.frontCanvas
   if(side == 'back') {
-    canvas = Store.getters.getCanvasImage.scene.backCanvas
+    //@ts-ignore
+    canvas = scene ? scene.backCanvas : Store.getters.getCanvasImage.scene.backCanvas
   }
   if(canvas) {
     canvas.discardActiveObject().renderAll()

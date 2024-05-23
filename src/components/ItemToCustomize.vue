@@ -119,7 +119,16 @@
       <span class="mt-1 toggleArrow" :class="[showDesigns ? 'opened' : '']"><BIconChevronDown /></span>
     </h2>
     <h2 v-else class="fw-bold p-3 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between">
-      <span style="font-size: 16px">Designs</span> <button v-if="!allow_shuffle_colors && JSON.stringify(this.logoColorsInfo.colors) != JSON.stringify(this.logoColorsInfo.extracted_colors)" @click="useShuffledColors()" class="btn btn-secondary btn-sm">Use shuffled colors</button>
+     <span style="font-size: 16px">Designs</span>
+      <button v-if="!allow_shuffle_colors && JSON.stringify(this.logoColorsInfo.colors) != JSON.stringify(this.logoColorsInfo.extracted_colors)"
+              @click="useShuffledColors()" class="btn btn-secondary btn-sm">
+        Use shuffled colors
+      </button>
+     <template v-if="isCustomerAuthenticated">
+       <b-button v-if="getProductSelectionDesignInfo.selected_designs.length > 0" @click="$emit('show-product-design-bulk-save-modal')" class="btn btn-secondary btn-sm">
+         Save Designs
+       </b-button>
+     </template>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
       <DesignAvailable v-if="startLoadDesigns" :key="this.selectedProduct.productstyles[styleIndex]? this.selectedProduct.productstyles[styleIndex].id : ''" :products_fonts="products_fonts" />
@@ -137,14 +146,16 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
   import { resetLastActiveProductData } from '@/helpers/Helpers'
 import {ProductsQueryParamsMixin, exitEditMode, handleMainProducts} from "@/mixins/LockerProduct";
 
+
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
+import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 
 @Component<ItemToCustomize>({
   components: {
+    AddLockerRoomModal,
     ItemsGrid,
     Search,
-    // ItemsCarousel,
     SelectItemCarousel,
     DesignAvailable
   },
@@ -182,11 +193,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   public customized = this.$store.getters.getCustomized
   public search = '';
   public showLoader = false;
-  public timeout = 0;
-
-  get startLoadDesigns(): boolean {
-    return this.$store.getters.getStartLoadDesigns
-  }
+  public timeout:any = 0;
 
   private toggleItems () {
     this.showItems = !this.showItems
@@ -210,6 +217,62 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     this.showDesigns = !this.showDesigns
   }
 
+  /* getters/computed props starts */
+
+  get hide_filter_if_only_one_exists():boolean {
+    return !((this.CustomizedCount === 0 && this.PersonalizedCount === 0) || (this.PersonalizedCount === 0 && this.PrivateProductCount === 0) || (this.CustomizedCount === 0 && this.PrivateProductCount === 0))
+  }
+
+  get getPersonalized(): boolean {
+    return this.$store.getters.getPersonalized
+  }
+
+  get getPrivateProduct(): boolean {
+    return this.$store.getters.getPrivateProduct
+  }
+
+  get getCustomized(): boolean {
+    return this.$store.getters.getCustomized
+  }
+
+  get CustomizedCount():number{
+    return this.$store.getters.getCustomizedCount
+  }
+  get PersonalizedCount():number{
+    return this.$store.getters.getPersonalizedCount
+  }
+  get PrivateProductCount():number{
+    return this.$store.getters.getPrivateProductCount
+  }
+
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject;
+  }
+
+  get getLastActiveProductData() {
+    return this.$store.getters.getLastActiveProductData;
+  }
+  get getSelectedCategory(){
+    return this.$store.getters.getSelectedCategory;
+  }
+
+  get selectedCategory() {
+    return { index: this.getSelectedCategory.category_index, id: this.getSelectedCategory.category_id }
+  }
+
+  get categories(): Record<any, any>[] {
+    return this.$store.getters.getCategories
+  }
+
+
+  get startLoadDesigns(): boolean {
+    return this.$store.getters.getStartLoadDesigns
+  }
+
+  get getProductSelectionDesignInfo(): Array<any> {
+    return this.$store.getters.getProductSelectionDesignInfo
+  }
+
   get selectedProduct(): Record<any, any>{
     return this.$store.getters.getSelectedProduct
   }
@@ -221,6 +284,14 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex
   }
+
+  get logoColorsInfo() {
+    return this.$store.getters.getLogoColorsInfo();
+  }
+
+  /* getters/computed props ends */
+
+  /* methods props starts */
 
   private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
     let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>;
@@ -369,58 +440,11 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     }
   }
 
-  get logoColorsInfo() {
-    return this.$store.getters.getLogoColorsInfo();
+  public toggleDesignSelection() {
+    this.$store.commit("UPDATE_product_designs_selection_info", { toggle_selection_mode: true })
   }
+  /* methods props ends */
 
-  /* getters/computed props starts */
-
-  get hide_filter_if_only_one_exists():boolean {
-    return !((this.CustomizedCount === 0 && this.PersonalizedCount === 0) || (this.PersonalizedCount === 0 && this.PrivateProductCount === 0) || (this.CustomizedCount === 0 && this.PrivateProductCount === 0))
-  }
-
-  get getPersonalized(): boolean {
-    return this.$store.getters.getPersonalized
-  }
-
-  get getPrivateProduct(): boolean {
-    return this.$store.getters.getPrivateProduct
-  }
-
-  get getCustomized(): boolean {
-    return this.$store.getters.getCustomized
-  }
-
-  get CustomizedCount():number{
-    return this.$store.getters.getCustomizedCount
-  }
-  get PersonalizedCount():number{
-    return this.$store.getters.getPersonalizedCount
-  }
-  get PrivateProductCount():number{
-    return this.$store.getters.getPrivateProductCount
-  }
-
-  get getProductEditInfoObject() {
-    return this.$store.getters.getProductEditInfoObject;
-  }
-
-  get getLastActiveProductData() {
-    return this.$store.getters.getLastActiveProductData;
-  }
-  get getSelectedCategory(){
-    return this.$store.getters.getSelectedCategory;
-  }
-
-  get selectedCategory() {
-    return { index: this.getSelectedCategory.category_index, id: this.getSelectedCategory.category_id }
-  }
-
-  get categories(): Record<any, any>[] {
-    return this.$store.getters.getCategories
-  }
-
-  /* getters/computed props ends */
 }
 </script>
 
