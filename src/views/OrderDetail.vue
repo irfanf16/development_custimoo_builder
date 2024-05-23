@@ -191,9 +191,9 @@
                                 </a>
                               </template>
 
-                            <template v-if="['pdf', 'ai', 'eps', 'svg'].includes(activity_comment_file.extension.toLowerCase())">
+                            <template v-if="['pdf', 'ai', 'eps', 'svg', 'xlsx'].includes(activity_comment_file.extension.toLowerCase())">
                               <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="`${storage_url}${activity_comment_file.url}`" :download="activity_comment_file.name" target="_blank">
-                                <img width="50" height="50" src="/img/images/file.png" :alt="activity_comment_file.name">
+                                <b-icon-file-earmark-text width="50" height="50" />
                                 <span>{{activity_comment_file.name}}.{{activity_comment_file.extension}}</span>
                               </a>
                             </template>
