@@ -3,7 +3,7 @@
     <div v-if="showLoader" class="loader">
       <img src="@assets/images/loading.gif" />
     </div>
-    <b-tabs class="main-locker-tabs" @input="hidePopper" ref="main-locker-tabs" v-model="main_locker_tabs">
+    <b-tabs class="main-locker-tabs" @input="updateTab" ref="main-locker-tabs" v-model="main_locker_tabs">
       <b-tab>
         <template #title>
           <span class="btn btn-secondary btn-sm">Locker Rooms</span>
@@ -246,6 +246,7 @@
                         </template>
                       </div>
                      </b-tab>
+                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Storyboard" @click="showStoryBoard($event,room)"></b-tab>
                   </b-tabs>
                 </b-card>
               </div>
@@ -307,11 +308,15 @@
                         </div>
                       </div>
                     </aside>
+                    <b-button title="Share collection" @click="downloadCollectionPDF(index)" class="light rounded-circle">
+                      <b-icon-download></b-icon-download>
+                    </b-button>
                 </div>
               </div>
               <div class="d-none d-lg-block product-description text-center">
                 <p>{{ collection.name }}</p>
               </div>
+              <CollectionPDF :ref="'collection_'+index" :collection="collection"/>
             </div>
           </template>
           </template>
@@ -408,16 +413,24 @@ import {
   getEditModeDefaultObj, exitFromEditMode, urlToBase64
 } from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
-import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
+import {
+  LockerProducts,
+  handleMainProducts,
+  exitEditMode,
+  ProductsQueryParamsMixin,
+  CollectionMixin
+} from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
 import ModalAction from "@/mixins/ModalAction";
 import {AxiosError} from "axios";
 import EditRosterDetails from "@/components/EditRosterDetails.vue";
+import CollectionPDF from "@/components/CollectionPDF.vue";
 
 @Component<LockerRoom>({
   components: {
+    CollectionPDF,
     EditRosterDetails,
     ConfirmModal,
     Scene,
@@ -485,7 +498,7 @@ import EditRosterDetails from "@/components/EditRosterDetails.vue";
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin, CollectionMixin) {
   @Prop({required: true}) opacityset:boolean
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
@@ -547,10 +560,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public markText($event:Record<any, any>) {
-    $event.target.select()
-  }
-
   public async getLockerProductsRosters() {
     let edit_product_info_obj = getEditModeDefaultObj()
     let response: any = await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
@@ -574,9 +583,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public isElementOverflowingContainer(elementRef:string) {
-    this.$emit('isElementOverflowingContainer', this.ref[elementRef][0])
-  }
 
   public locker_with_rosters(id:any) {
     return this.lockers_and_rosters.filter((item:Record<any, any>)=>item.id == id)
@@ -658,21 +664,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   get mainproductId():number{
     return this.$store.getters.getEditMainProductId
-  }
-
-  get getCollections(): Record<any, any> {
-    let main_product_id = this.$store.getters.getEditProductId;
-    let collections = this.$store.getters.getCollections.map((item: Record<any, any>) => {
-      item.collection_products = item.collection_products.map((collection: Record<any, any>) => {
-        if (collection.product_locker_room.id == main_product_id) {
-          let random = getRandom()
-          collection.product_locker_room.product_url = `${collection.product_locker_room.product_url}?${random}`
-        }
-        return collection
-      })
-      return item
-    })
-    return collections
   }
 
   @Watch('getCollections', {
@@ -779,6 +770,17 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       this.viewLoader = false
     }
   }
+
+
+  public updateTab(){
+    this.hidePopper();
+    if(this.main_locker_tabs){
+      this.$store.dispatch("setCollectionMode","COLLECTION");
+    }
+    else {
+      this.$store.dispatch("setCollectionMode","LOCKER_STORYBOARD");
+    }
+  }
   public async generateCollectionPdf(collection:Record<any, any>, index:number) {
     let res = await this.$store.dispatch('getCollection', collection.id)
     this.collection_available = true;
@@ -816,27 +818,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   public lockerStatus = 'not_accepted'
 
-  public get popperID() {
-    return this.$store.getters.getPopperID
-  }
 
   public get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }
 
-  public showPopper(id:string, callback){
-    this.$store.commit('setPopper', id);
-    setTimeout(function (){
-      callback();
-    },500)
-  }
-  public hidePopper(){
-    this.$emit('setOpacity', false)
-    this.$store.commit('setPopper', '');
-  }
-  public alertt(){
-    alert('setPopper')
-  }
 
   public async shareProduct(product: Record<any, any>, ind: number|string, lockerIndex: number|string) {
     try {
@@ -862,40 +848,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       console.log(error)
     }
   }
-  async shareCollectionLink(collection:Record<any, any>, index:number){
-    try {
-      if(collection){
-        let collections = {
-          id: collection.id,
-          file_name: collection.file_name
-        }
-        let shared_url = "";
-        if (collection.shared_url) {
-          shared_url += collection.shared_url;
-        }
-        else {
-          let res = await http.post('collection/link', collections)
-          shared_url += res.data.url;
-          Vue.set(this.getCollections[index], 'shared_url', shared_url)
-        }
-        this.hidePopper()
-        this.showPopper('share-collection'+index, ()=>{this.isElementOverflowingContainer('popper-content'+index)})
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
-  public copyCollectionLink(ind: number) {
-    let toCopy = this.$refs['copylink_' + ind] as Record<any, any>
-    toCopy = toCopy[0].$el as Record<any, any>
-    toCopy.select()
-    try {
-      document.execCommand('copy');
-      this.showToast('Shareable link was copied to your clipboard.', 'success');
-    } catch (err) {
-      this.showToast('Oops, unable to copy.', 'error');
-    }
+  public downloadCollectionPDF(index) {
+    (this.$refs['collection_'+index] as Record<any, any>[])[0]?.generateCollectionPDF()
   }
 
   public copyLink(room_index: number|string, ind: number|string) {
@@ -1004,6 +959,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public editCollection(collection_id: number) {
+    this.$store.dispatch("setCollectionMode","COLLECTION");
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "collection_id", "value": collection_id})
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "locker_products", "value": []})
     this.$emit('editCollectionModal')
@@ -1388,6 +1344,14 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public editRoster(product:Record<any, any>){
     this.locker_roster_id = product.id;
     this.ref["editrostermodal"].show()
+  }
+
+  public showStoryBoard($event,room){
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "collection_id", "value": room.collection.id})
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {"attribute": "locker_products", "value": []})
+    this.$store.dispatch("setCollectionMode","LOCKER_STORYBOARD");
+    this.$emit('editCollectionModal')
+    this.$emit('hideLockerRoomModal')
   }
 
 

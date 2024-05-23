@@ -1,5 +1,6 @@
 <template>
-  <div v-if="collection" class="position-relative">
+  <div v-if="showPdf && collection" class="position-relative">
+    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif"/></div>
     <div v-if="getCoverImage()" class="pdf_background_container" :ref="'pdf_page_header'">
       <div v-if="!fullWidthCoverImage" class="cover-image-banner" :style="{ width: coverImageDimensions.width + 'px', height: coverImageDimensions.height + 'px' }">
         <img style="height: 100%; width: 100%" :src="`${storageUrl}${getCoverImage()}?q=11`" crossorigin="anonymous">
@@ -120,6 +121,7 @@
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator';
 import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
+import html2pdf from 'html2pdf.js'
 
 @Component<CollectionPDF>({
 })
@@ -129,6 +131,8 @@ export default class CollectionPDF extends Vue {
   public storageUrl = process.env.VUE_APP_STORAGE_URL;
   public fullWidthCoverImage = false;
   public coverImageDimensions = {width: null, height: null}
+  public showLoader = false
+  public showPdf = false
 
   get collectionImageMerchant() {
     if (this.isJSONString(this.$store.getters.getSetting('collection_image_merchant'))) {
@@ -144,6 +148,62 @@ export default class CollectionPDF extends Vue {
     } else {
       return this.$store.getters.getSetting('collection_image_admin')
     }
+  }
+
+  public generateCollectionPDF() {
+    this.showPdf = true;
+    this.showLoader = true;
+    const options = {
+      margin: [0, 0, 0, 0],
+      filename: this.collection.name + '.pdf',
+      image: {type: "jpeg", quality: 1},
+      html2canvas: {
+        dpi: 192,
+        scale: 4,
+        useCORS: true,
+        letterRendering: true,
+      },
+      jsPDF: {
+        unit: "in",
+        format: "a4",
+        orientation: 'landscape'
+      }
+    };
+    setTimeout(() => {
+      const pages = this.$refs.pdf_page as (Element | Vue)[];
+      const pdf_pages_wrapper = this.$refs.pdf_pages_wrapper as Element;
+
+      (async () => {
+        let doc = html2pdf().set(options).from(this.$refs.pdf_page_header).toPdf();
+
+        for (let n = 0; n < pages.length; n += 10) {
+          const fourth_page = n + 9;
+          const four_pages = pdf_pages_wrapper.querySelectorAll(`.pdf_page:nth-child(n+${n}):nth-child(-n+${fourth_page})`);
+
+          const container = document.createElement('div');
+
+          four_pages.forEach(page => {
+            container.appendChild(page.cloneNode(true));
+          });
+
+          await doc.get('pdf').then(
+            pdf => {
+              pdf.addPage();
+            }
+          ).from(container).toContainer().toCanvas().toPdf();
+        }
+
+        doc.save();
+      })()
+        .then(() => {
+          this.showLoader = false;
+          this.showPdf = false;
+        })
+        .catch(error => {
+          // Handle any errors
+          console.error('Error generating PDF:', error);
+        });
+    })
   }
 
   public getLogoColors() {

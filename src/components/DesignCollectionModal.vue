@@ -13,11 +13,31 @@
       <div class="d-flex justify-content-sm-between flex-wrap align-items-center justify-content-center gap-1 w-100">
         <div class="d-flex align-items-center gap-1">
           <span class="fw-bold">Name: </span>
-          <b-form-input @input="updateCollectionItemAttribute('name','',$event)" v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
+          <b-form-input v-if="lockerStoryBoard" v-model="collectionItems.name" placeholder="Collection Name" :disabled="true"></b-form-input>
+          <b-form-input v-else @input="updateCollectionItemAttribute('name','',$event)" v-model="collectionItems.name" placeholder="Collection Name"></b-form-input>
         </div>
 
-        <div>
-          <b-button style="margin-right: 10px" @click="openLockerModel(false)">Locker Room</b-button>
+        <div class="d-flex">
+          <b-button style="margin-right: 10px" @click="generateCollectionPDF()">Download PDF</b-button>
+          <div style="display: block;position: relative">
+            <b-button style="margin-right: 10px" @click="shareCollectionLink(collectionItems,collectionItems.id)">Share Url</b-button>
+            <aside :id="'popper-content'+collectionItems.id" v-show="popperID == 'share-collection'+collectionItems.id" :ref="'popper-content'+collectionItems.id"
+                   :class="!opacityset ? 'opacity-0' : 'opacity-100'"
+                   v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip" :key="popperID" style="position: absolute;top:40px;left:20px">
+              <div class="share-holder">
+                <h3>Copy link and Share</h3>
+                <div class="share-form">
+                  <b-form inline>
+                    <b-form-input :ref="'copylink_'+collectionItems.id" @mouseenter="markText"
+                                  :value="collectionItems.shared_url !== 'undefined'   || collectionItems.shared_url != null ?  collectionItems.shared_url : ''"
+                    ></b-form-input>
+                    <b-button variant="primary" @click="copyCollectionLink(collectionItems.id)">Copy Link</b-button>
+                  </b-form>
+                </div>
+              </div>
+            </aside>
+          </div>
+          <b-button style="margin-right: 10px" @click="openLockerModel(false, 'locker_room')">Locker Room</b-button>
           <b-button style="margin-right: 10px" @click="saveCollectionForm">Save</b-button>
         </div>
 
@@ -46,7 +66,7 @@
       <b-col cols="12" md="6" lg="4" xl="3" v-for="(collectionItem, index) in collectionItems.collection_products"
              :key="index" class="dragger">
         <b-card>
-          <a class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
+          <a v-if="!lockerStoryBoard" class="btn remove absolute" @click="deleteLockerProduct(collectionItem.product_locker_room.id)">
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
 
@@ -102,6 +122,7 @@
         </b-form>
       </div>
       </div>
+      <CollectionPDF ref="collection" :collection="collectionItems"/>
     </div>
 
 
@@ -109,7 +130,7 @@
    <div class="modal-footer">
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
-        <b-button @click="openLockerModel">Add more</b-button>
+        <b-button v-if="!lockerStoryBoard" @click="openLockerModel">Add more</b-button>
         <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
       </div>
     </div>
@@ -122,7 +143,7 @@
 <script lang="ts">
 
 
-import {Component, Mixins, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
@@ -133,9 +154,12 @@ import ModalAction from "@/mixins/ModalAction";
 import CollectionLogoUploader from "@/components/Logo/CollectionLogoUploader.vue";
 import {forEach, findIndex} from "lodash";
 import {log} from "fabric/fabric-impl";
+import {CollectionMixin} from "@/mixins/LockerProduct";
+import CollectionPDF from "@/components/CollectionPDF.vue";
 
 @Component({
   components: {
+    CollectionPDF,
     DesignCollectionPdfView,
     CollectionLogoUploader,
     Scene,
@@ -143,7 +167,8 @@ import {log} from "fabric/fabric-impl";
   }
 })
 
-export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAction) {
+export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAction, CollectionMixin) {
+  @Prop({required: true}) opacityset:boolean
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public collectionData: any[] = []
   public ref = this.$refs as Record<any, any>
@@ -161,6 +186,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   public setCurrentUploader(current){
     this.currentUploader = -1
     this.currentUploader = current
+  }
+
+  public generateCollectionPDF() {
+    (this.$refs.collection as Record<any, any>)?.generateCollectionPDF()
   }
 
   public async retrievCollectionItems() {
@@ -269,7 +298,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
 
   public hideCollectionModal() {
     this.hideVModal('collection-modal')
-    this.$emit('showLockerRoomModal', this.collectionItems.id? 1 : 0)
+    this.$emit('showLockerRoomModal', this.lockerStoryBoard? 0 : 1)
     const payload = {"attribute": "locker_products", "value": []};
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', payload)
     this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
@@ -284,10 +313,17 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   }
 
    public async editCollectionModal() {
-    this.showVModal('collection-modal')
     await this.retrievCollectionItems();
+    if(this.collectionItems && this.collectionItems.collection_products.length > 0){
+      this.showVModal('collection-modal')
+      this.adding_more_product = false
+    }
+    else{
+      this.openLockerModel(false);
+      this.showToast("No Products in the storyboard","error");
+    }
     //when more products added to the collection then set it to false
-    this.adding_more_product = false
+
   }
 
   public deleteLockerProduct(locker_prod_id: number) {
@@ -394,14 +430,16 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     }
   }
 
-  public openLockerModel(add_more_status:boolean) {
-
+  public openLockerModel(add_more_status:boolean, type = null) {
     this.$emit('showLockerRoomModal');
+    if(type === "locker_room"){
+      this.$store.dispatch("setCollectionMode","LOCKER_STORYBOARD");
+    }
     if(add_more_status) {
       this.adding_more_product = true
       this.$store.commit('SET_SELECTION_MODE',{
         readonly:true,
-        collectionAddmoreMode:true,
+        colleceventProductModetionAddmoreMode:true,
         eventProductMode:false,
         eventCollectionMode:false
       })

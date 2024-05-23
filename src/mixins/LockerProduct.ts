@@ -1400,4 +1400,107 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
 
 
+@Component
+export class CollectionMixin extends Mixins(ErrorMessages) {
+
+  public ref = this.$refs as Record<any, any>
+
+
+  public markText($event:Record<any, any>) {
+    $event.target.select()
+  }
+
+
+  get lockerStoryBoard(){
+    return this.$store.getters.getCollectModeLockerStoryboard;
+  }
+
+
+  public get popperID() {
+    return this.$store.getters.getPopperID
+  }
+
+
+  public showPopper(id:string, callback){
+    this.$store.commit('setPopper', id);
+    setTimeout(function (){
+      callback();
+    },500)
+  }
+
+  public hidePopper(){
+    this.$emit('setOpacity', false)
+    this.$store.commit('setPopper', '');
+  }
+
+  public isElementOverflowingContainer(elementRef:string) {
+    this.$emit('isElementOverflowingContainer', this.ref[elementRef][0])
+  }
+
+  public copyCollectionLink(ind: number) {
+    let toCopy = this.$refs['copylink_' + ind] as Record<any, any>
+    if(this.lockerStoryBoard){
+      toCopy = toCopy.$el as Record<any, any>
+    }
+    else {
+      toCopy = toCopy[0].$el as Record<any, any>
+    }
+    toCopy.select()
+    try {
+      document.execCommand('copy');
+      this.hidePopper()
+      this.showToast('Shareable link was copied to your clipboard.', 'success');
+    } catch (err) {
+      this.showToast('Oops, unable to copy.', 'error');
+    }
+  }
+
+  get getCollections(): Record<any, any> {
+    let main_product_id = this.$store.getters.getEditProductId;
+    let collections = this.$store.getters.getCollections.map((item: Record<any, any>) => {
+      item.collection_products = item.collection_products.map((collection: Record<any, any>) => {
+        if (collection.product_locker_room.id == main_product_id) {
+          let random = getRandom()
+          collection.product_locker_room.product_url = `${collection.product_locker_room.product_url}?${random}`
+        }
+        return collection
+      })
+      return item
+    })
+    return collections
+  }
+
+  public async shareCollectionLink(collection:Record<any, any>, index:number , ){
+    try {
+      if(collection){
+        let collections = {
+          id: collection.id,
+          file_name: collection.file_name
+        }
+        let shared_url = "";
+        if (collection.shared_url) {
+          shared_url += collection.shared_url;
+        }
+        else {
+          let res = await http.post('collection/link', collections)
+          shared_url += res.data.url;
+          if(this.lockerStoryBoard){
+            collection.shared_url = shared_url;
+          }
+          else{
+            Vue.set(this.getCollections[index], 'shared_url', shared_url)
+          }
+        }
+        this.hidePopper()
+        this.showPopper('share-collection'+index, ()=>{this.isElementOverflowingContainer('popper-content'+index)})
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+}
+
+
 

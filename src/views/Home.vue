@@ -4,7 +4,12 @@
     <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
 
     <ShareDesignModal :product="product" :loader="shareDesignLoader" />
-    <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal" ref="collectionModal"  />
+          <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal"
+                                 ref="collectionModal"
+                                 :opacityset="opacityset"
+                                 @setOpacity="setOpacity"
+                                 @isElementOverflowingContainer="isElementOverflowingContainer"
+          />
     <modal name="product-rejection-info-modal" class="absolute-modals" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
       <h1>
         {{getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].message}}
@@ -190,7 +195,7 @@
 
                   <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute main-home-price" style="left: 0; right: 0; top: 15px;"
                        v-if="productPriceObject.show_price && productPriceObject.product_price">
-                    {{ PriceLabel }} : {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
+                    {{ PriceLabel }} {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
                   </div>
 
                   <div v-if="selectedProduct.is_3d_product" class="ml-auto">
@@ -578,6 +583,7 @@ import EditRosterAreaTab from "@/components/EditRosterAreaTab.vue";
 import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import AddProductWithDesignsToLockerRoom from "@/components/AddProductWithDesignsToLockerRoom.vue";
+import LockerRoom from "@/components/LockerRoom.vue";
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -588,6 +594,7 @@ Vue.filter('formatDate', function(value:string) {
 @Component<Home>({
   components: {
     AddProductWithDesignsToLockerRoom,
+    LockerRoom,
     LogoEditorModal,
     EditRosterAreaTab,
     ShareDesignModal,
@@ -748,6 +755,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private showDD = false;
   private fullScreen = false;
   private customTextIndex = -1
+  private opacityset = false;
   private saveToLockerProductEvent = async (resolve: any) => {
     await this.getLockers(false,false,resolve);
   }
@@ -788,6 +796,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   ]
   private order_update_data:Record<any, any>[]= []
   public is_admin_token = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
+
+
+  public setOpacity (toSet){
+    this.opacityset = toSet
+  }
 
   private async afterCategoriesCallOnMounted() {
 
@@ -1832,6 +1845,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public myFilter() {
     this.isActive = !this.isActive
+  }
+
+  public isElementOverflowingContainer(element:Record<any, any>) {
+    setTimeout(()=>{
+      this.opacityset = true
+    }, 10)
   }
 
   public async resetStore() {

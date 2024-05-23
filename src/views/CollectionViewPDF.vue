@@ -133,7 +133,7 @@
       </div>
     </div>
     <div>
-      <CollectionPDF v-show="showNewPdf" ref="collection" :collection="collection" :company="company"/>
+      <CollectionPDF ref="collection" :collection="collection"/>
     </div>
     <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()"/>
     <template>
@@ -188,8 +188,6 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
 import opentype from 'opentype.js'
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import CollectionPDF from "@/components/CollectionPDF.vue"
-import {findIndex, lowerCase} from 'lodash';
-import html2pdf from 'html2pdf.js'
 
 
 @Component<CollectionViewPDF>({
@@ -298,7 +296,6 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
   public current_collection = {};
   public locker_room_product: Record<any, any>|null = null;
   public button_type = '';
-  public showNewPdf = false;
   public fullWidthCoverImage = false;
 
   public show_roster = false;
@@ -647,60 +644,7 @@ async saveToLockerRoom(collection,product) {
   }
 
   public generateCollectionPDF() {
-    this.showNewPdf = true;
-    this.showLoader = true;
-    const element = this.$refs.collection as Record<any, any>
-    const options = {
-      margin: [0, 0, 0, 0],
-      filename: this.collection.name + '.pdf',
-      image: {type: "jpeg", quality: 1},
-      html2canvas: {
-        dpi: 192,
-        scale: 4,
-        useCORS: true,
-        letterRendering: true,
-      },
-      jsPDF: {
-        unit: "in",
-        format: "a4",
-        orientation: 'landscape'
-      }
-    };
-    const pages: Record<any, any>[] = element.$refs.pdf_page;
-    const pdf_pages_wrapper: HTMLElement = element.$refs.pdf_pages_wrapper;
-
-    (async () => {
-      let doc = html2pdf().set(options).from(element.$refs.pdf_page_header).toPdf();
-
-      for (let n = 0; n < pages.length; n += 10) {
-        const fourth_page = n + 9;
-        const four_pages = pdf_pages_wrapper.querySelectorAll(`.pdf_page:nth-child(n+${n}):nth-child(-n+${fourth_page})`);
-
-        const container = document.createElement('div');
-
-        four_pages.forEach(page => {
-          container.appendChild(page.cloneNode(true));
-        });
-
-        await doc.get('pdf').then(
-          pdf => {
-            pdf.addPage();
-          }
-        ).from(container).toContainer().toCanvas().toPdf();
-      }
-
-      doc.save();
-    })()
-      .then(() => {
-        // Hide loader when PDF generation is complete
-        this.showNewPdf = false;
-        this.showLoader = false;
-      })
-      .catch(error => {
-        // Handle any errors
-        console.error('Error generating PDF:', error);
-      });
-
+    (this.$refs.collection as Record<any, any>)?.generateCollectionPDF()
   }
 
   public convertCollection() {

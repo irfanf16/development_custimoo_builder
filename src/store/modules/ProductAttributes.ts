@@ -53,6 +53,10 @@ const ProductAttributes:Module<any, any> = {
       eventProductMode:false,
       eventCollectionMode:false
     },
+    collectionMode:{
+      COLLECTION: true,
+      LOCKER_STORYBOARD: false,
+    },
     customTexts: {},
     styleIndex: 0,
     // changing defaultColors object will also need to change value in helper method getDefaultColorsObject
@@ -1235,7 +1239,7 @@ const ProductAttributes:Module<any, any> = {
             state.product_designs_selection_info.selection_mode = false
           }
         }
-      } else {
+    } else {
         state.product_designs_selection_info.selection_mode = true;
         state.product_designs_selection_info.selected_designs.push(design_index)
       }
@@ -1243,9 +1247,21 @@ const ProductAttributes:Module<any, any> = {
     RESET_PRODUCT_DESIGNS_SELECTION_INFO(state, payload) {
       Vue.set(state, 'product_designs_selection_info', { selection_mode: false,  selected_designs: [] })
       eventBus.$emit('product_designs_selection_reset')
+    },
+    SET_COLLECTION_MODE(state, mode) {
+      Object.keys(state.collectionMode).forEach(key => {
+        state.collectionMode[key] = false;
+      });
+      state.collectionMode[mode] = true;
     }
   },
   getters: {
+    getCollectionMode: (state) => {
+      return state.collectionMode
+    },
+    getCollectModeLockerStoryboard: (state) => {
+      return state.collectionMode.LOCKER_STORYBOARD;
+    },
     selectedProductCustomTexts: state =>  {
       if(state.selectedPrdId) {
         return state.product_custom_texts[state.selectedPrdId];
@@ -1921,6 +1937,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setActiveRosterIndex({commit},index){
       commit("SET_ACTIVE_ROSTER_INDEX",index);
+    },
+    setCollectionMode({ commit }, mode) {
+      commit("SET_COLLECTION_MODE", mode);
     }
   }
 }
