@@ -97,17 +97,17 @@
          </div>
        </template>
       </div>
-
+      <span class="hover_tooltip" ref="hoover_tooltip"></span>
       <div class="d-flex align-items-center" v-if="getProductEditInfoObject.editing==false || (getProductEditInfoObject.editing===true && getProductEditInfoObject.locker_product_info !== null) ">
-        <div class="fade-right w-100 py-2" >
-          <div class="overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList ">
-            <div  v-for="(category, categoryIndex) in categories" :key="`category_${categoryIndex}`" style="white-space: nowrap"
+        <div class="fade-right w-100 py-2 overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList" >
+          <template v-for="(category, categoryIndex) in categories">
+            <div @mouseenter="showTooltip" @mouseleave="hideTooltip" :data-title="category.category_name" :key="`category_${categoryIndex}`" style="white-space: nowrap"
                   :style="{color: (selectedCategory.index == categoryIndex) ? '#000 !important': '#999 !important'}"
                   :class="{ 'pr-3': categoryIndex + 1 == categories.length, 'activeBrand': (selectedCategory.index == categoryIndex) }"
                   role="button" @click="handleCategoryUpdate(categoryIndex)">
                 <img :src="`${storage_url}${category.image_url}`"  height="30">
               </div>
-          </div>
+          </template>
         </div>
       </div>
 
@@ -220,6 +220,23 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex
+  }
+
+  private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>;
+    element.style.opacity = '1'
+    element.style.zIndex = '100'
+    element.style.left = ($event.clientX + (10 + leftOffset)) + 'px'
+    element.style.top = ($event.clientY + (topOffset)) + 'px'
+    element.innerHTML = $event.target.getAttribute('data-title')
+  }
+
+  private hideTooltip() {
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
+    element.style.opacity = '0'
+    element.style.left = '0'
+    element.style.top = '0'
+    element.style.zIndex = '-10'
   }
 
   public async searchProducts(isClear:boolean) {
