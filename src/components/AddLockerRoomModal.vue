@@ -109,7 +109,7 @@
       @Prop({required: true})  frontPreview !: string
       @Prop({required: true})  backPreview !: string
       @Prop({required: false, default: () => {} })  locker_room_product:Record<any, any>
-      @Prop({required: false, default: ''})  locker_room_product_type:string  //possible values are order_product, collection_product
+      @Prop({required: false, default: ''})  locker_room_product_type:string
       async recallProducts(){
         if(!(this.locker_room_product_type === 'collection_product')){
           this.showLoader = true;
@@ -120,6 +120,7 @@
             this.tabIndex = 0
           }
         }
+        this.generateNameSuggestion(this.productData);
       }
       private storageUrl = process.env.VUE_APP_STORAGE_URL
       public showLoader = false
@@ -201,6 +202,7 @@
                 this.tabIndex = index
                 this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
                 this.productData = this.roomWithProducts[index].product
+                this.generateNameSuggestion(this.productData)
             }
           }
           else {
@@ -208,8 +210,8 @@
             this.tabIndex = index
             this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
             this.productData = this.roomWithProducts[index].product
+            this.generateNameSuggestion(this.productData)
           }
-
       }
       public lockerAdded(){
         let index = this.lockers.length -1
@@ -217,6 +219,34 @@
         if (this.lockers[index]){
           this.room_id = this.lockers[index].id
           this.productData = this.roomWithProducts[index].product;
+        }
+      }
+
+      public generateNameSuggestion (products) {
+        if (this.roomWithProducts.length) {
+          if (this.locker_room_product_type === 'collection_product') {
+            const count = this.getSameNameCount(products, this.locker_room_product.product_name)
+            if (count === 0) {
+              this.product_name = this.locker_room_product.product_name;
+            } else {
+              this.product_name = this.locker_room_product.product_name + ' - ' + `${count}`
+            }
+          } else {
+            const count = this.getSameNameCount(products, this.selectedProduct.display_name)
+            if (count === 0) {
+              this.product_name = this.selectedProduct.display_name;
+            } else {
+              this.product_name = this.selectedProduct.display_name + ' - ' + `${count}`
+            }
+          }
+        }
+      }
+
+      public getSameNameCount (products, name) {
+        if (this.roomWithProducts.length && this.productData.length) {
+          return products.filter((product) => product.product_name.includes(name)).length + 1;
+        } else {
+          return 0;
         }
       }
 
@@ -511,6 +541,7 @@
                 this.productData = this.roomWithProducts[lockerRoomIndex].product
                 this.locker_room_product.room_id = this.roomWithProducts[lockerRoomIndex].id;
                 this.room_id = this.roomWithProducts[lockerRoomIndex].id
+                this.generateNameSuggestion(this.productData)
               }
               else{
                 this.createLocker(this.locker_room_product.collection.name).then(async (room) => {
@@ -576,7 +607,6 @@
       async shareOrderProductDesignUrl() {
         let locker_data = await this.getLockerProductData()
         this.showLoader = true
-        console.log("before")
         return await this.$store.dispatch("SHARE_DESIGN_URL", locker_data);
 
       }
