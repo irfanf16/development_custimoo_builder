@@ -8,10 +8,12 @@
         <a class="btn remove position-absolute" style="right: -5px; top: 5px; padding: 0; height: 24px; width: 24px" @click="removeLogo" v-if="!show_loader">
           <b-icon-x></b-icon-x>
         </a>
-        <img v-if="recent_logo_preview !==''" :src="`${recent_logo_preview}`" :alt="collection_logo.name" class="border"
+        <img v-if="recent_logo_preview !==''" :src="`${storage_url}${recent_logo_preview}`" :alt="collection_logo.name" class="border"
              style="max-height: 130px; border-color: #ccc; background-color: #ddd; margin-top: 20px; object-fit: contain; padding: 10px; width: 100%; border-radius: 7px"/>
+        <img v-else-if="!collection_logo.fileuploading" :src="`${storage_url}${collection_logo.path}`" :alt="collection_logo.name" class="border"
+             style="max-height: 130px; border-color: #ccc; background-color: #ddd; margin-top: 20px; object-fit: contain; padding: 10px; width: 100%; border-radius: 7px" />
         <img v-else :src="`${collection_logo.path}`" :alt="collection_logo.name" class="border"
-             style="max-height: 130px; border-color: #ccc; background-color: #ddd; margin-top: 20px; object-fit: contain; padding: 10px; width: 100%; border-radius: 7px"/>
+             style="max-height: 130px; border-color: #ccc; background-color: #ddd; margin-top: 20px; object-fit: contain; padding: 10px; width: 100%; border-radius: 7px">
       </div>
       <div style="padding-bottom: 10px" class="upload-logo-opener" v-else>
         <div class="btn btn-secondary modal-handler">
@@ -92,6 +94,7 @@ export default class CollectionLogoUploader extends Mixins(ErrorMessages, ModalA
       }
       this.collection_logo.path = URL.createObjectURL(this.collection_logo.file)
       this.collection_logo.collection_id = this.collection_id
+      this.collection_logo.fileuploading = true;
     }
 
    // this.addRemoveLogo()
@@ -105,7 +108,7 @@ export default class CollectionLogoUploader extends Mixins(ErrorMessages, ModalA
     this.collection_logo.size = 0
     this.collection_logo.is_recent_logo = true
     this.collection_logo.collection_id = this.collection_id
-    this.recent_logo_preview = this.storage_url + recent_logo.logo_url
+    this.recent_logo_preview = recent_logo.logo_url
   }
 
   public validateLogo(): boolean {
