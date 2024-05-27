@@ -305,8 +305,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           if(last_active_prod_data.product_id) {
             fixed_logo_index = last_active_prod_data.fixed_logo_index
             let custom_logos = last_active_prod_data.custom_logos;
-            let custom_logos_type = custom_logos.constructor.name;
             if(!checkIsEmpty(custom_logos)) {
+              let custom_logos_type = custom_logos.constructor.name;
               // array check is for handling old data. From now it always will be object
               if(custom_logos_type == "Array") {
                 this.$store.commit('SET_CUSTOM_LOGOS', { custom_logos: custom_logos })
