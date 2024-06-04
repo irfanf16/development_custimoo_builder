@@ -17,7 +17,7 @@
                  }"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" :mainPreview="mainPreview" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
                  :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :fromRosterModal="fromRosterModal" />
 
           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio"
@@ -25,7 +25,7 @@
                  models: selectedProduct.productstyles[styleIndex].front_models}"
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                 :colorGrouping="JSON.parse(design.front_design.color_group)" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
+                 :colorGrouping="JSON.parse(design.front_design.color_group)" :mainPreview="mainPreview" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
                  :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :fromRosterModal="fromRosterModal" />
         </div>
       </template>
@@ -42,6 +42,7 @@
     }
   })
   export default class CustomizationPreview extends Vue {
+    @Prop({required: false, default: false}) readonly mainPreview!: boolean;
     @Prop({ required: true }) readonly products_fonts!: Record<any, any>
     @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
     @Prop({required: false, default: false}) readonly fromRosterModal!: boolean;

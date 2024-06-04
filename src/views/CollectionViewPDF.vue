@@ -155,7 +155,8 @@
           <div class="d-flex flex-wrap justify-content-between">
             <RosterDetails ref="rosterDetailsModal" :productSizes="product_sizes"  :lockerRosters="products_roster" @addPlayer="rosterDetailsInit" :products_fonts="products_fonts"/>
             <div class="roster-preview-area">
-              <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts"/>
+              <CustomizationPreview :designs="products[designsIndex]" :products_fonts="products_fonts"
+                                    mainPreview="true" fromRosterModal="true" />
             </div>
           </div>
         </div>
