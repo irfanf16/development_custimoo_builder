@@ -216,7 +216,7 @@ const getColorType = (svg_group: string = '', product_id: number|null = null) =>
   const product = product_id? Store.getters.getProduct(product_id) : Store.getters.getProduct()
   if(svg_group && product && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
     return 'product_color'
-  } else if(!product.is_custom_color_allowed) {
+  } else if(product && !product.is_custom_color_allowed) {
     return 'product_color'
   }
   return Store.getters.getSetting('color_type');
@@ -853,7 +853,6 @@ const initCustomLogosNew = async (retrieved_products: Record<any, any>) => {
   if(Object.keys(custom_logos_by_products).length > 0) {
     Store.commit('SET_PRODUCT_CUSTOM_LOGOS', { 'append': true, data: custom_logos_by_products})
   }
-  const selected_product_custom_logos = Store.getters.getCustomLogos()
   eventBus.$emit('handleNonVectorCustomLogosCount')
 }
 
@@ -1623,7 +1622,7 @@ const getDataToSetLastActiveProduct = () => {
       personalized: Store.getters.getPersonalized,
       private_product: Store.getters.getPrivateProduct,
       product_custom_texts: Store.getters.productCustomTexts(),
-      custom_logos: Store.getters.getCustomLogos(),
+      custom_logos: Store.getters.getCustomLogos('all'),
       default_colors: Store.getters.getDefaultColors,
       group_colors: Store.getters.getGroupColors,
       logo_colors: Store.getters.getLogosColors,

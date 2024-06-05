@@ -226,7 +226,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         await this.$store.dispatch("getSkuInformation", active_product_id);
         await this.$store.dispatch('setSelectedIndex', {selectedIndex: active_product_index, selected_id: active_product_id});
         let fixed_logo_index = active_product.productstyles[this.styleIndex].logo.findIndex(logo => logo.is_default === 1);
-        let last_active_prod_data = self.$store.getters.getLastActiveProductData;
+        let last_active_prod_data = this.$store.getters.getLastActiveProductData;
         if(active_product_detail) {
           const { factory_product_active_index, factory_products } = active_product_detail
           let active_factory_product = factory_products[factory_product_active_index]

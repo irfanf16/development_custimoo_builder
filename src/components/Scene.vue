@@ -1878,7 +1878,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public addToOtherSide(target: any, side: string, clone_again = false) {
     side = side.toLowerCase()
-    if(this.back) {
+    if(this.back && this.frontCanvas && this.backCanvas) {
       let design = this.frontDesign
       let canvas = this.frontCanvas
       let zoom_point = this.front_zoom_point
