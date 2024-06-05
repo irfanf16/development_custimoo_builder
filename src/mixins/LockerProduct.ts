@@ -1306,12 +1306,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 shopify_main_item_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
               }
               if (Object.keys(shopify_sizes).length > 0) {
-                const size_array:Record<any, any> = [];
                 for (const shopify_size in shopify_sizes) {
                   shopify_main_item_data['properties']['_Size ' + shopify_size ] = shopify_sizes[shopify_size];
-                  size_array.push({'size':shopify_size, 'qty':shopify_sizes[shopify_size] })
                 }
-                shopify_main_item_data['properties']['_sizes_json'] = size_array;
               }
 
               ecom_url = company_domain + '/cart/add.js?token='+x_rand
