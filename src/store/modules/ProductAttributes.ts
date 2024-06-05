@@ -1131,7 +1131,7 @@ const ProductAttributes:Module<any, any> = {
     SET_PRODUCTS_ROSTERS(state:Record<any, any>, payload: Record<any, any>){
       const set_all = (payload && payload.set_all) ? payload.set_all : false;
       if(set_all) {
-        state.products_rosters = payload.roster_data
+        state.products_rosters = {...state.products_rosters, ...payload.roster_data}
       } else {
         if(payload && 'product_id' in payload) {
           if('roster_index' in payload) {
@@ -1156,7 +1156,7 @@ const ProductAttributes:Module<any, any> = {
                 products_rosters[product.id] = [roster_item]
               }
             })
-            state.products_rosters = products_rosters;
+            state.products_rosters = {...state.products_rosters, ...products_rosters};
           } else {
             console.info("No products found. So can't set products roster information")
           }
