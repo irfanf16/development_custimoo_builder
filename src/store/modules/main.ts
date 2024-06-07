@@ -3,12 +3,14 @@ import { Object } from "fabric/fabric-impl";
 import { Module } from "vuex";
 import Vue from "vue";
 const mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+const iPad = /iPad|Macintosh/.test(navigator.userAgent) && 'ontouchend' in document
 const Main:Module<any, any> = {
   state: {
     application_mounted: false,
     isSafari: process.env.NODE_ENV === 'staging' ? /^((?!chrome|android).)*safari/i.test(navigator.userAgent) : false,
     manageComponents: {
       mobileScreen: mobileScreen,
+      iPad: iPad,
       CustomizationPreview: !mobileScreen,
       ItemToCustomize: true,
       DefaultColorShuffleBtn: true,
