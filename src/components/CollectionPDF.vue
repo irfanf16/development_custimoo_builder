@@ -164,7 +164,7 @@ export default class CollectionPDF extends Vue {
     let scale = 4
     let page_size = 8
     if(this.mobileScreen || this.iPad) {
-      scale = 2
+      scale = 1
       page_size = 2
     }
     const options = {
@@ -183,8 +183,8 @@ export default class CollectionPDF extends Vue {
         svgRendering: true
       },
       jsPDF: {
-        unit: "mm",
-        format: [210, 297],
+        unit: "in",
+        format: "a4",
         orientation: "landscape",
         compress: true,
       },
