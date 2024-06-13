@@ -2852,10 +2852,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                       }
                       const converted_width = unitConversion(fabric_text.width * fabric_text.scaleX * this.measurementRatio)
                       const converted_height = unitConversion(fabric_text.height * fabric_text.scaleY * this.measurementRatio)
+                      const outline_width_converted = unitConversion(fabric_text.strokeWidth * fabric_text.scaleX * this.measurementRatio)
                       custom_text_item.actualWidth = fabric_text.width
                       custom_text_item.actualHeight = fabric_text.height
                       custom_text_item.originalWidth = converted_width!.value
                       custom_text_item.originalHeight = converted_height!.value
+                      custom_text_item.outline_width_converted = outline_width_converted!.value
 
                       this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement)
 
@@ -2999,10 +3001,13 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.frontCanvasRender()
     const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
     const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
+    const outline_width = (fabric_object.get('strokeWidth') as number * fabric_object.get('scaleX') * this.measurementRatio)
     const converted_width = unitConversion(width)
     const converted_height = unitConversion(height)
+    const outline_width_converted = unitConversion(outline_width)
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width!.value;
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height!.value;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width_converted = outline_width_converted!.value;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }

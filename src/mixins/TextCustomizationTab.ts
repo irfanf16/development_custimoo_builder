@@ -299,7 +299,7 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     custom_text.items[0] = Object.assign(custom_text.items[0], {
       color: productColors[0]?.color_text[0]?.value, color_pantone: productColors[0]?.color_text[0]?.name, font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
       is_locked: false, label: 'Fixed Text ' + (custom_text_names_count + 1), outline_color: productColors[0]?.color_text[1]?.value, outline_color_pantone: productColors[0]?.color_text[1]?.name,
-      outline_enabled: 1, outline_width: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300, scaleX: 0, scaleY: 0
+      outline_enabled: 1, outline_width: 0, outline_width_converted: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300, scaleX: 0, scaleY: 0
     })
     return custom_text;
   }

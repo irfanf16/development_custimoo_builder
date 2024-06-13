@@ -92,7 +92,7 @@
                                     Outline Width:
                                     <span class="font-weight-bolder">{{ product_custom_text_item.outline_width }}px</span>
                                   </label>
-                                  <b-form-input class="mt-2" type="range" min="0" max="10" step="1"
+                                  <b-form-input class="mt-2" type="range" min="0" max="10" step="0.1"
                                                 :value="product_custom_text_item.outline_width"
                                                 :name="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
                                                 :key="`custom_text_${customTextIndex}_child_${productCustomTextItemIndex}_outline`"
