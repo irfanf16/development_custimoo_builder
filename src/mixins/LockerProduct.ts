@@ -981,6 +981,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
   public checkMinimumOrderQtyBYDesign(){
     let roster = this.$store.getters.getProductRosters();
+    let moq = this.$store.getters.getSetting("moq");
     if (roster.some(el => (el.quantity > 0 &&  (el.size=="" || el.size == null || parseInt(el.size_index) < 0)  ))) {
       this.showToast(`Please provide size for all roster items`, "error");
       const is_mobile_screen = this.$store.getters.getMobileScreen
@@ -991,7 +992,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     }
     // check is the sum of roster items(collectively) is greater than sku's 'minimum order quantity'
     if(this.sku_information.minimum_order_quantity_type === "by_design" && this.sku_information.minimum_order_quantity != null &&
-      this.sku_information.minimum_order_quantity > 0) {
+      this.sku_information.minimum_order_quantity > 0 && parseInt(moq) === 0) {
       let roster_item_sum = 0;
       roster.forEach((item:Record<any, any>) => {
         roster_item_sum += parseInt(item.quantity);
@@ -1192,6 +1193,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
 
       }
+      let moq = this.$store.getters.getSetting("moq");
 
       if(platform === 'wordpress') {
         ecom_url = company_domain + '/wp-admin/admin-ajax.php';
@@ -1209,6 +1211,13 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         ecom_form_data.append('product_id', (cart_product as Record<any, any>).ecommerce_post_id);
         ecom_form_data.append('quantity', total_quantity.toString());
         ecom_form_data.append('product_front_image', (cart_product as Record<any, any>).front_image);
+        ecom_form_data.append('custimoo_merchant_moq', moq);
+
+        if((cart_product as Record<any, any>).minimum_order_quantity_type == 'by_cart' && (cart_product as Record<any, any>).minimum_order_quantity > 0 ) {
+          ecom_form_data.append('custimoo_cart_item_meta[custimoo_product_id]', (cart_product as Record<any, any>).product_id);
+          ecom_form_data.append('custimoo_cart_item_meta[custimoo_minimum_order_quantity]', (cart_product as Record<any, any>).minimum_order_quantity);
+        }
+
 
         if((cart_product as Record<any, any>).addons.length > 0) {
           for (const addon of (cart_product as Record<any, any>).addons) {
@@ -1296,6 +1305,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 '_custimoo_product_name': (cart_product as Record<any, any>).product_name,
                 '_custimoo_product_id': (cart_product as Record<any, any>).product_id,
                 '_custimoo_minimum_order_quantity': 0,
+                '_custimoo_merchant_moq': moq,
                 'DESIGN NAME': (cart_product as Record<any, any>).product_name,
                 'YOUR DESIGN': 'Below are the links of your customized designs.',
                 'FRONT IMAGE': api_res.front_image_short,

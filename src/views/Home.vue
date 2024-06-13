@@ -662,7 +662,6 @@ Vue.filter('formatDate', function(value:string) {
     if (this.hideColorSection){
       this.$store.commit('hideColorSection', false)
     }
-
     //set jwtToken
     await this.$store.dispatch('setCustomToken');
 

@@ -214,6 +214,17 @@
               </tbody>
             </table>
           </div>
+          <div v-if="(!can_finalize_order) && parseInt(moq) === 0" class="d-flex justify-content-start fs-2 text-danger mt-3">{{$t('minimum_order_cart_message',
+            {
+            product_name: $store.getters.getSelectedProduct.display_name,
+            min_products_count: sku_information.minimum_order_quantity
+            })}}
+          </div>
+          <div v-if="total_product_count < parseInt(moq)" class="d-flex justify-content-start fs-2 text-danger mt-3">{{$t('minimum_order_moq_message',
+            {
+              more_products_to_add: total_product_count < parseInt(this.moq) ? parseInt(this.moq) - this.total_product_count : 0
+            })}}
+          </div>
           <div class="fs-2 font-weight-bold mt-3">General comments</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Any comments?" type="text" name="general_comments"
@@ -227,7 +238,9 @@
         </div>
       </div>
       <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-        <b-button class="mt-4" @click="createOrder">Confirm Order</b-button>
+        <template>
+          <b-button class="mt-4" @click="createOrder" :disabled="(total_product_count < parseInt(moq)) || ((!can_finalize_order) && parseInt(moq) === 0)">Confirm Order</b-button>
+        </template>
       </div>
     </div>
   </modal>
@@ -306,6 +319,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public general_comments = ""
   public shipping_address: Record<any, any> | null = null
   public can_finalize_order = true;
+  public total_product_count = 0;
+  public product_names: Record<any, any>[] = [];
 
   get cartTotalPrice() {
     const {show_price} = this.$store.getters.getProductPriceObject
@@ -329,8 +344,11 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   get cartItems() {
     let cItems = this.$store.getters.getCartItems;
     this.can_finalize_order = true;
+    this.total_product_count = 0;
+    this.product_names = [];
     cItems.forEach((item:Record<any, any>) => {
       let uniqueProductContainer:Record<any, any> = [];
+      let total_products_count = 0;
       item.factory_products.forEach((product:Record<any, any>) => {
         let product_count = 0;
         item.factory_products.forEach((nestProduct:Record<any, any>) => {
@@ -349,10 +367,19 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
           product.show_in_summary = true;
         }
         product.roster_product_count = product_count;
-        if(product.roster_product_count < product.minimum_order_quantity) {
+        if(product.roster_product_count < product.minimum_order_quantity && parseInt(this.moq) === 0) {
           this.can_finalize_order = false;
         }
+
+        product.product_roster_detail.forEach((roster:Record<any, any>) => {
+          total_products_count += parseInt(roster.quantity);
+        });
+        if(!this.product_names.includes(product.product_name)){
+            this.product_names.push(product.product_name);
+        }
       });
+      item.total_product_count = total_products_count;
+      this.total_product_count = total_products_count;
     });
 
     return cItems;
@@ -385,8 +412,20 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     return this.$store.getters.getMainTotalTabs;
   }
 
+  get moq(){
+    return this.$store.getters.getSetting("moq");
+  }
+
   public createOrder() {
-    if(!this.can_finalize_order){
+    if(this.total_product_count < parseInt(this.moq)){
+      this.showToast(`${this.$t('minimum_order_moq_message',
+          {
+            more_products_to_add: this.total_product_count < parseInt(this.moq) ? parseInt(this.moq) - this.total_product_count : 0
+          })}`,
+        "error", 9000);
+      return false;
+    }
+    if((!this.can_finalize_order) && parseInt(this.moq) === 0){
       this.showToast(`${this.$t('minimum_order_cart_message',
         {
           product_name: this.$store.getters.getSelectedProduct.display_name,
