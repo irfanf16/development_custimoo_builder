@@ -1259,10 +1259,13 @@ const ProductAttributes:Module<any, any> = {
   },
   getters: {
     getLockedDesigns: state => (design_id) => {
-      if(design_id) {
-        return state.locked_designs? state.locked_designs[design_id] : undefined
+      if(state.locked_designs == undefined) { // as it is a new variable in storage after very first time of load of the project it got undefined but it can be remove after a while
+        state.locked_designs = {}
       }
-      return state.locked_designs? state.locked_designs : {};
+      if(design_id) {
+        return state.locked_designs[design_id]
+      }
+      return state.locked_designs;
     },
     getCollectionMode: (state) => {
       return state.collectionMode

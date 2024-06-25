@@ -9,12 +9,12 @@
               <span></span>
             </label>
           </template>
-          <button @click="handleLockDesign(index, design.id)" class="btn d-inline-flex" :class="{'btn-gray': !locked_designs[design.id], 'btn-active': locked_designs[design.id], 'lock-design-icon': !mobileScreen}">
+          <button @click="handleLockDesign(design.id)" class="btn d-inline-flex" :class="{'btn-gray': !locked_designs[design.id], 'btn-active': locked_designs[design.id], 'lock-design-icon': !mobileScreen}">
             <font-awesome-icon :icon="['fas', 'lock']" class="design-available-product-design-selection"/>
           </button>
         </div>
         <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
-          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio" ref="design_scene"
+          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio" :ref="`design_scene_${design.id}`"
                  :front="{
                     textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
                     safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -181,11 +181,11 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     }
   }
 
-  public handleLockDesign(design_index, design_id) {
+  public handleLockDesign(design_id) {
     if(this.locked_designs[design_id]) {
       this.$store.commit('UNSET_LOCKED_DESIGN', design_id)
     } else {
-      (this.$refs['design_scene'] as Record<any, any>)[design_index].setLockedDesign()
+      (this.$refs[`design_scene_${design_id}`] as Record<any, any>)[0].setLockedDesign()
     }
   }
 }
