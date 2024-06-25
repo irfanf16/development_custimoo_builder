@@ -1264,9 +1264,9 @@ const ProductAttributes:Module<any, any> = {
   getters: {
     getLockedDesigns: state => (design_id) => {
       if(design_id) {
-        return state.locked_designs[design_id]
+        return state.locked_designs? state.locked_designs[design_id] : undefined
       }
-      return state.locked_designs;
+      return state.locked_designs? state.locked_designs : {};
     },
     getCollectionMode: (state) => {
       return state.collectionMode

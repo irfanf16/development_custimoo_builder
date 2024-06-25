@@ -9,9 +9,9 @@
               <span></span>
             </label>
           </template>
-<!--          <button @click="handleLockDesign(index, design.id)" class="btn d-inline-flex" :class="{'btn-gray': !locked_designs[design.id], 'btn-active': locked_designs[design.id], 'lock-design-icon': !mobileScreen}">-->
-<!--            <font-awesome-icon :icon="['fas', 'lock']" class="design-available-product-design-selection"/>-->
-<!--          </button>-->
+          <button @click="handleLockDesign(index, design.id)" class="btn d-inline-flex" :class="{'btn-gray': !locked_designs[design.id], 'btn-active': locked_designs[design.id], 'lock-design-icon': !mobileScreen}">
+            <font-awesome-icon :icon="['fas', 'lock']" class="design-available-product-design-selection"/>
+          </button>
         </div>
         <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
           <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio" ref="design_scene"
