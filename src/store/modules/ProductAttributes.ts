@@ -156,9 +156,16 @@ const ProductAttributes:Module<any, any> = {
     product_designs_selection_info: {
       selection_mode: false,
       selected_designs: []
-    }
+    },
+    locked_designs: {}
   },
   mutations: {
+    SET_LOCKED_DESIGN(state: Record<any, any>, locked_design) {
+      Vue.set(state.locked_designs, locked_design.design_id, locked_design.default_color)
+    },
+    UNSET_LOCKED_DESIGN(state: Record<any, any>, design_id) {
+      Vue.delete(state.locked_designs, design_id)
+    },
     SET_IS_ROSTER_OPEN(state:Record<any,any>, payload: boolean){
       state.isRosterOpened = payload;
     },
@@ -314,8 +321,6 @@ const ProductAttributes:Module<any, any> = {
                      if (logo_settings && state.customLogos[new_item]) {
                        Vue.set(state.customLogos[new_item], newCustomLogo.logoIndex, {...logo_settings})
                      }
-                   } else {
-                     // await setCustomLogo(customLogo.customObj, newCustomLogo.logoIndex, new_item)
                    }
                  }
                })
@@ -851,6 +856,7 @@ const ProductAttributes:Module<any, any> = {
       }
 
       state.products_rosters = {}
+      state.locked_designs = {}
 
       // state.selectedIndex = 0;
       // state.styleIndex = 0 ;
@@ -1256,6 +1262,12 @@ const ProductAttributes:Module<any, any> = {
     }
   },
   getters: {
+    getLockedDesigns: state => (design_id) => {
+      if(design_id) {
+        return state.locked_designs[design_id]
+      }
+      return state.locked_designs;
+    },
     getCollectionMode: (state) => {
       return state.collectionMode
     },

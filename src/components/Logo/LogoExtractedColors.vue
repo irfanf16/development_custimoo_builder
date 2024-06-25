@@ -46,10 +46,9 @@
 
 <script lang="ts">
 
-import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
+import {Component, Prop, Mixins} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {getProductColors} from '@/helpers/Helpers'
-import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
@@ -57,7 +56,7 @@ import LogoColorTabsNew from "@/components/LogoColorTabsNew.vue";
 import {LogoUploaderColors} from '@/mixins/LogoUploaderColors'
 
 @Component<LogoExtractedColors>({
-  components: { LogoEditorModal, LogoDisclaimerModal, LogoEditor, LogoColorTabsNew },
+  components: { LogoDisclaimerModal, LogoEditor, LogoColorTabsNew },
   mounted() {
    this.product_colors = getProductColors();
  }

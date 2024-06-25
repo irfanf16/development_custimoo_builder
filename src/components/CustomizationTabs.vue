@@ -106,7 +106,6 @@ import CustomizationText from '@/components/CustomizationText.vue'
 import CollarStyle from '@/components/CollarStyle.vue'
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ColorTabs from '@/components/ColorTabs.vue'
-import RecentLogos from "@/components/RecentLogos.vue";
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import CustomizationTabsMixin from "@/mixins/CustomizationTabsMixin";
 import {filter} from "lodash"
@@ -116,7 +115,6 @@ import OrderSummary from "@/components/OrderSummary.vue";
 @Component<CustomizationTabs>({
   components: {
     OrderSummary,
-    RecentLogos,
     ColorAccordion,
     LogoPlacementTab,
     CustomizationText,

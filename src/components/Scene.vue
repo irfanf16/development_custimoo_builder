@@ -145,6 +145,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   @Prop({ required: false, default: () => { return [] } }) readonly texts !: [Record<string, any>];
   @Prop({ required: false }) readonly product_id !: number
   @Prop({ required: false }) readonly product_index !: number
+  @Prop({ required: false }) readonly design_id !: number
   @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
   @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
   @Prop({ required: false }) readonly logosLimit !: number
@@ -291,7 +292,14 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.$store.getters.getSkuInformation
   }
 
+  get locked_design() {
+    return this.design_id? this.$store.getters.getLockedDesigns(this.design_id) : undefined
+  }
+
   get appliedDefaultColors() {
+    if(this.locked_design) {
+      return this.locked_design
+    }
     let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
     if(defaultColors.length && !this.mainPreview && !this.mobileScreen && !this.allow_shuffle_colors) {
       defaultColors = this.logoColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
@@ -720,6 +728,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     return sortedDefaultColors === sortedLogoColors;
   }
+
+  public setLockedDesign() {
+    this.$store.commit('SET_LOCKED_DESIGN', {design_id: this.design_id, default_color: this.appliedDefaultColors})
+  }
+
   public changeDefaultColorsEvent(is_shuffle = false) {
     if(this.mainPreview && (Object.keys(this.groupColors).length)) {
       this.$store.dispatch('setGroupColors', {})

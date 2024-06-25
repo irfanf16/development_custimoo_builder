@@ -108,23 +108,21 @@
 
 <script lang="ts">
 
-import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
+import {Component, Prop, Mixins} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 import ColorTabs from "@/components/ColorTabs.vue";
 import {http} from "@/httpCommon";
 import {
   getLogoUpdatedProps,
-  getUploadedLogoObject,
   processColorsCustom,
-  recentLogoDefaultObject
+  recentLogoDefaultObject, santaClone
 } from "@/helpers/Helpers";
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 
 @Component<LogoEditor>({
-  components: {LogoEditorModal, LogoDisclaimerModal, ColorTabs},
+  components: {LogoDisclaimerModal, ColorTabs},
   mounted() {
     this.getProductFilesColors()
   }
@@ -226,88 +224,46 @@ export default class LogoEditor extends Mixins(ErrorMessages, ModalAction, Custo
     });
   }
 
-  public useLogo_back() {
-    this.showLoader = true
-    let custom_logo = JSON.parse(JSON.stringify(this.customLogo[this.customLogoIndex]));
-    let data = new FormData();
-    data.append("logo_id", custom_logo.id);
-    data.append("logo", this.$store.getters.getLogoEditor.image);
-    data.append("product_id", this.$store.getters.getSelectedProduct.id);
-    http.post('/customer/update/logo', data)
-      .then(async resp => {
-        const colors = resp.data.colors;
-        custom_logo.original_logo = resp.data.file.logo_url;
-        custom_logo.transparent_logo = resp.data.file.transparent_logo_url;
-        custom_logo.smart_transparent_logo = resp.data.file.smart_transparent_logo_url;
-        custom_logo.is_smart_transparent = false;
-        custom_logo.url = resp.data.file.logo_url;
-        custom_logo.id = resp.data.file.id;
-        let customObj = await getUploadedLogoObject(resp.data.file)
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
-        this.$store.commit('SET_COLORS_FROM_RECENT', false)
-        custom_logo.adding_tab = false
-        let payload = {
-          customObj : customObj,
-          custom_logo: custom_logo
-        }
-        this.$store.commit('customLogos', payload)
-        this.$emit('updateLogoFromLogoEditor', colors)
-        this.$store.commit('SET_RECENT_LOGOS');
-
-
-        if (this.customLogoIndex == 0) {
-          //update team logo url in all product logos
-          this.$store.dispatch('setTeamLogoUrl', payload)
-        }
-        this.showToast('Logo Applied', 'SUCCESS')
-        this.showLoader = false
-        this.hideVModal('logo-modal')
-      }).catch((e) => {
-      this.showLoader = false
-      this.showError('Something went wrong')
-      console.log('exception', e)
-    })
-  }
-
   public useLogo() {
     let self: Record<any, any> = this;
     this.showLoader = true
-    //let custom_logo = JSON.parse(JSON.stringify(this.customLogo));
     let data = new FormData();
     data.append("logo_id", this.customLogo.id);
     data.append("logo", this.logo_editor_obj.image_url);
     data.append("product_id", this.$store.getters.getSelectedProduct.id);
-    http.post('/customer/update/logo', data)
-      .then(async resp => {
-        const logo_data = resp.data.file
-        if(this.customLogoIndex == 0) {
-          let logo_colors = processColorsCustom(resp.data.colors)
-          this.$store.commit('SET_LOGO_COLORS_INFO', {
-            data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
-          })
-          await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
-        } else {
-          const custom_logos_updated_props = getLogoUpdatedProps(logo_data)
-          delete this.customLogo.scaleX
-          delete this.customLogo.scaleY
-          await this.$store.commit('SET_CUSTOM_LOGOS', {
-            logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
-          })
-        }
-        this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
-        self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
-        self.$eventBus.$emit('handleNonVectorCustomLogosCount')
-        this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
-        this.showToast('Logo Applied', 'SUCCESS')
-        this.showLoader = false
-        this.hideVModal('logo-editor-modal')
-      }).catch((e) => {
+    http.post('/customer/update/logo', data).then(async resp => {
+      const logo_data = resp.data.customer_logo
+      const unprocessed_logo_color = santaClone(logo_data.logo_colors)
+      const logo_colors = processColorsCustom(logo_data.logo_colors, 4, 'logo_color_type')
+      const product_logo_colors = processColorsCustom(logo_data.logo_colors, 4)
+
+      logo_data.logo_colors = logo_colors
+      if(this.customLogoIndex == 0) {
+        this.$store.commit('SET_LOGO_COLORS_INFO', {
+          data: { colors: product_logo_colors, extracted_colors: JSON.parse(JSON.stringify(product_logo_colors)) }
+        })
+        this.addRemoveTeamLogoOnAllProducts('add', logo_data)
+      } else {
+        const custom_logos_updated_props = getLogoUpdatedProps(logo_data)
+        delete this.customLogo.scaleX
+        delete this.customLogo.scaleY
+        this.$store.commit('SET_CUSTOM_LOGOS', {
+          logo_index: this.customLogoIndex, custom_logos: {...this.customLogo, ...custom_logos_updated_props}
+        })
+      }
+      this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject({...logo_data, ...{logo_colors: unprocessed_logo_color}})})
+      self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogo)
+      self.$eventBus.$emit('handleNonVectorCustomLogosCount')
+      this.$store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(this.$store.getters.getCustomLogoObject)), action: 'customLogos' })
+      this.showToast('Logo Applied', 'SUCCESS')
+      this.showLoader = false
+      this.hideVModal('logo-editor-modal')
+    }).catch((e) => {
       this.showLoader = false
       this.showError('Something went wrong')
       console.log('exception', e)
     })
   }
-
 
   public cancelEditing() {
     this.$store.dispatch('unsetLogoEditor')

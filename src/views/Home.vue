@@ -533,7 +533,6 @@ import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import ItemToCustomize from '@/components/ItemToCustomize.vue'
 import CustomizationTabs from '@/components/CustomizationTabs.vue'
 import SaveColorModal from "@/components/SaveColorModal.vue"
-// import UploadLogo from '@/components/UploadLogo.vue'
 import LockerRoomModal from '@/components/LockerRoomModal.vue'
 import AddLockerRoomModal from '@/components/AddLockerRoomModal.vue'
 import LoginForm from '@/components/LoginForm.vue'
@@ -580,7 +579,6 @@ import ShareDesignModal from "@/components/ShareDesignModal.vue";
 import ThreeDScene from "@/components/ThreeDScene.vue";
 import Scene3d from "@/components/3d/scene-3d.vue";
 import EditRosterAreaTab from "@/components/EditRosterAreaTab.vue";
-import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import AddProductWithDesignsToLockerRoom from "@/components/AddProductWithDesignsToLockerRoom.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
@@ -595,7 +593,6 @@ Vue.filter('formatDate', function(value:string) {
   components: {
     AddProductWithDesignsToLockerRoom,
     LockerRoom,
-    LogoEditorModal,
     EditRosterAreaTab,
     ShareDesignModal,
     Scene3d,

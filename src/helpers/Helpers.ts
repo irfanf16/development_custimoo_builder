@@ -163,7 +163,7 @@ const fileToBase64 =  (file: any) => {
 
 }
 
-const processColorsCustom = (colors: any, logos_count=4) => {
+const processColorsCustom = (colors: any, logos_count= 4, color_type = 'color_type') => {
   const imageColors: any[] = []
   const uniqueColors: string[] = []
   if(colors && colors.length > 0) {
@@ -181,7 +181,7 @@ const processColorsCustom = (colors: any, logos_count=4) => {
   uniqueColors.splice(4, deletedCount)
   const selectProductPantonesList = getSelectedProductPantones()
   uniqueColors.forEach((color: string) => {
-    const pantoneColor = getClosestColor(color, selectProductPantonesList, getColorType());
+    const pantoneColor = getClosestColor(color, selectProductPantonesList, getColorType('', null, color_type));
     imageColors.push({hex: pantoneColor.hex, pantone: pantoneColor.pantone, name: pantoneColor.name})
   })
   while(imageColors.length < logos_count ) {
@@ -212,14 +212,14 @@ const getSelectedProductPantones = (product_id: null|number = null, svg_group: s
   return product_pantones;
 }
 
-const getColorType = (svg_group: string = '', product_id: number|null = null) => {
+const getColorType = (svg_group = '', product_id: number|null = null, color_type = 'color_type') => {
   const product = product_id? Store.getters.getProduct(product_id) : Store.getters.getProduct()
   if(svg_group && product && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
     return 'product_color'
   } else if(product && !product.is_custom_color_allowed) {
     return 'product_color'
   }
-  return Store.getters.getSetting('color_type');
+  return Store.getters.getSetting(color_type);
 }
 
 const sortTextsArray = (product_names: any) => {
@@ -279,120 +279,6 @@ const getReminderOptions = () => {
   optionArray[3] = {value: 10080, text: '7 days before'}
   optionArray[4] = {value: 43200, text: '1 month before'}
   return optionArray;
-}
-
-const  setCustomLogo  = async (logo:Record<any, any>, logoIndex:number, prd_id = 0):Promise<void> => {
-  const customTabIndex = logoIndex
-  const custom_logos = Store.getters.getCustomLogos()
-  let logo_url = '';
-  const transparent_logo =  logo.transparent_logo_url;
-  const smart_transparent_logo = logo.smart_transparent_logo_url;
-  const original_logo = logo.logo_url;
-  const is_transparent = false;
-  logo_url = original_logo;
-
-  let image_colors:Record<any, any>[] = [];
-  if(logo.logo_colors != null) {
-    image_colors = processColorsCustom(logo.logo_colors)
-    let image_color_count = image_colors.length;
-    while(image_color_count < 4 ) {
-      image_colors.push({hex: null, pantone: null, name: null});
-      ++image_color_count;
-    }
-  }
-
-
-  const payload = [{
-    index: customTabIndex,
-    attribute: 'url',
-    value: logo_url
-  },{
-    index: customTabIndex,
-    attribute: 'id',
-    value: logo.id
-  },{
-    index: customTabIndex,
-    attribute: 'is_transparent',
-    value: false
-  },
-    {
-      index: customTabIndex,
-      attribute: 'original_logo',
-      value: original_logo
-    },
-    {
-      index: customTabIndex,
-      attribute: 'transparent_logo',
-      value: transparent_logo
-    },
-    {
-      index: customTabIndex,
-      attribute: 'smart_transparent_logo',
-      value: smart_transparent_logo
-    },
-    {
-      index: customTabIndex,
-      attribute: 'is_smart_transparent',
-      value: false
-    },
-    {
-      index: customTabIndex,
-      attribute: 'original_logo_url',
-      value: logo.original_logo_url
-    },
-    {
-      index: customTabIndex,
-      attribute: 'logo_colors',
-      value: image_colors
-    },
-
-  ];
-  let getLogos = []
-  if (custom_logos.length > 1){
-    getLogos = custom_logos.slice(0, -1)
-  }else{
-    getLogos = custom_logos
-  }
-  Store.commit('UPDATE_UNDO', { data: JSON.parse(JSON.stringify(Store.getters.getCustomLogoObject)), action: 'customLogos' })
-  // Store.commit('SET_COLORS_FROM_RECENT',true)
-  payload.forEach(async (data) => {
-    if (prd_id){
-      const new_data = {
-        logo: data,
-        id:prd_id
-      }
-      await Store.commit('UPDATE_LOGO_ATTRIBUTE_FOR_EACH_PRODUCT', new_data)
-    }else{
-      await Store.dispatch('updateCustomLogoAttribute', data)
-    }
-  })
-  if(customTabIndex == 0) {
-    //update team logo url in all product logos
-    const logo_:any = {}
-    logo_.original_logo = original_logo
-    logo_.transparent_logo = transparent_logo
-    logo_.smart_transparent_logo = smart_transparent_logo
-    logo_.is_smart_transparent = false
-    logo_.is_transparent = false
-    logo_.url = logo_url
-    logo_.id = logo.id;
-    const payload = {
-      customObj : logo_,
-    }
-    await Store.dispatch('setTeamLogoUrl', payload)
-  }
-  if(!logo.logo_colors) {
-    Store.dispatch("SET_LOGO_COLORS", []);
-  }
-  else {
-    if(customTabIndex == 0) {
-      if(logo.logo_colors != null) {
-        Store.dispatch("SET_LOGO_COLORS", image_colors);
-        Store.dispatch("initialLogoColors", JSON.stringify(image_colors));
-        Store.commit("UPDATE_USING_COLOR_LOGOS", false);
-      }
-    }
-  }
 }
 
 const handleResponseException = (errorResponse: AxiosError | TypeError) => {

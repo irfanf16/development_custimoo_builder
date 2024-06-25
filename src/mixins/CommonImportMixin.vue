@@ -28,6 +28,7 @@ import {
   faArrowRight,
   faBaseballBall,
   faCube,
+  faLock,
   faDiceTwo,
   faEdit,
   faEye,
@@ -86,6 +87,7 @@ library.add(faUser)
 library.add(faFacebookF)
 library.add(faLinkedinIn)
 library.add(faGooglePlusG)
+library.add(faLock)
 library.add(faCube)
 library.add(faSignOutAlt)
 library.add(faDiceTwo)

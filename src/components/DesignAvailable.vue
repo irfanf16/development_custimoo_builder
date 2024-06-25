@@ -2,14 +2,19 @@
   <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
     <template v-if="selectedProduct.productstyles[styleIndex]">
       <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
-        <template>
-          <label :class="{ 'select-design-checkbox': !mobileScreen, 'custom-checkbox': isCustomerAuthenticated }">
-            <input v-if="isCustomerAuthenticated" type="checkbox" :value="index" @change="handleActiveProductDesignSelection($event, index)" class="design-available-product-design-selection">
-            <span></span>
-          </label>
-        </template>
+        <div class="d-flex justify-content-between">
+          <template>
+            <label :class="{ 'select-design-checkbox': !mobileScreen, 'custom-checkbox': isCustomerAuthenticated }">
+              <input v-if="isCustomerAuthenticated" type="checkbox" :value="index" @change="handleActiveProductDesignSelection($event, index)" class="design-available-product-design-selection">
+              <span></span>
+            </label>
+          </template>
+<!--          <button @click="handleLockDesign(index, design.id)" class="btn d-inline-flex" :class="{'btn-gray': !locked_designs[design.id], 'btn-active': locked_designs[design.id], 'lock-design-icon': !mobileScreen}">-->
+<!--            <font-awesome-icon :icon="['fas', 'lock']" class="design-available-product-design-selection"/>-->
+<!--          </button>-->
+        </div>
         <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
-          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio"
+          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio" ref="design_scene"
                  :front="{
                     textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
                     safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -21,7 +26,8 @@
                  :logos="selectedProduct.productstyles[styleIndex].logo"
                  :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                  :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
-                 :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts" />
+                 :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                 :design_id="design.id"/>
         </a>
         <div v-else :style="{width: design_width+ 'px', height: design_height+ 'px'}"></div>
         <h3>{{ design.design_name }}</h3>
@@ -89,6 +95,10 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   public design_width = 0
   public design_height = 0
   public design_times = []
+
+  get locked_designs() {
+    return this.$store.getters.getLockedDesigns()
+  }
 
   get mobileScreen(): boolean {
     return this.$store.getters.getManageComponents.mobileScreen
@@ -170,6 +180,14 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
       });
     }
   }
+
+  public handleLockDesign(design_index, design_id) {
+    if(this.locked_designs[design_id]) {
+      this.$store.commit('UNSET_LOCKED_DESIGN', design_id)
+    } else {
+      (this.$refs['design_scene'] as Record<any, any>)[design_index].setLockedDesign()
+    }
+  }
 }
 </script>
 
@@ -225,6 +243,11 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   //   flex: auto;
   // }
 
+  .lock-design-icon {
+    opacity: 0;
+    padding: 1px 12px 6px 12px;
+  }
+
   .design-col {
     &:hover {
       .select-design-checkbox {
@@ -232,6 +255,9 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
         span {
           opacity: 1;
         }
+      }
+      .lock-design-icon {
+        opacity: 1;
       }
     }
 
@@ -350,6 +376,13 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
         display: block;
       }
     }
+  }
+  .btn-gray {
+    color: gray;
+  }
+  .btn-active {
+    color: #219F84 !important;
+    opacity: 1;
   }
 }
 </style>

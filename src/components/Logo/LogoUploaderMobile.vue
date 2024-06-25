@@ -49,14 +49,13 @@
 
 import {Component, Prop, Watch, Vue, Mixins} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import LogoEditorModal from "@/components/LogoEditorModal.vue";
 import {LogoUploaderMixin} from "@/mixins/LogoUploaderMixin";
 import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
 import LogoEditor from "@/components/Logo/LogoEditor.vue";
 
 @Component<LogoUploaderMobile>({
-  components: {LogoEditor, LogoEditorModal, LogoDisclaimerModal},
+  components: {LogoEditor, LogoDisclaimerModal},
 })
 export default class LogoUploaderMobile extends Mixins(ErrorMessages, ModalAction, LogoUploaderMixin) {
   @Prop({ required: false, default: true }) showImage!: boolean

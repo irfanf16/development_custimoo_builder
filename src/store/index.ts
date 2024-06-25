@@ -12,7 +12,7 @@ Vue.use(Vuex)
 
 const pathsToPersist = {
   'ProductAttributes': ['selectedIndex', 'selectedPrdId', 'selectedDesignId', 'products_rosters', 'using_logo_colors',
-  'product_edit_info_object', 'last_active_product_data', 'logo_colors_info'],
+  'product_edit_info_object', 'last_active_product_data', 'logo_colors_info', 'locked_designs'],
   'Product': ['logoColors', 'initialExtractedColors'],
   'Main': ['tabIndexMain'],
   'Auth': ['jwtToken', 'platform']

@@ -127,8 +127,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop} from 'vue-property-decorator'
-import UploadLogo from "@/components/UploadLogo.vue"
+import {Component, Mixins} from 'vue-property-decorator'
 import SaveLogoModal from "@/components/SaveLogoModal.vue"
 import SaveColorModal from "@/components/SaveColorModal.vue"
 import LogoColorTabsNew from "@/components/LogoColorTabsNew.vue"
@@ -145,7 +144,6 @@ import {getDomDocument, getProductColors} from "@/helpers/Helpers";
     LogoExtractedColors,
     LogoUploaderMobile,
     RecentLogos,
-    UploadLogo,
     SaveLogoModal,
     SaveColorModal,
     LogoColorTabsNew

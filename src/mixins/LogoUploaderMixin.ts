@@ -4,7 +4,7 @@ import {
   getExtensionsFor,
   processColorsCustom,
   getLogoUpdatedProps,
-  recentLogoDefaultObject, hideLockerProductUpdateButton
+  recentLogoDefaultObject, hideLockerProductUpdateButton, santaClone
 } from '@/helpers/Helpers';
 import {http} from "@/httpCommon"
 import CustomLogosMixin from "@/mixins/CustomLogosMixin"
@@ -155,13 +155,16 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
       const response_data = resp.data
       if(response_data.success) {
         const logo_data = response_data.result.customer_logo
+        const unprocessed_logo_color = santaClone(logo_data.logo_colors)
         logo_data.is_replace_success =  replaceLogo ? true : false
         await setUndoRedoItems('customLogos', 'added')
-        const logo_colors = processColorsCustom(logo_data.logo_colors)
+        const logo_colors = processColorsCustom(logo_data.logo_colors, 4, 'logo_color_type')
+        const product_logo_colors = processColorsCustom(logo_data.logo_colors, 4)
+
         logo_data.logo_colors = logo_colors
         if(customLogoIndex == 0) {
           this.$store.commit('SET_LOGO_COLORS_INFO', {
-            data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
+            data: { colors: product_logo_colors, extracted_colors: JSON.parse(JSON.stringify(product_logo_colors)) }
           })
           await this.addRemoveTeamLogoOnAllProducts('add', logo_data)
         } else {
@@ -172,7 +175,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
             logo_index: customLogoIndex, custom_logos: {...customLogo, ...custom_logos_updated_props}
           })
         }
-        this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject(logo_data)})
+        this.$store.commit('SET_RECENT_LOGOS', {data: recentLogoDefaultObject({...logo_data, ...{logo_colors: unprocessed_logo_color}})})
         self.$eventBus.$emit('handleCustomLogoUpdatedEvent', customLogo)
         self.$eventBus.$emit('handleNonVectorCustomLogosCount')
         this.$emit('logo-uploaded', customLogo)

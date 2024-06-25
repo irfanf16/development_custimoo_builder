@@ -131,8 +131,8 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
   public async setRecentLogo(recent_logo: Record<any, any>) {
     let self: Record<any, any> = this;
     await setUndoRedoItems('customLogos', 'recent_added')
-    let logo_colors = processColorsCustom(recent_logo.logo_colors)
-    recent_logo.logo_colors = JSON.parse(JSON.stringify(logo_colors))
+    const logo_colors = processColorsCustom(recent_logo.logo_colors, 4, 'logo_color_type')
+    const product_logo_colors = processColorsCustom(recent_logo.logo_colors, 4)
     const custom_logos_updated_props: Record<any, any> = {
       transparent_logo: recent_logo.transparent_logo_url, smart_transparent_logo: recent_logo.smart_transparent_logo_url,
       original_logo_url: recent_logo.original_logo_url, original_logo: recent_logo.original_logo, is_smart_transparent: false,
@@ -144,7 +144,7 @@ export default class RecentLogos extends Mixins(ErrorMessages,LockerProducts, Cu
     if(this.customLogoIndex == 0) {
       if(recent_logo.logo_colors && recent_logo.logo_colors instanceof Array) {
         this.$store.commit('SET_LOGO_COLORS_INFO', {
-          data: { colors: logo_colors, extracted_colors: JSON.parse(JSON.stringify(logo_colors)) }
+          data: { colors: product_logo_colors, extracted_colors: JSON.parse(JSON.stringify(product_logo_colors)) }
         })
       }
       this.addRemoveTeamLogoOnAllProducts('add', recent_logo)

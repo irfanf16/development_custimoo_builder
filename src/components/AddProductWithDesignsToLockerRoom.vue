@@ -59,6 +59,7 @@
                          :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                          :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"
                          :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                         :design_id="design.id"
                   />
                   <Scene  v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio"
                           :ref="`product-selected-design-${designIndex}-ref`" :key="`product-selected-design-${designIndex}`"
@@ -74,6 +75,7 @@
                           :productColors="selectedProduct.colors"
                           :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"
                           :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                          :design_id="design.id"
                   />
                 </div>
                 <div class="d-flex justify-content-center align-items-center my-2">

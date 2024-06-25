@@ -100,7 +100,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
     let colors = null
     await http.get(`logos/colors?id=${id}`)
       .then((res) => {
-        colors =  res.data.colors
+        colors =  res.data.logo_colors
       }).catch((e) => {
         console.log('Unable to fetch logo colors',e.response.data.message)
       })
@@ -481,26 +481,14 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     return this.$store.getters.getProducts
   }
 
-  public async fetchLogoColors(id:number) {
-    let colors = null
-    await http.get(`logos/colors?id=${id}`)
-      .then((res) => {
-        colors =  res.data.colors
-      }).catch((e) => {
-        console.log('Unable to fetch logo colors',e.response.data.message)
-        //this.showError('Unable to fetch logo colors')
-      })
-    return colors
-  }
-
   public setProductTeamLogoColors(custom_logos: any) {
     const custom_logos_type = custom_logos.constructor.name
     custom_logos = custom_logos_type == 'String' ? JSON.parse(custom_logos) : custom_logos
     if(custom_logos.length > 0) {
       if(custom_logos[0].logo_colors && custom_logos[0].logo_colors.length > 0) {
-        let logo_colors = this.getLogoColors(custom_logos[0].logo_colors)
+        let product_logo_colors = this.getLogoColors(custom_logos[0].logo_colors)
         this.$store.commit('SET_LOGO_COLORS_INFO', {
-          data: { using_logo_colors: false,  is_shuffled: false,  colors: logo_colors,  extracted_colors: logo_colors }
+          data: { using_logo_colors: false,  is_shuffled: false,  colors: product_logo_colors,  extracted_colors: product_logo_colors }
         })
       }
     }
