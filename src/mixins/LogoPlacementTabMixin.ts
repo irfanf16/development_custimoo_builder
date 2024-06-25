@@ -1,6 +1,7 @@
 import {Component, Mixins, Prop} from "vue-property-decorator";
 import {setUndoRedoItems, getLogoSettingsObject, updateLastActiveProductData} from '@/helpers/Helpers';
 import CustomLogosMixin from "@/mixins/CustomLogosMixin"
+import { processColorsCustom } from "@/helpers/Helpers";
 
 @Component
 export class LogoPlacementTabMixin extends Mixins(CustomLogosMixin) {
@@ -15,7 +16,30 @@ export class LogoPlacementTabMixin extends Mixins(CustomLogosMixin) {
     })
     this.$root.$on('changeLogoTabIndex', (index:number) => {
       // here you need to use the arrow function
-      this.tabIndex = index;
+      this.custom_logo_tab_index = index;
+    })
+    this.$root.$on('useLockerRoomAssetLogo', async (logo: Record<any, any>) => {
+      // here you need to use the arrow function
+      const active_tab_logo = this.$store.getters.getCustomLogos(undefined, this.custom_logo_tab_index)
+      const updated_logo = {...active_tab_logo, ...logo}
+      updated_logo.url = updated_logo.logo_url;
+      if (this.custom_logo_tab_index == 0) {
+        const logo_colors = processColorsCustom(updated_logo.logo_colors, 4, 'logo_color_type')
+        const product_logo_colors = processColorsCustom(updated_logo.logo_colors, 4)
+        updated_logo.logo_colors = logo_colors;
+        delete updated_logo.scaleX;
+        delete updated_logo.scaleY;
+        if (updated_logo.logo_colors && updated_logo.logo_colors instanceof Array) {
+          this.$store.commit("SET_LOGO_COLORS_INFO", {
+            data: { colors: product_logo_colors, extracted_colors: product_logo_colors }
+          })
+        }
+        await this.addRemoveTeamLogoOnAllProducts('add', updated_logo)
+      } else {
+        this.$store.commit("SET_CUSTOM_LOGOS", {logo_index: this.custom_logo_tab_index, custom_logos: updated_logo})
+      }
+      self.$eventBus.$emit('handleCustomLogoUpdatedEvent', updated_logo);
+      // self.$eventBus.$emit("customLogoResetAndAdd");
     })
   }
 

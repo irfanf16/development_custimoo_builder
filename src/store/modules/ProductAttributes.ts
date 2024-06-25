@@ -42,7 +42,6 @@ const ProductAttributes:Module<any, any> = {
     selectedIndex: 0,
     selectedPrdId:0,
     categories: [],
-    colorsFromRecent: false,
     customLogos: {},
     fixed_logo_index: 0,
     recentLogos: [],
@@ -234,9 +233,6 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_HIDE_COLOR_SECTION(state: Record<any, any>, payload: boolean){
       state.hideColorSection = payload
-    },
-    SET_COLORS_FROM_RECENT(state: Record<any, any>, payload: boolean){
-      state.colorsFromRecent = payload
     },
     SET_SELECTION_MODE(state: Record<any, any>, payload: boolean){
       state.selectionMode = payload
@@ -1351,9 +1347,6 @@ const ProductAttributes:Module<any, any> = {
     },
     getLockerTabsIndex: state => {
       return state.lockerTabsIndex
-    },
-    getColorsFromRecent: state => {
-      return state.colorsFromRecent
     },
     getRecentLogos: state => {
       return state.recentLogos

@@ -3,327 +3,329 @@
     <div v-if="showLoader" class="loader">
       <img src="@assets/images/loading.gif" />
     </div>
-    <b-tabs class="main-locker-tabs" @input="updateTab" ref="main-locker-tabs" v-model="main_locker_tabs">
-      <b-tab>
-        <template #title>
-          <span class="btn btn-secondary btn-sm">Locker Rooms</span>
-        </template>
-        <b-tabs nav-class="lockerroom_titles" class="locker-tabs" lazy content-class="mt-3" @changed="lockerChanged">
-        <template v-for="(room, i) in getLockerProducts">
-          <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
-            <template #title>
-              <draggable ghostClass="locker-tab-ghost" :data-title="`${room.room_name}`" :group="{name: `locker-${i}`, pull: false, put: true}"
-                         :data-room-id="room.id" :data-room-index="i"
-                         @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
-                <span @click="changeColor" style="white-space: nowrap">{{ room.room_name }}</span>
-              </draggable>
-              <a v-if="!getSelectionMode.readonly" style="right: 13px" title="Rename locker" @click="renameLockerModal($event, room)" class="remove-tab theme-bg-color theme-color">
-                <b-icon-pencil-fill />
-              </a>
-              <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom($event, room.id, i)">
-                <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-              </a>
-            </template>
-            <div class="lockerroom-tabs">
-              <div>
-                <b-card no-body>
-                  <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
-                  <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="handleLockerRoomChanged" @input="handleTabChanged" :no-fade="true">
-                    <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" draggable="false">
-                      <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
-                                 :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
-                                 :multiDrag="true" @remove="designMoved"
-                                 :forceFallback="true"
-                                 handle=".image-holder"
-                                 v-bind="{filter: '.custom-checkbox', animation: 250, delayOnTouchOnly: true, delay: 500}"
-                                 @update="lockerProductsChanged($event)">
-                        <template v-for="(product, ind) in room.product">
-                          <div :key="`${ind}-${product.id}`" class="products-block" :class=" product.disable_style ? 'notactive' : ''" :data-room-id="room.id"
-                               :data-room-index="i" :data-design-title="product.product_name"
-                               :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
-                               :data-product-index="ind">
-                            <div class="fs-2">
-                              Total products: <strong class="font-weight-bolder">{{product.roster_total_quantity ? product.roster_total_quantity : '0'}}</strong>
-                            </div>
-                            <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
-                                   @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
-                              <div class="image-holder">
-                                <div>
-                                  <label class="custom-checkbox" @click="($event)=>$event.stopPropagation()" @dragstart="($event)=>$event.stopPropagation()">
-                                    <input type="checkbox" v-model="selectedCollectionProducts" v-bind:value="product.id">
-                                    <span></span>
-                                  </label>
-
-                                  <template v-if="room.active_tab">
-                                    <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                                    <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
-                                  </template>
-                                </div>
+    <div class="d-flex justify-content-between">
+      <b-tabs class="main-locker-tabs" @input="updateTab" ref="main-locker-tabs" v-model="main_locker_tabs">
+        <b-tab>
+          <template #title>
+            <span class="btn btn-secondary btn-sm">Locker Rooms</span>
+          </template>
+          <b-tabs nav-class="lockerroom_titles" class="locker-tabs" lazy content-class="mt-3" @changed="lockerChanged">
+          <template v-for="(room, i) in getLockerProducts">
+            <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
+              <template #title>
+                <draggable ghostClass="locker-tab-ghost" :data-title="`${room.room_name}`" :group="{name: `locker-${i}`, pull: false, put: true}"
+                           :data-room-id="room.id" :data-room-index="i"
+                           @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
+                  <span @click="changeColor" style="white-space: nowrap">{{ room.room_name }}</span>
+                </draggable>
+                <a v-if="!getSelectionMode.readonly" style="right: 13px" title="Rename locker" @click="renameLockerModal($event, room)" class="remove-tab theme-bg-color theme-color">
+                  <b-icon-pencil-fill />
+                </a>
+                <a v-if="!getSelectionMode.readonly" class="remove-tab" @click="deleteRoom($event, room.id, i)">
+                  <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                </a>
+              </template>
+              <div class="lockerroom-tabs">
+                <div>
+                  <b-card no-body>
+                    <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
+                    <b-tabs v-else card v-model="lockerActiveTabIndex" @changed="handleLockerRoomChanged" @input="handleTabChanged" :no-fade="true">
+                      <b-tab v-if="!getSelectionMode.eventCollectionMode"  title="Products" draggable="false">
+                        <draggable @start="dragStart" selectedClass="sortable-selected" :group="{name: 'people', pull: room.locker_pull_groups}"
+                                   :value="[]" class="products-holder draggable grid mobile-cols-2 gap-4 grid-6"
+                                   :multiDrag="true" @remove="designMoved"
+                                   :forceFallback="true"
+                                   handle=".image-holder"
+                                   v-bind="{filter: '.custom-checkbox', animation: 250, delayOnTouchOnly: true, delay: 500}"
+                                   @update="lockerProductsChanged($event)">
+                          <template v-for="(product, ind) in room.product">
+                            <div :key="`${ind}-${product.id}`" class="products-block" :class=" product.disable_style ? 'notactive' : ''" :data-room-id="room.id"
+                                 :data-room-index="i" :data-design-title="product.product_name"
+                                 :data-product-locker-room-id="product.id" :data-customer-id="product.customer_id"
+                                 :data-product-index="ind">
+                              <div class="fs-2">
+                                Total products: <strong class="font-weight-bolder">{{product.roster_total_quantity ? product.roster_total_quantity : '0'}}</strong>
                               </div>
-                            </label>
+                              <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
+                                     @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
+                                <div class="image-holder">
+                                  <div>
+                                    <label class="custom-checkbox" @click="($event)=>$event.stopPropagation()" @dragstart="($event)=>$event.stopPropagation()">
+                                      <input type="checkbox" v-model="selectedCollectionProducts" v-bind:value="product.id">
+                                      <span></span>
+                                    </label>
 
-                            <div @click="($event)=>$event.stopPropagation()" class="d-flex align-items-center justify-content-center product-description gap-1 text-center">
-                              <span class="cursor-pointer" @mouseenter="showTooltip" @mouseleave="hideTooltip"
-                                    data-title="Rename" @click="setRenameLockerProductID(`${i + ind}${ind}`, product)"><b-icon-pencil-square /></span>
-                              <p class="break-word">{{ product.product_name }}</p>
-                            </div>
-
-                          <ul class="product-icons">
-                            <li v-if="!getSelectionMode.readonly">
-                              <a style="font-size: 12px;" data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"
-                                 @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
-                                :icon="['fas', 'trash-alt']" /></a>
-                            </li>
-                            <li v-if="!getSelectionMode.readonly">
-                              <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                              <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                              <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product, ind)" @mouseleave="hideTooltip"
-                                 @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
-                            </li>
-                            <li v-if="!getSelectionMode.readonly" class="position-relative" style="z-index: 20;">
-                              <b-button style="font-size: 12px;"  @mouseleave="hideTooltip" @mouseenter="showTooltip" data-title="Share design" :ref="'share'+i+''+ind" :id="'share'+i+''+ind"
-                                        @click.stop="shareProduct(product, ind, i)"><font-awesome-icon
-                                :icon="['fas', 'share-alt']"/>
-                              </b-button>
-
-                              <aside :id="'share-popper-content'+i+''+ind" v-show="popperID == ('share'+i+''+ind)" :ref="'share-popper-content'+i+''+ind"
-                                     :class="!opacityset ? 'opacity-0' : 'opacity-100'"
-                                     v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-product-tooltip" :key="popperID">
-                                <div class="share-holder">
-                                  <h3>Copy link and Share</h3>
-                                  <div class="share-form">
-                                    <b-form inline>
-                                      <b-form-input @mouseenter="markText" :ref="'copylink_product_'+i +''+ind"
-                                                    :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
-
-                                      ></b-form-input>
-                                      <button @click="copyLink(i, ind)" class="btn" type="button">Copy Link</button>
-                                    </b-form>
+                                    <template v-if="room.active_tab">
+                                      <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                                      <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
+                                    </template>
                                   </div>
                                 </div>
-                              </aside>
-                            </li>
-                            <li v-if="!getSelectionMode.readonly">
-                              <a style="font-size: 12px;"  @click="showDesignModal(product)" @mouseleave="hideTooltip" @mouseenter="showTooltip" data-title="Copy design">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy" class="svg-inline--fa fa-copy" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path></svg>
-                              </a>
-                            </li>
-                            <li>
-                              <a style="font-size: 12px;" data-title="Edit roster" @click="editRoster(product)"
-                                 @mouseleave="hideTooltip" @mouseenter="showTooltip">
-                                <b-icon-list class="fs-3" />
-                              </a>
-                            </li>
-                            <li>
-                              <a style="font-size: 12px;" data-title="Download preview images" @click="downloadProductPreviewImages(i, ind)"
-                                 @mouseleave="hideTooltip" @mouseenter="showTooltip">
-                                <b-icon-download class="fs-3" />
-                              </a>
-                            </li>
-                            <li v-if="mobileScreen" class="swap">
-                              <a  v-if="product.design && product.design.back_design_count > 0" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
-                              </a>
-                            </li>
-                            <li v-else-if="isSafari" class="swap">
-                              <a v-if="product.design && product.design.back_design_count > 0" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
-                              </a>
-                            </li>
-                            <li v-else class="swap">
-                              <a v-if="product.design && product.design.back_design_count > 0"  @mouseleave="hideTooltip" @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
-                                <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
-                              </a>
-                            </li>
-                          </ul>
+                              </label>
 
-                          <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'"
-                               class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100" :ref="`rename-locker-${i + ind}${ind}`">
+                              <div @click="($event)=>$event.stopPropagation()" class="d-flex align-items-center justify-content-center product-description gap-1 text-center">
+                                <span class="cursor-pointer" @mouseenter="showTooltip" @mouseleave="hideTooltip"
+                                      data-title="Rename" @click="setRenameLockerProductID(`${i + ind}${ind}`, product)"><b-icon-pencil-square /></span>
+                                <p class="break-word">{{ product.product_name }}</p>
+                              </div>
 
-                            <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
-                            <div class="d-flex">
-                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
-                                <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
-                                <b-icon-check v-else />
-                              </b-button>
-                              <b-button class="px-2 py-1 fs-2 border-0 rounded-0 close-rename" @click="()=>{renameID = '-1'}">
-                                <b-icon-x />
-                              </b-button>
+                            <ul class="product-icons">
+                              <li v-if="!getSelectionMode.readonly">
+                                <a style="font-size: 12px;" data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"
+                                   @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
+                                  :icon="['fas', 'trash-alt']" /></a>
+                              </li>
+                              <li v-if="!getSelectionMode.readonly">
+                                <a style="font-size: 12px;" v-if="mobileScreen" data-title="Edit design" @click="editProduct(room.id, product, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                                <a style="font-size: 12px;" v-else-if="isSafari" data-title="Edit design" @click="editProduct(room.id, product, ind)"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                                <a style="font-size: 12px;" v-else data-title="Edit design" @click="editProduct(room.id, product, ind)" @mouseleave="hideTooltip"
+                                   @mouseenter="showTooltip"><font-awesome-icon :icon="['fas', 'edit']"/></a>
+                              </li>
+                              <li v-if="!getSelectionMode.readonly" class="position-relative" style="z-index: 20;">
+                                <b-button style="font-size: 12px;"  @mouseleave="hideTooltip" @mouseenter="showTooltip" data-title="Share design" :ref="'share'+i+''+ind" :id="'share'+i+''+ind"
+                                          @click.stop="shareProduct(product, ind, i)"><font-awesome-icon
+                                  :icon="['fas', 'share-alt']"/>
+                                </b-button>
+
+                                <aside :id="'share-popper-content'+i+''+ind" v-show="popperID == ('share'+i+''+ind)" :ref="'share-popper-content'+i+''+ind"
+                                       :class="!opacityset ? 'opacity-0' : 'opacity-100'"
+                                       v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-product-tooltip" :key="popperID">
+                                  <div class="share-holder">
+                                    <h3>Copy link and Share</h3>
+                                    <div class="share-form">
+                                      <b-form inline>
+                                        <b-form-input @mouseenter="markText" :ref="'copylink_product_'+i +''+ind"
+                                                      :value="product.shared_url !== 'undefined'  ?   product.shared_url : ''"
+
+                                        ></b-form-input>
+                                        <button @click="copyLink(i, ind)" class="btn" type="button">Copy Link</button>
+                                      </b-form>
+                                    </div>
+                                  </div>
+                                </aside>
+                              </li>
+                              <li v-if="!getSelectionMode.readonly">
+                                <a style="font-size: 12px;"  @click="showDesignModal(product)" @mouseleave="hideTooltip" @mouseenter="showTooltip" data-title="Copy design">
+                                  <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="copy" class="svg-inline--fa fa-copy" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M384 96L384 0h-112c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48H464c26.51 0 48-21.49 48-48V128h-95.1C398.4 128 384 113.6 384 96zM416 0v96h96L416 0zM192 352V128h-144c-26.51 0-48 21.49-48 48v288c0 26.51 21.49 48 48 48h192c26.51 0 48-21.49 48-48L288 416h-32C220.7 416 192 387.3 192 352z"></path></svg>
+                                </a>
+                              </li>
+                              <li>
+                                <a style="font-size: 12px;" data-title="Edit roster" @click="editRoster(product)"
+                                   @mouseleave="hideTooltip" @mouseenter="showTooltip">
+                                  <b-icon-list class="fs-3" />
+                                </a>
+                              </li>
+                              <li>
+                                <a style="font-size: 12px;" data-title="Download preview images" @click="downloadProductPreviewImages(i, ind)"
+                                   @mouseleave="hideTooltip" @mouseenter="showTooltip">
+                                  <b-icon-download class="fs-3" />
+                                </a>
+                              </li>
+                              <li v-if="mobileScreen" class="swap">
+                                <a  v-if="product.design && product.design.back_design_count > 0" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                                  <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                                </a>
+                              </li>
+                              <li v-else-if="isSafari" class="swap">
+                                <a v-if="product.design && product.design.back_design_count > 0" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                                  <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                                </a>
+                              </li>
+                              <li v-else class="swap">
+                                <a v-if="product.design && product.design.back_design_count > 0"  @mouseleave="hideTooltip" @mouseenter="showTooltip" :data-title="product.is_back_img ? 'Show front' : 'Show back' " @click="swapDesign(i, ind)" style="font-size: 1em">
+                                  <svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="arrows-rotate" class="svg-inline--fa fa-arrows-rotate fa-w-16" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="currentColor" d="M464 16c-17.67 0-32 14.31-32 32v74.09C392.1 66.52 327.4 32 256 32C161.5 32 78.59 92.34 49.58 182.2c-5.438 16.81 3.797 34.88 20.61 40.28c16.89 5.5 34.88-3.812 40.3-20.59C130.9 138.5 189.4 96 256 96c50.5 0 96.26 24.55 124.4 64H336c-17.67 0-32 14.31-32 32s14.33 32 32 32h128c17.67 0 32-14.31 32-32V48C496 30.31 481.7 16 464 16zM441.8 289.6c-16.92-5.438-34.88 3.812-40.3 20.59C381.1 373.5 322.6 416 256 416c-50.5 0-96.25-24.55-124.4-64H176c17.67 0 32-14.31 32-32s-14.33-32-32-32h-128c-17.67 0-32 14.31-32 32v144c0 17.69 14.33 32 32 32s32-14.31 32-32v-74.09C119.9 445.5 184.6 480 255.1 480c94.45 0 177.4-60.34 206.4-150.2C467.9 313 458.6 294.1 441.8 289.6z"></path></svg>
+                                </a>
+                              </li>
+                            </ul>
+
+                            <div :key="`rename-locker-${renameID}${i + ind}${ind}`" :class="renameID == `${i + ind}${ind}` ? 'd-flex' : 'd-none'"
+                                 class="rounded-lg overflow-hidden position-absolute rename-locker-product" style="z-index: 100" :ref="`rename-locker-${i + ind}${ind}`">
+
+                              <b-form-input class="fs-1 pr-1" v-model="current_product_name" :readonly="renameLoader" style="box-shadow: none; border: none; height: auto"></b-form-input>
+                              <div class="d-flex">
+                                <b-button class="px-2 py-1 fs-2 border-0 rounded-0" :disabled="renameLoader" @click="renameLockerProduct(product)">
+                                  <b-icon-arrow-counterclockwise v-if="renameLoader" class="b-icon-animation-spin-reverse" />
+                                  <b-icon-check v-else />
+                                </b-button>
+                                <b-button class="px-2 py-1 fs-2 border-0 rounded-0 close-rename" @click="()=>{renameID = '-1'}">
+                                  <b-icon-x />
+                                </b-button>
+                              </div>
+                            </div>
+                          </div>
+                          </template>
+                        </draggable>
+
+                      </b-tab>
+                      <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file" draggable="false">
+                        <div class="grid w-100 gap-2" style="grid-template-columns: repeat(auto-fill, 140px)">
+                          <div :key="'asset'+inda" v-for="(logo, inda) in room.logos" class="position-relative align-self-stretch d-flex flex-column">
+                            <div class="assets-logo-block h-100 w-100" style="background: rgba(0,0,0,0.12)">
+                              <span class="d-flex h-100 w-100 align-items-center justify-content-center p-2" >
+                                <img :src="storageUrl+logo.logo_url+'?nocache=1'" class="w-auto" />
+                              </span>
+                              <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
+                            </div>
+                            <a :key="`delete_logo${inda}`" class="absolute btn small p-0 remove" @click="deleteLogo(i, logo.id, inda, room.id)">
+                              <b-icon-x class="fs-2" />
+                            </a>
+                          </div>
+                        </div>
+                      </b-tab>
+                      <b-tab lazy v-if="!getSelectionMode.readonly" title="Colors" draggable="false">
+                        <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
+                          <div class="pt-lg-2 folder-wrapper">
+                            <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
+                            <div class="d-flex flex-wrap color-folder-holder">
+                              <template v-for="(folder, inde) in room.folders">
+                                <a href="#" class="text-center d-block" @click="fetchColors($event, inde, i)" :key="inde">
+                                  <font-awesome-icon :icon="['fas', 'folder']"/>
+                                  <span class="folder-name d-block">{{ folder.folder_name }}</span>
+                                </a>
+                              </template>
+                            </div>
+                          </div>
+                          <div class="color-holder" v-if="colors">
+                            <div class="color-container">
+                              <template v-for="(item, ix) in colors">
+                                <div :key="`item_${ix}`" v-if="item.value">
+                                  <div class="color-box" :title="item.pantone? item.pantone: item.name"
+                                       :style="{backgroundColor: item.value}" :key="`${ix}`">
+                                  </div>
+                                  <span> {{ item.pantone? item.pantone: item.name }} </span>
+                                </div>
+                              </template>
                             </div>
                           </div>
                         </div>
-                        </template>
-                      </draggable>
-
-                    </b-tab>
-                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Assets" class="assets-file" draggable="false">
-                      <div class="grid w-100 gap-2" style="grid-template-columns: repeat(auto-fill, 140px)">
-                        <div :key="'asset'+inda" v-for="(logo, inda) in room.logos" class="position-relative align-self-stretch d-flex flex-column">
-                          <div class="assets-logo-block h-100 w-100" style="background: rgba(0,0,0,0.12)">
-                            <span class="d-flex h-100 w-100 align-items-center justify-content-center p-2" >
-                              <img :src="storageUrl+logo.logo_url+'?nocache=1'" class="w-auto" />
-                            </span>
-                            <button @click="addToCustomLogos(logo)" class="use-logo-btn">Use</button>
+                      </b-tab>
+                      <b-tab lazy v-if="!getSelectionMode.readonly && locker_with_rosters(room.id).length" title="Rosters" draggable="false">
+                        <div class="d-flex text-left justify-content-start locker-rosters">
+                          <div style="width: max(20%, 250px)" class="bg-light border-right flex-shrink-0">
+                            <div class="fs-3" style="background: #495057; color: #fff; padding: 11px 16px">Select Design</div>
+                            <ul>
+                              <li class="px-3 py-2 d-flex align-items-center gap-1" :class="{'border-top': design_i>0, 'active': design_i == lockerActiveDesignIndex}"
+                                  @click="()=>lockerActiveDesignIndex = design_i"
+                                  v-for="(design, design_i) in locker_with_rosters(room.id)[0].products" :key="`locker_design_${design_i}`">
+                                <span class="btn btn-secondary btn-sm rounded-circle flex-shrink-0" title="Edit Roster"
+                                      @click.stop="editProduct(room.id, product_with_rosters(room.product, design.id), design_i, '', true, {target: 'locker-room', activeLocker: tabIndex, lockerActiveTabIndex: lockerActiveTabIndex, lockerActiveDesignIndex: design_i})">
+                                  <b-icon-pencil class="fs-2" />
+                                </span>
+                                <span>{{ design.product_name }}</span>
+                              </li>
+                            </ul>
                           </div>
-                          <a :key="`delete_logo${inda}`" class="absolute btn small p-0 remove" @click="deleteLogo(i, logo.id, inda, room.id)">
-                            <b-icon-x class="fs-2" />
-                          </a>
-                        </div>
-                      </div>
-                    </b-tab>
-                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Colors" draggable="false">
-                      <div class="d-flex flex-wrap justify-content-between lockerroom-color-folders">
-                        <div class="pt-lg-2 folder-wrapper">
-                          <h3 class="w-100 d-block mb-3 mb-lg-4 text-bold text-left">Select Folder</h3>
-                          <div class="d-flex flex-wrap color-folder-holder">
-                            <template v-for="(folder, inde) in room.folders">
-                              <a href="#" class="text-center d-block" @click="fetchColors($event, inde, i)" :key="inde">
-                                <font-awesome-icon :icon="['fas', 'folder']"/>
-                                <span class="folder-name d-block">{{ folder.folder_name }}</span>
-                              </a>
+                          <div style="width: 100%">
+                            <template v-for="(roster, roster_i) in locker_with_rosters(room.id)[0].products">
+                              <b-table v-if="roster_i == lockerActiveDesignIndex" hover :key="`roster_${roster_i}`" :items="roster.product_roster_detail | getProps"></b-table>
                             </template>
                           </div>
                         </div>
-                        <div class="color-holder" v-if="colors">
-                          <div class="color-container">
-                            <template v-for="(item, ix) in colors">
-                              <div :key="`item_${ix}`" v-if="item.value">
-                                <div class="color-box" :title="item.pantone? item.pantone: item.name"
-                                     :style="{backgroundColor: item.value}" :key="`${ix}`">
-                                </div>
-                                <span> {{ item.pantone? item.pantone: item.name }} </span>
-                              </div>
-                            </template>
-                          </div>
-                        </div>
-                      </div>
-                    </b-tab>
-                    <b-tab lazy v-if="!getSelectionMode.readonly && locker_with_rosters(room.id).length" title="Rosters" draggable="false">
-                      <div class="d-flex text-left justify-content-start locker-rosters">
-                        <div style="width: max(20%, 250px)" class="bg-light border-right flex-shrink-0">
-                          <div class="fs-3" style="background: #495057; color: #fff; padding: 11px 16px">Select Design</div>
-                          <ul>
-                            <li class="px-3 py-2 d-flex align-items-center gap-1" :class="{'border-top': design_i>0, 'active': design_i == lockerActiveDesignIndex}"
-                                @click="()=>lockerActiveDesignIndex = design_i"
-                                v-for="(design, design_i) in locker_with_rosters(room.id)[0].products" :key="`locker_design_${design_i}`">
-                              <span class="btn btn-secondary btn-sm rounded-circle flex-shrink-0" title="Edit Roster"
-                                    @click.stop="editProduct(room.id, product_with_rosters(room.product, design.id), design_i, '', true, {target: 'locker-room', activeLocker: tabIndex, lockerActiveTabIndex: lockerActiveTabIndex, lockerActiveDesignIndex: design_i})">
-                                <b-icon-pencil class="fs-2" />
-                              </span>
-                              <span>{{ design.product_name }}</span>
-                            </li>
-                          </ul>
-                        </div>
-                        <div style="width: 100%">
-                          <template v-for="(roster, roster_i) in locker_with_rosters(room.id)[0].products">
-                            <b-table v-if="roster_i == lockerActiveDesignIndex" hover :key="`roster_${roster_i}`" :items="roster.product_roster_detail | getProps"></b-table>
+                      </b-tab>
+                      <b-tab lazy :ref="`yearlyTab${room.id}`" draggable="false" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
+                        <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
+                          <template>
+                            <div v-if="!room.have_yearly_planner">
+                                <b-button variant="secondary" style="float: left" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
+                                <b-form-select style="display:inline-block; float:left; width: 30%; margin-left: 10px" @change="copyYearlyPlannerEvents($event,room.id,i)" v-model="yearly_planner_template_id"  :options="getYearlyPlannerTemplateOptions"
+                                ></b-form-select>
+                            </div>
+                            <div v-else>
+                              <YearlyPlanner @edit-event="editEvent"
+                                             @init-event-contacts="initEventContacts"
+                                             @open-event-modal="openEventModal"
+                                             @getLockerEvents="getLockerEvents(room.id)"
+                                             @show-contact-modal="showContactPopup"
+                                             :room_id="room.id" :room_index="i" :key="room.id"
+                              >
+                                <template slot="actions">
+                                  <b-button class="mr-3 light" variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
+                                  <button class="btn mr-3 light btn-secondary" @click="getIcsFile(room.id,i)">Export to Outlook</button>
+                                </template>
+                              </YearlyPlanner>
+                            </div>
                           </template>
                         </div>
-                      </div>
-                    </b-tab>
-                    <b-tab lazy :ref="`yearlyTab${room.id}`" draggable="false" @click="clickYearlyTab($event,room.id)" v-if="!getSelectionMode.readonly && customerPermissions.includes('Yearly-Planner')"  title="Yearly Planner" class="designCollections">
-                      <div class="products-holder grid gap-5 mobile-cols-6 grid-12">
-                        <template>
-                          <div v-if="!room.have_yearly_planner">
-                              <b-button variant="secondary" style="float: left" @click="createYearlyPlanner(room.id,i)">Create Yearly Planner</b-button>
-                              <b-form-select style="display:inline-block; float:left; width: 30%; margin-left: 10px" @change="copyYearlyPlannerEvents($event,room.id,i)" v-model="yearly_planner_template_id"  :options="getYearlyPlannerTemplateOptions"
-                              ></b-form-select>
-                          </div>
-                          <div v-else>
-                            <YearlyPlanner @edit-event="editEvent"
-                                           @init-event-contacts="initEventContacts"
-                                           @open-event-modal="openEventModal"
-                                           @getLockerEvents="getLockerEvents(room.id)"
-                                           @show-contact-modal="showContactPopup"
-                                           :room_id="room.id" :room_index="i" :key="room.id"
-                            >
-                              <template slot="actions">
-                                <b-button class="mr-3 light" variant="danger" @click="deletePlanner(room.id,i)">Delete Planner</b-button>
-                                <button class="btn mr-3 light btn-secondary" @click="getIcsFile(room.id,i)">Export to Outlook</button>
-                              </template>
-                            </YearlyPlanner>
-                          </div>
-                        </template>
-                      </div>
-                     </b-tab>
-                    <b-tab lazy v-if="!getSelectionMode.readonly" title="Storyboard" @click="showStoryBoard($event,room)"></b-tab>
-                  </b-tabs>
-                </b-card>
-              </div>
-            </div>
-          </b-tab>
-        </template>
-
-
-          <CreateLockerRoomModal ref="create-modal" @lockerAdded="lockerAdded"/>
-          <ExistingCollectionModal ref="existing-collection-modal" @existingCollection="existingCollection"/>
-          <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex" @yearlyPlannerTab="yearlyPlannerTab"   />
-          <ContactModal ref="contactmodal"   />
-        </b-tabs>
-      </b-tab>
-      <b-tab @click="getCollectionData" lazy v-if="(!getSelectionMode.readonly) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)"
-             class="designCollections">
-        <template #title>
-          <span class="btn btn-secondary btn-sm">Collections</span>
-        </template>
-
-        <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
-          <template v-if="getCollections.length > 0">
-            <template v-for="(collection, index) in getCollections">
-            <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
-              <div class="image-holder">
-                <div class="convas_container" :key="collection_product_index"
-                     v-for="(collection_product,collection_product_index) in collection.collection_products">
-                  <template v-if="collection_product_index < 3">
-                    <img :src="storageUrl+collection_product.product_locker_room.product_url+'?q='+collection_product.product_locker_room.random_string"
-                         :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" loading=""
-                         alt="">
-                  </template>
+                       </b-tab>
+                      <b-tab lazy v-if="!getSelectionMode.readonly" title="Storyboard" @click="showStoryBoard($event,room)"></b-tab>
+                    </b-tabs>
+                  </b-card>
                 </div>
+              </div>
+            </b-tab>
+          </template>
 
-                <div class="controls" v-if="!getSelectionMode.readonly">
-                  <a v-b-tooltip.hover.right title="Delete collection"
-                     @click="deleteCollection(collection.id,index)" class="remove btn">
-                    <font-awesome-icon :icon="['fas', 'trash-alt']"/>
-                  </a>
-                  <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
-                     class="btn light btn-secondary rounded-circle"><font-awesome-icon
-                    :icon="['fas', 'edit']"/></a>
-                  <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
-                            :ref="'share-collection'+index" class="light rounded-circle"
-                            custom-class="share-tooltip"><font-awesome-icon
-                    :icon="['fas', 'share-alt']"/></b-button>
-                    <aside :id="'popper-content'+index" v-show="popperID == 'share-collection'+index" :ref="'popper-content'+index"
-                           :class="!opacityset ? 'opacity-0' : 'opacity-100'"
-                           v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip" :key="popperID">
-                      <div class="share-holder">
-                        <h3>Copy link and Share</h3>
-                        <div class="share-form">
-                          <b-form inline>
-                            <b-form-input :ref="'copylink_'+index" @mouseenter="markText"
-                                          :value="collection.shared_url !== 'undefined'   || collection.shared_url != null ?  collection.shared_url : ''"
-                            ></b-form-input>
-                            <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
-                          </b-form>
+
+            <CreateLockerRoomModal ref="create-modal" @lockerAdded="lockerAdded"/>
+            <ExistingCollectionModal ref="existing-collection-modal" @existingCollection="existingCollection"/>
+            <EventModal ref="eventmodal" @change-locker-tabindex="changeLockerTabIndex" @yearlyPlannerTab="yearlyPlannerTab"   />
+            <ContactModal ref="contactmodal"   />
+          </b-tabs>
+        </b-tab>
+        <b-tab @click="getCollectionData" lazy v-if="(!getSelectionMode.readonly) || (getSelectionMode.readonly && getSelectionMode.eventCollectionMode)"
+               class="designCollections">
+          <template #title>
+            <span class="btn btn-secondary btn-sm">Collections</span>
+          </template>
+
+          <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
+            <template v-if="getCollections.length > 0">
+              <template v-for="(collection, index) in getCollections">
+              <div :key="index" @click="getSelectionMode.eventCollectionMode ? setEventCollection(index) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
+                <div class="image-holder">
+                  <div class="convas_container" :key="collection_product_index"
+                       v-for="(collection_product,collection_product_index) in collection.collection_products">
+                    <template v-if="collection_product_index < 3">
+                      <img :src="storageUrl+collection_product.product_locker_room.product_url+'?q='+collection_product.product_locker_room.random_string"
+                           :class="collection_product.product_locker_room.product_url ? '' : 'placeholder'" loading=""
+                           alt="">
+                    </template>
+                  </div>
+
+                  <div class="controls" v-if="!getSelectionMode.readonly">
+                    <a v-b-tooltip.hover.right title="Delete collection"
+                       @click="deleteCollection(collection.id,index)" class="remove btn">
+                      <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                    </a>
+                    <a v-b-tooltip.hover.right title="Edit collection" @click="editCollection(collection.id)"
+                       class="btn light btn-secondary rounded-circle"><font-awesome-icon
+                      :icon="['fas', 'edit']"/></a>
+                    <b-button title="Share collection" :id="'share-collection'+index" @click.stop="shareCollectionLink(collection, index)"
+                              :ref="'share-collection'+index" class="light rounded-circle"
+                              custom-class="share-tooltip"><font-awesome-icon
+                      :icon="['fas', 'share-alt']"/></b-button>
+                      <aside :id="'popper-content'+index" v-show="popperID == 'share-collection'+index" :ref="'popper-content'+index"
+                             :class="!opacityset ? 'opacity-0' : 'opacity-100'"
+                             v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip" :key="popperID">
+                        <div class="share-holder">
+                          <h3>Copy link and Share</h3>
+                          <div class="share-form">
+                            <b-form inline>
+                              <b-form-input :ref="'copylink_'+index" @mouseenter="markText"
+                                            :value="collection.shared_url !== 'undefined'   || collection.shared_url != null ?  collection.shared_url : ''"
+                              ></b-form-input>
+                              <b-button variant="primary" @click="copyCollectionLink(index)">Copy Link</b-button>
+                            </b-form>
+                          </div>
                         </div>
-                      </div>
-                    </aside>
-                    <b-button title="Share collection" @click="downloadCollectionPDF(index)" class="light rounded-circle">
-                      <b-icon-download></b-icon-download>
-                    </b-button>
+                      </aside>
+                      <b-button title="Share collection" @click="downloadCollectionPDF(index)" class="light rounded-circle">
+                        <b-icon-download></b-icon-download>
+                      </b-button>
+                  </div>
                 </div>
+                <div class="d-none d-lg-block product-description text-center">
+                  <p>{{ collection.name }}</p>
+                </div>
+                <CollectionPDF :ref="'collection_'+index" :collection="collection"/>
               </div>
-              <div class="d-none d-lg-block product-description text-center">
-                <p>{{ collection.name }}</p>
-              </div>
-              <CollectionPDF :ref="'collection_'+index" :collection="collection"/>
-            </div>
-          </template>
-          </template>
-          <template v-else><p>No Collection Exists</p></template>
-        </div>
-      </b-tab>
-    </b-tabs>
+            </template>
+            </template>
+            <template v-else><p>No Collection Exists</p></template>
+          </div>
+        </b-tab>
+      </b-tabs>
+    </div>
 
     <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
                   ref="reset-confirm-modal" name=""></confirm-modal>
@@ -731,6 +733,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.commit('Change_Locker_Tabs_Index', index)
   }
 
+
   public showDesignModal(product:Record<any, any>){
     this.copiedProductId = 0
     this.copiedProductId = product.id
@@ -933,12 +936,12 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   public async addToCustomLogos(logo: Record<any, any>) {
-    let index = this.logoTabIndex
     if(!logo.logo_colors) {
       logo.logo_colors = await this.fetchLogoColors(logo.id)
     }
-    this.$store.commit('SET_COLORS_FROM_RECENT',false)
     this.$emit('hideLockerRoomModal')
+    delete logo.product_id;
+    this.$root.$emit('useLockerRoomAssetLogo', logo);
   }
 
   public async deleteLogo(room_index:number, logo_id:number, logo_index: number, room_id:number){
@@ -1353,7 +1356,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$emit('editCollectionModal')
     this.$emit('hideLockerRoomModal')
   }
-
 
 }
 </script>
