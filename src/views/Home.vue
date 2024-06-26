@@ -694,9 +694,11 @@ Vue.filter('formatDate', function(value:string) {
 
     if(!this.isCustomerAuthenticated){
       setTimeout(async ()=>{
-        const ok = await this.ref['login-reminder'].showConfirm();
-        if(ok){
-          this.gotoLogin();
+        if(!this.isCustomerAuthenticated) {
+          const ok = await this.ref['login-reminder'].showConfirm();
+          if (ok) {
+            this.gotoLogin();
+          }
         }
       }, this.mobileScreen ? 100000 : 50000)
     }
