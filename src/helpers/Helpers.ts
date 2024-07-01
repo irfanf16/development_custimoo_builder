@@ -2125,6 +2125,61 @@ const isGetCategories = async () => {
   return get_categories;
 }
 
+const downloadNodeCollectionPDF = (collection_id) => {
+  return new Promise((resolve, reject) => {
+  http.get('download-collection-pdf/'+collection_id, { responseType: 'blob'} )
+    .then(response => {
+      console.log(response);
+      if (response.data.error) {
+        showError(response.data.message);
+        reject(false);
+      } else {
+        const url = `${process.env.VUE_APP_STORAGE_URL}${response.data.pdf_link}`;
+        // Open PDF in a new tab
+        const newTab = window.open(url, '_blank');
+        if (newTab) {
+            newTab.focus();
+            resolve(true);
+        }
+        else{
+          reject(false)
+        }
+      }
+    })
+    .catch(error => {
+      showError('PDF file generation is in progress. Please try again later.');
+      reject(false);
+    });
+  });
+}
+
+// const downloadNodeCollectionPDF = (collection_id) => {
+//   return new Promise((resolve, reject) => {
+//     http.get('download-collection-pdf/'+collection_id, { responseType: 'blob'} )
+//       .then(response => {
+//         console.log(response);
+//         if (response.data.error) {
+//           showError(response.data.message);
+//           reject(false);
+//         } else {
+//           const blob = new Blob([response.data], { type: 'application/pdf' });
+//           const url = window.URL.createObjectURL(blob);
+//           const a = document.createElement('a');
+//           a.href = url;
+//           a.download = 'collection-pdf-'+collection_id+'.pdf';
+//           document.body.appendChild(a);
+//           a.click();
+//           window.URL.revokeObjectURL(url);
+//           resolve(true);
+//         }
+//       })
+//       .catch(error => {
+//         showError('PDF file generation is in progress. Please try again later.');
+//         reject(false);
+//       });
+//   });
+// }
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2140,5 +2195,5 @@ export {
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, getDeviceInfo, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
-  isGetCategories
+  isGetCategories, downloadNodeCollectionPDF
 };

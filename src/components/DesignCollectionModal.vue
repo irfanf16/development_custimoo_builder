@@ -18,7 +18,7 @@
         </div>
 
         <div class="d-flex">
-          <b-button style="margin-right: 10px" @click="generateCollectionPDF()">Download PDF</b-button>
+          <b-button style="margin-right: 10px" @click="downloadCollectionPdf(collectionItems.id)">Download PDF</b-button>
           <div style="display: block;position: relative">
             <b-button style="margin-right: 10px" @click="shareCollectionLink(collectionItems,collectionItems.id)">Share Url</b-button>
             <aside :id="'popper-content'+collectionItems.id" v-show="popperID == 'share-collection'+collectionItems.id" :ref="'popper-content'+collectionItems.id"
@@ -149,7 +149,7 @@ import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
-import {getCollectionLogoDefaultObj, getRandom} from "@/helpers/Helpers";
+import {getCollectionLogoDefaultObj, getRandom, downloadNodeCollectionPDF} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import CollectionLogoUploader from "@/components/Logo/CollectionLogoUploader.vue";
 import {forEach, findIndex} from "lodash";
@@ -485,6 +485,15 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     }
   }
 
+  public downloadCollectionPdf(collection_id) {
+    this.showLoader = true;
+    downloadNodeCollectionPDF(collection_id).then( () => {
+      this.showLoader = false;
+    })
+    .catch(error => {
+      this.showLoader = false;
+    });
+  }
 
 }
 </script>

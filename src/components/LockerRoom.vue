@@ -267,7 +267,7 @@
           <template #title>
             <span class="btn btn-secondary btn-sm">Collections</span>
           </template>
-
+          <div class="loader relative" v-if="viewLoader"><img src="@assets/images/loading.gif" /></div>
           <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
             <template v-if="getCollections.length > 0">
               <template v-for="(collection, index) in getCollections">
@@ -309,7 +309,7 @@
                           </div>
                         </div>
                       </aside>
-                      <b-button title="Share collection" @click="downloadCollectionPDF(index)" class="light rounded-circle">
+                      <b-button title="download collection pdf" @click="downloadCollectionPdf(collection.id)" class="light rounded-circle">
                         <b-icon-download></b-icon-download>
                       </b-button>
                   </div>
@@ -412,7 +412,7 @@ import {
   classObserver,
   handleResponseException,
   getDomDocument,
-  getEditModeDefaultObj, exitFromEditMode, urlToBase64
+  getEditModeDefaultObj, exitFromEditMode, urlToBase64, downloadNodeCollectionPDF
 } from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {
@@ -1355,6 +1355,16 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     this.$store.dispatch("setCollectionMode","LOCKER_STORYBOARD");
     this.$emit('editCollectionModal')
     this.$emit('hideLockerRoomModal')
+  }
+
+  public downloadCollectionPdf(collection_id) {
+    this.viewLoader = true;
+    downloadNodeCollectionPDF(collection_id).then( () => {
+      this.viewLoader = false;
+    })
+      .catch(error => {
+        this.viewLoader = false;
+      });
   }
 
 }

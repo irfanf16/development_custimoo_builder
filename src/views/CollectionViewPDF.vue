@@ -2,7 +2,7 @@
   <div>
     <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif"/></div>
     <div v-if="collection" class="collection_pdf_page position-relative">
-      <button @click="generateCollectionPDF" class="download-pdf btn btn-secondary light">
+      <button @click="downloadCollectionPdf(collection.id)" class="download-pdf btn btn-secondary light">
         <BIconDownload/>
         <span>
             Download PDF
@@ -180,7 +180,13 @@ import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import LoginForm from '@/components/LoginForm.vue'
 import {LockerProducts,handleMainProducts, ProductsQueryParamsMixin} from "@/mixins/LockerProduct"
-import {getDomDocument, getPermissions, getRandom, getRosterDetailDefaultObject} from '@/helpers/Helpers'
+import {
+  downloadNodeCollectionPDF,
+  getDomDocument,
+  getPermissions,
+  getRandom,
+  getRosterDetailDefaultObject
+} from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
@@ -654,6 +660,16 @@ async saveToLockerRoom(collection,product) {
       newArray.push(this.collection.collection_products.slice(i, i + 3));
     }
     return newArray;
+  }
+
+  public downloadCollectionPdf(collection_id) {
+    this.showLoader = true;
+    downloadNodeCollectionPDF(collection_id).then( () => {
+      this.showLoader = false;
+    })
+    .catch(error => {
+      this.showLoader = false;
+    });
   }
 }
 </script>
