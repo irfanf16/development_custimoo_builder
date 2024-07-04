@@ -110,21 +110,29 @@
                             <h2 class="factory-name d-flex align-items-center gap-1"> {{ 'Factory ' + parseInt(indexItem + 1) }} <span class="factory_status" :class="item.status">{{item.status | Status}}</span></h2>
                           </div>
                           <table class="w-100">
-                            <template v-for="(product,indexProduct) in item.factory_products">
-                              <tr class="product-details" :key="indexItem + indexProduct + index">
+                            <template v-for="(product,factoryProductIndex) in item.factory_products">
+                              <tr class="product-details" :key="indexItem + factoryProductIndex + index">
                                 <td>{{ product.product_name }}</td>
-                                <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                                <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                                <template v-if="product.is_custom_product">
+                                  <td class="image"><img :src="`${storage_url}${product.custom_product_placeholder}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                                  <td class="image"><img :src="`${storage_url}${product.custom_product_placeholder}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                                </template>
+                                <template v-else>
+                                  <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                                  <td class="image"><img :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
+                                </template>
                                 <td>{{ product.roster_quantity }}</td>
                                 <td style="text-align: center">
                                   <div class="d-flex w-100 gap-1">
-                                    <span class="btn btn-dark btn-sm mx-xxl-2" @click="saveToLockerRoom(product)">Save As</span>
                                     <template>
-                                  <span  v-if="product.share_design_info.show_loader" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
-                                    <img width="20" height="20" src="@assets/images/loading.gif" />
-                                  </span>
-                                      <span v-else-if="product.share_design_info.share_url" class="btn btn-dark btn-sm mx-xxl-2" @click="copyShareUrl(product.share_design_info.share_url)">Copy Share Url</span>
-                                      <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="shareDesign(item.id, product)">Share</span>
+                                      <template v-if="Object.prototype.hasOwnProperty.call(product, 'is_custom_product') && !product.is_custom_product">
+                                        <span class="btn btn-dark btn-sm mx-xxl-2" @click="saveToLockerRoom(product)">Save As</span>
+                                        <span  v-if="product.share_design_info.show_loader" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
+                                          <img width="20" height="20" src="@assets/images/loading.gif" />
+                                        </span>
+                                        <span v-else-if="product.share_design_info.share_url" class="btn btn-dark btn-sm mx-xxl-2" @click="copyShareUrl(product.share_design_info.share_url)">Copy Share Url</span>
+                                        <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="shareDesign(item.id, product)">Share</span>
+                                      </template>
                                     </template>
                                     <template>
                                   <span  v-if="product.adding_to_cart" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
@@ -133,7 +141,7 @@
                                       <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="addToCart(item.id, product)">Add To Cart</span>
                                     </template>
                                     <template v-if="product.can_reorder">
-                                      <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product)">Reorder</span>
+                                      <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product, factoryProductIndex)">Reorder</span>
                                     </template>
                                     <template v-else>
                                       <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
@@ -184,9 +192,9 @@ import {http} from "@/httpCommon";
 import moment from "moment";
 import {
   CustimooOrderFlowStatuses,
-  exitFromEditMode,
-  handleResponseException, isGetCategories,
-  resetLastActiveProductData
+  exitFromEditMode, getReorderDataDefaultObject,
+  handleResponseException, isGetCategories, navigateToCustomProduct,
+  resetLastActiveProductData, santaClone
 } from '@/helpers/Helpers';
 import Search from '@/components/Search.vue';
 import {query} from "vue-gtag";
@@ -350,7 +358,7 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
     }
     this.getOrders(params);
   }
-  public reorderItem(order: Record<any, any>,order_item: Record<any, any>, factory_product: Record<any, any>) {
+  public reorderItem(order: Record<any, any>,order_item: Record<any, any>, factory_product: Record<any, any>, factory_product_index: string) {
     const order_item_id: string = order_item.id
     http.post(`product/${factory_product.product_id}/can_reorder`).then(async (res:Record<any, any>) => {
       const res_result = res.data.result
@@ -358,15 +366,33 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
         exitFromEditMode()
         resetLastActiveProductData()
         await this.$store.commit('SET_PRODUCTS', { products: [] });
-        this.$router.push({
-          name: 'Home',
-          query: {
-            is_reorder: 'true', order_id: order.id, order_number: order.order_no , order_item_id: order_item_id,
-            factory_product_id:  factory_product.id, active_product_id:  factory_product.product_id,
-            style_id: factory_product.style_id, design_id: factory_product.design_id, factory_id: order_item.factory_id,
-            factory_name: order_item.factory_name,
+        if(factory_product.is_custom_product) {
+          const reorder_item_obj = getReorderDataDefaultObject();
+          reorder_item_obj.order_id = order.id;
+          reorder_item_obj.order_number = order.order_no;
+          reorder_item_obj.order_item_id = order_item_id;
+          reorder_item_obj.factory_id = order_item.factory_id;
+          reorder_item_obj.factory_name = order_item.factory_name;
+          reorder_item_obj.factory_product_id = factory_product.id;
+          let custom_product_object = santaClone(factory_product);
+          custom_product_object.reorder_data = reorder_item_obj
+          custom_product_object.edit_mode_info_obj = {
+            mode: 'reorder', item_id: order_item_id, factory_product_id: factory_product.id, factory_product_index: factory_product_index
           }
-        });
+          await navigateToCustomProduct(custom_product_object).catch(errorResponse => {
+            handleResponseException(errorResponse)
+          });
+        } else {
+          this.$router.push({
+            name: 'Home',
+            query: {
+              is_reorder: 'true', order_id: order.id, order_number: order.order_no , order_item_id: order_item_id,
+              factory_product_id:  factory_product.id, active_product_id:  factory_product.product_id,
+              style_id: factory_product.style_id, design_id: factory_product.design_id, factory_id: order_item.factory_id,
+              factory_name: order_item.factory_name,
+            }
+          });
+        }
       } else {
         this.showError(res.data.message)
       }

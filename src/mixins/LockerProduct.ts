@@ -18,7 +18,12 @@ import {
   hideLockerProductUpdateButton,
   checkIsEmpty,
   getProductById,
-  handleProductPriceUpdate, getSelectedProductPantones, getColorType,
+  handleProductPriceUpdate,
+  getSelectedProductPantones,
+  getColorType,
+  santaClone,
+  navigateToCustomProduct,
+  createOrUpdateOrderUpdateDataState,
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -27,6 +32,7 @@ import {FetchCategories, HideUpdateLockerButton} from '@/mixins/SelectedProductM
 import {eventBus} from "@/event/eventBus";
 import {getClosestColor} from "@/pantoneColor";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
+import {loadState, saveState} from "@/indexedDBPersistence";
 
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
@@ -200,6 +206,27 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       active_product_detail, products: response_products_obj, products: { data: retrieved_products },
       products: {next_page_url: next_page_url}, products: {current_page: current_page},
     } = response_data;
+    if(product_edit_info_object.type == "order_product") {
+      let order_product_info_data = getEditModeDefaultObj('order_product_info')
+      order_product_info_data.activity_items = active_product_detail.activity_items
+      order_product_info_data.factory_id = active_product_detail.factory_id
+      order_product_info_data.factory_products = active_product_detail.factory_products
+      order_product_info_data.active_product_id = active_product_id
+      order_product_info_data.item_id = active_product_detail.id
+      order_product_info_data.activity_id = active_product_detail.activity_id
+      order_product_info_data.style_id = active_style_id
+      order_product_info_data.design_id = active_design_id
+      order_product_info_data.factory_product_active_index = active_product_detail.factory_product_active_index
+      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_product_info_data })
+      const { item_id, factory_product_active_index, active_factory_product } = await createOrUpdateOrderUpdateDataState()
+      if(active_factory_product && active_factory_product.is_custom_product) {
+        active_factory_product.edit_mode_info_obj = {
+          mode: 'order_edit', item_id, factory_product_id: active_factory_product.id, factory_product_index: factory_product_active_index
+        }
+        await navigateToCustomProduct(active_factory_product)
+        return false;
+      }
+    }
     if(response_products_obj.current_page == 1 && active_product_id != this.selectedProductId) {
       this.$store.commit('SET_START_LOAD_DESIGNS', false)
     }
@@ -251,37 +278,60 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           }
 
           if(product_edit_info_object.type == "order_product") {
-            let order_product_info_data = getEditModeDefaultObj('order_product_info')
-            order_product_info_data.activity_items = active_product_detail.activity_items
-            order_product_info_data.factory_id = active_product_detail.factory_id
-            order_product_info_data.factory_products = active_product_detail.factory_products
-            order_product_info_data.active_product_id = active_product_id
-            order_product_info_data.item_id = active_product_detail.id
-            order_product_info_data.activity_id = active_product_detail.activity_id
-            order_product_info_data.style_id = active_style_id
-            order_product_info_data.design_id = active_design_id
-            order_product_info_data.factory_product_active_index = factory_product_active_index
-            self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_product_info_data })
-
-            if(self.order_update_data && self.order_update_data.length > 0 && self.order_update_data[factory_product_active_index]) {
-              let order_update_active_product = self.order_update_data[factory_product_active_index]
-              custom_logos = order_update_active_product.custom_logos
-              default_colors = order_update_active_product.defaultcolors
-              group_colors = order_update_active_product.groupcolors
-              product_roster_detail = order_update_active_product.product_roster_detail
-              product_custom_texts = order_update_active_product.product_custom_texts
-              active_style_id = order_update_active_product.style_id
-              active_design_id = order_update_active_product.design_id
-              const active_product_styles = active_product.productstyles
-              active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
-                return style.id == active_style_id
-              })
-              this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
-              const active_style_designs = active_product_styles[active_style_index].productdesigns
-              active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
-                return design.id == active_design_id
-              })
+            // let order_product_info_data = getEditModeDefaultObj('order_product_info')
+            // order_product_info_data.activity_items = active_product_detail.activity_items
+            // order_product_info_data.factory_id = active_product_detail.factory_id
+            // order_product_info_data.factory_products = active_product_detail.factory_products
+            // order_product_info_data.active_product_id = active_product_id
+            // order_product_info_data.item_id = active_product_detail.id
+            // order_product_info_data.activity_id = active_product_detail.activity_id
+            // order_product_info_data.style_id = active_style_id
+            // order_product_info_data.design_id = active_design_id
+            //order_product_info_data.factory_product_active_index = factory_product_active_index
+            // self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_product_info_data })
+            let order_existing_updated_data = await loadState("order_updated_data");
+            if(order_existing_updated_data) {
+              const order_updated_data = order_existing_updated_data.order_updated_data
+              if(order_updated_data && order_updated_data.length > 0 && order_updated_data[factory_product_active_index]) {
+                let order_update_active_product = order_updated_data[factory_product_active_index]
+                custom_logos = order_update_active_product.custom_logos
+                default_colors = order_update_active_product.defaultcolors
+                group_colors = order_update_active_product.groupcolors
+                product_roster_detail = order_update_active_product.product_roster_detail
+                product_custom_texts = order_update_active_product.product_custom_texts
+                active_style_id = order_update_active_product.style_id
+                active_design_id = order_update_active_product.design_id
+                const active_product_styles = active_product.productstyles
+                active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
+                  return style.id == active_style_id
+                })
+                this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
+                const active_style_designs = active_product_styles[active_style_index].productdesigns
+                active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
+                  return design.id == active_design_id
+                })
+              }
             }
+
+            // if(self.order_update_data && self.order_update_data.length > 0 && self.order_update_data[factory_product_active_index]) {
+            //   let order_update_active_product = self.order_update_data[factory_product_active_index]
+            //   custom_logos = order_update_active_product.custom_logos
+            //   default_colors = order_update_active_product.defaultcolors
+            //   group_colors = order_update_active_product.groupcolors
+            //   product_roster_detail = order_update_active_product.product_roster_detail
+            //   product_custom_texts = order_update_active_product.product_custom_texts
+            //   active_style_id = order_update_active_product.style_id
+            //   active_design_id = order_update_active_product.design_id
+            //   const active_product_styles = active_product.productstyles
+            //   active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
+            //     return style.id == active_style_id
+            //   })
+            //   this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
+            //   const active_style_designs = active_product_styles[active_style_index].productdesigns
+            //   active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
+            //     return design.id == active_design_id
+            //   })
+            // }
           }
 
           let customizer_data: Record<any, any> = {
@@ -516,7 +566,7 @@ export class ProductsQueryParamsMixin extends Vue {
   public async setQueryParams() {
     let self: Record<any, any> = this;
     /*
-    * is_customized, is_personalized, is_private is always updated as setQueryPArams method is called after fetch categories which sets the values of three variables
+    * is_customized, is_personalized, is_private is always updated as setQueryParams method is called after fetch categories which sets the values of three variables
     * */
     let is_customized = this.$store.getters.getCustomized;
     let is_personalized = this.$store.getters.getPersonalized;
@@ -530,8 +580,14 @@ export class ProductsQueryParamsMixin extends Vue {
         let { order_product_info } = edit_product_info_obj
         // on page refresh load first order product
         if(order_product_info.factory_products.length > 0) {
-          let first_factory_product = order_product_info.factory_products[0]
-          order_product_info.factory_product_active_index = 0
+          let order_item_active_factory_product_index = 0
+          //if order_update_identifier value is set then it means the page is not refreshed and need to get the factory_product_active_index from store getProductEditInfoObject
+          const order_update_identifier = this.$store.getters.getOrderUpdateIndentifier
+          if(order_update_identifier) {
+            order_item_active_factory_product_index = order_product_info.factory_product_active_index
+          }
+          let first_factory_product = order_product_info.factory_products[order_item_active_factory_product_index]
+          order_product_info.factory_product_active_index = order_item_active_factory_product_index
           order_product_info.active_product_id = first_factory_product.product_id
           order_product_info.style_id = first_factory_product.style_id
           order_product_info.design_id = first_factory_product.design_id
@@ -680,6 +736,7 @@ export class exitEditMode extends Mixins(ErrorMessages) {
     let self: Record<any, any> = this;
     return new Promise((resolve,reject) => {
       if (self.$store.getters.getProductEditInfoObject.editing) {
+        const editing_product_info = self.$store.getters.getProductEditInfoObject;
         switch (self.$store.getters.getProductEditInfoObject.type) {
           case 'locker_product':
             if (self.$store.getters.getHideSaveLockerButton === false) {
@@ -711,27 +768,35 @@ export class exitEditMode extends Mixins(ErrorMessages) {
             }
             break;
           case 'cart_product':
-            self.$santaModal.show({
-              icon: 'confirm', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Save', cancel_text: 'Cancel',
-            },self).then((confirmation) => {
-              if(confirmation){
-                self.$santaModal.hide();
-                self.showToast('Your settings are being saved please wait...', 'info');
-                const prms = new Promise((resolve) => {
-                  self.$eventBus.$emit('updateCart', resolve)
-                })
-                prms.then(() => {
-                  self.showToast('Your settings saved successfully', 'success');
+            const { cart_product_info: { cart_item_product: { is_custom_product = false } }  } = editing_product_info
+            if(is_custom_product) {
+              self.showToast('Changes Discarded, Exiting from Editing State', 'error');
+              exitFromEditMode()
+              resolve(false)
+            } else {
+              self.$santaModal.show({
+                icon: 'confirm', title: 'Changes Detected', text: 'Do you want to save the product before exiting', confirm_text: 'Save', cancel_text: 'Cancel',
+              },self).then((confirmation) => {
+                if(confirmation){
+                  self.$santaModal.hide();
+                  self.showToast('Your settings are being saved please wait...', 'info');
+                  const prms = new Promise((resolve) => {
+                    self.$eventBus.$emit('updateCart', resolve)
+                  })
+                  prms.then(() => {
+                    self.showToast('Your settings saved successfully', 'success');
+                    exitFromEditMode()
+                    resolve(true)
+                  });
+                }
+                else{
+                  self.showToast('Changes Discarded, Exiting from Editing State', 'error');
                   exitFromEditMode()
-                  resolve(true)
-                });
-              }
-              else{
-                self.showToast('Changes Discarded, Exiting from Editing State', 'error');
-                exitFromEditMode()
-                resolve(false)
-              }
-            });
+                  resolve(false)
+                }
+              });
+            }
+
             break;
           case 'order_product':
             self.$santaModal.show({
@@ -963,14 +1028,20 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     return sum;
   }
 
-  get sku_information(){
-    return this.$store.getters.getSkuInformation
-  }
-
-  public checkMinimumOrderQtyBYDesign(){
-    let roster = this.$store.getters.getProductRosters();
+  public checkMinimumOrderQtyBYDesign(roster, sku_information, edit_product_info_obj, product_name){
     let moq = this.$store.getters.getSetting("moq");
-    if (roster.some(el => (el.quantity > 0 &&  (el.size=="" || el.size == null || parseInt(el.size_index) < 0)  ))) {
+    if(Object.prototype.hasOwnProperty.call(edit_product_info_obj, "mode")){
+      //This reorder is from custom design
+      if(edit_product_info_obj.mode === "reorder" && (sku_information.reorder_follows_moq === 1 || sku_information.reorder_follows_moq === true)){
+        return true;
+      }
+    }
+    else{
+      if(edit_product_info_obj.type === "reorder_product" && (sku_information.reorder_follows_moq === 1 || sku_information.reorder_follows_moq === true)){
+        return true;
+      }
+    }
+    if (roster.some(el => (parseInt(el.quantity) > 0 &&  (el.size=="" || el.size == null || parseInt(el.size_index) < 0)  ))) {
       this.showToast(`Please provide size for all roster items`, "error");
       const is_mobile_screen = this.$store.getters.getMobileScreen
       if(!is_mobile_screen){
@@ -979,17 +1050,17 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       return false;
     }
     // check is the sum of roster items(collectively) is greater than sku's 'minimum order quantity'
-    if(this.sku_information.minimum_order_quantity_type === "by_design" && this.sku_information.minimum_order_quantity != null &&
-      this.sku_information.minimum_order_quantity > 0 && parseInt(moq) === 0) {
+    if(sku_information.minimum_order_quantity_type === "by_design" && sku_information.minimum_order_quantity != null &&
+      sku_information.minimum_order_quantity > 0 && parseInt(moq) === 0) {
       let roster_item_sum = 0;
       roster.forEach((item:Record<any, any>) => {
         roster_item_sum += parseInt(item.quantity);
       })
-      if(roster_item_sum < this.sku_information.minimum_order_quantity){
+      if(roster_item_sum < sku_information.minimum_order_quantity){
         this.showToast(`${this.$t('minimum_order_roster_message',
           {
-            product_name: this.$store.getters.getSelectedProduct.display_name,
-            min_products_count: this.sku_information.minimum_order_quantity
+            product_name: product_name,
+            min_products_count: sku_information.minimum_order_quantity
           })}`, "error", 9000);
         return false;
       }
@@ -1112,7 +1183,12 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
 
   public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null) {
-    if(!this.checkMinimumOrderQtyBYDesign()) {
+    if(!this.checkMinimumOrderQtyBYDesign(
+      this.$store.getters.getProductRosters(this.$store.getters.getSelectedProductId),
+      this.$store.getters.getSkuInformation,
+      this.$store.getters.getProductEditInfoObject,
+      this.$store.getters.getSelectedProduct.display_name
+    )) {
       if(resolve){
         resolve(false);
       }

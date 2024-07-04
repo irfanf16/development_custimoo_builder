@@ -382,10 +382,10 @@
             </a>
           </b-col>
         </b-row>
-        <b-row class="mt-3 mx-2">
+        <b-row class="mt-3 mx-2 pt-2 pb-5">
           <b-col class="col-6 order-detail-roster">
-            <h4>Roster Detail</h4>
-            <template>
+            <h4 class="py-3">Roster Detail</h4>
+            <template v-if="order && activity_item_info.factory_product.product_roster_detail.length > 0">
               <b-table
                 :items="activity_item_info.factory_product.product_roster_detail"
                 :fields="roster_headers"
@@ -393,25 +393,9 @@
                 sorter
                 class="bg-gray-200"
               >
-                <template #cell(number)="data">
-                  <template v-if="data.item.number">
-                    <img style="height: 27px;" :alt="data.item.number"
-                      :src="`data:image/svg+xml;charset=utf-8,${encodeURIComponent(activity_item_info.factory_product
-                        .product_custom_text_objects.roster[data.index].number.items[0].svg)}`"
-                    />
-                  </template>
-                </template>
-                <template #cell(name)="data">
-                  <template v-if="data.item.text">
-                    <img :alt="data.item.text"
-                      :src="`data:image/svg+xml;charset=utf-8,${encodeURIComponent(activity_item_info.factory_product
-                        .product_custom_text_objects.roster[data.index].name.items[0].svg)}`"  style="height: 27px;"
-                      />
-                  </template>
-                </template>
               </b-table>
             </template>
-            <template v-if="activity_item_info.factory_product.product_roster_detail.length == 0">
+            <template v-else>
               <b-row class="bg-gray-200">
                 <b-col class="col-12">
                   No roster exists
@@ -628,7 +612,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public product_texts: any = []
   public custom_logos: any = []
   public roster_headers = [
-    {key: 'size', label: 'Size'}, {key: 'quantity', label: 'Quantity'}, {key: 'number', label: 'Number'}, {key: 'name', label: 'Name'}
+    {key: 'size', label: 'Size'}, {key: 'quantity', label: 'Quantity'}, {key: 'number', label: 'Number'}, {key: 'text', label: 'Text'}
   ]
   public api_url =  ''
   public cancel_confirm_message =  `Are you sure that you want to cancel this order?`

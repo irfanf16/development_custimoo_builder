@@ -20,9 +20,11 @@ const pathsToPersist = {
 
 let timeout;
 const plugins = [
-  (store) => {
+  async (store) => {
     // Load the state from IndexedDB when the store is initialized
-    loadState().then((savedState) => {
+    await loadState(1)
+
+    loadState(1).then((savedState) => {
       if (savedState) {
         // Merge the loaded state with the existing state
         Object.keys(pathsToPersist).forEach((namespace) => {
@@ -49,7 +51,7 @@ const plugins = [
           })
         })
         // console.log(stateToPersist)
-        saveState(stateToPersist)
+        saveState({id: 1, data: stateToPersist})
       }, state.Main.index_db_store_time)
     })
   },

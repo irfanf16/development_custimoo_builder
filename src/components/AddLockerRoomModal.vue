@@ -297,7 +297,7 @@
           product_name: this.product_name,
           style_id: style_id,
           design_id: design_id,
-          custom_logos: custom_logos,
+          custom_logos: custom_logos ? custom_logos : [],
           text: product_custom_texts,
           colors: logo_colors,
           defaultcolors: defaultcolors,

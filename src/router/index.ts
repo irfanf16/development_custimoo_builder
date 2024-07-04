@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import {persistToken,fetchCustomer} from "@/helpers/Helpers";
 import {checkCompanyStatus} from '../../middleware/checkCompany'
+import CustomDesign from "@/views/customDesign.vue";
 
 const Home = ()=> import('../views/Home.vue')
 const Addresses = ()=> import('../views/Addresses.vue')
@@ -18,6 +19,7 @@ const Dashboard = ()=> import("@/views/Dashboard.vue")
 const ThreeDView = ()=> import("@/views/ThreeDView.vue")
 const Thankyou = ()=> import("@/views/Thankyou.vue")
 const Deactive = ()=> import("@/views/Deactive.vue")
+const UploadCustomDesign = () => import("@/views/UploadCustomDesign.vue")
 const Payment = ()=> import("@/views/Payment.vue")
 const scene3d  = () => import("@/components/3d/scene-3d.vue")
 const GLBLoader  = () => import("@/components/3d/glb-loader.vue")
@@ -105,6 +107,12 @@ const routes: Array<RouteConfig> = [
     component: Deactive,
   },
   {
+    path: '/upload-custom-design',
+    name: "UploadCustomDesign",
+    component: UploadCustomDesign,
+    props: true
+  },
+  {
     path:'/payment',
     name:'Payment',
     component: Payment,
@@ -129,6 +137,12 @@ const routes: Array<RouteConfig> = [
   {
     path: '/glb_new',
     component: GLBLoaderNew
+  },
+  {
+    path: '/product/:product_id/custom-design',
+    name:'CustomDesign',
+    component: CustomDesign,
+    props: true
   }
 ]
 

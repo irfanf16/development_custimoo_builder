@@ -39,19 +39,33 @@
               <tr :key="factory_product.id" >
                 <td>
                   <template v-if="editingCartProductInfo.cart_product_info.cart_item_product && editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
-                    <span title="Editing This Product" style="cursor:pointer;">{{ factory_product.product_name }}</span>
+                    <span title="Editing This Product" style="cursor:pointer;" v-if="factory_product.is_custom_product">{{ factory_product.product_name_custom }}</span>
+                    <span title="Editing This Product" style="cursor:pointer;" v-else>{{ factory_product.product_name }}</span>
                   </template>
-                  <template v-else="">
-                    <a style="cursor:pointer;color:blue;text-decoration: underline"
-                       @click="editCartItem(cart_item_index, factory_product_index, true, false)">{{ factory_product.product_name }}</a>
+                  <template v-else>
+                    <a style="cursor:pointer;color:blue;text-decoration: underline" @click="editCartItem(cart_item_index, factory_product_index, true, false)">
+                      <template v-if="factory_product.is_custom_product">
+                        {{ factory_product.product_name_custom }}
+                      </template>
+                      <template v-else>
+                        {{ factory_product.product_name }}
+                      </template>
+                    </a>
                   </template>
                 </td>
                 <td>
                   <div class="d-inline-flex gap-1">
-                    <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.front_image"
-                           alt="Front Design"></b-img>
-                    <b-img v-if="factory_product.back_image" style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
-                           alt="Back Design"></b-img>
+                    <template v-if="factory_product.is_custom_product">
+                      <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.custom_product_placeholder"
+                             alt="Front Design"></b-img>
+                    </template>
+                    <template v-else>
+                      <b-img style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.front_image"
+                             alt="Front Design"></b-img>
+                      <b-img v-if="factory_product.back_image" style="width: 80px" thumbnail fluid :src="storageUrl + factory_product.back_image"
+                             alt="Back Design"></b-img>
+                    </template>
+
                   </div>
                 </td>
                 <td>
@@ -253,8 +267,7 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
-  getEditModeDefaultObj,
-  logData,
+  getEditModeDefaultObj, handleResponseException, logData, navigateToCustomProduct, santaClone
 } from "@/helpers/Helpers";
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
@@ -489,23 +502,32 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index];
+    let is_private = this.$store.getters.getPrivateProduct;
+    //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
+    let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
+    let shopify_line_item = (self.$route.query.line)?self.$route.query.line:null;
+    if(ecommerce_cart_id){
+      this.$router.push({ name: 'Home' });
+    }
 
-      let is_private = this.$store.getters.getPrivateProduct;
-      //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
-      let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
-      let shopify_line_item = (self.$route.query.line)?self.$route.query.line:null;
-      if(ecommerce_cart_id){
-        this.$router.push({ name: 'Home' });
-      }
+    self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
+      editing: true,  type: "cart_product", filters: {search_products: "", private_product: is_private},
+      locker_product_info: getEditModeDefaultObj('locker_product_info'), cart_product_info: {
+        cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index,
+        cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item, meta_info: {back_to_cart: backToCart}
+      },
+      order_product_info: getEditModeDefaultObj('order_product_info')
+    })
+    if(cart_item_product.is_custom_product) {
+      let custom_product_object = santaClone(cart_item_product);
+      custom_product_object.edit_mode_info_obj = { mode: 'cart_edit', item_id: cart_item.id, factory_product_id: cart_item_product.id,
+        factory_product_index: factory_product_index}
+      await navigateToCustomProduct(custom_product_object).catch(errorResponse => {
+        handleResponseException(errorResponse)
+      });
+      return false;
+    }
 
-      self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", {
-        editing: true,  type: "cart_product", filters: {search_products: "", private_product: is_private},
-        locker_product_info: getEditModeDefaultObj('locker_product_info'), cart_product_info: {
-          cart_item_index: cart_item_index, cart_item_id: cart_item.id, cart_item_product_index: factory_product_index,
-          cart_item_product: cart_item_product, ecommerce_cart_id, shopify_line_item, meta_info: {back_to_cart: backToCart}
-        },
-        order_product_info: getEditModeDefaultObj('order_product_info')
-      })
       self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
 
       //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
@@ -517,11 +539,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       await http.get(url).then(async (response: Record<any, any>) => {
         await (this as Record<any, any>).handleMainProducts(response);
       })
-      // if(!is_private){
-      //   await this.$store.dispatch('setProductType', { prd_type: cart_item_product.product_type, value: true });
-      // }else{
-      //   this.$store.dispatch('setPrivateProduct', is_private);
-      // }
 
       this.hideVModal('cart-modal')
       if (!edit) {

@@ -125,6 +125,9 @@
         Use shuffled colors
       </button>
      <template v-if="isCustomerAuthenticated">
+       <b-button v-if="getProductSelectionDesignInfo" class="btn btn-secondary btn-sm" @click="customizeProduct">
+         Customize
+       </b-button>
        <b-button v-if="getProductSelectionDesignInfo.selected_designs.length > 0" @click="$emit('show-product-design-bulk-save-modal')" class="btn btn-secondary btn-sm">
          Save Designs
        </b-button>
@@ -143,7 +146,7 @@ import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
   import DesignAvailable from '../components/DesignAvailable.vue'
   import ItemsGrid from "@/components/ItemsGrid.vue";
   import { dragscroll } from 'vue-dragscroll'
-  import { resetLastActiveProductData } from '@/helpers/Helpers'
+  import { resetLastActiveProductData, handleResponseException, navigateToCustomProduct } from '@/helpers/Helpers'
 import {ProductsQueryParamsMixin, exitEditMode, handleMainProducts} from "@/mixins/LockerProduct";
 
 
@@ -364,6 +367,12 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         }
       });
     }, 700);
+  }
+
+  public async customizeProduct() {
+    await navigateToCustomProduct().catch(errorResponse => {
+      handleResponseException(errorResponse)
+    });
   }
 
   public useShuffledColors() {

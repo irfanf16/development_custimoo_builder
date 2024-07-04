@@ -7,12 +7,11 @@ import Vue from "vue";
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 import {http} from "@/httpCommon";
-import {parseInt, findIndex, isEmpty} from "lodash";
-import {Canvas} from "fabric/fabric-impl";
+import {find, findIndex, parseInt} from "lodash";
 import {eventBus} from "@/event/eventBus"
-import VueRouter from 'vue-router'
 import LZString from 'lz-string';
 import Router from '../router/index'
+import {loadState, saveState} from "@/indexedDBPersistence";
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
@@ -303,6 +302,7 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
     variant: 'info',
     timeout: 5000
   });
+  return message;
 }
 
 const CustimooOrderFlowStatuses : Record<any, any> = {
@@ -557,18 +557,15 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           return custom_logo && 'id' in custom_logo
         })
       }
-      const reorder_info_obj = Store.getters.getReorderInfoObj;
       let reorder_data: Record<any, any>|null = {}
       if(product_edit_info_obj && product_edit_info_obj.type == "reorder_product") {
+        reorder_data = getReorderDataDefaultObject();
         reorder_data.order_id = product_edit_info_obj.reorder_product_info.order_id
         reorder_data.order_number = product_edit_info_obj.reorder_product_info.order_number
         reorder_data.order_item_id = product_edit_info_obj.reorder_product_info.order_item_id
         reorder_data.factory_id = product_edit_info_obj.reorder_product_info.factory_id
         reorder_data.factory_name = product_edit_info_obj.reorder_product_info.factory_name
         reorder_data.factory_product_id = product_edit_info_obj.reorder_product_info.factory_product_id
-        reorder_data.changes = []
-        reorder_data.roster_change = false
-        reorder_data.design_change = false
       } else if(product_edit_info_obj && product_edit_info_obj.type == "cart_product" && product_edit_info_obj.cart_product_info.reorder_data) {
         reorder_data =  product_edit_info_obj.cart_product_info.reorder_data;
       } else {
@@ -582,7 +579,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       let currency_symbol = "";
       if (productPriceObject !== null && productPriceObject !== undefined) {
         product_price = productPriceObject.product_price ? productPriceObject.product_price : 0;
-        quantity = productPriceObject.quantity ? productPriceObject.quantity : 0;
+        quantity = productPriceObject.total_quantity ? productPriceObject.total_quantity : 0;
         if (productPriceObject.active_currency) {
           currency_code = productPriceObject.active_currency.code ? productPriceObject.active_currency.code : '';
           currency_symbol = productPriceObject.active_currency.symbol ? productPriceObject.active_currency.symbol : '';
@@ -1715,11 +1712,11 @@ const validateLogoType = (type: string, file_name:string) => {
 }
 
 const getExtensionFromString = (string: string) => {
-  let extension: string|null = null
+  let extension = ''
   if(string) {
     extension =  string.substr(string.lastIndexOf('.') + 1).toLowerCase()
   }
-  return extension
+  return extension;
 }
 
 const getUrlParameter = (name = '') => {
@@ -2039,10 +2036,17 @@ const getProductPriceDefaultObject = (update_values={}) => {
     }, ...update_values }
 }
 
-const handleProductPriceUpdate = async ():Promise<void> => {
-  const product_sku = Store.getters.getSkuInformation
-  const selected_product = Store.getters.getSelectedProduct
-  const product_roster = Store.getters.getProductRosters()
+const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={}, product_sku_info:Record<any, any>={}):Promise<Record<any, any>> => {
+  let product_sku = Store.getters.getSkuInformation
+  let selected_product = Store.getters.getSelectedProduct
+  let product_roster = Store.getters.getProductRosters()
+  let show_product_price = isShowProductPrice()
+  if(!checkIsEmpty(product)) {
+    product_sku = product_sku_info
+    selected_product = product
+    product_roster = product.product_roster
+    show_product_price = true
+  }
   let roster_quantity_total = 0;
   product_roster.forEach(roster_item => {
     roster_quantity_total += parseInt(roster_item.quantity)
@@ -2050,7 +2054,7 @@ const handleProductPriceUpdate = async ():Promise<void> => {
   let product_price_object: Record<any, any> = {
     total_quantity: roster_quantity_total
   }
-  if(selected_product && isShowProductPrice()) {
+  if(selected_product && show_product_price) {
     if(!checkIsEmpty(product_sku) && product_sku.prices.length > 0) {
       const product_price = product_sku.prices[0].price ? product_sku.prices[0].price : 0;
       let addons_price = 0;
@@ -2073,7 +2077,10 @@ const handleProductPriceUpdate = async ():Promise<void> => {
       product_price_object = getProductPriceDefaultObject();
     }
   }
-  Store.commit('SET_PRODUCT_PRICE_OBJECT', product_price_object )
+  if(commit) {
+    Store.commit('SET_PRODUCT_PRICE_OBJECT', product_price_object )
+  }
+  return product_price_object;
 }
 
 const toggleProductAddons = async ():Promise<void> => {
@@ -2125,7 +2132,206 @@ const isGetCategories = async () => {
   return get_categories;
 }
 
+const isFilePreviewable = (file_name: string) => {
+  const extension = getExtensionFromString(file_name)
+  return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(extension);
+}
 
+const getFilePlaceHolder = (file_name: string, placeholder_extension='svg') => {
+  const extension = getExtensionFromString(file_name)
+  const storage_url = process.env.VUE_APP_STORAGE_URL;
+  return `${storage_url}placeholders/${extension}.${placeholder_extension}`
+}
+
+const getCustomLockers = () => {
+  return new Promise((resolve, reject) => {
+    const is_customer_authenticated = Store.getters.isCustomerAuthenticated
+    let customer_lockers = [];
+    if(is_customer_authenticated) {
+      http.get("lockers_with_rosters").then((successResponse:Record<any, any>) => {
+        const response_data = successResponse.data
+        if (response_data.success) {
+          customer_lockers = response_data.result.lockers
+        }
+        resolve(customer_lockers)
+      }).catch((errorResponse: AxiosError) => {
+        resolve([])
+        handleResponseException(errorResponse)
+      })
+    }
+    else {
+      resolve([])
+    }
+  })
+}
+
+const getCustomProductData = async (custom_product_data: Record<any, any>={}) => {
+  let selected_product: Record<any, any> = Store.getters.getSelectedProduct
+  //mode = {cart_edit, order_edit, reorder}
+  let edit_mode_info_obj:{ mode: string|null, item_id: number|null, factory_product_id: number|null, factory_product_index: number|null} =
+    { mode: null, item_id: null, factory_product_id: null, factory_product_index: null }
+  let {
+    id: product_id, display_name: product_name, allow_name_number, product_type, sizes= [], productstyles: product_styles = [],
+    active_addons = [], company_addons = [], product_addons = [], reorder_data = null, not_uploaded_assets = [],
+    measurement_ratio
+  } = selected_product;
+  let fixed_logo_index = Store.getters.getFixedLogoIndex;
+  let sku = Store.getters.getSkuInformation;
+  let product_roster = Store.getters.getProductRosters()
+  let price_info = Store.getters.getProductPriceObject
+  let selected_style_index = Store.getters.getCurrentStyleIndex
+  let selected_style_id = selected_style_index >= 0 ? product_styles[selected_style_index]?.id : product_styles[0]?.id;
+  let existing_assets: Record<any, any> = []
+  //if custom_product_data is not empty then get custom product initial data
+  if(!checkIsEmpty(custom_product_data)) {
+    const storage_url = process.env.VUE_APP_STORAGE_URL
+    product_id = custom_product_data.product_id
+    let custom_product_initial_data_response: any = await getCustomProductInitialData(product_id).catch((errorResponse: any) => {
+      throw errorResponse;
+    });
+    let custom_product_initial_data: Record<any, any> = custom_product_initial_data_response.custom_product_initial_data;
+    if('existing_assets' in custom_product_data && custom_product_data.existing_assets.length > 0) {
+      existing_assets = custom_product_data.existing_assets
+      not_uploaded_assets = custom_product_data.assets
+    } else {
+      existing_assets = custom_product_data.assets
+    }
+    existing_assets.forEach(existing_asset => {
+      existing_asset.existing_asset = true
+      existing_asset.path = `${existing_asset.path}`
+    })
+    fixed_logo_index = ('fixed_logo_index' in custom_product_data) ? custom_product_data.fixed_logo_index : 0;
+    edit_mode_info_obj = custom_product_data.edit_mode_info_obj
+    reorder_data = custom_product_data.reorder_data ? custom_product_data.reorder_data : null
+    product_id = custom_product_data.product_id
+    measurement_ratio = custom_product_initial_data.measurement_ratio
+    product_name = custom_product_initial_data.display_name
+    selected_style_id = custom_product_data.style_id
+    allow_name_number = custom_product_initial_data.allow_name_number
+    product_type = custom_product_initial_data.product_type
+    sizes = custom_product_initial_data.sizes
+    product_styles = custom_product_initial_data.productstyles
+    active_addons = custom_product_initial_data.active_addons
+    company_addons = custom_product_initial_data.company_addons
+    product_addons = custom_product_initial_data.product_addons
+    sku = custom_product_initial_data.sku
+    product_roster = custom_product_data.product_roster_detail
+    let existing_addons = custom_product_data.addons
+    company_addons = custom_product_initial_data.company_addons
+    product_addons = custom_product_initial_data.product_addons
+    active_addons = custom_product_initial_data.active_addons
+    active_addons = active_addons.map(active_addon => {
+      const existing_addon = find(existing_addons, ["addon_id", active_addon.addon_id]);
+      active_addon.selected = existing_addon ? !!existing_addon.selected : false
+      return active_addon;
+    });
+  }
+  let [{json_data: product_sizes}] = sizes
+  product_sizes = product_sizes.map(product_size => ({ id: product_size.name, label: product_size.name}))
+  return {
+    id: product_id, name: product_name, allow_name_number, product_type: product_type, product_sizes, product_styles,
+    selected_style_id: selected_style_id, active_addons, company_addons, product_addons, sku, product_roster, price_info,
+    existing_assets, edit_mode_info_obj, reorder_data, not_uploaded_assets, measurement_ratio: measurement_ratio, fixed_logo_index: fixed_logo_index
+  };
+}
+
+const getCustomProductInitialData = (product_id): Promise<Record<any, any>> => {
+  return new Promise((resolve, reject) => {
+    http.post(`custom_product/${product_id}/initial_data`).then((successResponse:Record<any, any>) => {
+      const response_data = successResponse.data
+      if (response_data.success) {
+        resolve(response_data.result)
+      } else {
+        reject(response_data)
+      }
+    }).catch((errorResponse: AxiosError) => {
+      reject(errorResponse)
+    })
+  })
+}
+
+const navigateToCustomProduct = async (factory_custom_product={}) => {
+  let custom_product_data = await getCustomProductData(factory_custom_product).catch(errorResponse => {
+    throw errorResponse
+  })
+  if(custom_product_data) {
+    //@ts-ignore
+    Router.push({
+      // name: 'CustomDesign',
+      name: 'UploadCustomDesign',
+      params: {product_id: custom_product_data.id, customizeProduct: (custom_product_data as unknown) as string }
+    });
+  }
+}
+
+const getReorderDataDefaultObject = (update_values={}): Record<any, any> => {
+  const default_object: Record<any, any> =  {
+    order_id: null, order_number: null, order_item_id: null, factory_id: null, factory_name: null, factory_product_id: null,
+    changes: [], roster_change: false, design_change: false
+  }
+  return {...default_object, ...update_values}
+}
+
+const getOrderUpdateIdentifier = (save_to_store=false) => {
+  let date = new Date();
+  const update_order_item_identifier =
+    `${getRandom(5)}_${date.getDay()}${date.getMonth()}${date.getFullYear()}${date.getMinutes()}${date.getHours()}${date.getMilliseconds()}`;
+  if(save_to_store) {
+    Store.commit("SET_ORDER_ITEM_UPDATE_IDENTIFIER", update_order_item_identifier)
+  }
+  return update_order_item_identifier;
+}
+
+const createOrUpdateOrderUpdateDataState = async (updated_factory_product_index=-1, updated_factory_product= {}) => {
+  const product_edit_info_object = Store.getters.getProductEditInfoObject
+  const update_previous_factory_product = !checkIsEmpty(updated_factory_product) && updated_factory_product_index >= 0
+  if(product_edit_info_object.type == "order_product") {
+    let { factory_product_active_index, factory_products, item_id  } = product_edit_info_object.order_product_info
+    factory_products = santaClone(factory_products)
+    if(update_previous_factory_product) {
+      factory_products[updated_factory_product_index] = updated_factory_product
+    }
+    let active_factory_product = factory_products[factory_product_active_index]
+    const order_existing_updated_data = await loadState("order_updated_data")
+    if(order_existing_updated_data ) {
+      factory_products = order_existing_updated_data.order_updated_data
+      if(update_previous_factory_product) {
+        factory_products[updated_factory_product_index] = updated_factory_product
+      }
+      active_factory_product = factory_products[factory_product_active_index]
+    }
+    if(update_previous_factory_product || !order_existing_updated_data) {
+      let identifier = ''
+      if(order_existing_updated_data) {
+        identifier = order_existing_updated_data.identifier
+      } else {
+        identifier = getOrderUpdateIdentifier(true)
+      }
+      saveState({ id: "order_updated_data", data:  {identifier: identifier, order_updated_data: factory_products  } })
+    }
+    return { item_id, factory_product_active_index, active_factory_product, factory_products }
+  } else {
+    return {}
+  }
+}
+const updateOrder = async () => {
+  const company = Store.getters.getCompany
+  const order_existing_updated_data = await loadState("order_updated_data")
+  const order_products_info_obj = Store.getters.getProductEditInfoObject;
+  let order_item_id = order_products_info_obj.order_product_info.item_id;
+  let url = `order_item/${order_item_id}/update/products`;
+  return http.post(url, {factory_products: order_existing_updated_data}).then(async (res: any) => {
+    console.log('then 111')
+    await exitFromEditMode()
+    if (res.data.success == true) {
+      if (company && company.platform == 'wordpress') {
+        window.location.href = `${company.company_domain}/my-account/orders`;
+      } else {
+        Router.push({name: "OrderDetail", params: {order_id: order_item_id}});
+      }
+    }
+  });
+}
 const downloadNodeCollectionPDF = (collection_id) => {
   return new Promise((resolve, reject) => {
   http.get('download-collection-pdf/'+collection_id)
@@ -2181,6 +2387,7 @@ const downloadNodeCollectionPDF = (collection_id) => {
 //   });
 // }
 
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2196,5 +2403,6 @@ export {
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, getDeviceInfo, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
-  isGetCategories, downloadNodeCollectionPDF
+  isGetCategories, isFilePreviewable, getFilePlaceHolder, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
+  getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF
 };

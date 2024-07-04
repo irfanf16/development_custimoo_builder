@@ -75,7 +75,6 @@ export default class GlbLoaderNew extends Vue {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     (document.getElementById('glb-loader') as HTMLElement).appendChild(this.renderer.domElement);
     const canvas = new fabric.Canvas('canvas')
-    console.log('shah', document.getElementById('canvas'), canvas)
     // Load GLB model
     this.loader.load('https://custimoo.s3.us-east-1.amazonaws.com/models/testJersey.gltf', async (gltf) => {
       await self.addMaterialToGltf(gltf)

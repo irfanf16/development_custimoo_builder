@@ -42,7 +42,7 @@ import OrderDetailsTab from '@/components/OrderDetailsTab.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import Scene from "@/components/Scene.vue"
-import {getRosterDetailDefaultObject, handleResponseException} from '@/helpers/Helpers'
+import {getRosterDetailDefaultObject, handleResponseException, getCustomLockers} from '@/helpers/Helpers'
 import { findIndex } from 'lodash'
 import ModalAction from "@/mixins/ModalAction";
 import {AxiosError, AxiosResponse} from "axios";
@@ -271,15 +271,9 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   }
 
   public async getLockerProductsRosters() {
-    let response: any = this.isCustomerAuthenticated && await http.get("lockers_with_rosters").catch((errorResponse: AxiosError) => {
-      handleResponseException(errorResponse)
+    getCustomLockers().then((customer_lockers: Record<any, any>[]) => {
+      this.lockers = customer_lockers
     })
-    if(response) {
-      let response_data: Record<any, any> = response.data;
-      if (response_data.success) {
-        this.lockers = response_data.result.lockers
-      }
-    }
   }
 
   handleRosterModalBeforeClose() {

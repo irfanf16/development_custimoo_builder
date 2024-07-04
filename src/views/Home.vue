@@ -1,7 +1,7 @@
 <template>
   <div class="page-wrapper position-relative m-lg-4" :class="{'mobile-full-screen': fullScreen}" v-cloak style="margin-top: 0 !important; font-size: 15px" >
     <meta name="viewport" content="width=device-width">
-    <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" /></div>
+    <div class="loader global" v-if="showLoader && getUrlParams"><img src="@assets/images/loading.gif" alt="loading...."/></div>
 
     <ShareDesignModal :product="product" :loader="shareDesignLoader" />
           <DesignCollectionModal @showLockerRoomModal="showLockerRoomModal"
@@ -166,7 +166,7 @@
                           <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]">
                             <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
                               <p v-if="notification.type == 'roster_updated'" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
-                              <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link>
+                              <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link></p>
                               <div class="date">
                                 <div class="day" >{{ notification.created_at | formatDate }}</div>
                               </div>
@@ -565,7 +565,12 @@ import {
   getLockerColors,
   getDomDocument,
   hideLockerProductUpdateButton,
-  isGetCategories
+  isGetCategories,
+  navigateToCustomProduct,
+  getRandom,
+  getOrderUpdateIdentifier,
+  createOrUpdateOrderUpdateDataState,
+  updateOrder
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -580,6 +585,7 @@ import ThreeDScene from "@/components/ThreeDScene.vue";
 import Scene3d from "@/components/3d/scene-3d.vue";
 import EditRosterAreaTab from "@/components/EditRosterAreaTab.vue";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
+import {deleteStateById, loadState, saveState} from "@/indexedDBPersistence";
 import AddProductWithDesignsToLockerRoom from "@/components/AddProductWithDesignsToLockerRoom.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
 
@@ -627,6 +633,16 @@ Vue.filter('formatDate', function(value:string) {
     self.$eventBus.$off('cancelCart', this.cancelCart)
   },
   async mounted() {
+    /*
+    * if order_update_identifier value is set then it means the page is not refreshed and if it is empty then page is refreshed in that case delete existing order updated data
+    * */
+    const order_update_identifier = this.$store.getters.getOrderUpdateIndentifier
+    const order_update_data = await loadState("order_updated_data")
+    if(order_update_data) {
+      if(!order_update_identifier) {
+        await deleteStateById("order_updated_data")
+      }
+    }
     localStorage.removeItem('custimo')
     const self: Record<any, any> = this;
     self.$gtag.pageview({ page_path: '/home'})
@@ -1966,26 +1982,31 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return false;
     }
     let order_products_info_obj = this.getProductEditInfoObject.order_product_info
-    let factory_product_active_index = order_products_info_obj.factory_product_active_index;
-    let factory_product_updated_index = (action == "next") ? parseInt(factory_product_active_index) + 1 : parseInt(factory_product_active_index) - 1;
-    const next_prev_product_id = order_products_info_obj.factory_products[factory_product_updated_index].product_id
 
-    let next_prev_factory_product = order_products_info_obj.factory_products[factory_product_updated_index];
+    let current_factory_product_index = order_products_info_obj.factory_product_active_index;
+    let factory_product_active_index = (action == "next") ? parseInt(current_factory_product_index) + 1 : parseInt(current_factory_product_index) - 1;
 
-
-    updated_product["id"] = order_products_info_obj.factory_products[factory_product_active_index].id;
-    updated_product["status"] = "order_approve";
-    this.order_update_data[factory_product_active_index] = updated_product
-    // order_products_info_obj.factory_products[factory_product_active_index] = updated_product
-    order_products_info_obj.factory_product_active_index = factory_product_updated_index
+    order_products_info_obj.factory_product_active_index = factory_product_active_index
     this.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_products_info_obj })
-    let query_params = [
-      `customized=${true}`, `personalized=${true}`, 'active_product_type=order_product', `active_product_id=${next_prev_product_id}`,
-      `item_id=${order_products_info_obj.item_id}`, `activity_id=${order_products_info_obj.activity_id}`,
-      `style_id=${next_prev_factory_product.style_id}`,`design_id=${next_prev_factory_product.design_id}`,
-      `factory_product_active_index=${factory_product_updated_index}`,'paginate=false'
-    ];
-    await this.retrieveProductsNew(query_params);
+
+    updated_product["id"] = order_products_info_obj.factory_products[current_factory_product_index].id;
+    updated_product["status"] = "order_approve";
+
+    let { item_id, active_factory_product } = await createOrUpdateOrderUpdateDataState(current_factory_product_index, updated_product)
+    if(active_factory_product.is_custom_product) {
+      active_factory_product.edit_mode_info_obj = {
+        mode: 'order_edit', item_id, factory_product_id: active_factory_product.id, factory_product_index: order_products_info_obj.factory_product_active_index,
+      }
+      await navigateToCustomProduct(active_factory_product)
+    } else {
+      let query_params = [
+        `customized=${true}`, `personalized=${true}`, 'active_product_type=order_product', `active_product_id=${active_factory_product.product_id}`,
+        `item_id=${order_products_info_obj.item_id}`, `activity_id=${order_products_info_obj.activity_id}`,
+        `style_id=${active_factory_product.style_id}`,`design_id=${active_factory_product.design_id}`,
+        `factory_product_active_index=${factory_product_active_index}`,'paginate=false'
+      ];
+      await this.retrieveProductsNew(query_params);
+    }
   }
 
   async UpdateOrderProducts(resolve:any= null) {
@@ -1995,17 +2016,17 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       return false;
     }
     let order_products_info_obj = self.getProductEditInfoObject.order_product_info
-    let factory_product_active_index = order_products_info_obj.factory_product_active_index;
-    updated_product["id"] = order_products_info_obj.factory_products[factory_product_active_index].id;
+    let current_factory_product_index = order_products_info_obj.factory_product_active_index;
+    updated_product["id"] = order_products_info_obj.factory_products[current_factory_product_index].id;
     let order_item_id = order_products_info_obj.item_id;
     updated_product["status"] = "order_approve";
-    this.order_update_data[factory_product_active_index] = updated_product
-    let url = `order_item/${order_item_id}/update/products`;
+    const  { item_id, factory_products } = await createOrUpdateOrderUpdateDataState(current_factory_product_index, updated_product)
+    let url = `order_item/${item_id}/update/products`;
     this.showLoader = true
-    http.post(url, {factory_products: this.order_update_data}).then(async (res: any) => {
-      await self.exitFromEditMode()
+    http.post(url, {factory_products: factory_products}).then(async (res: any) => {
       this.showLoader = false
-      if (res.data.success == true) {
+      if (res.data.success) {
+        await self.exitFromEditMode()
         if (this.company.platform == 'wordpress') {
           window.location.href = `${this.company.company_domain}/my-account/orders`;
         } else {
@@ -2174,6 +2195,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     setTimeout(() => {
       dom_document.body.removeChild(anchor);
     },5000);
+  }
+
+  public async customizeProduct() {
+    await navigateToCustomProduct().catch(errorResponse => {
+      handleResponseException(errorResponse)
+    });
   }
 
   public showProductDesignSaveModal() {

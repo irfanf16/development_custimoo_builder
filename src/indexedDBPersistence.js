@@ -15,12 +15,22 @@ db.version(1).stores({
   state: 'id',
 });
 
+export const DexieDb = db
+/*
+* The state must follow below structure
+* state = {id: "", data: ""}.
+* */
 export const saveState = (state) => {
   // Use the 'state' store to put the data into IndexedDB
-  return db.state.put({ id: 1, data: state });
+  return db.state.put(state);
 };
 
-export const loadState = () => {
+export const loadState = (id) => {
   // Use the 'state' store to get the data from IndexedDB
-  return db.state.get(1).then((result) => (result ? result.data : null))
+  return db.state.get(id).then((result) => (result ? result.data : null))
+}
+
+
+export const deleteStateById = (id) => {
+  db.state.delete(id)
 }

@@ -152,6 +152,7 @@ const ProductAttributes:Module<any, any> = {
       colors: []
     },
     updating_logo: false,
+    order_item_update_identifier: null,
     product_designs_selection_info: {
       selection_mode: false,
       selected_designs: []
@@ -1231,6 +1232,9 @@ const ProductAttributes:Module<any, any> = {
         Vue.set(state.products[payload.product_index], 'show_product_in_list', payload.product_data.show_product_in_list)
       }
     },
+    SET_ORDER_ITEM_UPDATE_IDENTIFIER(state, payload) {
+      state.order_item_update_identifier = payload
+    },
     UPDATE_product_designs_selection_info(state, payload) {
       const {action, design_index} = payload
       if (action == "remove") {
@@ -1572,6 +1576,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getUpdatingLogo(state:Record<any,any>) {
       return state.updating_logo
+    },
+    getOrderUpdateIndentifier(state:Record<any,any>) {
+      return state.order_item_update_identifier
     },
     getProductSelectionDesignInfo(state: Record<any, any>) {
       return state.product_designs_selection_info;
@@ -1946,12 +1953,13 @@ const ProductAttributes:Module<any, any> = {
     setActiveRosterIndex({commit},index){
       commit("SET_ACTIVE_ROSTER_INDEX",index);
     },
+    setOrderItemUpdateIdentifier({commit}, payload){
+      commit("SET_ORDER_ITEM_UPDATE_IDENTIFIER", payload)
+    },
     setCollectionMode({ commit }, mode) {
       commit("SET_COLLECTION_MODE", mode);
     }
-  }
+}
 }
 export default ProductAttributes;
-
-
 
