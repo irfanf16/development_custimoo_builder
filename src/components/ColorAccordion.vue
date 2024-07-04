@@ -32,10 +32,25 @@
               <b-nav-item class="active mr-2">{{ getSvgGroupColors(svgElement.id).name | capitalize }}</b-nav-item>
             </template>
             <template v-else>
-              <b-nav-item :class="{ 'active' : index == selectTypeIndex && !showOtherColors}" class="mr-2 " v-for="(colorType, index) in productColors" :key="'color-nav'+index" @click="selectType(index, false)">{{ colorType.name | capitalize }}</b-nav-item>
-              <b-nav-item v-if="logoColorsInfo && logoColorsInfo.length" :class="{ 'active' : selectTypeIndex == (productColors.length) && !showOtherColors}" class="mr-2 " @click="selectType(productColors.length, false)">Team logo colors</b-nav-item>
-              <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !showOtherColors}" class="mr-2 " v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length" @click="selectType(productColors.length + 1, false)">Locker colors</b-nav-item>
-              <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: showOtherColors }" @click="selectType(null, true)">Others</b-nav-item>
+              <b-nav-item :class="{ 'active' : index == selectTypeIndex && !showOtherColors}" class="mr-2 "
+                          v-for="(colorType, index) in productColors" :key="'color-nav'+index"
+                          @click="selectType(index, false)">
+                {{ colorType.name | capitalize }}
+              </b-nav-item>
+              <b-nav-item v-if="logoColorsInfo && logoColorsInfo.length"
+                          :class="{ 'active' : selectTypeIndex == (productColors.length) && !showOtherColors}" class="mr-2 "
+                          @click="selectType(productColors.length, false)">
+                Team logo colors
+              </b-nav-item>
+              <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !showOtherColors}" class="mr-2 "
+                          v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length"
+                          @click="selectType(productColors.length + 1, false)">
+                Locker colors
+              </b-nav-item>
+              <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ 'active': selectTypeIndex == (productColors.length + 2) && showOtherColors }"
+                          @click="selectType(productColors.length + 2, true)">
+                Others
+              </b-nav-item>
             </template>
           </b-nav>
           <div v-if="selectTypeIndex == (productColors.length + 1) && !showOtherColors" class="overflow-hidden fade-right pr-4">
@@ -67,7 +82,7 @@
                 </div>
               </template>
               <!-- other colors -->
-              <div v-else-if="showOtherColors && selectedProduct.is_custom_color_allowed && getColorTypeBySvgGroup(svgElement.id) !== 'product_color'" class="custom-color-picker">
+              <div v-else-if="showOtherColors && selectedProduct.is_custom_color_allowed && getColorTypeBySvgGroup(svgElement.id, 'logo_color_type') !== 'product_color'" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
                   <label for="inline-form-input-pantone-color" v-if="getColorType === 'cmyk'">CMYK (x,x,x,x)</label>
                   <label for="inline-form-input-pantone-color" v-else-if="getColorType === 'pantone-coated'">Pantone: (xxx c)</label>
@@ -167,17 +182,18 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     this.selectType(this.selectTypeIndex, false)
   }
 
-  @Watch('tabIndex', {
-    deep: true
-  })
-
-  tabIndexChanged(){
-    if(this.productColors[this.selectTypeIndex]){
-      return false;
-    }else{
-      this.selectType(this.selectTypeIndex - 1, false)
-    }
-  }
+  // @Watch('tabIndex', {
+  //   deep: true
+  // })
+  //
+  // tabIndexChanged(){
+  //   console.log('sdfsdf', this.selectTypeIndex, this.productColors)
+  //   if(this.productColors[this.selectTypeIndex]){
+  //     return false;
+  //   }else{
+  //     this.selectType(this.selectTypeIndex, false)
+  //   }
+  // }
 
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
@@ -187,8 +203,8 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     return this.$store.getters.getGroupColors
   }
 
-  public getColorTypeBySvgGroup(svg_group: string) {
-    return getColorType(svg_group)
+  public getColorTypeBySvgGroup(svg_group: string, color_type) {
+    return getColorType(svg_group, null,'logo_color_type')
   }
 }
 </script>

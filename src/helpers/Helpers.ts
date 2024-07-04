@@ -213,7 +213,7 @@ const getSelectedProductPantones = (product_id: null|number = null, svg_group: s
 }
 
 const getColorType = (svg_group = '', product_id: number|null = null, color_type = 'color_type') => {
-  const product = product_id? Store.getters.getProduct(product_id) : Store.getters.getProduct()
+  const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
   if(svg_group && product && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
     return 'product_color'
   } else if(product && !product.is_custom_color_allowed) {

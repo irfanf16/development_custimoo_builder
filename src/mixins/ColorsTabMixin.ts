@@ -118,13 +118,16 @@ export default class ColorsTabMixin extends Vue{
 
   public changeColor(color: Record<any, any>) {
     const selectProductPantonesList = getSelectedProductPantones()
-    const pantoneColor = getClosestColor(color.hex,selectProductPantonesList, getColorType(this.svgGroups[this.selectAccordionIndex].id)) // this is sub-menu other tab of color tab in menu
+    const pantoneColor = getClosestColor(color.hex,selectProductPantonesList, getColorType(this.svgGroups[this.selectAccordionIndex].id, null, 'logo_color_type')) // this is sub-menu other tab of color tab in menu
     this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: pantoneColor.pantone, name: pantoneColor.name})
   }
 
   public changePantoneColor() {
-    const color_code = this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone)?this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone):this.svgGroups[this.selectAccordionIndex].pantone;
-    const pantoneColor = getColorEncoding(color_code, getColorType(this.svgGroups[this.selectAccordionIndex].id));
+    const color_code = this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone) ?
+      this.extractExactCode(this.svgGroups[this.selectAccordionIndex].pantone) : this.svgGroups[this.selectAccordionIndex].pantone;
+    const pantoneColor = getColorEncoding(
+      color_code, getColorType(this.svgGroups[this.selectAccordionIndex].id, null, 'logo_color_type')
+    );
     if (pantoneColor) {
       this.setColor({value: pantoneColor.hex.toUpperCase(), pantone: color_code.toUpperCase(), name: pantoneColor.name})
       this.pantoneMessage = ''

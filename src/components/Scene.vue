@@ -88,7 +88,7 @@ import {
   getColorType,
   getDefaultColorsObject,
   getSelectedProductPantones,
-  hideLockerProductUpdateButton,
+  hideLockerProductUpdateButton, santaClone,
   setUndoRedoItems,
   unitConversion
 } from '@/helpers/Helpers'
@@ -699,15 +699,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     } else {
       groupColor = this.groupColors[svg_group]
     }
-    let final_color
-    if(this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === groupColor.color)) {
-      const selectProductPantonesList = getSelectedProductPantones(this.product_id, svg_group)
-      final_color = getClosestColor(groupColor.color as string, selectProductPantonesList, getColorType(svg_group, this.product_id))
-      final_color.color = final_color.hex
-    } else {
-      final_color = groupColor
-    }
-    return final_color
+    return groupColor
   }
 
   public getDefaultColorBySvgGroup(svg_group: string, defaultColorOriginal: Record<any, any>) {
