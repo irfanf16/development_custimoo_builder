@@ -18,9 +18,10 @@
             <span class="btn btn-secondary btn-sm">Locker Rooms</span>
           </template>
           <b-tabs nav-class="lockerroom_titles" class="locker-tabs" lazy content-class="mt-3" @changed="lockerChanged">
-            <div v-if="hasProducts">
+            <div v-if="getLockerProducts && getLockerProducts.length > 0">
             <template v-for="(room, i) in getLockerProducts">
-            <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
+            <span :key="`locker-room-${room.id}-${i}`">
+              <b-tab lazy  @click="changeTabIndex(i)" :active="tabIndex === i">
               <template #title>
                 <draggable ghostClass="locker-tab-ghost" :data-title="`${room.room_name}`" :group="{name: `locker-${i}`, pull: false, put: true}"
                            :data-room-id="room.id" :data-room-index="i"
@@ -262,6 +263,7 @@
                 </div>
               </div>
             </b-tab>
+            </span>
           </template>
             </div>
             <span v-else>No lockers or designs match with your search</span>
@@ -679,10 +681,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   get mainproductId():number{
     return this.$store.getters.getEditMainProductId
-  }
-
-  get hasProducts() {
-    return this.getLockerProducts.some((locker_room) => locker_room.product.length > 0);
   }
 
   @Watch('getCollections', {

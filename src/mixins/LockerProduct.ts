@@ -73,32 +73,33 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
   get getLockerProducts() {
     let main_product_id = this.$store.getters.getEditProductId;
     let locker_products:Record<any, any> = this.$store.getters.getLockerProducts;
+    locker_products = santaClone(locker_products)
     let locker_products_count = locker_products.length
-    let active_index = locker_products.findIndex((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
+    let locker_room_index = locker_products.findIndex((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
     if (this.searchText) {
-      let filtered_products = locker_products.filter((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
-      if (active_index !== -1) {
-        let payload = {index: active_index, attribute: 'active_tab', value: true};
+      let filtered_locker_rooms = locker_products.filter((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
+      if (locker_room_index !== -1) {
+        let payload = {index: locker_room_index, attribute: 'active_tab', value: true};
         this.$store.commit('SET_LOCKER_ATTRIBUTE', payload);
-        this.$store.commit('Change_Locker_Tabs_Index', active_index);
+        this.$store.commit('Change_Locker_Tabs_Index', locker_room_index);
       }
-      if (filtered_products.length === 0) {
-        locker_products = locker_products.map((locker) => {
-          let filteredProducts = locker.product.filter((product) => product.product_name.toLowerCase().includes(this.searchText.toLowerCase()));
+      if (filtered_locker_rooms.length === 0) {
+        locker_products = locker_products.filter((locker) => {
+            let filteredProducts = locker.product.filter((product) => product.product_name.toLowerCase().includes(this.searchText.toLowerCase()));
           let active_tab_index = locker_products.findIndex((locker) => locker.id === filteredProducts[0]?.room_id);
           if (filteredProducts.length) {
             let payload = {index: active_tab_index, attribute: 'active_tab', value: true};
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload);
             this.$store.commit('Change_Locker_Tabs_Index', active_tab_index);
-          }
-
-          return {
-            ...locker,
-            product: filteredProducts
+            locker.product = filteredProducts
+            return true
+          } else {
+            return false
           }
         })
-      } else {
-        locker_products = filtered_products
+      }
+      else {
+        locker_products = filtered_locker_rooms
       }
     }
     locker_products = locker_products.map((item: Record<any, any>, lpIdx: number) => {
