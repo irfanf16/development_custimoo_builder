@@ -138,6 +138,7 @@ export default class Addresses extends Mixins(ErrorMessages) {
         if(response.data.success){
           this.$store.commit('ADD_SHIPPING_ADDRESS', response.data.result)
           this.$emit('actionAfterAddressSave');
+          this.actionAfterAddressSave();
         }else{
           if(response.data.status_code === 422){
             this.showErrorArr(response.data.errors);
@@ -152,7 +153,7 @@ export default class Addresses extends Mixins(ErrorMessages) {
     }catch (error){
       this.showError(error)
     }
-    this.actionAfterAddressSave();
+
   }
 
   // public showConfirm(){
@@ -176,6 +177,14 @@ export default class Addresses extends Mixins(ErrorMessages) {
     if (this.$route.query && Number(this.$route.query.cart) == 1) {
       this.$store.commit('SHOW_CART_MODAL', true);
       this.$router.push({ name: 'Home' })
+    }
+
+    if (this.$route.query && Number(this.$route.query.quote) == 1) {
+      const order_id = this.$route.query.order_id; // Replace with your dynamic order ID
+      this.$router.push({ path: `/order/${order_id}/detail?accept_quote=1` }).then(() => {
+        // Force the page to reload after navigation
+        window.location.reload();
+      });
     }
 
     await this.getAddressDetails();

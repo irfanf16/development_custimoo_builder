@@ -57,7 +57,14 @@ const routes: Array<RouteConfig> = [
   {
     path: '/customer-orders',
     name: 'CustomerOrders',
-    component: OrderListing
+    component: OrderListing,
+    props: { page_type: 'order' },
+  },
+  {
+    path: '/customer-quotes',
+    name: 'CustomerQuotes',
+    component: OrderListing,
+    props: { page_type: 'quote' },
   },
   {
     path: '/order/:order_id/detail',

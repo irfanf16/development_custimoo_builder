@@ -1209,8 +1209,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     })
   }
 
-
-  public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null) {
+  public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null,  get_quote:boolean = false) {
     if(!this.checkMinimumOrderQtyBYDesign(
       this.$store.getters.getProductRosters(this.$store.getters.getSelectedProductId),
       this.$store.getters.getSkuInformation,
@@ -1246,6 +1245,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let post_data = {
         factory_product: cart_product
       };
+      (post_data as Record<any,any>).get_quote = get_quote;
       let url = "carts"
       let cart_edit_mode = false;
       let product_edit_info_object = self.$store.getters.getProductEditInfoObject
@@ -1340,14 +1340,24 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         await http.post(url, post_data).then(async (res: any) => {
           if (res.data.success == true){
             let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
-            let api_res:Record<any, any> = res.data.result
-            self.$store.dispatch('addToCart',api_res.items)
-            // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
-            // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
-            self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
-            await self.exitFromEditMode()
-            self.showToast(res.data.message, 'success');
-            self.$store.dispatch('addedToCart', true)
+            let api_res:Record<any, any> = {};
+            if(get_quote) {
+              self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
+              await self.exitFromEditMode()
+              self.showToast(res.data.message, 'success');
+              self.$store.dispatch('addedToCart', true)
+              this.$router.push({name: 'CustomerQuotes'});
+            } else {
+              api_res = res.data.result ;
+              self.$store.dispatch('addToCart',api_res.items)
+              // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
+              // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+              self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
+              await self.exitFromEditMode()
+              self.showToast(res.data.message, 'success');
+              self.$store.dispatch('addedToCart', true)
+            }
+
             if(platform === 'wordpress'){
               let update_cart_id_data = new FormData();
               update_cart_id_data.append('santa_cart_id', api_res.new_created_id);

@@ -658,18 +658,7 @@ Vue.filter('formatDate', function(value:string) {
     await self.$eventBus.$on('cancelLocker', this.cancelLocker)
     await self.$eventBus.$on('cancelCart', this.cancelCart)
 
-    await http.get(`/get-settings`).then((res) => {
-      const response_data = res.data;
-      const { settings: company_settings,  factory_settings } = response_data.result
-      this.$store.commit('SET_SETTING', company_settings)
-      this.$store.commit('SET_FACTORY_SETTING', factory_settings)
-      if(company_settings && company_settings.currencies) {
-        const company_currency_obj = company_settings.currencies
-        this.$store.commit('SET_PRODUCT_PRICE_OBJECT', {
-          show_price: company_currency_obj.visible,  active_currency: company_currency_obj.currencies[0]
-        })
-      }
-    });
+
     this.setRecentLogos()
 
     if (this.hideColorSection){
@@ -1392,6 +1381,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     } else if (this.actionBeforeLogin == 'addToCart') {
       this.setRosterOpen(true)
       this.addToCart(null)
+    }
+    else if (this.actionBeforeLogin == 'addQuote') {
+      this.setRosterOpen(true)
+      this.addToCart(null, true)
     } else if (this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
     } else if (this.actionBeforeLogin == 'generatePdf') {
@@ -1402,8 +1395,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     getLockerColors();
   }
 
-  private async addToCart(resolve:any=null) {
-    await this.addToCartMixin(this.products_fonts,resolve);
+  private async addToCart(resolve:any=null, get_quote = false) {
+    await this.addToCartMixin(this.products_fonts, resolve, get_quote);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       let no_cart_modal_platforms = ['wordpress','shopify'];
 
@@ -2025,15 +2018,26 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.showLoader = true
     http.post(url, {factory_products: factory_products}).then(async (res: any) => {
       this.showLoader = false
+      let is_quote = res.data.result.is_quote_order ? res.data.result.is_quote_order : false;
       if (res.data.success) {
         await self.exitFromEditMode()
-        if (this.company.platform == 'wordpress') {
+      if (this.company.platform == 'wordpress') {
           window.location.href = `${this.company.company_domain}/my-account/orders`;
         } else {
-          self.$router.push({name: "OrderDetail", params: {order_id: order_item_id}});
+          if(is_quote) {
+            window.location.href = `${this.company.company_domain}/#/customer-quotes`;
+          } else {
+            self.$router.push({name: "OrderDetail", params: {order_id: order_item_id}});
+          }
+
         }
       } else {
-        this.showErrorArr(res.data.errors)
+        if(is_quote) {
+          this.showToast(res.data.message, 'error');
+        } else {
+          this.showErrorArr(res.data.errors)
+        }
+
       }
       if(resolve){
         resolve(true);

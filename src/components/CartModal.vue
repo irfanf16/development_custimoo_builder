@@ -251,9 +251,14 @@
           </div>
         </div>
       </div>
-      <div class="d-flex justify-content-center" v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-        <template>
-          <b-button class="mt-4" @click="createOrder" :disabled="(total_product_count < parseInt(moq)) || ((!can_finalize_order) && parseInt(moq) === 0)">Confirm Order</b-button>
+
+      <div class="d-flex justify-content-center">
+        <template v-if="show_quote_button">
+          <b-button style="margin-right: 15px" class="mt-4" @click="createOrder(true)">Get Quote</b-button>
+        </template>
+
+        <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+          <b-button class="mt-4" @click="createOrder(false)" :disabled="(total_product_count < parseInt(moq)) || ((!can_finalize_order) && parseInt(moq) === 0)">Confirm Order</b-button>
         </template>
       </div>
     </div>
@@ -285,6 +290,15 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
         return Number(quantity)
       }
       return 0
+    }
+  },
+  computed:{
+    show_quote_button : function () {
+      if(this.company.platform == 'wordpress' || this.company.platform == 'shopify') {
+        return false
+      }
+
+      return this.get_quote.enable;
     }
   },
   async mounted() {
@@ -334,6 +348,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public can_finalize_order = true;
   public total_product_count = 0;
   public product_names: Record<any, any>[] = [];
+  public get_quote = this.$store.getters.getSetting('get_quote');
 
   get cartTotalPrice() {
     const {show_price} = this.$store.getters.getProductPriceObject
@@ -429,7 +444,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     return this.$store.getters.getSetting("moq");
   }
 
-  public createOrder() {
+  public createOrder(is_quote=false) {
     if(this.total_product_count < parseInt(this.moq)){
       this.showToast(`${this.$t('minimum_order_moq_message',
           {
@@ -448,6 +463,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       return false;
     }
     let payload = {}
+    payload['get_quote'] = is_quote;
     // const response = await this.editModeConfirmation();
     payload['customer_reference_no'] = this.customer_reference_no
     payload['general_comments'] = this.general_comments
@@ -464,6 +480,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     }
 
     this.viewLoader = true;
+
     http.post('order', payload).then((res: Record<any, any>) => {
       if (res.data.success) {
         this.$store.dispatch('addToCart', [])
@@ -471,7 +488,12 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         this.showToast('Your pdf is generating', 'success');
         this.viewLoader = false;
         // this.hideVModal('cart-modal')
-        this.$router.push({name: 'Thankyou', params: { order: res.data.result.order } })
+        if(is_quote) {
+          this.$router.push({name: 'CustomerQuotes'});
+        } else {
+          this.$router.push({name: 'Thankyou', params: { order: res.data.result.order } })
+        }
+
       }
       else {
         this.viewLoader = false

@@ -5,23 +5,37 @@
     </div>
     <div class="order-wrapper" v-if="order && order.id">
       <div class="d-flex justify-content-between align-items-center">
-        <div class="fs-4 font-weight-bolder order-title p-2">Order # {{ order.order_no }}</div>
+        <div class="fs-4 font-weight-bolder order-title p-2">
+          {{ is_quote_order ? 'Quote' : 'Order' }} # {{ order.order_no }}
+        </div>
         <div class="font-weight-bolder d-flex order-title p-2">
+          <template v-if="is_quote_order && show_quote_buttons">
+            <button class="btn btn-secondary mx-2 cursor-pointer fs-2" @click.stop="acceptQuote()">Accept Quote</button>
+            <button class="btn btn-danger mx-2 cursor-pointer fs-2" @click.stop="rejectQuote(false)" >Reject Quote</button>
+
+          </template>
+
           <button class="btn btn-dark mx-2 cursor-pointer fs-2" @click.stop="cancelOrder(order)"
                   v-if="order.items[order.items.length-1].status === FACTORYREVIEW">Cancel order</button>
 
-          <button class="btn p-0 fs-5 btn-dark" @click="$router.push({path: '/customer-orders'})" title="Go Back" style="line-height: 0">
+          <button v-if="is_quote_order" class="btn p-0 fs-5 btn-dark" @click="$router.push({path: '/customer-quotes'})" title="Go Back" style="line-height: 0">
+            <b-icon-arrow-left-short />
+          </button>
+          <button v-else class="btn p-0 fs-5 btn-dark" @click="$router.push({path: '/customer-orders'})" title="Go Back" style="line-height: 0">
             <b-icon-arrow-left-short />
           </button>
         </div>
+
       </div>
+
       <b-tabs content-class="mt-3">
+
         <b-tab :key="`order_item_${order_item_index}`" v-for="(order_item, order_item_index) in order.items">
           <template #title>
             {{ 'Factory ' + parseInt(order_item_index + 1) }}
           </template>
 
-          <OrderFlowStatusLine :item_status="order_item.status" />
+          <OrderFlowStatusLine v-if="!is_quote_order" :item_status="order_item.status" />
 
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
@@ -117,6 +131,12 @@
                        v-if="order.general_comments && item_status_activity_index === 0">
                     <strong class="font-weight-bold">General Comments:</strong>
                     <span class="text-muted">{{ order.general_comments }}</span>
+                  </div>
+
+                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                       v-if="order.quote_text && item_status_activity.status == QUOTEPROVIDED">
+                    <strong class="font-weight-bold">Quote provided price:</strong>
+                    <span class="text-muted">{{ order.quote_text }}</span>
                   </div>
 
                   <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
@@ -436,7 +456,9 @@
 
 
     </modal>
-    <confirm-modal :message="cancel_confirm_message" ref="confirm_order_cancel" name="confirm_order_cancel"></confirm-modal>
+    <QuoteModal ref="quoteModal" :order="order"/>
+    <confirm-modal v-if="is_quote_order" :message="cancel_quote_message" ref="confirm_order_cancel" name="confirm_order_cancel"></confirm-modal>
+    <confirm-modal v-else :message="cancel_confirm_message" ref="confirm_order_cancel" name="confirm_order_cancel"></confirm-modal>
   </div>
 </template>
 
@@ -451,7 +473,7 @@ import {
   handleResponseException,
   logData,
   activityStatus,
-  urlToBase64, getDomDocument, initiateLocalStorageKeys, authenticateUser
+  urlToBase64, getDomDocument, initiateLocalStorageKeys, authenticateUser, updateOrderProducts
 } from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
@@ -462,6 +484,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import {findIndex, debounce, filter} from "lodash";
 import {getCompany} from "@/helpers/Helpers";
 import ConfirmModal from "@/components/ConfirmModal.vue";
+import QuoteModal from "@/components/QuoteModal.vue";
 
 
 @Component<OrderDetail>({
@@ -507,17 +530,25 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
        }
      }
 
+     if(customer_authenticated) {
 
-     if(customer_authenticated){
-       await self.getOrderDetail();
-       if(comment_id) {
-         let timer = setInterval(function() {
-           self.goToMessage(Number(comment_id))
-           if( document.getElementById(`comment-${comment_id}-box`)) {
-             clearInterval(timer)
-           }
-         }, 2000)
-       }
+        self.getOrderDetail().then(() => {
+         if(comment_id) {
+           let timer = setInterval(function() {
+             self.goToMessage(Number(comment_id))
+             if( document.getElementById(`comment-${comment_id}-box`)) {
+               clearInterval(timer)
+             }
+           }, 2000)
+         }
+         if(this.$route.query.accept_quote) {
+           this.acceptQuote();
+         }
+         if(this.$route.query.reject_quote) {
+           this.rejectQuote(true);
+         }
+       });
+
      }
 
   },
@@ -525,7 +556,8 @@ import ConfirmModal from "@/components/ConfirmModal.vue";
     ConfirmModal,
     AddUpdateComment,
     OrderFlowStatusLine,
-    ActivityStatusIcons
+    ActivityStatusIcons,
+    QuoteModal
   },
   filters: {
     initials(value: string) {
@@ -565,8 +597,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public isWebComponent = false
   public reorder_product:Record<any,any> = {};
   public selectedReorderImage = null;
+  public is_quote_order = false;
+  public show_quote_buttons = false;
 
   // -------- Order Status Constants
+  public QUOTEREQUESTED = "quote_requested"
+  public QUOTEUPDATED = "quote_updated"
+  public QUOTEPROVIDED = "quote_provided"
+  public QUOTEREJECTED = "quote_rejected"
   public FACTORYREVIEW = "submitted_for_factory_review"
   public ORDERAPPROVE = "order_approve"
   public ORDERCANCEL = "order_cancel"
@@ -616,6 +654,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   ]
   public api_url =  ''
   public cancel_confirm_message =  `Are you sure that you want to cancel this order?`
+  public cancel_quote_message =  `Are you sure that you want to cancel this quote?`
 
   /*
   * data props ends
@@ -639,11 +678,21 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   async getOrderDetail() {
     let self = this;
     let url = `order/${self.order_id}`
-    http.get(url)
+    await http.get(url)
       .then((successResponse: Record<any, any>) => {
         let response_data = successResponse.data;
         if(response_data.success == true) {
           self.order = response_data.result;
+          self.is_quote_order = self.order.is_quote_order;
+          if(self.is_quote_order) {
+            const lastorderitem = self.order.items.at(-1);
+            if(lastorderitem.status == this.QUOTEPROVIDED) {
+              self.show_quote_buttons = true;
+            }else {
+              self.show_quote_buttons = false;
+            }
+          }
+
         } else {
           if(this.company.platform != "wordpress" && this.company.platform != "shopify") {
             self.showToast(response_data.message, "error")
@@ -662,7 +711,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     });
   }
 
-  public async cancelOrder(order:Record<any, any>){
+  public async cancelOrder(order:Record<any, any>) {
     this.cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
     const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
     const confirm = await confirm_modal.showConfirm();
@@ -916,21 +965,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   updateOrderProducts(order_item: Record<any, any>, order_item_status_activity: number) {
-    this.$store.dispatch('resetStore')
-    const first_factory_product = order_item.factory_products[0];
-    let self:Record<any, any> = this;
-    let query_param_obj: Record<any, any> = {
-      customized:true, personalized:true, active_product_type: 'order_product', active_product_id: first_factory_product.product_id,
-      item_id: order_item.id, activity_id: order_item_status_activity, style_id :first_factory_product.style_id,
-      design_id : first_factory_product.design_id, factory_product_active_index : 0, paginate: false
-    }
-    if(this.company.platform == "wordpress" || this.company.platfrom == "shopify") {
-      const query_string = new URLSearchParams(query_param_obj).toString();
-      window.location.href = `${this.company.company_domain}/customizer/#/?${query_string}`;
-    } else {
-      self.$router.push({ path: "/", query: query_param_obj });
-    }
+    updateOrderProducts(order_item, order_item_status_activity);
   }
+
 
   canPerformCommentAction(comment_obj: Record<any, any>) {
     let self = this;
@@ -1015,7 +1052,44 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         return "Customer"
       }
     }
+    acceptQuote() {
+     if(this.is_quote_order && this.show_quote_buttons) {
+        const quote_modal = (this.$refs['quoteModal'] as Record<any, any>);
+        quote_modal.showVModal('quote-modal');
+      }
+    }
 
+    async rejectQuote(via_link = false) {
+      if(this.is_quote_order && this.show_quote_buttons) {
+        const order  = this.order;
+        let confirm = false;
+        if(via_link) {
+          confirm = true;
+        } else {
+          this.cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+          const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
+          confirm = await confirm_modal.showConfirm();
+        }
+
+        if(confirm){
+          this.showLoader = true;
+          let payload = {}
+          payload['order_id'] = order.id
+          http.post(`reject-quote-order`, payload).then(async (res:Record<any, any>) => {
+            console.log('res', res.data)
+            if(res.data.success){
+              await this.getOrderDetail();
+              this.showToast(res.data.message, 'success');
+            }else{
+              this.showToast('ERROR! Could not cancel the order, please try again.', 'error')
+            }
+
+            this.showLoader = false;
+          })
+        }
+      }
+
+    }
 }
 </script>
 

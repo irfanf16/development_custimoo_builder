@@ -8,10 +8,18 @@
   <template v-else-if="isCustomerAuthenticated">
     <template>
       <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-        <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+          <b-button :key="'getQuote'" aria-label="Add to Cart" v-if="!cartLoading && show_quote_button"
+                 class="mx-2 px-5" variant="secondary" @click="addToCart(null, true)">
+            Get Quote
+          </b-button>
+         <b-button v-if="!show_cart_button && cartLoading" class="mx-2 px-5" variant="secondary" :disabled="true">
+          <img width="20" height="20" src="@assets/images/loading.gif"/>
+        </b-button>
+
+        <template v-if="show_cart_button && (company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')))">
           <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`"
                 v-if="canvasImage.scene == null || (is_admin_token && (company.platform == 'wordpress' || company.platform == 'shopify'))">
-            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"
+           <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"
                       class="mx-2 px-5" variant="secondary" @click="addToCart" disabled>
               Add to Cart
             </b-button>
@@ -48,9 +56,17 @@
         Finalize Design
       </b-button>
     </span>
-    <b-button v-else @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart"
-              class="mx-2 px-5" variant="secondary">Add to Cart
-    </b-button>
+    <template v-else>
+      <span>
+        <b-button v-if="show_cart_button"  @click="setActionBeforeLogin('addToCart')" :key="'loginmodal'" aria-label="Add to Cart"
+                   class="mx-2 px-5" variant="secondary">Add to Cart
+        </b-button>
+        <b-button v-if="show_quote_button"  @click="setActionBeforeLogin('addQuote')" :key="'loginmodal'" aria-label="Get Quote"
+                   class="mx-2 px-5" variant="secondary">Get Quote
+        </b-button>
+      </span>
+
+    </template>
   </template>
   </span>
 </template>
@@ -62,12 +78,30 @@ import {filter} from "lodash";
 
 @Component<AddToCartButton>({
   components: {
+  },
+  computed:{
+    show_cart_button : function () {
+      if(!this.get_quote.enable) {
+        return true;
+      }else {
+        return (this.get_quote.cart_with_quote) ? true : false;
+      }
+    },
+    show_quote_button : function () {
+      if(this.company.platform == 'wordpress' || this.company.platform == 'shopify') {
+        return false
+      }
+
+      return this.get_quote.enable;
+    }
   }
+
 })
 export default class AddToCartButton extends Mixins(cartModalData) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>[]
 
   public is_admin_token = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
+  public get_quote = this.$store.getters.getSetting('get_quote');
 
   get isRosterOpened() {
     return this.$store.getters.getIsRosterOpened
@@ -127,8 +161,8 @@ export default class AddToCartButton extends Mixins(cartModalData) {
     })
     this.gotoLogin()
   }
-  private async addToCart(resolve:any=null) {
-    await this.addToCartMixin(this.products_fonts, resolve);
+  private async addToCart(resolve:any=null, get_quote = false) {
+    await this.addToCartMixin(this.products_fonts, resolve, get_quote);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       let no_cart_modal_platforms = ['wordpress','shopify'];
 

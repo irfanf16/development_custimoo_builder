@@ -306,6 +306,9 @@ const handleResponseException = (errorResponse: AxiosError | TypeError) => {
 }
 
 const CustimooOrderFlowStatuses : Record<any, any> = {
+  quote_requested: 'Quote Requested',
+  quote_rejected: 'Quote Rejected',
+  quote_provided: 'Quote Provided',
   pending_for_factory_assignment: 'Submitted for Factory Review',
   submitted_for_factory_review: 'Submitted for Factory Review',
   order_approve: 'Marked to Factory',
@@ -764,6 +767,22 @@ const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct
 }
 
 const activityStatus = {
+  quote_requested: {
+    title: "Quote Requested",
+    message: "Quote requested by customer.",
+  },
+  quote_updated: {
+    title: "Quote Updated",
+    message: "Quote updated by customer.",
+  },
+  quote_provided: {
+    title: "Quote Provided",
+    message: "Quote provided by merchant.",
+  },
+  quote_rejected: {
+    title: "Quote Rejected",
+    message: "Quote rejected by customer.",
+  },
   submitted_for_factory_review: {
     title: "Order created",
     message: "Please review the artwork.",
@@ -2354,33 +2373,22 @@ const downloadNodeCollectionPDF = (collection_id) => {
   });
 }
 
-// const downloadNodeCollectionPDF = (collection_id) => {
-//   return new Promise((resolve, reject) => {
-//     http.get('download-collection-pdf/'+collection_id, { responseType: 'blob'} )
-//       .then(response => {
-//         console.log(response);
-//         if (response.data.error) {
-//           showError(response.data.message);
-//           reject(false);
-//         } else {
-//           const blob = new Blob([response.data], { type: 'application/pdf' });
-//           const url = window.URL.createObjectURL(blob);
-//           const a = document.createElement('a');
-//           a.href = url;
-//           a.download = 'collection-pdf-'+collection_id+'.pdf';
-//           document.body.appendChild(a);
-//           a.click();
-//           window.URL.revokeObjectURL(url);
-//           resolve(true);
-//         }
-//       })
-//       .catch(error => {
-//         showError('PDF file generation is in progress. Please try again later.');
-//         reject(false);
-//       });
-//   });
-// }
-
+const updateOrderProducts = (order_item: Record<any, any>, order_item_status_activity: number) => {
+  Store.dispatch('resetStore')
+  const company = Store.getters.getCompany
+  const first_factory_product = order_item.factory_products[0];
+  const query_param_obj: Record<any, any> = {
+    customized:true, personalized:true, active_product_type: 'order_product', active_product_id: first_factory_product.product_id,
+    item_id: order_item.id, activity_id: order_item_status_activity, style_id :first_factory_product.style_id,
+    design_id : first_factory_product.design_id, factory_product_active_index : 0, paginate: false
+  }
+  if(company.platform == "wordpress" || company.platfrom == "shopify") {
+    const query_string = new URLSearchParams(query_param_obj).toString();
+    window.location.href = `${company.company_domain}/customizer/#/?${query_string}`;
+  } else {
+    Router.push({ path: "/", query: query_param_obj });
+  }
+}
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -2398,5 +2406,6 @@ export {
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
-  getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF
+  getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
+  updateOrderProducts
 };

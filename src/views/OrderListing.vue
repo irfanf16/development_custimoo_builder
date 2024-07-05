@@ -5,7 +5,7 @@
     </div>
     <div class="d-flex justify-content-between">
       <div class="fs-4 font-weight-bold">
-        Order
+        {{title}}
       </div>
       <div class="d-flex align-items-center gap-2">
         <div>
@@ -42,7 +42,7 @@
           <tbody>
           <tr>
             <th>
-              Order No
+              {{ page_type == 'order' ? 'Order' : 'Quote' }} No
             </th>
             <th>
               Created At
@@ -51,10 +51,10 @@
               Items Count
             </th>
             <th class="text-left">
-              Order Status
+              {{ page_type == 'order' ? 'Order' : 'Quote' }} Status
             </th>
             <th>
-              Order Reference
+              {{ page_type == 'order' ? 'Order' : 'Quote' }} Reference
             </th>
             <th>
               Actions
@@ -123,30 +123,40 @@
                                 </template>
                                 <td>{{ product.roster_quantity }}</td>
                                 <td style="text-align: center">
-                                  <div class="d-flex w-100 gap-1">
-                                    <template>
-                                      <template v-if="Object.prototype.hasOwnProperty.call(product, 'is_custom_product') && !product.is_custom_product">
-                                        <span class="btn btn-dark btn-sm mx-xxl-2" @click="saveToLockerRoom(product)">Save As</span>
-                                        <span  v-if="product.share_design_info.show_loader" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
+                                  <template v-if="page_type == 'order'">
+                                    <div class="d-flex w-100 gap-1">
+                                      <template>
+                                        <template v-if="Object.prototype.hasOwnProperty.call(product, 'is_custom_product') && !product.is_custom_product">
+                                          <span class="btn btn-dark btn-sm mx-xxl-2" @click="saveToLockerRoom(product)">Save As</span>
+                                          <span  v-if="product.share_design_info.show_loader" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
                                           <img width="20" height="20" src="@assets/images/loading.gif" />
                                         </span>
-                                        <span v-else-if="product.share_design_info.share_url" class="btn btn-dark btn-sm mx-xxl-2" @click="copyShareUrl(product.share_design_info.share_url)">Copy Share Url</span>
-                                        <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="shareDesign(item.id, product)">Share</span>
+                                          <span v-else-if="product.share_design_info.share_url" class="btn btn-dark btn-sm mx-xxl-2" @click="copyShareUrl(product.share_design_info.share_url)">Copy Share Url</span>
+                                          <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="shareDesign(item.id, product)">Share</span>
+                                        </template>
                                       </template>
-                                    </template>
-                                    <template>
-                                  <span  v-if="product.adding_to_cart" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
-                                    <img width="20" height="20" src="@assets/images/loading.gif" />
-                                  </span>
-                                      <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="addToCart(item.id, product)">Add To Cart</span>
-                                    </template>
-                                    <template v-if="product.can_reorder">
-                                      <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product, factoryProductIndex)">Reorder</span>
-                                    </template>
-                                    <template v-else>
-                                      <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
-                                    </template>
-                                  </div>
+                                      <template>
+                                        <span  v-if="product.adding_to_cart" class="btn btn-dark light  btn-sm mx-xxl-2" :disabled="true" title="Adding to cart">
+                                          <img width="20" height="20" src="@assets/images/loading.gif" />
+                                        </span>
+                                        <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="addToCart(item.id, product)">Add To Cart</span>
+                                      </template>
+                                      <template v-if="product.can_reorder">
+                                        <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product, factoryProductIndex)">Reorder</span>
+                                      </template>
+                                      <template v-else>
+                                        <span class="btn btn-cancel mx-xxl-2" title="The product no longer exists">Reorder</span>
+                                      </template>
+                                    </div>
+                                  </template>
+                                  <template v-else>
+                                    <div class="d-flex w-100 gap-1">
+                                      <span v-if="item.status == 'quote_requested'"
+                                            @click="updateOrderProducts(item, item.latest_status_activity.id)"
+                                            class="btn btn-dark btn-sm mx-xxl-2">Update Quote</span>
+                                    </div>
+
+                                  </template>
                                 </td>
                               </tr>
                             </template>
@@ -186,7 +196,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Vue} from "vue-property-decorator";
+import {Component, Mixins, Prop, Vue} from "vue-property-decorator";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {http} from "@/httpCommon";
 import moment from "moment";
@@ -194,7 +204,7 @@ import {
   CustimooOrderFlowStatuses,
   exitFromEditMode, getReorderDataDefaultObject,
   handleResponseException, isGetCategories, navigateToCustomProduct,
-  resetLastActiveProductData, santaClone
+  resetLastActiveProductData, santaClone, updateOrderProducts
 } from '@/helpers/Helpers';
 import Search from '@/components/Search.vue';
 import {query} from "vue-gtag";
@@ -221,12 +231,7 @@ Vue.filter('Status', function(value:string) {
     Search
   },
   created(){
-    Object.entries(CustimooOrderFlowStatuses).forEach(([key, value]) => {
-      this.options.push({
-        value: key,
-        text: value
-      })
-    });
+
     if((this.$route as Record<any,any>)?.query?.filter in CustimooOrderFlowStatuses){
       this.params.filter = this.$route.query.filter;
       this.filterOrders();
@@ -234,9 +239,36 @@ Vue.filter('Status', function(value:string) {
     else{
       this.getOrders();
     }
+  },
+  computed: {
+    title() {
+      this.getOrders();
+
+      let quote_options = ['quote_requested', 'quote_rejected', 'quote_provided'];
+      this.options = [];
+      Object.entries(CustimooOrderFlowStatuses).forEach(([key, value]) => {
+        if(this.page_type == 'quote' && quote_options.includes(key)) {
+          this.options.push({
+            value: key,
+            text: value
+          })
+        } else if(this.page_type == 'order' && !quote_options.includes(key)) {
+
+          this.options.push({
+            value: key,
+            text: value
+          })
+        }
+      });
+
+      return this.page_type === 'order' ? 'Orders' : 'Quotes';
+
+
+    }
   }
 })
 export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
+  @Prop({ required: false, default: 'order' }) readonly page_type!: string;
   private screenWidth = (window.screen.availWidth - 100)
   public storage_url = process.env.VUE_APP_STORAGE_URL
   public params:Record<any,any> = {
@@ -270,8 +302,13 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
   }
 
   public async getOrders(params: string | void){
-    if(!params)
-      params = ''
+    if(!params) {
+      params = this.page_type ? '?page_type='+this.page_type :''
+    } else {
+     if(this.page_type)
+       params += '&page_type='+this.page_type
+    }
+
     http.get('orders'+params).then((res:Record<any, any>) => {
       this.orders =  res.data.result.data
       this.makePagination(res.data.result)
@@ -452,6 +489,10 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
   }
   toggleAccordion(index) {
     this.isAccordionOpen = this.isAccordionOpen === index ? null : index;
+  }
+
+  updateOrderProducts(order_item: Record<any, any>, order_item_status_activity: number) {
+    updateOrderProducts(order_item, order_item_status_activity);
   }
 
 }
@@ -638,8 +679,16 @@ table.order-listing{
     background: #B997C6;
     color: #fff;
   }
+  &.quote_requested{
+    background: #B997C6;
+    color: #fff;
+  }
   &.pending_for_factory_assignment{
     background: #B997C6;
+    color: #fff;
+  }
+  &.quote_provided{
+    background: #57A2AC;
     color: #fff;
   }
   &.factory_approved{
@@ -647,6 +696,10 @@ table.order-listing{
     color: #fff;
   }
   &.factory_rejected{
+    background: #CE2220;
+    color: #fff;
+  }
+  &.quote_rejected{
     background: #CE2220;
     color: #fff;
   }

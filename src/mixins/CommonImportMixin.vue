@@ -152,6 +152,7 @@ Vue.directive('click-outside-custom', {
 
 import VueGtag from "vue-gtag";
 import {isEmpty} from "lodash";
+import {http} from "@/httpCommon";
 Vue.use(VueGtag, {
   config: { id: "GTM-N2985NF" },
   params: {
@@ -272,6 +273,21 @@ export default class CommonImportMixin extends Vue{
       const current_locale = i18n.locale;
       i18n.setLocaleMessage(current_locale, this.company.translations[current_locale]);
     }
+
+    await http.get(`/get-settings`).then((res) => {
+      const response_data = res.data;
+      const { settings: company_settings,  factory_settings } = response_data.result
+      this.$store.commit('SET_SETTING', company_settings)
+      this.$store.commit('SET_FACTORY_SETTING', factory_settings)
+      if(company_settings && company_settings.currencies) {
+        const company_currency_obj = company_settings.currencies
+        this.$store.commit('SET_PRODUCT_PRICE_OBJECT', {
+          show_price: company_currency_obj.visible,  active_currency: company_currency_obj.currencies[0]
+        })
+      }
+    });
+
+
   }
 
   created(){
