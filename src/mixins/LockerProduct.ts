@@ -36,6 +36,7 @@ import {loadState, saveState} from "@/indexedDBPersistence";
 
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
+  public searchText = '';
   get mainTotalTabs(){
     return this.$store.getters.getMainTotalTabs;
   }
@@ -73,6 +74,33 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
     let main_product_id = this.$store.getters.getEditProductId;
     let locker_products:Record<any, any> = this.$store.getters.getLockerProducts;
     let locker_products_count = locker_products.length
+    let active_index = locker_products.findIndex((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
+    if (this.searchText) {
+      let filtered_products = locker_products.filter((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
+      if (active_index !== -1) {
+        let payload = {index: active_index, attribute: 'active_tab', value: true};
+        this.$store.commit('SET_LOCKER_ATTRIBUTE', payload);
+        this.$store.commit('Change_Locker_Tabs_Index', active_index);
+      }
+      if (filtered_products.length === 0) {
+        locker_products = locker_products.map((locker) => {
+          let filteredProducts = locker.product.filter((product) => product.product_name.toLowerCase().includes(this.searchText.toLowerCase()));
+          let active_tab_index = locker_products.findIndex((locker) => locker.id === filteredProducts[0]?.room_id);
+          if (filteredProducts.length) {
+            let payload = {index: active_tab_index, attribute: 'active_tab', value: true};
+            this.$store.commit('SET_LOCKER_ATTRIBUTE', payload);
+            this.$store.commit('Change_Locker_Tabs_Index', active_tab_index);
+          }
+
+          return {
+            ...locker,
+            product: filteredProducts
+          }
+        })
+      } else {
+        locker_products = filtered_products
+      }
+    }
     locker_products = locker_products.map((item: Record<any, any>, lpIdx: number) => {
       //locker_pull_groups contains the locker group names where products can be moved. This array is make sure user can not drop product to same locker.
       let locker_pull_groups:Record<any, any> = [];

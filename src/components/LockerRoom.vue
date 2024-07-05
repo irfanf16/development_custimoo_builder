@@ -3,14 +3,23 @@
     <div v-if="showLoader" class="loader">
       <img src="@assets/images/loading.gif" />
     </div>
-    <div class="d-flex justify-content-between">
+    <div>
+      <div v-if="main_locker_tabs === 0" style="max-width: 300px; width: 80%; flex-shrink: 1; padding-left: 4px; position: absolute; right: 5%">
+         <b-input-group>
+           <template #append>
+             <b-input-group-text @click="searchText = ''" style="height: 33px; cursor: pointer"><strong class="text-secondary">X</strong></b-input-group-text>
+           </template>
+           <b-form-input type="text" style="height: 33px;" placeholder="Search" v-model="searchText" />
+         </b-input-group>
+       </div>
       <b-tabs class="main-locker-tabs" @input="updateTab" ref="main-locker-tabs" v-model="main_locker_tabs">
         <b-tab>
           <template #title>
             <span class="btn btn-secondary btn-sm">Locker Rooms</span>
           </template>
           <b-tabs nav-class="lockerroom_titles" class="locker-tabs" lazy content-class="mt-3" @changed="lockerChanged">
-          <template v-for="(room, i) in getLockerProducts">
+            <div v-if="hasProducts">
+            <template v-for="(room, i) in getLockerProducts">
             <b-tab lazy :key="i" @click="changeTabIndex(i)" :active="tabIndex === i">
               <template #title>
                 <draggable ghostClass="locker-tab-ghost" :data-title="`${room.room_name}`" :group="{name: `locker-${i}`, pull: false, put: true}"
@@ -254,6 +263,8 @@
               </div>
             </b-tab>
           </template>
+            </div>
+            <span v-else>No lockers or designs match with your search</span>
 
 
             <CreateLockerRoomModal ref="create-modal" @lockerAdded="lockerAdded"/>
@@ -530,6 +541,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public lockerToRename: Record<any, any> = {};
   public locker_roster_id: number = 0
   public showLoader = false
+  public filtered_locker_products = [];
+  public localLockers: Record<any, any> = [];
 
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
@@ -666,6 +679,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
   get mainproductId():number{
     return this.$store.getters.getEditMainProductId
+  }
+
+  get hasProducts() {
+    return this.getLockerProducts.some((locker_room) => locker_room.product.length > 0);
   }
 
   @Watch('getCollections', {
