@@ -72,11 +72,11 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
     }
   }
 
-  public handleInputChange(e: Event, replaceLogo: boolean, customLogo?:Record<any, any>, customLogoIndex?:number) {
+  public async handleInputChange(e: Event, replaceLogo: boolean, customLogo?:Record<any, any>, customLogoIndex?:number) {
     const target = e.target as HTMLInputElement
     const logo_file = target.files && target.files.length ? target.files[0] : null
     if(logo_file) {
-      if(this.validateLogoFile(logo_file, replaceLogo)) {
+      if(await this.validateLogoFile(logo_file, replaceLogo)) {
         this.uploadLogo(logo_file, replaceLogo, customLogo, customLogoIndex)
       } else {
         target.value = '';
@@ -84,7 +84,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
     }
   }
 
-  public handleInputOnDrag(e: any, replaceLogo: boolean, customLogo?:Record<any, any>, customLogoIndex?:number) {
+  public async handleInputOnDrag(e: any, replaceLogo: boolean, customLogo?:Record<any, any>, customLogoIndex?:number) {
     // this.logo_file have file then it means user have accepted logo disclaimer so now simply upload file to server
     if(this.logo_file) {
       this.uploadLogo(this.logo_file, replaceLogo, customLogo, customLogoIndex)
@@ -92,7 +92,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
     } else {
       const target = e.target as HTMLInputElement
       const logo_file = e.dataTransfer.files[0]
-      if(this.validateLogoFile(logo_file, replaceLogo)) {
+      if(await this.validateLogoFile(logo_file, replaceLogo)) {
         if(this.showLogoDisclaimer()) {
           e.preventDefault()
           // if logo disclaimer is shown then save uploaded file to public property (logo_file). When user accept the disclaimer then upload file to server
@@ -128,16 +128,43 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
     this.handlingDisclaimerAction = false
   }
 
-  public validateLogoFile(logo_file: File, replaceLogo = false) {
+  public getImageDimensions(file: File): Promise<{ width: number; height: number }> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve({ width: img.width, height: img.height });
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  public async validateLogoFile(logo_file: File, replaceLogo = false) {
+
     const self: Record<any, any> = this;
     const extension = logo_file.name.toLowerCase().split('.').pop() as string;
     let logo_allowed_extensions = getExtensionsFor()
     if(replaceLogo) {
       logo_allowed_extensions = getExtensionsFor('vector')
     }
-    const is_allowed = logo_allowed_extensions.includes(extension)
+    let is_allowed = logo_allowed_extensions.includes(extension)
     if(!is_allowed) {
       self.showToast(`The file must be a file of type: ${logo_allowed_extensions.join(', ')}.`,'Error');
+      return false;
+    }
+
+    const raster_extensions = getExtensionsFor('raster')
+    if (raster_extensions.includes(extension)) {
+
+      if (logo_file.size > 20 * 1024 * 1024 ) { // 20MB in bytes
+         self.showToast('The file size must not be greater than 20MB.', 'Error');
+         is_allowed = false;
+      } else {
+          const {width, height} = await this.getImageDimensions(logo_file);
+          if (width > 3840 || height > 2160) {
+            self.showToast('The file resolution must not be greater than 4K (3840x2160).', 'Error');
+            is_allowed = false;
+          }
+      }
+
     }
     return is_allowed;
   }
