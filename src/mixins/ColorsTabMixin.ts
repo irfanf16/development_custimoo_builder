@@ -34,7 +34,7 @@ export default class ColorsTabMixin extends Vue{
   }
 
   get getColorType(){
-    return getColorType()
+    return getColorType('', null, 'logo_color_type')
   }
 
   get selectedProduct(): Record<any, any> {
