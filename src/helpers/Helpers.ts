@@ -2137,12 +2137,6 @@ const isFilePreviewable = (file_name: string) => {
   return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(extension);
 }
 
-const getFilePlaceHolder = (file_name: string, placeholder_extension='svg') => {
-  const extension = getExtensionFromString(file_name)
-  const storage_url = process.env.VUE_APP_STORAGE_URL;
-  return `${storage_url}placeholders/${extension}.${placeholder_extension}`
-}
-
 const getCustomLockers = () => {
   return new Promise((resolve, reject) => {
     const is_customer_authenticated = Store.getters.isCustomerAuthenticated
@@ -2403,6 +2397,6 @@ export {
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, getDeviceInfo, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
   getKeyItemFromLocalStorage,setKeyItemFromLocalStorage,removeKeyItemFromLocalStorage,getReOrderInfoObject, checkIsEmpty, hideLockerProductUpdateButton,
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
-  isGetCategories, isFilePreviewable, getFilePlaceHolder, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
+  isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF
 };

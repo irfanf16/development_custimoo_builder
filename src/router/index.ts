@@ -2,7 +2,6 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import {persistToken,fetchCustomer} from "@/helpers/Helpers";
 import {checkCompanyStatus} from '../../middleware/checkCompany'
-import CustomDesign from "@/views/customDesign.vue";
 
 const Home = ()=> import('../views/Home.vue')
 const Addresses = ()=> import('../views/Addresses.vue')
@@ -137,12 +136,6 @@ const routes: Array<RouteConfig> = [
   {
     path: '/glb_new',
     component: GLBLoaderNew
-  },
-  {
-    path: '/product/:product_id/custom-design',
-    name:'CustomDesign',
-    component: CustomDesign,
-    props: true
   }
 ]
 

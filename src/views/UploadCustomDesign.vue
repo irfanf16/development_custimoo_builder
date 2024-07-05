@@ -487,7 +487,7 @@ import {Component, Mixins, Prop} from 'vue-property-decorator'
 import {http} from "@/httpCommon";
 import {
   createOrUpdateOrderUpdateDataState, getCustomLockers, getCustomProductData, getEditModeDefaultObj,
-  getExtensionFromString, getFilePlaceHolder, getOrderUpdateIdentifier, handleProductPriceUpdate, handleResponseException,
+  getExtensionFromString, getOrderUpdateIdentifier, handleProductPriceUpdate, handleResponseException,
   isFilePreviewable, santaClone
 } from "@/helpers/Helpers";
 import {find, findIndex} from "lodash"
@@ -498,7 +498,6 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import Store from "@/store";
 
 @Component<CustomDesign>({
-  methods: {getFilePlaceHolder},
   components: {},
   mounted() {
     if(!this.customizeProduct) {
@@ -609,7 +608,6 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
   }
 
   public isFilePreviewable = isFilePreviewable
-  public getFilePlaceHolder = getFilePlaceHolder
 
   public addPlayer() {
     let product_last_roster = {
@@ -1268,6 +1266,11 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
         }
       })
     }
+  }
+
+  public getFilePlaceHolder(file_name: any, placeholder_extension='svg') {
+    const extension = getExtensionFromString(file_name)
+    return `${this.storageUrl}placeholders/${extension}.${placeholder_extension}`
   }
 }
 </script>
