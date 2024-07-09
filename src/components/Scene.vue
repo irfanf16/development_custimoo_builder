@@ -749,7 +749,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       if(!this.mainPreview) {
         render_time = this.getRandom()
       }
-      this.changeDefaultColors(render_time)
+      if(!this.locked_design || this.design_id == selectedDesign().id) {
+        this.changeDefaultColors(render_time)
+      }
     }
   }
 
