@@ -1,5 +1,12 @@
 import { Component, Vue } from 'vue-property-decorator'
-import {getSelectedProductPantones, hideLockerProductUpdateButton, setUndoRedoItems, getColorType} from '@/helpers/Helpers'
+import {
+  getSelectedProductPantones,
+  hideLockerProductUpdateButton,
+  setUndoRedoItems,
+  getColorType,
+  selectedDesign,
+  santaClone
+} from '@/helpers/Helpers'
 import {getClosestColor, getColorEncoding} from "@/pantoneColor";
 
 @Component
@@ -47,6 +54,10 @@ export default class ColorsTabMixin extends Vue{
 
   get logoColorsInfo() {
     return this.$store.getters.getLogoColorsInfo('extracted_colors');
+  }
+
+  get locked_design() {
+    return selectedDesign()?.id? this.$store.getters.getLockedDesigns(selectedDesign().id) : undefined
   }
 
   public getSvgGroupColors(svg_group) {
@@ -101,14 +112,19 @@ export default class ColorsTabMixin extends Vue{
     await setUndoRedoItems('groupColors','updated')
     await hideLockerProductUpdateButton(false)
     if (color.value){
-      this.$store.commit('UPDATE_GROUP_COLORS',
-        {
-          index: this.svgGroups[this.selectAccordionIndex].id,
-          gradient_index: this.gradient_index,
-          color: color.value,
-          pantone: color.pantone,
-          name: color.name
+      const group_id = this.svgGroups[this.selectAccordionIndex].id
+      this.$store.commit('UPDATE_GROUP_COLORS', {
+        index: group_id,
+        gradient_index: this.gradient_index,
+        color: color.value,
+        pantone: color.pantone,
+        name: color.name
+      })
+      if(this.locked_design) {
+        this.$store.commit('SET_LOCKED_DESIGN_GROUP_COLOR', {
+          design_id: selectedDesign().id, id: group_id, color: santaClone(this.$store.getters.getGroupColorsById(group_id))
         })
+      }
       self.$eventBus.$emit("changeGroupColors")
       if(this.lastActiveProductData && !this.lastActiveProductData.editing ) {
         this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {group_colors: this.$store.getters.getGroupColors})

@@ -598,10 +598,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         product_custom_texts: productCustomTexts,
         product_custom_text_objects: {roster: roster_texts, common: common},
         colors: Store.getters.getLogosColors,
-        design_id: selected_design.id,
-        defaultcolors: Store.getters.getDefaultColors,
+        design_id: selectedDesign().id,
+        defaultcolors: scene_ref.appliedDefaultColors,
         front_image: front_image,
-        groupcolors: Store.getters.getGroupColors,
+        groupcolors: scene_ref.appliedGroupColors,
         logo_colors: Store.getters.getLogosColors,
         model_description: sku_information.product_model_description,
         sku_number: sku_information.sku_number,
@@ -637,6 +637,12 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
       resolve(post_data)
     }, 500)
   })
+}
+
+const selectedDesign = () : Record<any, any> => {
+  const style_index = Store.getters.getCurrentStyleIndex;
+  const product_style = Store.getters.getSelectedProduct.productstyles[style_index];
+  return product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
 }
 
 const syncGroupColorsWithSvgGroups = async() => {
@@ -2407,5 +2413,5 @@ export {
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
-  updateOrderProducts
+  updateOrderProducts, selectedDesign
 };

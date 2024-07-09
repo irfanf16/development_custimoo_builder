@@ -161,7 +161,10 @@ const ProductAttributes:Module<any, any> = {
   },
   mutations: {
     SET_LOCKED_DESIGN(state: Record<any, any>, locked_design) {
-      Vue.set(state.locked_designs, locked_design.design_id, locked_design.default_color)
+      Vue.set(state.locked_designs, locked_design.design_id, {defaultColors: locked_design.default_color, groupColors: locked_design.group_color})
+    },
+    SET_LOCKED_DESIGN_GROUP_COLOR(state: Record<any, any>, group_color) {
+      Vue.set(state.locked_designs[group_color.design_id].groupColors, group_color.id, group_color.color)
     },
     UNSET_LOCKED_DESIGN(state: Record<any, any>, design_id) {
       Vue.delete(state.locked_designs, design_id)
@@ -1451,6 +1454,12 @@ const ProductAttributes:Module<any, any> = {
       return state.defaultColors
     },
     getGroupColors: state => {
+      return state.groupColors
+    },
+    getGroupColorsById: state => (group_id = '') => {
+      if(group_id) {
+        return state.groupColors[group_id]
+      }
       return state.groupColors
     },
     getSvgGroups: state => {

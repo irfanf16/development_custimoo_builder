@@ -90,7 +90,8 @@ import {
   getSelectedProductPantones,
   hideLockerProductUpdateButton, santaClone,
   setUndoRedoItems,
-  unitConversion
+  unitConversion,
+  selectedDesign
 } from '@/helpers/Helpers'
 import {find} from "lodash";
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
@@ -296,9 +297,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return this.design_id? this.$store.getters.getLockedDesigns(this.design_id) : undefined
   }
 
+  get appliedGroupColors() {
+    if(this.locked_design) {
+      return this.locked_design.groupColors? this.locked_design.groupColors : {}
+    }
+    return this.groupColors
+  }
+
   get appliedDefaultColors() {
     if(this.locked_design) {
-      return this.locked_design
+      return this.locked_design.defaultColors
     }
     let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
     if(defaultColors.length && !this.mainPreview && !this.mobileScreen && !this.allow_shuffle_colors) {
@@ -508,9 +516,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public async changeGroupColors(render_time = 300) {
     if(this.productType == 'customized') {
-      if (Object.keys(this.groupColors).length) {
+      if (Object.keys(this.appliedGroupColors).length) {
         let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
-        let groupColors = this.groupColors
+        let groupColors = this.appliedGroupColors
         let design = this.frontDesign._objects ? this.frontDesign._objects : [this.frontDesign]
         design.forEach((item: Record<any, any>) => {
           if(item.id) {
@@ -695,9 +703,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public getGroupColorBySvgGroup(svg_group: string, gradient_color_index: number|null = null) {
     let groupColor
     if(gradient_color_index != null) {
-      groupColor = this.groupColors[svg_group].gradient_colors[gradient_color_index]
+      groupColor = this.appliedGroupColors[svg_group].gradient_colors[gradient_color_index]
     } else {
-      groupColor = this.groupColors[svg_group]
+      groupColor = this.appliedGroupColors[svg_group]
     }
     return groupColor
   }
@@ -722,14 +730,21 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public setLockedDesign() {
-    this.$store.commit('SET_LOCKED_DESIGN', {design_id: this.design_id, default_color: this.appliedDefaultColors})
+    this.$store.commit('SET_LOCKED_DESIGN', {
+      design_id: this.design_id, default_color: santaClone(this.appliedDefaultColors), group_color: santaClone(this.appliedGroupColors)
+    })
   }
 
   public changeDefaultColorsEvent(is_shuffle = false) {
     if(this.mainPreview && (Object.keys(this.groupColors).length)) {
       this.$store.dispatch('setGroupColors', {})
     }
-    if(!is_shuffle || this.mainPreview || this.allow_shuffle_colors || this.mobileScreen) {
+    if(!is_shuffle || this.mainPreview || this.design_id == selectedDesign().id || this.allow_shuffle_colors || this.mobileScreen) {
+      if(this.locked_design && this.design_id == selectedDesign().id) { // change color if on the selected design even if it is locked
+        this.$store.commit('SET_LOCKED_DESIGN', {
+          design_id: this.design_id, default_color: santaClone(this.defaultColors), group_color: {}
+        })
+      }
       let render_time = 0
       if(!this.mainPreview) {
         render_time = this.getRandom()

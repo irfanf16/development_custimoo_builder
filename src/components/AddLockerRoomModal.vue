@@ -92,10 +92,11 @@
       getEditModeDefaultObj,
       getImageFromCanvas,
       getLockerColors,
-      syncGroupColorsWithSvgGroups
+      // syncGroupColorsWithSvgGroups
     } from '@/helpers/Helpers'
     import { Canvas } from 'fabric/fabric-impl'
     import {lowerCase} from "lodash";
+    import Store from "@/store";
     @Component<AddLockerRoomModal>({
       components: {
         ConfirmModal,
@@ -253,6 +254,8 @@
       public async saveExistingProductToLockerRoom() {
         this.showLoader = true
         let locker_data: Record<any, any> = await this.getLockerProductData()
+        console.log(locker_data, 'locker_data')
+        return;
         if(this.locker_room_product_type == 'collection_product'){
           locker_data.locker_id = this.locker_room_product.locker_id;
           locker_data.fixed_logo_index = this.locker_room_product.fixed_logo_index;
@@ -290,6 +293,7 @@
             unique[svg_groups[i].color] = 1;
           }
         }
+        const scene_ref = Store.getters.getCanvasImage.scene
         let locker_data: Record<any, any> = {
           roster_url: this.rosterUrl,
           room_id: this.room_id,
@@ -300,8 +304,8 @@
           custom_logos: custom_logos ? custom_logos : [],
           text: product_custom_texts,
           colors: logo_colors,
-          defaultcolors: defaultcolors,
-          groupcolors: groupcolors,
+          defaultcolors: scene_ref.appliedDefaultColors,
+          groupcolors: scene_ref.appliedGroupColors,
           locker_front_png: front_image,
           locker_back_png: back_image,
           product_roster_detail: product_roster_detail,
@@ -320,7 +324,7 @@
           await this.saveExistingProductToLockerRoom()
           return false
         }
-        syncGroupColorsWithSvgGroups()
+        // syncGroupColorsWithSvgGroups() // for now don't sync may be look into it later
         this.showLoader = true
         if (this.isCustomerAuthenticated) {
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
@@ -345,6 +349,8 @@
             }
           }
           const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
+
+          const scene_ref = Store.getters.getCanvasImage.scene
           let locker = {
             roster_url: this.rosterUrl,
             room_id: this.room_id,
@@ -355,8 +361,8 @@
             custom_logos: this.customLogos,
             text: this.customTexts,
             colors: this.logoColors,
-            defaultcolors: this.defaultColors,
-            groupcolors: this.groupColors,
+            defaultcolors: scene_ref.appliedDefaultColors,
+            groupcolors: scene_ref.appliedGroupColors,
             locker_front_png: locker_front_png,
             locker_back_png: locker_back_png,
             product_roster_detail: this.productRosterDetail,
@@ -432,6 +438,8 @@
           }
         }
         const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
+
+        const scene_ref = Store.getters.getCanvasImage.scene
         let locker = {
           roster_url: this.rosterUrl,
           room_id: null,
@@ -442,8 +450,8 @@
           custom_logos: this.customLogos,
           text: this.customTexts,
           colors: this.logoColors,
-          defaultcolors: this.defaultColors,
-          groupcolors: this.groupColors,
+          defaultcolors: scene_ref.appliedDefaultColors,
+          groupcolors: scene_ref.appliedGroupColors,
           locker_front_png: locker_front_png,
           locker_back_png: locker_back_png,
           product_roster_detail: this.productRosterDetail,

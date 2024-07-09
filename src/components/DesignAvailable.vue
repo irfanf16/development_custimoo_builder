@@ -182,8 +182,10 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   }
 
   public handleLockDesign(design_id) {
+    const self: Record<any, any> = this;
     if(this.locked_designs[design_id]) {
       this.$store.commit('UNSET_LOCKED_DESIGN', design_id)
+      self.$eventBus.$emit("changeColors")
     } else {
       (this.$refs[`design_scene_${design_id}`] as Record<any, any>)[0].setLockedDesign()
     }

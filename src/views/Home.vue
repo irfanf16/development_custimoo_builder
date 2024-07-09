@@ -384,7 +384,7 @@
                                          :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                                          :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                          :colorGrouping="[]" :productType="selectedProduct.product_type"
-                                         :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"></ThreeDScene>
+                                         :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"></ThreeDScene>
                           </template>
                           <div v-show="!selectedProduct.show_3d">
                             <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
@@ -404,7 +404,7 @@
                                    :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                                    :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                    :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
-                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
                             />
 
                             <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
@@ -419,7 +419,7 @@
                                    :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
                                    :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                    :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
-                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
                             />
                           </div>
                         </div>

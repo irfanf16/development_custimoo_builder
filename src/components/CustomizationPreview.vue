@@ -18,7 +18,7 @@
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                  :colorGrouping="JSON.parse(design.front_design.color_group)" :mainPreview="mainPreview" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
-                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :fromRosterModal="fromRosterModal" />
+                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id" :fromRosterModal="fromRosterModal" />
 
           <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio"
                  :front="{textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension, safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -26,7 +26,7 @@
                  :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                  :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
                  :colorGrouping="JSON.parse(design.front_design.color_group)" :mainPreview="mainPreview" :canvasSelection="canvasSelection" :productType="selectedProduct.product_type"
-                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :fromRosterModal="fromRosterModal" />
+                 :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id" :fromRosterModal="fromRosterModal" />
         </div>
       </template>
     </div>

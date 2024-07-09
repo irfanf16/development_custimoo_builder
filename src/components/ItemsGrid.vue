@@ -18,7 +18,7 @@
                       :logos="product.productstyles[0].logo" :logosSettings="product.logos_setting" :logoAllowed="Boolean(product.is_logo_allowed)"
                       :logosLimit="product.allowed_logos_count" :productNamesSetting="product.productnames" :productColors="product.colors"
                       :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="product.product_type" :product_id="product.id"
-                      :product_index="index" :products_fonts="products_fonts" />
+                      :product_index="index" :products_fonts="products_fonts" :design_id="design.id"/>
              </div>
            </template>
            <h3 class="text-center product_name" :title="product.display_name">{{ product.display_name }}</h3>

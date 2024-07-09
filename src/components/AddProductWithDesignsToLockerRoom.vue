@@ -391,9 +391,11 @@ public errors = [];
         const back_image_base64 = await this.getImageFromCanvasAsPromise('back', {}, scene_ref);
         const svg_groups = this.$refs[`product-selected-design-${productSelectedDesignIndex}-ref`]?.[0].svgGroups;
         let default_colors = []
+        let group_colors = {}
         if(scene_ref) {
           //@ts-ignore
           default_colors = scene_ref?.appliedDefaultColors
+          group_colors = scene_ref?.appliedGroupColors
         }
         if(!front_image_base64 && !back_image_base64){
           this.showToast(`Front image and Back image is undefined for Product Design ${productSelectedDesign.id}`,"error")
@@ -415,7 +417,7 @@ public errors = [];
           text: this.customTexts,
           colors: this.logoColors,
           defaultcolors: default_colors,
-          groupcolors: this.groupColors,
+          groupcolors: group_colors,
           locker_front_png: front_image_base64,
           locker_back_png: back_image_base64,
           product_roster_detail: product_rosters,
