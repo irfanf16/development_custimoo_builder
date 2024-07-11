@@ -135,7 +135,7 @@
               <div class="d-flex flex-wrap w-100">
                 <div>{{ shipping_address.country.name }}</div>
 
-                <router-link :to="'address?cart=1'" class="btn ml-auto align-self-end btn-dark medium btn-sm my-orders">
+                <router-link v-if="!shipOnlyToStore" :to="'address?cart=1'" class="btn ml-auto align-self-end btn-dark medium btn-sm my-orders">
                   <span style="font-size: 0.85em">
                     <b-icon-pencil />
                   </span> Change
@@ -440,6 +440,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     return this.$store.getters.getMainTotalTabs;
   }
 
+  get shipOnlyToStore() {
+    return this.$store.getters.getSetting('ship_only_to_store');
+  }
+
   get moq(){
     return this.$store.getters.getSetting("moq");
   }
@@ -508,11 +512,15 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public async getAddresses() {
     this.$store.commit('SHOW_CART_MODAL', false);
     let address = this.$store.getters.getShippingAddress
-    if (!address) {
-      address = await this.$store.dispatch('getCartAddresses');
-      this.shipping_address = address
+    if (this.shipOnlyToStore) {
+      this.shipping_address = this.$store.getters.getSetting('store_address');
     } else {
-      this.shipping_address = address
+      if (!address) {
+        address = await this.$store.dispatch('getCartAddresses');
+        this.shipping_address = address
+      } else {
+        this.shipping_address = address
+      }
     }
 
   }
