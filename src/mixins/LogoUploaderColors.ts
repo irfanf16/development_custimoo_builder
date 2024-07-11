@@ -1,6 +1,6 @@
 import {Component, Mixins} from "vue-property-decorator";
 import Store from '@/store'
-import {setDefaultColors, setUndoRedoItems} from '@/helpers/Helpers'
+import {santaClone, setDefaultColors, setUndoRedoItems} from '@/helpers/Helpers'
 
 import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
 
@@ -53,7 +53,7 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
     const self: Record<any, any> = this
     await setUndoRedoItems('defaultColors', 'use_logo_colors')
     if(fire_event) { // fire event true means its the first time we use logo colors so update logo colors in extracted colors so on product change we got the same color as shown
-      this.logoColorsInfo.extracted_colors = JSON.parse(JSON.stringify(this.logoColorsInfo.colors))
+      this.logoColorsInfo.extracted_colors = santaClone(this.logoColorsInfo.colors)
     }
     let again_from_logo = true
     if(this.mobileScreen || this.allow_shuffle_colors) {
