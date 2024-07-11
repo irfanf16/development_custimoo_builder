@@ -422,7 +422,8 @@ public errors = [];
           locker_back_png: back_image_base64,
           product_roster_detail: product_rosters,
           fixed_logo_index: fixed_logo_index,
-          svgcolors: svg_groups
+          svgcolors: svg_groups,
+          batch_save:true,
         })
       }
 
@@ -434,7 +435,18 @@ public errors = [];
         });
       });
 
-      await Promise.all(savePromises);
+      const responses = await Promise.all(savePromises);
+      // Extract collection_id from responses
+      const collectionIds = responses.map((response:any) => {
+        if (response.data && response.data.data && response.data.data.collection_id) {
+          return response.data.data.collection_id;
+        }
+        return null; // Handle cases where collection_id is not present
+      });
+      const filteredCollectionIds = collectionIds.filter(value => value !== null);
+      const [collection_id] = [...new Set(filteredCollectionIds)];
+      await this.executeCollectionPdfJob(collection_id);
+      
       this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
       this.loadingLocker = false
       await getLockerColors();
@@ -455,6 +467,17 @@ public errors = [];
   async getImageFromCanvasAsPromise(side, options, canvasRef) {
     const imageData = await (getImageFromCanvas(side, options, canvasRef).split(',')[1]);
     return imageData; // Return the base64 string
+  }
+  async executeCollectionPdfJob(collection_id){
+    return new Promise((resolve,reject) => {
+      http.get(`generate-collection-pdf/${collection_id}`)
+        .then((response) => {
+          resolve(response);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    })
   }
 }
 
