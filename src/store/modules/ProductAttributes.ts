@@ -141,6 +141,10 @@ const ProductAttributes:Module<any, any> = {
       category_index: 0,
       category_id: null
     },
+    selectedSubCategory: {
+      sub_category_index: 0,
+      sub_category_id: null
+    },
     initializing_product_data: false,
     logo_colors_info: {
       /*
@@ -292,6 +296,9 @@ const ProductAttributes:Module<any, any> = {
      },
     SET_SELECTED_CATEGORY(state:Record<any,any>, payload){
       state.selectedCategory = {category_id:payload.category_id, category_index:payload.category_index};
+    },
+    SET_SELECTED_SUB_CATEGORY(state: Record<any, any>, payload) {
+      state.selectedSubCategory = { sub_category_id: payload.sub_category_id, sub_category_index: payload.sub_category_index };
     },
     SET_FIXED_LOGO_INDEX(state:Record<any,any>, payload){
       state.fixed_logo_index = payload;
@@ -1410,6 +1417,9 @@ const ProductAttributes:Module<any, any> = {
     getSelectedCategory: state => {
       return state.selectedCategory;
     },
+    getSelectedSubCategory: state => {
+      return state.selectedSubCategory
+    },
     /*
     * product_id could be number or string. If product_id = 'all' it will return all products logos and return type will be object.
     * If it's number then it will return custom logos against product id and return type will be array
@@ -1639,29 +1649,50 @@ const ProductAttributes:Module<any, any> = {
         http.get(url).then( async (response: Record<any,any>) => {
           if(response) {
             const categories = response.data.data;
+            const {product_category_id,product_sub_category_id, private_product, customized, personalized, customized_count,personalized_count,private_product_count} = response.data;
             let category_index = 0 ;
-            if(categories && categories.length){
+            if(categories && categories.length && product_category_id){
               category_index = categories.findIndex((category) => {
-                return category.id === response.data.product_category_id
+                return category.id === product_category_id
               });
-            }
 
+            }
             commit('categories', response.data.data)
-            commit('SET_PRIVATE_PRODUCT', response.data.private_product);
-            commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: response.data.customized})
-            commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: response.data.personalized})
-            commit('SET_CUSTOMIZED_COUNT',response.data.customized_count);
-            commit('SET_PERSONALIZED_COUNT',response.data.personalized_count);
-            commit('SET_PRIVATE_PRODUCT_COUNT',response.data.private_product_count);
+            commit('SET_PRIVATE_PRODUCT', private_product);
+            commit('SET_PRODUCT_TYPE',{prd_type: 'customized', value: customized})
+            commit('SET_PRODUCT_TYPE',{prd_type: 'personalized', value: personalized})
+            commit('SET_CUSTOMIZED_COUNT',customized_count);
+            commit('SET_PERSONALIZED_COUNT',personalized_count);
+            commit('SET_PRIVATE_PRODUCT_COUNT',private_product_count);
             if(categories && categories.length) {
               commit("SET_SELECTED_CATEGORY", {
-                category_id: response.data.product_category_id,
+                category_id: product_category_id,
                 category_index: category_index
               });
+              if(categories[category_index] && categories[category_index].subcategories && categories[category_index].subcategories.length && product_sub_category_id){
+                const subcategories = categories[category_index].subcategories;
+                const sub_category_index = subcategories.findIndex((subcategory) => {
+                  return subcategory.id === product_sub_category_id;
+                });
+                commit("SET_SELECTED_SUB_CATEGORY", {
+                  sub_category_id: product_sub_category_id,
+                  sub_category_index: sub_category_index
+                });
+              }
+              else{
+                commit("SET_SELECTED_SUB_CATEGORY", {
+                  sub_category_id: null,
+                  sub_category_index: null
+                });
+              }
             } else {
               commit("SET_SELECTED_CATEGORY", {
                 category_index: 0,
                 category_id: null
+              });
+              commit("SET_SELECTED_SUB_CATEGORY", {
+                sub_category_id: null,
+                sub_category_index: null
               });
             }
             resolve(response.data);

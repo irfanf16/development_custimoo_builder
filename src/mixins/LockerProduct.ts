@@ -403,14 +403,21 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
               default_colors: last_active_prod_data.default_colors, product_roster_detail: product_roster_detail})
           }
 
-          let last_active_obj_updated_values = {
+          const selected_category = this.$store.getters.getSelectedCategory;
+          const selected_sub_category = this.$store.getters.getSelectedSubCategory;
+
+          let last_active_obj_updated_values = lastActiveProductDefaultObject({
+            category_id: selected_category.category_id, category_index: selected_category.category_index,
+            sub_category_id: selected_sub_category.sub_category_id, sub_category_index: selected_sub_category.sub_category_index,
             product_index: active_product_index, product_id: active_product_id, fixed_logo_index: fixed_logo_index,
             style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
             search_products: self.search_products, customized: this.$store.getters.getCustomized,
             personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
             products_rosters: this.$store.getters.getProductRosters('all'), default_colors: last_active_prod_data.default_colors,
             group_colors: last_active_prod_data.group_colors
-          }
+          })
+
+
           let set_last_active_product_data = lastActiveProductDefaultObject(last_active_obj_updated_values)
           self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", set_last_active_product_data);
           this.$store.dispatch("setProductsRosters");
@@ -602,6 +609,7 @@ export class ProductsQueryParamsMixin extends Vue {
     let is_private = this.$store.getters.getPrivateProduct;
     let query_params: string[] = await this.handleUrlQueryParams();
     const selected_category = this.$store.getters.getSelectedCategory;
+    const selected_sub_category = this.$store.getters.getSelectedSubCategory;
     let edit_product_info_obj = this.$store.getters.getProductEditInfoObject
     if(edit_product_info_obj.editing) {
       const active_product_type = edit_product_info_obj.type;
@@ -633,6 +641,9 @@ export class ProductsQueryParamsMixin extends Vue {
           `locker_product_id=${edit_product_info_obj.locker_product_info.locker_product_id}`, `active_product_type=${edit_product_info_obj.type}`,
           `category_id=${selected_category.category_id}`, 'paginate=false'
         ];
+        if (selected_sub_category.sub_category_id) {
+          query_params.push(`sub_category_id=${selected_sub_category.sub_category_id}`);
+        }
       } else if(active_product_type == "cart_product") {
         const cart_product_info = edit_product_info_obj.cart_product_info
         const cart_item_factory_product = cart_product_info.cart_item_product
@@ -663,6 +674,9 @@ export class ProductsQueryParamsMixin extends Vue {
         if(selected_category.category_id) {
           query_params.push(`category_id=${selected_category.category_id}`)
         }
+        if (selected_sub_category.sub_category_id) {
+          query_params.push(`sub_category_id=${selected_sub_category.sub_category_id}`);
+        }
       }
     } else {
       let last_active_product_data = self.getLastActiveProductData;
@@ -678,6 +692,9 @@ export class ProductsQueryParamsMixin extends Vue {
       if(selected_category.category_id) {
         query_params.push(`category_id=${selected_category.category_id}`)
       }
+      if (selected_sub_category.sub_category_id) {
+        query_params.push(`sub_category_id=${selected_sub_category.sub_category_id}`);
+      }
       query_params.push(`customized=${this.$store.getters.getCustomized}`, `personalized=${this.$store.getters.getPersonalized}`, `private=${this.$store.getters.getPrivateProduct}`)
     }
     return query_params
@@ -688,6 +705,7 @@ export class ProductsQueryParamsMixin extends Vue {
     let url_query_string: null | string = getUrlParameter()
     let query_params: string[] = [];
     const selected_category = this.$store.getters.getSelectedCategory;
+    const selected_sub_category = this.$store.getters.getSelectedSubCategory;
     const route_query_object: Record<any, any> = JSON.parse(JSON.stringify(this.$route.query))
 
     if(route_query_object.is_reorder) {
@@ -719,6 +737,9 @@ export class ProductsQueryParamsMixin extends Vue {
 
       } else {
         query_params.push(`category_id=${selected_category.category_id}`)
+          if(selected_sub_category.sub_category_id){
+              query_params.push(`sub_category_id=${selected_sub_category.sub_category_id}`);
+          }
       }
     }
 

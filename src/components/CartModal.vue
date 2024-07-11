@@ -524,6 +524,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index];
+    this.fetchCategories(null, cart_item_product.product_id);
+
     let is_private = this.$store.getters.getPrivateProduct;
     //As in cart edit mode there will be only one product is shown in listing. So that product will be of type customized or personalized.
     let ecommerce_cart_id = (self.$route.query.update_item)?self.$route.query.update_item:null;
@@ -550,26 +552,26 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       return false;
     }
 
-      self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
+    self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
 
-      //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
-      this.$root.$emit('rostershared', '')
-      let query_string = `item_id=${cart_item.id}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product&paginate=false`
-      query_string += `&factory_product_id=${cart_item_product.id}&style_id=${cart_item_product.style_id}&design_id=${cart_item_product.design_id}`
-      let url = `list/products?${query_string}`;
-      self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
-      await http.get(url).then(async (response: Record<any, any>) => {
-        await (this as Record<any, any>).handleMainProducts(response);
-      })
+    //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
+    this.$root.$emit('rostershared', '')
+    let query_string = `item_id=${cart_item.id}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product&paginate=false`
+    query_string += `&factory_product_id=${cart_item_product.id}&style_id=${cart_item_product.style_id}&design_id=${cart_item_product.design_id}`
+    let url = `list/products?${query_string}`;
+    self.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", null)
+    await http.get(url).then(async (response: Record<any, any>) => {
+      await (this as Record<any, any>).handleMainProducts(response);
+    })
 
-      this.hideVModal('cart-modal')
-      if (!edit) {
-        let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
-        setTimeout(async () => {
-          await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
-          this.showVModal('rostermodal');
-        },500)
-      }
+    this.hideVModal('cart-modal')
+    if (!edit) {
+      let total_tabs = (this.mainTotalTabs > 0)?this.mainTotalTabs: 3;
+      setTimeout(async () => {
+        await this.$store.dispatch('setTabMain', {value: (total_tabs + 1)})
+        this.showVModal('rostermodal');
+      },500)
+    }
   }
 
   public deleteConfirm(cart_item: Record<any, any>, factory_product: Record<any, any>) {

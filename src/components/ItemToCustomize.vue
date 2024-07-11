@@ -110,6 +110,20 @@
           </template>
         </div>
       </div>
+      <template v-if="categories[selectedCategory.index] && categories[selectedCategory.index].subcategories && categories[selectedCategory.index].subcategories.length">
+        <div class="d-flex align-items-center">
+          <div class="fade-right w-100 py-2 overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList">
+              <template v-for="(subCategory, subCategoryIndex) in categories[selectedCategory.index].subcategories">
+                <div @mouseenter="showTooltip" @mouseleave="hideTooltip" :data-title="subCategory.category_name" :key="`subCategory_${subCategoryIndex}`" style="white-space: nowrap"
+                     :style="{color: (selectedSubCategory.index == subCategoryIndex) ? '#000 !important': '#999 !important'}"
+                     :class="{ 'pr-3': subCategoryIndex + 1 == categories[selectedCategory.index].subcategories.length, 'activeBrand': (selectedSubCategory.index == subCategoryIndex) }"
+                     role="button" @click="handleSubCategoryUpdate(subCategoryIndex)">
+                  <img :src="`${storage_url}${subCategory.image_url}`"  height="30">
+                </div>
+              </template>
+          </div>
+        </div>
+      </template>
 
       <SelectItemCarousel ref="itemsCarousel" :products_fonts="products_fonts" />
     </template>
@@ -259,6 +273,14 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     return this.$store.getters.getSelectedCategory;
   }
 
+  get getSelectedSubCategory() {
+    return this.$store.getters.getSelectedSubCategory;
+  }
+
+  get selectedSubCategory() {
+    return { index: this.getSelectedSubCategory.sub_category_index, id: this.getSelectedSubCategory.sub_category_id }
+  }
+
   get selectedCategory() {
     return { index: this.getSelectedCategory.category_index, id: this.getSelectedCategory.category_id }
   }
@@ -360,6 +382,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
           if(this.getSelectedCategory && this.getSelectedCategory.category_id){
             query_params.push(`category_id=${this.getSelectedCategory.category_id}`)
           }
+          if (this.getSelectedSubCategory && this.getSelectedSubCategory.sub_category_id) {
+            query_params.push(`sub_category_id=${this.getSelectedSubCategory.sub_category_id}`);
+          }
           if(product_filter){
             query_params.push(product_filter)
           }
@@ -396,10 +421,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       return; // No further processing needed if private_product is already true
     }
 
-    isCustomized = prd_type === "customized";
-    isPersonalized = prd_type === "personalized";
-    isPrivate = prd_type === "private_product";
-
     const confirmed_value = await this.editModeConfirmation();
     const edit_info_obj = this.$store.getters.getProductEditInfoObject;
 
@@ -407,23 +428,27 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       return false;
     }
     if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors(false)
-      }
-    const categories_promise = this.fetchCategories(prd_type);
+      this.useLogoColors(false)
+    }
 
-    categories_promise.then(async (cat_response) => {
+    const categories_promise = this.fetchCategories(prd_type);
+    categories_promise.then(async (cat_response: Record<any, any>) => {
+      console.log(cat_response)
       const query_params = [
-        `category_id=${this.getSelectedCategory.category_id || ''}`,
-        `customized=${isCustomized}`,
-        `personalized=${isPersonalized}`,
-        `private=${isPrivate}`,
+        `category_id=${cat_response.product_category_id}`,
+        `customized=${cat_response.customized}`,
+        `personalized=${cat_response.personalized}`,
+        `private=${cat_response.private_product}`,
       ];
+      if(cat_response.product_sub_category_id){
+        query_params.push(`sub_category_id=${cat_response.product_sub_category_id}`);
+      }
       await this.retrieveProductsNew(query_params);
     });
   }
 
   public async handleCategoryUpdate(category_index:number) {
-    if(this.getSelectedCategory.id != this.categories[category_index].id) {
+    if(this.getSelectedCategory.category_id != this.categories[category_index].id) {
       const confirmed_value = await this.editModeConfirmation();
       const edit_info_obj = this.$store.getters.getProductEditInfoObject;
       if (edit_info_obj.type == "reorder_product" && confirmed_value) {
@@ -433,7 +458,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
         this.useLogoColors(false)
       }
       let selected_category = this.categories[category_index]
-      await resetLastActiveProductData()
+      // await resetLastActiveProductData()
       this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { category_index: category_index, category_id: selected_category.id })
       this.$store.commit('SET_SELECTED_CATEGORY', {category_id: selected_category.id, category_index: category_index})
       let query_params: string[] = [
@@ -441,6 +466,46 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       ];
       if (selected_category && selected_category.id) {
         query_params.push(`category_id=${selected_category.id}`);
+        if (selected_category.subcategories.length) {
+          const [subcategory] = selected_category.subcategories;
+          if(subcategory){
+            this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { sub_category_index: 0, sub_category_id: subcategory.id })
+            this.$store.commit('SET_SELECTED_SUB_CATEGORY', {sub_category_id: subcategory.id, sub_category_index: 0})
+            query_params.push(`sub_category_id=${subcategory.id}`);
+          }
+
+        }
+      }
+      if (this.search_products) {
+        query_params.push(`title=${this.search_products}`);
+      }
+      await this.retrieveProductsNew(query_params)
+    }
+  }
+
+  public async handleSubCategoryUpdate(subcategory_index) {
+    if(this.getSelectedSubCategory.sub_category_id != this.categories[this.getSelectedCategory.category_index].subcategories[subcategory_index].id) {
+      const confirmed_value = await this.editModeConfirmation();
+      const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+      if (edit_info_obj.type == "reorder_product" && confirmed_value) {
+        return false;
+      }
+      if(this.logoColorsInfo.using_logo_colors) {
+        this.useLogoColors(false)
+      }
+      let selected_category = this.categories[this.getSelectedCategory.category_index];
+      let selected_sub_category = selected_category.subcategories[subcategory_index];
+      // await resetLastActiveProductData()
+      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", { sub_category_index: subcategory_index, sub_category_id: selected_sub_category.id })
+      this.$store.commit('SET_SELECTED_SUB_CATEGORY', {sub_category_id: selected_sub_category.id, sub_category_index: subcategory_index})
+      let query_params: string[] = [
+        `customized=${this.getCustomized}`, `personalized=${this.getPersonalized}`
+      ];
+      if (selected_category && selected_category.id) {
+          query_params.push(`category_id=${selected_category.id}`);
+          if (selected_category.subcategories.length) {
+            query_params.push(`sub_category_id=${selected_sub_category.id}`);
+          }
       }
       if (this.search_products) {
         query_params.push(`title=${this.search_products}`);
