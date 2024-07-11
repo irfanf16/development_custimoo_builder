@@ -12,7 +12,7 @@
         <div class="pdf_cover"
              :style="{ 'background': `url(${storageUrl + getCoverImage()}) no-repeat center` }"
              :class="{'design_hummel_us': company.id == 45}">
-          <h1 class="text-white p-4" style="text-align: center">{{ collection.name }} </h1>
+          <h1 class="text-white p-4" style="width: fit-content; margin: 0 auto 0 auto !important; padding: 5px !important; border: 2px solid black">{{ collection.name }} </h1>
 
           <div v-if="company.id == 1 || company.id == 45"  class="logo">
             <img src="../../src/assets/logo.png" alt="Logo">
