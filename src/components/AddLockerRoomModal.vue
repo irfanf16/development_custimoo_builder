@@ -253,9 +253,7 @@
 
       public async saveExistingProductToLockerRoom() {
         this.showLoader = true
-        let locker_data: Record<any, any> = await this.getLockerProductData()
-        console.log(locker_data, 'locker_data')
-        return;
+        let locker_data: Record<any, any> = await this.getLockerProductData();
         if(this.locker_room_product_type == 'collection_product'){
           locker_data.locker_id = this.locker_room_product.locker_id;
           locker_data.fixed_logo_index = this.locker_room_product.fixed_logo_index;
@@ -304,8 +302,8 @@
           custom_logos: custom_logos ? custom_logos : [],
           text: product_custom_texts,
           colors: logo_colors,
-          defaultcolors: scene_ref.appliedDefaultColors,
-          groupcolors: scene_ref.appliedGroupColors,
+          defaultcolors: defaultcolors,
+          groupcolors: groupcolors,
           locker_front_png: front_image,
           locker_back_png: back_image,
           product_roster_detail: product_roster_detail,
