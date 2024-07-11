@@ -930,7 +930,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
       let show_message = false;
       if(action == 'reject'){
-        if((activityObj.message == null || activityObj.message == '' ) && !imageEdit ){
+        if((activityObj.message == null || activityObj.message == '' )){
           this.showToast('Please provide feedback before rejection','error');
           show_message = true;
         }
