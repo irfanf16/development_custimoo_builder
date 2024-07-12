@@ -141,24 +141,50 @@ export default class AddUpdateComment extends  Mixins(ErrorMessages) {
 
   async uploadFiles(event: Record<any, any>) {
     let self = this;
+    const mimeTypes = {
+        'image/jpeg': ['jpg', 'jpeg'],
+        'application/pdf': ['pdf'],
+        'image/png': ['png'],
+        'application/postscript': ['ai', 'eps'],
+        'image/svg+xml': ['svg'],
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
+    };
     let uploaded_files = event.target.files;
-    let allowed_file_types = ["jpg", "jpeg", "pdf", 'png', 'ai', 'eps', 'svg', 'xlsx']
-    let rejected_files: string [] = [];
+    let invalid_files : string[] = [];
+    let mismatched_files: string [] = [];
+    let no_extension_files: string [] = [];
+
     for (let uploaded_file of uploaded_files) {
       let file_name = uploaded_file.name;
+      let file_type = uploaded_file.type;
       let file_extension = file_name.substring(file_name.lastIndexOf('.') + 1).toLowerCase();
-      if(allowed_file_types.includes(file_extension)) {
+
+      // Check MIME type
+      if (!mimeTypes[file_type]) {
+        invalid_files.push(file_name);
+      } else if (!mimeTypes[file_type].includes(file_extension)) {
+        mismatched_files.push(file_name);
+      }
+      else if(!file_extension){
+        no_extension_files.push(file_name);
+      }
+      else if(mimeTypes[file_type].includes(file_extension)){
         let file_preview = await self.createFilePreview(uploaded_file)
         self.comment_files.push({
           file: uploaded_file, file_preview: file_preview, name: file_name, extension: file_extension
         })
-      } else {
-        rejected_files.push(file_name)
       }
     }
-    let rejected_files_length = rejected_files.length;
-    if(rejected_files_length > 0) {
-      console.warn(`Uploaded files(${rejected_files_length}) has been rejected. The rejected files are`+ rejected_files.toString())
+
+    if (invalid_files.length > 0) {
+      self.showToast(`Invalid file types: ${invalid_files.join(', ')}`,"error");
+    }
+
+    if (mismatched_files.length > 0) {
+      self.showToast(`Files with no extensions: ${mismatched_files.join(', ')}`, "error");
+    }
+    if(no_extension_files.length > 0){
+      self.showToast(`Files with no extensions: ${no_extension_files.join(', ')}`,"error");
     }
     event.target.files = null;
   }
