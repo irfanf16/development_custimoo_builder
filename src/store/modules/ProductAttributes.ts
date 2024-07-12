@@ -1299,7 +1299,7 @@ const ProductAttributes:Module<any, any> = {
       if(product_id == "all") {
         return state.product_custom_texts;
       } else {
-        return state.product_custom_texts[product_id];
+        return state.product_custom_texts[product_id] ? state.product_custom_texts[product_id] : [];
       }
     },
     getInitializingProductData: state => {
