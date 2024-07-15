@@ -1233,8 +1233,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
 
-  public swapDesign(lockerIndex: number, productIndex: number) {
-    let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
+  public async swapDesign(lockerIndex: number, productIndex: number) {
+    let locker_products = this.$store.getters.getLockerProducts;
+    let product = locker_products[lockerIndex].product[productIndex];
 
     if (product.is_back_img == 0) {
       product.is_back_img = 1
@@ -1243,7 +1244,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       product.is_back_img = 0
       product.product_url = product.product_front_url
     }
-    this.getLockerProducts[lockerIndex].product[productIndex] = product;
+    locker_products[lockerIndex].product[productIndex] = product;
+    this.$store.commit("SET_LOCKER_PRODUCTS",locker_products);
   }
 
   public preventDrag($event:Record<any, any>) {
