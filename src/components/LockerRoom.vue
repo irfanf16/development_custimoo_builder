@@ -325,6 +325,18 @@
                       <b-button title="download collection pdf" @click="downloadCollectionPdf(collection.id)" class="light rounded-circle">
                         <b-icon-download></b-icon-download>
                       </b-button>
+                    <template v-if="customerPermissions.includes('create-shopify-collection')">
+                        <b-button v-if="!collection.ecommerce_collection_id"
+                                  :title="isExportingCollection(collection.id) ? 'Exporting..' : 'Export to Shopify'"
+                                  @click="addShopifyCollection(collection.id, index)"
+                                  :class="['light', 'rounded-circle']"
+                                  :disabled="isExportingCollection(collection.id)">
+                            <font-awesome-icon
+                              :icon="isExportingCollection(collection.id) ? ['fas', 'spinner'] :
+                                     (collection.ecommerce_collection_id ? ['fas', 'sync'] : ['fas', 'file-export'])" />
+                        </b-button>
+                    </template>
+
                   </div>
                 </div>
                 <div class="d-none d-lg-block product-description text-center">
@@ -425,7 +437,7 @@ import {
   classObserver,
   handleResponseException,
   getDomDocument,
-  getEditModeDefaultObj, exitFromEditMode, urlToBase64, downloadNodeCollectionPDF
+  getEditModeDefaultObj, exitFromEditMode, urlToBase64, downloadNodeCollectionPDF, startExportStatusChecker
 } from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {
@@ -510,6 +522,13 @@ import CollectionPDF from "@/components/CollectionPDF.vue";
         data.push({name: val.text, number: val.number, size: val.size, quantity: val.quantity})
       })
       return data;
+    }
+  },
+  computed:{
+    isExportingCollection() {
+      return (id: number) => {
+        return this.getExportingCollections.some((collection: { id: number }) => collection.id === id);
+      };
     }
   }
 })
@@ -640,8 +659,14 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         this.viewLoader = true
         this.setCollections();
         this.viewLoader = false
+      startExportStatusChecker()
+
     }
 
+  }
+
+  public get getExportingCollections(){
+    return this.$store.getters.getExportingCollections
   }
 
   private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
@@ -1380,6 +1405,26 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       .catch(error => {
         this.viewLoader = false;
       });
+  }
+  public addShopifyCollection(collection_id, index:number) {
+    this.viewLoader = true;
+    const self = this as Record<any, any>
+    let payload = {collection_id}
+      http.post(`export-collection-to-shopify`, payload).then((res) => {
+        this.viewLoader = false;
+        const collection = this.getCollections[index];
+        self.$store.commit('TOGGLE_EXPORTING_COLLECTION', {
+          id: collection.id,
+          name: collection.name,
+        });
+        startExportStatusChecker();
+        this.showToast('Exporting collection to Shopify is in progress...','success')
+      }).catch(err => {
+        this.viewLoader = false;
+        if (err.response.status) {
+          self.showToast('There is some problem in exporting. Try later.', 'error')
+        }
+      })
   }
 
 }

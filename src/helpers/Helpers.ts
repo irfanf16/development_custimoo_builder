@@ -2398,6 +2398,55 @@ const updateOrderProducts = (order_item: Record<any, any>, order_item_status_act
   }
 }
 
+
+
+
+let shopifyExportCollectionStatusCheckerInterval: number | null = null;
+
+const  startExportStatusChecker = () => {
+  // Exit if the interval is already running
+  if (shopifyExportCollectionStatusCheckerInterval !== null) {
+    return;
+  }
+
+  shopifyExportCollectionStatusCheckerInterval = window.setInterval(() => {
+    const exporting_collections = Store.getters.getExportingCollections.map((collection: { id: number }) => collection.id);
+
+    if (exporting_collections.length > 0) {
+      http.post('check-ecommerce-collections-status', { exporting_collection: exporting_collections })
+        .then((res) => {
+          const exportedCollections = res.data.exported_collections;
+
+          exportedCollections.forEach((id: number) => {
+            const collection = Store.getters.getExportingCollections.find((collection: { id: number }) => collection.id === id);
+            if (collection) {
+              VsToast.show({
+                title:  `${collection.name} has been successfully exported.`,
+                variant: 'info',
+                timeout: 5000,
+                position: "bottom-left"
+              });
+              Store.commit('TOGGLE_EXPORTING_COLLECTION', { id });
+              Store.commit('UPDATE_COLLECTION_ECOMMERCE_ID', { collection_id:id, ecommerce_id:true });
+            }
+          });
+        })
+        .catch(err => {
+          console.error('Failed to check export status:', err);
+        });
+    } else {
+      // Clear the interval if there are no exporting collections
+      // @ts-ignore
+      clearInterval(shopifyExportCollectionStatusCheckerInterval);
+      shopifyExportCollectionStatusCheckerInterval = null; // Reset the interval variable
+    }
+  }, 30000); // Check after every 30 seconds
+}
+
+
+
+
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2415,5 +2464,5 @@ export {
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
-  updateOrderProducts, selectedDesign
+  updateOrderProducts, selectedDesign,startExportStatusChecker
 };

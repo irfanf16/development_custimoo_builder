@@ -18,6 +18,20 @@
         </div>
 
         <div class="d-flex">
+
+            <template v-if="customerPermissions.includes('create-shopify-collection')">
+              <b-button v-if="collectionItems.ecommerce_collection_id"
+                @click="removeShopifyCollection(collectionItems.id)"
+                style="margin-right: 10px"
+              >Remove From Shopify</b-button>
+
+              <b-button v-else title="Export to Shopify"
+                @click="addShopifyCollection(collectionItems.id)"
+                style="margin-right: 10px"
+                :disabled="isExportingCollection(collectionItems.id)"
+              > {{isExportingCollection(collectionItems.id) ? " Exporting ...": "Export to Shopify"}}</b-button>
+            </template>
+
           <b-button style="margin-right: 10px" @click="downloadCollectionPdf(collectionItems.id)">Download PDF</b-button>
           <div style="display: block;position: relative">
             <b-button style="margin-right: 10px" @click="shareCollectionLink(collectionItems,collectionItems.id)">Share Url</b-button>
@@ -125,8 +139,6 @@
       <CollectionPDF ref="collection" :collection="collectionItems"/>
     </div>
 
-
-
    <div class="modal-footer">
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
@@ -143,19 +155,26 @@
 <script lang="ts">
 
 
-import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
 import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
-import {getCollectionLogoDefaultObj, getRandom, downloadNodeCollectionPDF} from "@/helpers/Helpers";
+import {
+  getCollectionLogoDefaultObj,
+  getRandom,
+  downloadNodeCollectionPDF,
+  startExportStatusChecker
+} from "@/helpers/Helpers";
 import ModalAction from "@/mixins/ModalAction";
 import CollectionLogoUploader from "@/components/Logo/CollectionLogoUploader.vue";
 import {forEach, findIndex} from "lodash";
 import {log} from "fabric/fabric-impl";
 import {CollectionMixin} from "@/mixins/LockerProduct";
 import CollectionPDF from "@/components/CollectionPDF.vue";
+import {http} from "@/httpCommon";
+import Store from "@/store";
 
 @Component({
   components: {
@@ -164,6 +183,13 @@ import CollectionPDF from "@/components/CollectionPDF.vue";
     CollectionLogoUploader,
     Scene,
     draggable
+  },
+  computed:{
+    isExportingCollection() {
+      return (id: number) => {
+        return this.getExportingCollections.some((collection: { id: number }) => collection.id === id);
+      };
+    }
   }
 })
 
@@ -268,6 +294,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     this.showLoader = false;
   }
 
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
+  }
+
   get collectionItemsPdf() {
     let products: Record<any, any>[] = []
     let subProducts: Record<any, any>[] = []
@@ -294,6 +324,10 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       })
     items.collection_products = collections
     return items
+  }
+
+  public get getExportingCollections(){
+    return this.$store.getters.getExportingCollections
   }
 
   public hideCollectionModal() {
@@ -493,6 +527,43 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     .catch(error => {
       this.showLoader = false;
     });
+  }
+
+  public addShopifyCollection(collection_id) {
+    this.showLoader = true;
+    const self = this as Record<any, any>
+    let payload = {collection_id}
+    http.post(`export-collection-to-shopify`, payload).then((res) => {
+      this.showLoader = false;
+      self.$store.commit('TOGGLE_EXPORTING_COLLECTION', {
+        id: collection_id,
+        name: this.collectionItems.name,
+      });
+      startExportStatusChecker();
+      this.showToast('Exporting collection to Shopify is in progress. You will be notified when complete.','success')
+    }).catch(err => {
+      this.showLoader = false;
+      if (err.response.status) {
+        self.showToast('There is some problem in exporting. Try later.', 'error')
+      }
+    })
+  }
+
+  public removeShopifyCollection(collection_id) {
+    this.showLoader = true;
+    const self = this as Record<any, any>
+    let payload = {collection_id}
+    http.post(`remove-collection-on-shopify`, payload).then((res) => {
+      this.showLoader = false;
+      this.showToast('Collection removed from shopify successfully.','success')
+      this.collectionItems.ecommerce_collection_id = null;
+      Store.commit('UPDATE_COLLECTION_ECOMMERCE_ID', { collection_id, ecommerce_id: null });
+    }).catch(err => {
+      this.showLoader = false;
+      if (err.response.status) {
+        self.showToast('There is some problem in exporting. Try later.', 'error')
+      }
+    })
   }
 
 }

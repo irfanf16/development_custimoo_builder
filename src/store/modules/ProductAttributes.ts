@@ -85,6 +85,7 @@ const ProductAttributes:Module<any, any> = {
     collectionItems: {id: "", name: "", link: "", collection_products: []},
     collections: [],
     designCollections: [],
+    exportingCollections: [],
     editProduct:{
       editProductId: 0,
       editStyleId: 0,
@@ -827,7 +828,31 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_COLLECTIONS (state: Record<any, any>, collections: Record<any, any>) {
         state.collections = collections
+        state.exportingCollections = state.collections.
+        filter((collection:  Record<any, any>) => collection.is_exporting === 1)
+          .map(({ id, name }) => ({ id, name }));
+    },
+    TOGGLE_EXPORTING_COLLECTION(state, collection) {
+      const existingIndex = state.exportingCollections.findIndex(
+        item => item.id === collection.id
+      );
 
+      if (existingIndex !== -1) {
+        state.exportingCollections.splice(existingIndex, 1);
+      } else {
+        // Add the collection if it doesn't exist
+        state.exportingCollections.push({
+          id: collection.id,
+          name: collection.name,
+        });
+      }
+    },
+    UPDATE_COLLECTION_ECOMMERCE_ID(state: Record<any, any>, payload) {
+      const collection = state.collections.find((obj: { id: number }) => obj.id === payload.collection_id);
+      if (collection) {
+        collection.ecommerce_collection_id = payload.ecommerce_id;
+        state.collectionItems.ecommerce_collection_id = payload.ecommerce_id;
+      }
     },
     async RESET_STORE(state: Record<any, any>){
       state.customized = true
@@ -1534,6 +1559,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getCollectionItems(state:Record<any, any>){
       return state.collectionItems
+    },
+    getExportingCollections(state:Record<any, any>){
+      return state.exportingCollections;
     },
     getDesignCollections(state:Record<any, any>){
       return state.designCollections
