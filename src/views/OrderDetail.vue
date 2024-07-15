@@ -1241,6 +1241,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
           img {
             height: 150px;
             border-radius: 4px;
+            max-width: 20vw;
+            object-fit: contain;
 
             @media (max-width: 600px) {
               height: auto;
