@@ -23,7 +23,7 @@ import {
   getColorType,
   santaClone,
   navigateToCustomProduct,
-  createOrUpdateOrderUpdateDataState,
+  createOrUpdateOrderUpdateDataState, getBase64FileInfo, getDateTimeFormatted
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -1264,9 +1264,11 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let cart_product = await getActiveProductData(product_fonts);
 
       self.$store.dispatch('setRevertRosterBOOL',true);
-      let post_data = {
+      let post_data: Record<any, any> = {
         factory_product: cart_product
-      };
+      }
+      const factory_product_id = getRandom(4, 'alpha_numeric')+getDateTimeFormatted()+getRandom(4, 'alpha_numeric');
+      post_data.factory_product.id = factory_product_id;
       (post_data as Record<any,any>).get_quote = get_quote;
       let url = "carts"
       let cart_edit_mode = false;
@@ -1358,117 +1360,170 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
 
       if(santacart){
+        const customer = this.$store.getters.getCustomer
+        const selected_product = this.$store.getters.getSelectedProduct
+        const factory_id = selected_product && selected_product?.sku?.factory?.id
+        let base_path = `company_${company.id}/${company.id}/cart/${customer.id}`;
+        if(factory_id) {
+          base_path = `${base_path}/${factory_id}`;
+        } else {
+          base_path = `${base_path}/shareable`;
+        }
         self.$store.dispatch('setCartLoading',true);
-        await http.post(url, post_data).then(async (res: any) => {
-          if (res.data.success == true){
-            let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
-            let api_res:Record<any, any> = {};
-            if(get_quote) {
-              self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
-              await self.exitFromEditMode()
-              self.showToast(res.data.message, 'success');
-              self.$store.dispatch('addedToCart', true)
-              this.$router.push({name: 'CustomerQuotes'});
-            } else {
-              api_res = res.data.result ;
-              self.$store.dispatch('addToCart',api_res.items)
-              // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
-              // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
-              self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
-              await self.exitFromEditMode()
-              self.showToast(res.data.message, 'success');
-              self.$store.dispatch('addedToCart', true)
-            }
-
-            if(platform === 'wordpress'){
-              let update_cart_id_data = new FormData();
-              update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
-              update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id as string);
-              update_cart_id_data.append('action', 'add_custimoo_cart_id');
-              if(cart_edit_mode) {
+        const cart_data = santaClone(post_data)
+        const front_image_info = getBase64FileInfo(cart_data.factory_product.front_image, base_path)
+        const is_back_image = cart_data.factory_product.back_image
+        let back_image_info: Record<any, any> = {}
+        if(is_back_image) {
+          back_image_info = getBase64FileInfo(cart_data.factory_product.back_image, base_path)
+        }
+        const cart_assets_promises = [
+          http.post('upload_file_to_s3', front_image_info)
+        ]
+        if(is_back_image) {
+          cart_assets_promises.push(http.post('upload_file_to_s3', back_image_info))
+        }
+        let svg_content_info: Record<any, any> = {}
+        if(cart_data.factory_product.svg_content) {
+          svg_content_info = {
+            file_name: `${factory_product_id}.svg`, file_path: `${base_path}/${factory_product_id}.svg`, file_extension: 'svg',
+            file_content: cart_data.factory_product.svg_content
+          }
+          cart_assets_promises.push(http.post('upload_file_to_s3', svg_content_info))
+        }
+        Promise.allSettled(cart_assets_promises).then(async (all_promises_response) => {
+          delete post_data.factory_product.svg_content
+          post_data.factory_product.front_image = front_image_info.file_path
+          post_data.factory_product.back_image = back_image_info.file_path ? back_image_info.file_path : ''
+          post_data.factory_product.svg_url = svg_content_info.file_path ? svg_content_info.file_path : ''
+          await http.post(url, post_data).then(async (res: any) => {
+            if (res.data.success == true){
+              let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
+              let api_res:Record<any, any> = {};
+              if(get_quote) {
                 self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
                 await self.exitFromEditMode()
+                self.showToast(res.data.message, 'success');
+                self.$store.dispatch('addedToCart', true)
+                this.$router.push({name: 'CustomerQuotes'});
+              } else {
+                api_res = res.data.result ;
+                self.$store.dispatch('addToCart',api_res.items)
+                // self.$store.dispatch('setEditCart', {key:'cartId',value:0});
+                // self.$store.dispatch('setEditCart', {key:'cartItemId',value:''});
+                self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
+                await self.exitFromEditMode()
+                self.showToast(res.data.message, 'success');
+                self.$store.dispatch('addedToCart', true)
               }
-              http.post(ecom_url, update_cart_id_data).then((res: any) => {
-                self.$store.dispatch('setCartLoading',false);
-                if(!collection_view) {
-                  self.$store.commit("SET_NAVIGATE_TO_CART", true);
-                  window.location.replace(company_domain + '/cart');
+
+              if(platform === 'wordpress'){
+                let update_cart_id_data = new FormData();
+                update_cart_id_data.append('santa_cart_id', api_res.new_created_id);
+                update_cart_id_data.append('woocom_cart_id', ecommerce_cart_id as string);
+                update_cart_id_data.append('action', 'add_custimoo_cart_id');
+                if(cart_edit_mode) {
+                  self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
+                  await self.exitFromEditMode()
                 }
-              }).catch(err => {
+                http.post(ecom_url, update_cart_id_data).then((res: any) => {
+                  self.$store.dispatch('setCartLoading',false);
+                  if(!collection_view) {
+                    self.$store.commit("SET_NAVIGATE_TO_CART", true);
+                    window.location.replace(company_domain + '/cart');
+                  }
+                }).catch(err => {
+                  self.$store.dispatch('setCartLoading',false);
+                  self.showErrorArr(err.response.data.errors)
+                });
+
+              }
+
+              else if(platform === 'shopify') {
+
+                let ecom_addon_ids : number[] = [];
+                for (const addon of (cart_product as Record<any, any>).addons) {
+                  ecom_addon_ids.push(parseInt(addon.addon_ecommerce_variant_id));
+                }
+                let shopify_main_item_data:Record<any, any> = {};
+                let x_rand = Math.floor((Math.random() * 100) + 1);
+
+                shopify_main_item_data['quantity'] = total_quantity;
+                let delete_cart_item_url = `${process.env.VUE_APP_API_BASE_URL}/api/carts/cart-items/${api_res.new_created_id}/factory_product/${api_res.cart_item_key}`;
+
+                const shopify_sizes = {};
+                (cart_product as Record<any, any>).product_roster_detail.forEach(item => {
+                  shopify_sizes[item.size] = (shopify_sizes[item.size] || 0) + parseInt(item.quantity);
+                });
+
+                shopify_main_item_data['properties'] = {  // items with underscore are private properties of shopify cart object
+                  '_custimoo_cart_id': api_res.new_created_id,
+                  '_custimoo_cart_item_key': api_res.cart_item_key,
+                  '_custimoo_front_image': api_res.front_image_url,
+                  '_custimoo_back_image': api_res.back_image_url,
+                  '_custimoo_cart_url': `${company_domain}/${company.customizer_page_url}/#/?sync_id=${(cart_product as Record<any, any>).sync_id}&update_item=${api_res.cart_item_key}&update_cart=${api_res.new_created_id}`,
+                  '_custimoo_delete_cart_url': delete_cart_item_url,
+                  '_custimoo_product_name': (cart_product as Record<any, any>).product_name,
+                  '_custimoo_product_id': (cart_product as Record<any, any>).product_id,
+                  '_custimoo_minimum_order_quantity': 0,
+                  '_custimoo_merchant_moq': moq,
+                  'DESIGN NAME': (cart_product as Record<any, any>).product_name,
+                  'YOUR DESIGN': 'Below are the links of your customized designs.',
+                  'FRONT IMAGE': api_res.front_image_short,
+                  'BACK IMAGE': api_res.back_image_short,
+                  'child_addons' : ecom_addon_ids,
+                };
+                if((cart_product as Record<any, any>).minimum_order_quantity_type == 'by_cart' && (cart_product as Record<any, any>).minimum_order_quantity > 0 ) {
+                  shopify_main_item_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
+                }
+                if (Object.keys(shopify_sizes).length > 0) {
+                  for (const shopify_size in shopify_sizes) {
+                    shopify_main_item_data['properties']['_Size ' + shopify_size ] = shopify_sizes[shopify_size];
+                  }
+                }
+
+                ecom_url = company_domain + '/cart/add.js?token='+x_rand
+                shopify_main_item_data['id'] = (cart_product as Record<any, any>).ecommerce_variant_id;
+
+                let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
+                if(ecommerce_update_id) {
+                  let cart_item_index = product_edit_info_object.cart_product_info.shopify_line_item;
+                  this.updateShopifyAddons(parseInt(cart_item_index)-1, ecom_addon_ids, total_quantity).then( (res : Record<any, any>) => {
+                    let {add_cart_addons} = res;
+                    add_cart_addons.push(shopify_main_item_data);
+                    this.makeShopifyCartCall(ecom_url,add_cart_addons, collection_view, delete_cart_item_url);
+                  })
+
+                }else{
+
+                  this.addShopifyAddons(ecom_addon_ids, total_quantity).then( (res : Record<any, any>) => {
+                    let {add_cart_addons} = res;
+                    add_cart_addons.push(shopify_main_item_data);
+                    this.makeShopifyCartCall(ecom_url, add_cart_addons, collection_view, delete_cart_item_url);
+                  })
+
+                }
+
+              }
+              else {
+                if(cart_edit_mode) {
+                  await self.exitFromEditMode()
+                  const categories_promise = this.fetchCategories();
+                  categories_promise.then(async (cat_response) => {
+                    let query_params = await self.setQueryParams()
+                    self.retrieveProductsNew(query_params);
+                  })
+
+                }
                 self.$store.dispatch('setCartLoading',false);
-                self.showErrorArr(err.response.data.errors)
-              });
+              }
 
             }
-
-            else if(platform === 'shopify') {
-
-              let ecom_addon_ids : number[] = [];
-              for (const addon of (cart_product as Record<any, any>).addons) {
-                ecom_addon_ids.push(parseInt(addon.addon_ecommerce_variant_id));
+            else
+            {
+              if(res.data.status_code === 422){
+                self.showErrorValidation(res.data.errors);
               }
-              let shopify_main_item_data:Record<any, any> = {};
-              let x_rand = Math.floor((Math.random() * 100) + 1);
-
-              shopify_main_item_data['quantity'] = total_quantity;
-              let delete_cart_item_url = `${process.env.VUE_APP_API_BASE_URL}/api/carts/cart-items/${api_res.new_created_id}/factory_product/${api_res.cart_item_key}`;
-
-              const shopify_sizes = {};
-              (cart_product as Record<any, any>).product_roster_detail.forEach(item => {
-                shopify_sizes[item.size] = (shopify_sizes[item.size] || 0) + parseInt(item.quantity);
-               });
-
-              shopify_main_item_data['properties'] = {  // items with underscore are private properties of shopify cart object
-                '_custimoo_cart_id': api_res.new_created_id,
-                '_custimoo_cart_item_key': api_res.cart_item_key,
-                '_custimoo_front_image': api_res.front_image_url,
-                '_custimoo_back_image': api_res.back_image_url,
-                '_custimoo_cart_url': `${company_domain}/${company.customizer_page_url}/#/?sync_id=${(cart_product as Record<any, any>).sync_id}&update_item=${api_res.cart_item_key}&update_cart=${api_res.new_created_id}`,
-                '_custimoo_delete_cart_url': delete_cart_item_url,
-                '_custimoo_product_name': (cart_product as Record<any, any>).product_name,
-                '_custimoo_product_id': (cart_product as Record<any, any>).product_id,
-                '_custimoo_minimum_order_quantity': 0,
-                '_custimoo_merchant_moq': moq,
-                'DESIGN NAME': (cart_product as Record<any, any>).product_name,
-                'YOUR DESIGN': 'Below are the links of your customized designs.',
-                'FRONT IMAGE': api_res.front_image_short,
-                'BACK IMAGE': api_res.back_image_short,
-                'child_addons' : ecom_addon_ids,
-              };
-              if((cart_product as Record<any, any>).minimum_order_quantity_type == 'by_cart' && (cart_product as Record<any, any>).minimum_order_quantity > 0 ) {
-                shopify_main_item_data['properties']['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
-              }
-              if (Object.keys(shopify_sizes).length > 0) {
-                for (const shopify_size in shopify_sizes) {
-                  shopify_main_item_data['properties']['_Size ' + shopify_size ] = shopify_sizes[shopify_size];
-                }
-              }
-
-              ecom_url = company_domain + '/cart/add.js?token='+x_rand
-              shopify_main_item_data['id'] = (cart_product as Record<any, any>).ecommerce_variant_id;
-
-              let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
-              if(ecommerce_update_id) {
-                let cart_item_index = product_edit_info_object.cart_product_info.shopify_line_item;
-                this.updateShopifyAddons(parseInt(cart_item_index)-1, ecom_addon_ids, total_quantity).then( (res : Record<any, any>) => {
-                  let {add_cart_addons} = res;
-                  add_cart_addons.push(shopify_main_item_data);
-                  this.makeShopifyCartCall(ecom_url,add_cart_addons, collection_view, delete_cart_item_url);
-                })
-
-              }else{
-
-                this.addShopifyAddons(ecom_addon_ids, total_quantity).then( (res : Record<any, any>) => {
-                 let {add_cart_addons} = res;
-                  add_cart_addons.push(shopify_main_item_data);
-                  this.makeShopifyCartCall(ecom_url, add_cart_addons, collection_view, delete_cart_item_url);
-                })
-
-              }
-
-            }
-            else {
               if(cart_edit_mode) {
                 await self.exitFromEditMode()
                 const categories_promise = this.fetchCategories();
@@ -1476,54 +1531,38 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                   let query_params = await self.setQueryParams()
                   self.retrieveProductsNew(query_params);
                 })
-
               }
+
               self.$store.dispatch('setCartLoading',false);
             }
 
-          }
-          else
-          {
-            if(res.data.status_code === 422){
-              self.showErrorValidation(res.data.errors);
+            self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
+            self.$store.dispatch('setCartLoading',false);
+            if(resolve){
+              resolve(true);
             }
+
+            if(collection_view){
+              self.$root.$emit('getNextProduct');
+            }
+          }).catch(async errorResponse => {
+            self.$store.dispatch('setCartLoading',false);
+            handleResponseException(errorResponse)
             if(cart_edit_mode) {
               await self.exitFromEditMode()
               const categories_promise = this.fetchCategories();
               categories_promise.then(async (cat_response) => {
                 let query_params = await self.setQueryParams()
                 self.retrieveProductsNew(query_params);
-              })
+                self.hideVModal('rostermodal');
+              });
+              if(resolve){
+                resolve(false);
+              }
             }
-
-            self.$store.dispatch('setCartLoading',false);
-          }
-
-          self.showToast(res.data.message, res.data.success ? "SUCCESS" : "ERROR")
-          self.$store.dispatch('setCartLoading',false);
-          if(resolve){
-            resolve(true);
-          }
-
-          if(collection_view){
-            self.$root.$emit('getNextProduct');
-          }
-        }).catch(async errorResponse => {
-          self.$store.dispatch('setCartLoading',false);
-          handleResponseException(errorResponse)
-          if(cart_edit_mode) {
-            await self.exitFromEditMode()
-            const categories_promise = this.fetchCategories();
-            categories_promise.then(async (cat_response) => {
-              let query_params = await self.setQueryParams()
-              self.retrieveProductsNew(query_params);
-              self.hideVModal('rostermodal');
-            });
-            if(resolve){
-              resolve(false);
-            }
-          }
+          })
         })
+
       }
 
   }

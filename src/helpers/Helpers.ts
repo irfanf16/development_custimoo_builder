@@ -33,12 +33,12 @@ const getRandom = (length = 5, type = 'number') => {
     max_number = parseInt(max_number);
     rand_string = Math.floor(max_number + (Math.random() * max_number));
   } else if (type === 'string') {
-    const chars = "abcdefghijklmnopqrstuvwxyz";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     for (let i = 0; i < length; i++) {
       rand_string += chars.charAt(Math.floor(Math.random() * chars.length))
     }
   } else {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (let i = 0; i < length; i++) {
       rand_string += chars.charAt(Math.floor(Math.random() * chars.length))
     }
@@ -627,7 +627,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         product_price_object:{ product_price, currency_code, currency_symbol, quantity },
         svg_groups: Store.getters.getSvgGroups,
         ecommerce_cart_id:null,
-        reorder_data
+        reorder_data,
+        is_custom_product: false
       }
      // if(product_price_object)
 
@@ -2342,7 +2343,6 @@ const updateOrder = async () => {
   let order_item_id = order_products_info_obj.order_product_info.item_id;
   let url = `order_item/${order_item_id}/update/products`;
   return http.post(url, {factory_products: order_existing_updated_data}).then(async (res: any) => {
-    console.log('then 111')
     await exitFromEditMode()
     if (res.data.success == true) {
       if (company && company.platform == 'wordpress') {
@@ -2357,7 +2357,6 @@ const downloadNodeCollectionPDF = (collection_id) => {
   return new Promise((resolve, reject) => {
   http.get('download-collection-pdf/'+collection_id)
     .then(response => {
-      console.log(response);
       if (response.data.error) {
         showError(response.data.message);
         reject(false);
@@ -2443,6 +2442,52 @@ const  startExportStatusChecker = () => {
   }, 30000); // Check after every 30 seconds
 }
 
+const getExtensionFromMimeType = (mimetype: string) => {
+  if(mimetype) {
+    const mimetypes_info = {
+      'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/svg+xml': 'svg', 'application/pdf': 'pdf',
+    };
+    return mimetypes_info[mimetype.toLowerCase()] || '';
+  } else {
+    return ''
+  }
+}
+
+const getBase64FileInfo = (base64_string: string, base_path: string='') => {
+  const mime_type_matched = base64_string.match(/^data:(.*);base64,/);
+  const response_obj = {
+    file_name: '', file_path: '', file_extension: '', file_content: base64_string, is_base64_string: true
+  }
+  if(mime_type_matched) {
+    const mimetype: string = mime_type_matched[1];
+    const file_extension = getExtensionFromMimeType(mimetype);
+    const date_time_formatted = getDateTimeFormatted()
+    const file_name =  `${date_time_formatted}.${file_extension}`
+    if(base_path) {
+      response_obj.file_path = `${base_path}/${file_name}`
+    }
+    response_obj.file_name = file_name;
+    response_obj.file_extension = file_extension;
+  }
+  return response_obj
+}
+
+const getDateTimeFormatted = () => {
+  const pad = (num, size) => num.toString().padStart(size, '0');
+  const date = new Date()
+
+  const day = pad(date.getDate(), 2);
+  const month = pad(date.getMonth() + 1, 2); // Months are zero-indexed
+  const year = date.getFullYear();
+  const hours = pad(date.getHours() % 12 || 12, 2); // 12-hour format
+  const minutes = pad(date.getMinutes(), 2);
+  const seconds = pad(date.getSeconds(), 2);
+  const milliseconds = pad(date.getMilliseconds(), 3); // Milliseconds
+  // Convert milliseconds to microseconds (approximation)
+  const microseconds = pad(milliseconds * 1000, 6);
+  return `${day}${month}${year}${hours}${minutes}${seconds}${microseconds}`
+}
+
 
 
 
@@ -2464,5 +2509,5 @@ export {
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
-  updateOrderProducts, selectedDesign,startExportStatusChecker
+  updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker
 };
