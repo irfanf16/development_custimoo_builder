@@ -2488,6 +2488,11 @@ const getDateTimeFormatted = () => {
   return `${day}${month}${year}${hours}${minutes}${seconds}${microseconds}`
 }
 
+const isEcommercePlatform = () => {
+  const company = Store.getters.getCompany
+  return ['shopify', 'wordpress'].includes(company?.platform)
+}
+
 
 
 
@@ -2509,5 +2514,5 @@ export {
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
-  updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker
+  updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform
 };
