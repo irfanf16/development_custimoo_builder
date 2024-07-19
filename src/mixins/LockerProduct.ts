@@ -258,6 +258,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     }
     if(response_products_obj.current_page == 1 && active_product_id != this.selectedProductId) {
       this.$store.commit('SET_START_LOAD_DESIGNS', false)
+      this.$store.commit('SET_START_LOAD_PRODUCTS', false)
     }
     let append_products: boolean =  response_products_obj.current_page > 1;
     this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", next_page_url ? current_page + 1 : null)
@@ -455,7 +456,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         }
         this.$store.commit('SET_APPLICATION_MOUNTED')
         this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', false)
-        self.$eventBus.$emit("sceneMountedAction")
         resolve(response_data)
       })
     })
@@ -920,6 +920,7 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
         (this.$parent!.$parent as Record<any, any>).isFront = true
       } else {
         this.$store.commit('SET_START_LOAD_DESIGNS', false)
+        this.$store.commit('SET_START_LOAD_PRODUCTS', false)
       }
 
       const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {

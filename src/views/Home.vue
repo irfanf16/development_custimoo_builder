@@ -374,54 +374,56 @@
                     <template v-if="selectedProduct.productstyles[styleIndex]" >
                       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
-                          <template v-if="selectedProduct.is_3d_product && selectedProduct.show_3d">
-                            <ThreeDScene :key="'main3dScene'+design.id"
-                                         :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url,
-                                            texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url,
-                                            design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
-                                         :measurement-ratio="selectedProduct.measurement_ratio"
-                                         :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
-                                         :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-                                         :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                         :colorGrouping="[]" :productType="selectedProduct.product_type"
-                                         :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"></ThreeDScene>
-                          </template>
-                          <div v-show="!selectedProduct.show_3d">
-                            <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
-                                   :front="{
-                                      textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                      safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                      boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                                      models: selectedProduct.productstyles[styleIndex].front_models
-                                   }"
-                                   :back="{
-                                      textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
-                                      safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
-                                      boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
-                                      models: selectedProduct.productstyles[styleIndex].back_models
-                                   }"
-                                   :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
-                                   :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-                                   :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                   :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
-                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
-                            />
+                          <template v-if="!initializingProductData">
+                            <template v-if="selectedProduct.is_3d_product && selectedProduct.show_3d">
+                              <ThreeDScene :key="'main3dScene'+design.id"
+                                           :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url,
+                                              texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url,
+                                              design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
+                                           :measurement-ratio="selectedProduct.measurement_ratio"
+                                           :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                           :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                                           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                           :colorGrouping="[]" :productType="selectedProduct.product_type"
+                                           :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"></ThreeDScene>
+                            </template>
+                            <div v-show="!selectedProduct.show_3d">
+                              <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
+                                     :front="{
+                                        textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                        safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                        boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                        models: selectedProduct.productstyles[styleIndex].front_models
+                                     }"
+                                     :back="{
+                                        textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
+                                        safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                        boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
+                                        models: selectedProduct.productstyles[styleIndex].back_models
+                                     }"
+                                     :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                     :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                                     :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                     :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                     :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
+                              />
 
-                            <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
-                                   :front="{
-                                      textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                      safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                      boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                                      models: selectedProduct.productstyles[styleIndex].front_models
-                                   }"
-                                   :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
-                                   :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                                   :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
-                                   :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                   :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
-                                   :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
-                            />
-                          </div>
+                              <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
+                                     :front="{
+                                        textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                        safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                        boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                        models: selectedProduct.productstyles[styleIndex].front_models
+                                     }"
+                                     :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                                     :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                                     :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
+                                     :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
+                                     :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
+                                     :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
+                              />
+                            </div>
+                          </template>
                         </div>
                       </template>
                     </template>
@@ -857,6 +859,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.frontPreview = getImageFromCanvas('front') as string
       this.backPreview = getImageFromCanvas('back') as string
     }
+  }
+
+  get initializingProductData() {
+    return this.$store.getters.getInitializingProductData
   }
 
   get mobileScreen(): boolean {

@@ -119,6 +119,7 @@ const ProductAttributes:Module<any, any> = {
     editLockerProduct: [],
     canvas_ready: false,
     start_load_designs: false,
+    start_load_products: false,
     notifications:[],
     customLogoObjects:[],
     cartItemId:'',
@@ -1056,6 +1057,9 @@ const ProductAttributes:Module<any, any> = {
     SET_START_LOAD_DESIGNS(state:Record<any, any>, payload: boolean){
       state.start_load_designs = payload
     },
+    SET_START_LOAD_PRODUCTS(state:Record<any, any>, payload: boolean){
+      state.start_load_products = payload
+    },
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.scene.$refs.front
       state.canvasImage.ref_back = payload.scene.$refs.back
@@ -1359,6 +1363,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getStartLoadDesigns: state => {
       return state.start_load_designs
+    },
+    getStartLoadProducts: state => {
+      return state.start_load_products
     },
     getCanvasImage: state => {
       return state.canvasImage

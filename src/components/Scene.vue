@@ -121,7 +121,6 @@ import hexRgb from "hex-rgb";
     self.$eventBus.$off("changeColors", this.changeColors)
     self.$eventBus.$off("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
     self.$eventBus.$off("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
-    self.$eventBus.$off("sceneMountedAction", this.sceneMountedAction)
     if (this.front_time) {
       clearTimeout(this.front_time)
     }
@@ -130,9 +129,6 @@ import hexRgb from "hex-rgb";
     }
   },
   async mounted() {
-    const self: Record<any, any> = this;
-    self.$eventBus.$off("sceneMountedAction", this.sceneMountedAction)
-    self.$eventBus.$on("sceneMountedAction", this.sceneMountedAction)
     this.sceneMountedAction()
   }
 })
@@ -871,6 +867,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
       if((this.mainPreview && !this.back) || this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', true)
+        this.$store.commit('SET_START_LOAD_PRODUCTS', true)
       }
     }, render_time);
   }
@@ -883,6 +880,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
       if(this.mainPreview || this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', true)
+        this.$store.commit('SET_START_LOAD_PRODUCTS', true)
       }
     }, render_time);
   }

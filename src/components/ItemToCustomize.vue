@@ -125,7 +125,7 @@
         </div>
       </template>
 
-      <SelectItemCarousel ref="itemsCarousel" :products_fonts="products_fonts" />
+      <SelectItemCarousel v-if="startLoadProducts" ref="itemsCarousel" :products_fonts="products_fonts" />
     </template>
 
     <h2 v-if="mobileScreen" class="fw-bold px-3 py-1 p-lg-0 mt-lg-5 mb-2 fz-18 available-design-heading d-flex align-items-center justify-content-between" @click="toggleDesigns">
@@ -294,9 +294,12 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     return this.$store.getters.getCategories
   }
 
-
   get startLoadDesigns(): boolean {
     return this.$store.getters.getStartLoadDesigns
+  }
+
+  get startLoadProducts(): boolean {
+    return this.$store.getters.getStartLoadProducts
   }
 
   get getProductSelectionDesignInfo(): Array<any> {
