@@ -865,10 +865,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getInitializingProductData
   }
 
-  get initializingProductData() {
-    return this.$store.getters.getInitializingProductData
-  }
-
   get mainTabIndex() {
     return this.$store.getters.getMainTab
   }
