@@ -256,6 +256,10 @@ const ProductAttributes:Module<any, any> = {
       } else {
         state.products = payload.products;
       }
+      if('active_product_index' in payload) {
+        state.selectedIndex = payload.active_product_index;
+        state.selectedPrdId = state.products[payload.active_product_index].id;
+      }
     },
     SET_STOCK_COUNT(state:Record<any,any>, payload:number){
       state.stock_count = payload;

@@ -865,8 +865,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getInitializingProductData
   }
 
-  get mobileScreen(): boolean {
-      return this.$store.getters.getManageComponents.mobileScreen
+  get initializingProductData() {
+    return this.$store.getters.getInitializingProductData
   }
 
   get mainTabIndex() {
@@ -957,7 +957,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private showLockerRoomModal(open_locker_tab = 1) {
     this.showVModal('locker-modal');
     setTimeout(()=>{
-      console.log('locker', this.ref['lockerModal'].$refs['lockerRoom'].main_locker_tabs = open_locker_tab)
+      this.ref['lockerModal'].$refs['lockerRoom'].main_locker_tabs = open_locker_tab
     }, 500)
   }
 
@@ -1777,15 +1777,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public toggleFullScreen() {
     const doc = getDomDocument(true);
-    console.log('doc', doc)
     let root_elem:Record<any, any> = {};
     if(doc){
       const customizer_elem = doc.querySelector('v-customizer');
-      console.log('customizer_elem', customizer_elem)
-
       if(customizer_elem){
         root_elem = this.findTopParentExceptBody(customizer_elem);
-        console.log('root_elem', root_elem)
       }
     }
 
@@ -1795,7 +1791,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.showToast('Fullscreen mode', 'SUCCESS');
 
       if(root_elem){
-        console.log('root_elem 2', root_elem)
         root_elem.style.position = 'relative';
         root_elem.style.background = 'white';
         root_elem.style.zIndex = '999999';

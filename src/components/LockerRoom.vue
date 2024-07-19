@@ -535,7 +535,6 @@ import CollectionPDF from "@/components/CollectionPDF.vue";
 export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin, CollectionMixin) {
   @Prop({required: true}) opacityset:boolean
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  public mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
   public colors: [] = []

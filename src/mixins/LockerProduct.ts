@@ -226,6 +226,10 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     return this.$store.getters.getSelectedProductId
   }
 
+  get mobileScreen(): boolean {
+    return this.$store.getters.getManageComponents.mobileScreen
+  }
+
   public async handleMainProducts(response: Record<any, any>){
     let self: Record<any, any> = this;
     let product_edit_info_object = self.$store.getters.getProductEditInfoObject
@@ -256,10 +260,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         return false;
       }
     }
-    if(response_products_obj.current_page == 1 && active_product_id != this.selectedProductId) {
-      this.$store.commit('SET_START_LOAD_DESIGNS', false)
-      this.$store.commit('SET_START_LOAD_PRODUCTS', false)
-    }
+
     let append_products: boolean =  response_products_obj.current_page > 1;
     this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", next_page_url ? current_page + 1 : null)
 
@@ -273,15 +274,19 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           this.$store.commit('SET_APPLICATION_MOUNTED')
           return false;
         } else {
+          if(!this.mobileScreen && response_products_obj.current_page == 1 && active_product_id != this.selectedProductId) {
+            this.$store.commit('SET_START_LOAD_DESIGNS', false)
+            this.$store.commit('SET_START_LOAD_PRODUCTS', false)
+          }
           this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
         }
         let active_product: Record<any, any> = retrieved_products[active_product_index]
         let product_custom_texts: Record<any, any>[] = active_product.product_custom_texts;
 
-        this.$store.commit('SET_PRODUCTS', {products: retrieved_products});
+        this.$store.commit('SET_PRODUCTS', {products: retrieved_products, active_product_index: active_product_index});
         this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
         await this.$store.dispatch("getSkuInformation", active_product_id);
-        await this.$store.dispatch('setSelectedIndex', {selectedIndex: active_product_index, selected_id: active_product_id});
+        //await this.$store.dispatch('setSelectedIndex', {selectedIndex: active_product_index, selected_id: active_product_id});
         let fixed_logo_index = active_product.productstyles[this.styleIndex].logo.findIndex(logo => logo.is_default === 1);
         let last_active_prod_data = this.$store.getters.getLastActiveProductData;
         if(active_product_detail) {

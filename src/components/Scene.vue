@@ -127,6 +127,9 @@ import hexRgb from "hex-rgb";
     if (this.back_time) {
       clearTimeout(this.back_time)
     }
+    if (this.mounted_time) {
+      clearTimeout(this.mounted_time)
+    }
   },
   async mounted() {
     this.sceneMountedAction()
@@ -216,6 +219,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private storage_url = process.env.VUE_APP_STORAGE_URL
   private front_time
   private back_time
+  private mounted_time
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -321,6 +325,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public sceneMountedAction() {
     if(!this.initializingProductData && !this.mounted) {
+      if (this.mounted_time) {
+        clearTimeout(this.mounted_time)
+      }
       const self: Record<any, any> = this;
       if (this.back) {
         this.dimTextBack = new fabric.Text('', {
@@ -455,6 +462,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           hideLockerProductUpdateButton(false)
         }
       })
+    } else if(!this.mounted) {
+      this.mounted_time = setTimeout(() => {
+        this.sceneMountedAction()
+      }, 500)
     }
   }
 
