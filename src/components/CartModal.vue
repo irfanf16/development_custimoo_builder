@@ -298,7 +298,7 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin'
         return false
       }
 
-      return this.get_quote.enable;
+      return (this.get_quote && this.get_quote.enable) ? this.get_quote.enable : false;
     }
   },
   async mounted() {

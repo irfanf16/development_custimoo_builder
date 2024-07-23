@@ -81,7 +81,10 @@ import {filter} from "lodash";
   },
   computed:{
     show_cart_button : function () {
-      if(!this.get_quote.enable) {
+      if(!this.get_quote) {
+        return true;
+      }
+      else if(!this.get_quote.enable) {
         return true;
       }else {
         return (this.get_quote.cart_with_quote) ? true : false;
@@ -92,7 +95,7 @@ import {filter} from "lodash";
         return false
       }
 
-      return this.get_quote.enable;
+      return (this.get_quote && this.get_quote.enable) ? this.get_quote.enable : false;
     }
   }
 

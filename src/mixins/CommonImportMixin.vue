@@ -173,6 +173,19 @@ export default class CommonImportMixin extends Vue{
     * Initialize store state default values starts
     * */
 
+    await http.get(`/get-settings`).then((res) => {
+      const response_data = res.data;
+      const { settings: company_settings,  factory_settings } = response_data.result
+      this.$store.commit('SET_SETTING', company_settings)
+      this.$store.commit('SET_FACTORY_SETTING', factory_settings)
+      if(company_settings && company_settings.currencies) {
+        const company_currency_obj = company_settings.currencies
+        this.$store.commit('SET_PRODUCT_PRICE_OBJECT', {
+          show_price: company_currency_obj.visible,  active_currency: company_currency_obj.currencies[0]
+        })
+      }
+    });
+
     const product_price_obj = this.$store.getters.getProductPriceObject
     if(checkIsEmpty(product_price_obj)) {
       this.$store.commit('SET_PRODUCT_PRICE_OBJECT', getProductPriceDefaultObject())
@@ -277,18 +290,7 @@ export default class CommonImportMixin extends Vue{
       i18n.setLocaleMessage(current_locale, this.company.translations[current_locale]);
     }
 
-    await http.get(`/get-settings`).then((res) => {
-      const response_data = res.data;
-      const { settings: company_settings,  factory_settings } = response_data.result
-      this.$store.commit('SET_SETTING', company_settings)
-      this.$store.commit('SET_FACTORY_SETTING', factory_settings)
-      if(company_settings && company_settings.currencies) {
-        const company_currency_obj = company_settings.currencies
-        this.$store.commit('SET_PRODUCT_PRICE_OBJECT', {
-          show_price: company_currency_obj.visible,  active_currency: company_currency_obj.currencies[0]
-        })
-      }
-    });
+
 
 
   }
