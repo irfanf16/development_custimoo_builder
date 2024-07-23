@@ -2165,7 +2165,7 @@ const downloadTemplate = async (prod_id:any, product_name) => {
     responseType: 'blob',
   }).then((res) => {
     const blob = new Blob([res.data],{type:res.headers['content-type']})
-    const custom_document = getDomDocument();
+    const custom_document = getDomDocument(true);
     const link = custom_document.createElement('a')
     link.href = window.URL.createObjectURL(blob)
     link.download = 'product_'+ product_name +'_template.xlsx';
