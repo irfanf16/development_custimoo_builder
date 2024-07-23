@@ -2160,6 +2160,19 @@ const isGetCategories = async () => {
   return get_categories;
 }
 
+const downloadTemplate = async (prod_id:any, product_name) => {
+  await http.get(`template/download/${prod_id}`,{
+    responseType: 'blob',
+  }).then((res) => {
+    const blob = new Blob([res.data],{type:res.headers['content-type']})
+    const custom_document = getDomDocument();
+    const link = custom_document.createElement('a')
+    link.href = window.URL.createObjectURL(blob)
+    link.download = 'product_'+ product_name +'_template.xlsx';
+    link.click();
+  })
+}
+
 const isFilePreviewable = (file_name: string) => {
   const extension = getExtensionFromString(file_name)
   return ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg'].includes(extension);
@@ -2514,5 +2527,5 @@ export {
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
-  updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform
+  updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate
 };

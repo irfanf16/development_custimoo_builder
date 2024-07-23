@@ -151,7 +151,7 @@
               <div class="px-2 d-flex gap-1 flex-column flex-lg-row align-items-center justify-content-between">
                 <div> Add order details from excel file:</div>
                 <div class="d-flex flex-column flex-md-row gap-2 mt-1">
-                  <button @click="downloadTemplate(product.id)" style="max-height: 58px;" class="btn btn-secondary btn-sm"
+                  <button @click="downloadTemplate(product.id, product.name)" style="max-height: 58px;" class="btn btn-secondary btn-sm"
                           v-b-tooltip="'Download the sample file of microsoft excel to fill the data to upload it later'">
                     <b-icon-download/>
                     <br>
@@ -488,7 +488,7 @@ import {http} from "@/httpCommon";
 import {
   createOrUpdateOrderUpdateDataState, getCustomLockers, getCustomProductData, getEditModeDefaultObj,
   getExtensionFromString, getOrderUpdateIdentifier, handleProductPriceUpdate, handleResponseException,
-  isFilePreviewable, santaClone
+  isFilePreviewable, santaClone, downloadTemplate
 } from "@/helpers/Helpers";
 import {find, findIndex} from "lodash"
 import {cartModalData} from "@/mixins/LockerProduct";
@@ -608,6 +608,7 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
   }
 
   public isFilePreviewable = isFilePreviewable
+  public downloadTemplate = downloadTemplate
 
   public addPlayer() {
     let product_last_roster = {
@@ -695,18 +696,6 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
 
   public async handleAddonSelectionUpdate() {
     this.product.price_info = {...this.product.price_info, ...await handleProductPriceUpdate(false, this.product, this.product.sku)}
-  }
-
-  public async downloadTemplate(product_id:any){
-    await http.get(`template/download/${product_id}`,{
-      responseType: 'blob',
-    }).then((res) => {
-      const blob = new Blob([res.data],{type:res.headers['content-type']})
-      const link = document.createElement('a')
-      link.href = window.URL.createObjectURL(blob)
-      link.download = 'product_'+ this.product.name +'_template.xlsx';
-      link.click();
-    })
   }
 
   public handleProductAssetsUpload(event: Event) {

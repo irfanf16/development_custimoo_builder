@@ -7,7 +7,7 @@
       </div>
 
       <div class="d-flex gap-2 mt-1">
-        <button @click="downloadTemplate(selectedProduct.id)" class="btn btn-secondary btn-sm"
+        <button @click="downloadTemplate(selectedProduct.id, selectedProduct.display_name)" class="btn btn-secondary btn-sm"
                 v-b-tooltip="'Download the sample file of microsoft excel to fill the data to upload it later'">
           <b-icon-download /><br>
           Download roster excel template
@@ -209,7 +209,7 @@ import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 import RosterTabMixin from "@/mixins/RosterTabMixin";
-import {handleProductPriceUpdate} from "@/helpers/Helpers";
+import {handleProductPriceUpdate, downloadTemplate} from "@/helpers/Helpers";
 import AddToCartButton from "@/components/AddToCartButton.vue";
 
 
@@ -373,6 +373,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
   * component methods starts
   * */
 
+  public downloadTemplate = downloadTemplate;
   public addRosterItemOnTab($event:Record<any, any>) {
     (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem(this.productSizes);
   }

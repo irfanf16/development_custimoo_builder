@@ -122,7 +122,7 @@ import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {getRosterDetailDefaultObject, getSelectedProductPantones, getDomDocument} from "@/helpers/Helpers";
+import {getRosterDetailDefaultObject, getSelectedProductPantones, getDomDocument, downloadTemplate} from "@/helpers/Helpers";
 import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationTabsMixin from '../mixins/CustomizationTabsMixin'
@@ -263,6 +263,7 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
     return sizes;
   }
 
+  public downloadTemplate = downloadTemplate;
   public changeProduct(designsIndex: number) {
     this.designsIndex = designsIndex
   }

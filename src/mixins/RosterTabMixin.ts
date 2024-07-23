@@ -111,18 +111,6 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     }
   }
 
-  public async downloadTemplate(prod_id:any){
-    await http.get(`template/download/${prod_id}`,{
-      responseType: 'blob',
-    }).then((res) => {
-      const blob = new Blob([res.data],{type:res.headers['content-type']})
-      const link = document.createElement('a')
-      link.href = window.URL.createObjectURL(blob)
-      link.download = 'product_'+ this.selectedProduct.display_name +'_template.xlsx';
-      link.click();
-    })
-  }
-
   public getOccurence(val: string) {
     const count = (val.match(/\*/g) || []).length;
     return count
