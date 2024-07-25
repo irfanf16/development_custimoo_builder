@@ -407,7 +407,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         }
       });
       item.total_product_count = total_products_count;
-      this.total_product_count = total_products_count;
+      this.total_product_count += total_products_count;
     });
 
     return cItems;
