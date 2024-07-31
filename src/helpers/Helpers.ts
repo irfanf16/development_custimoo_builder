@@ -2474,7 +2474,7 @@ const getBase64FileInfo = (base64_string: string, base_path: string='') => {
   if(mime_type_matched) {
     const mimetype: string = mime_type_matched[1];
     const file_extension = getExtensionFromMimeType(mimetype);
-    const date_time_formatted = getDateTimeFormatted()
+    const date_time_formatted = getRandom(5)+'_'+getDateTimeFormatted()
     const file_name =  `${date_time_formatted}.${file_extension}`
     if(base_path) {
       response_obj.file_path = `${base_path}/${file_name}`
