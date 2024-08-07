@@ -408,7 +408,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
           roster_size = this.productSizes[0].text
         }
       }
-      return Object.assign(roster_item, {code: roster_size, size_index: size_index})
+      return Object.assign(roster_item, {code: roster_size, size: roster_size, size_index: size_index})
     })
     this.product_locker_roster = roster_items;
   }

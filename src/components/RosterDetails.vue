@@ -444,7 +444,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
         size_index = 0
         roster_size = this.productSizes[0].text
       }
-      return Object.assign(roster_item, {code: roster_size, size_index: size_index})
+      return Object.assign(roster_item, {code: roster_size, size: roster_size, size_index: size_index})
     })
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
     let first_roster_item = roster_items[0]
