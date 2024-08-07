@@ -218,9 +218,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   public async changeColors() {
     if(this.mounted) {
-      await this.changeDefaultColors()
-      await this.changeGroupColors()
+      await this.callChangeColors()
     }
+  }
+
+  public async callChangeColors() {
+    await this.changeDefaultColors()
+    await this.changeGroupColors()
   }
 
   public async changeGroupColors() {
@@ -229,6 +233,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
         let groupColors = this.groupColors
         let design = this.design._objects ? this.design._objects : [this.design]
+        this.logos.forEach((logo, index) => {
+          if(logo.is_customizable) {
+            if(groupColors[`${logo.placement_title} logo`]) {
+              this.changeFixedLogoColor(index, groupColors[`${logo.placement_title} logo`].color)
+            }
+          }
+        })
         design.forEach((item: Record<any, any>) => {
           if(item.id) {
             item.id = item.id.toLowerCase()
@@ -283,6 +294,39 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         this.unHideColorGrouping()
       }
     }
+  }
+
+  public changeFixedLogoColor(logo_index: number, color: string, default_colors: Record<any, any> = {}) {
+    this.fixed_logo_objects.forEach((fixed_logo_object) => {
+      if(fixed_logo_object.fixed_logo_index == logo_index){
+        fixed_logo_object.getObjects().forEach((item) => {
+          if (['path', 'rect', 'circle', 'polygon', 'polyline', 'line', 'ellipse', 'text'].includes(item.type as string)) {
+            item.set({ fill: color });
+          }
+        })
+
+        this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
+          if (svgGroup.id == `${this.logos[logo_index].placement_title} logo`) {
+            let final_color;
+            if(Object.entries(default_colors).length) {
+              final_color = this.getDefaultColorBySvgGroup(`${this.logos[logo_index].placement_title} logo`, default_colors)
+            } else {
+              final_color = this.getGroupColorBySvgGroup(`${this.logos[logo_index].placement_title} logo` as string, null)
+            }
+            svgGroup.color = final_color.color
+            svgGroup.name = final_color.name
+            svgGroup.pantone = final_color.pantone
+
+            if (this.mainPreview) {
+              this.$store.dispatch('updateSvgGroups', {
+                index: svgIndex,
+                ...svgGroup
+              })
+            }
+          }
+        })
+      }
+    })
   }
 
   public getGroupColorBySvgGroup(svg_group: string, gradient_color_index: number|null = null) {
@@ -367,6 +411,19 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             }
           }
         })
+
+        this.logos.forEach((logo, index) => {
+          if(logo.is_customizable) {
+            if (appliedDefaultColors[`${logo.placement_title} logo`]) {
+              useColorIndex++
+              if (useColorIndex >= defaultColors.length) {
+                useColorIndex = 0
+              }
+              this.changeFixedLogoColor(index, appliedDefaultColors[`${logo.placement_title} logo`], defaultColors[useColorIndex])
+            }
+          }
+        })
+
         this.canvas.requestRenderAll()
         this.unHideColorGrouping()
       }
@@ -414,6 +471,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         }
       }
     })
+
+    this.resetAndAddFixedLogos()
     this.canvas.requestRenderAll()
   }
 
@@ -516,9 +575,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
     this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
 
-    await this.changeDefaultColors()
-
-    await this.changeGroupColors()
+    if(!this.logos.length) {
+      this.callChangeColors()
+    }
 
     this.showLoader = false
   }
@@ -830,38 +889,75 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.renderScene()
   }
 
-  public addSvgLogos(logo: Record<any, any>) {
-    let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
-    fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
-      options.crossOrigin = 'Anonymous'
-      const img = fabric.util.groupSVGElements(objects) as fabric.Group
-      img.scaleToHeight(logo.height as number / this.canvasHeightRatio)
-      const threeDXPosition = this.canvasWidthRatio * logo.x_axis
-      const threeDYPosition = this.canvasHeightRatio * logo.y_axis
-      const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, logo.side)
-      fabricJSPointPromis.then((fabricJSPoint) => {
-        img.set({
-          left: fabricJSPoint.x,
-          top: fabricJSPoint.y,
-          angle: logo.rotation < 0 ? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation) as number,
-          hasControls: false,
-          selectable: false,
-          evented: false,
-          lockMovementX: true,
-          lockMovementY: true,
-          globalCompositeOperation: 'source-atop',
-          originX: 'center',
-          originY: 'center',
-        })
+  public addSvgLogos(logo: Record<any, any>, index: number): Promise<boolean> {
+    return new Promise((resolve) => {
+      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
+      fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
+        options.crossOrigin = 'Anonymous'
+        const img = fabric.util.groupSVGElements(objects) as fabric.Group
+        img.scaleToHeight(logo.height as number / this.canvasHeightRatio)
+        const threeDXPosition = this.canvasWidthRatio * logo.x_axis
+        const threeDYPosition = this.canvasHeightRatio * logo.y_axis
+        const fabricJSPointPromis = this.findIntersectionAndMapToFabricJS(threeDXPosition, threeDYPosition, logo.side)
+        fabricJSPointPromis.then((fabricJSPoint) => {
+          img.set({
+            left: fabricJSPoint.x,
+            top: fabricJSPoint.y,
+            angle: logo.rotation < 0 ? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation) as number,
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true,
+            globalCompositeOperation: 'source-atop',
+            originX: 'center',
+            originY: 'center',
+          })
 
-        this.canvas.add(img)
-        Object.assign(img, {
-          fixed_logo_index: logo.fixed_logo_index,
-          side: logo.side,
-          type: 'fixed_logo'
+          if (logo.is_customizable) {
+            const id = logo.placement_title + ' logo'
+            if (!this.containsObject({id: id})) {
+              let fill_color = ''
+              img.getObjects().forEach((item: any) => {
+                if (['path', 'rect', 'circle', 'polygon', 'polyline', 'line', 'ellipse', 'text'].includes(item.type) && item.fill) {
+                  if (item.fill.includes('rgb')) {
+                    item.fill = rgbHex(item.fill as string).includes('#') ? rgbHex(item.fill as string) : '#' + rgbHex(item.fill as string)
+                  }
+                  if (!fill_color) { // get the first fill color from fixed logo
+                    fill_color = item.fill
+                    const selectProductPantonesList = getSelectedProductPantones(this.product_id)
+                    const pantoneColor = getClosestColor(item.fill as string, selectProductPantonesList, getColorType('', this.product_id))
+
+                    this.svgGroups.push({
+                      id: id,
+                      color: item.fill,
+                      count: 0,
+                      pantone: pantoneColor.pantone,
+                      name: pantoneColor.name,
+                      logo_index: index
+                    })
+                    this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
+
+                    if(this.mainPreview) {
+                      this.$store.dispatch('setSvgGroups', this.svgGroups)
+                    }
+                    this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
+                  }
+                }
+              })
+            }
+          }
+
+          this.canvas.add(img)
+          Object.assign(img, {
+            fixed_logo_index: logo.fixed_logo_index,
+            side: logo.side,
+            type: 'fixed_logo'
+          })
+          this.fixed_logo_objects.push(img)
+          this.canvas.requestRenderAll()
+          resolve(true)
         })
-        this.fixed_logo_objects.push(img)
-        this.canvas.requestRenderAll()
       })
     })
   }
@@ -875,13 +971,20 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   public addFixedLogos() {
     if (this.logos.length) {
+      let promises: Promise<boolean>[] = []
       this.logos.forEach((logo: Record<any, any>, index: number) => {
         const is_fixed_logos_all =  this.selectedProduct.productstyles[this.styleIndex].is_fixed_logos_all
         if(is_fixed_logos_all || (is_fixed_logos_all == false && logo.is_default))
           if (logo && logo.url) {
             logo.fixed_logo_index = index
-            this.addSvgLogos(logo)
+            promises.push(this.addSvgLogos(logo, index))
           }
+      })
+
+      Promise.all(promises).then(() => {
+        if(this.groupColors.length || this.defaultColors.length) {
+          this.callChangeColors()
+        }
       })
     }
   }
