@@ -195,9 +195,7 @@
 
                   <div class="ml-auto mr-auto w-100 fs-3 font-weight-bolder text-center position-absolute main-home-price" style="left: 0; right: 0; top: 15px;"
                        v-if="productPriceObject.show_price && productPriceObject.product_price">
-                    {{ PriceLabel }}
-                    <span v-if="productPriceObject.active_currency && productPriceObject.active_currency.ecommerce_min_price"> - From : </span>
-                    {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
+                    {{ PriceLabel }} {{ productPriceObject.product_price + " " + productPriceObject.currency_code }}
                   </div>
 
                   <div v-if="selectedProduct.is_3d_product" class="ml-auto">
@@ -367,7 +365,7 @@
             <div class="customization-area" :class="{'mobile-custom-scroll': (hideTab.logoHide || hideTab.colorHide || hideTab.textHide || hideTab.styleHide || hideTab.teamHide) }">
               <div v-if="mobileScreen && productPriceObject.show_price && productPriceObject.product_price"
                    class="w-100 fs-1 font-weight-bolder text-center main-home-price">
-                MSRP: <span v-if="productPriceObject.active_currency && productPriceObject.active_currency.ecommerce_min_price"> - From : </span> {{productPriceObject.product_price + " " + productPriceObject.currency_code}}
+                MSRP: {{productPriceObject.product_price + " " + productPriceObject.currency_code}}
               </div>
 
               <div v-bind:class="{active: isActive}">
