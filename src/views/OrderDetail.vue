@@ -1026,7 +1026,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.$modal.show('order-detail');
   }
   evaluateRole(activity_comment){
-      if(Object.prototype.hasOwnProperty.call(activity_comment, "user")){
+      if(Object.prototype.hasOwnProperty.call(activity_comment, "user") && activity_comment.user){
           if(Object.prototype.hasOwnProperty.call(activity_comment.user, "userroles")){
             if(activity_comment.user.userroles.length > 0){
               switch(activity_comment.user.userroles[0].name.toLowerCase()){
