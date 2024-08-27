@@ -5,6 +5,7 @@
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('create-modal')"><BIconX /></span>
       </div>
       <div class="p-4 design-name-form">
+        <div class="loader global" v-if="showLoader"><img src="@assets/images/loading.gif" alt="loading...."/></div>
           <b-form inline @submit.prevent="createLocker">
               <label for="inline-form-input-productname" class="w-100 text-left d-block mb-2">Name</label>
               <div class="w-100 d-flex gap-2 flex-wrap align-items-center">
@@ -32,20 +33,24 @@ import ModalAction from "@/mixins/ModalAction";
     export default class CreateLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
       public name = ''
       public ref = this.$refs as Record<any, any>
+      public showLoader = false;
 
       public async createLocker(){
         if(this.name == ''){
           this.showError('please input locker name')
           return false
         }
+        this.showLoader = true;
         let res = await this.$store.dispatch('createLocker', this.name);
         if (res.status == 201){
           this.name = ''
           await this.$store.dispatch('GET_LOCKER_PRODUCTS');
+          this.showLoader = false;
           this.hideVModal('create-modal')
           this.$emit('lockerAdded')
-       }else if (res.status == 422){
-         this.showError(res.message)
+        }else if (res.status == 422){
+          this.showLoader = false;
+          this.showError(res.message)
        }
       }
     }
