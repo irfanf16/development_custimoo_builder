@@ -168,7 +168,6 @@ optgroup,
 select,
 textarea {
     font-family: inherit; /* 1 */
-    font-size: 100%; /* 1 */
     line-height: 1.15; /* 1 */
     margin: 0; /* 2 */
 }
@@ -472,6 +471,7 @@ img{
     border: 1px solid #999;
     text-align: left;
     margin-top: 0.1in;
+    font-size: 14px;
 }
 .pdf_page .pdf_description,
 .pdf_page .pdf_price,
