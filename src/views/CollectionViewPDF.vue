@@ -32,14 +32,15 @@
             <tbody>
             <tr>
               <td v-for="(collection_product, idxs) in products_chunks" :key="idxs">
-                <template v-if="collection_product.allow_title && collection_product.product_locker_room && collection_product.product_locker_room.model_description">
-                  <div style="font-weight: 600; font-size: larger; word-wrap: break-word" v-html="collection_product.product_locker_room.model_description.model_name">
+                <template v-if="collection_product.allow_title && collection_product.product_locker_room && collection_product.product_locker_room.product.sku">
+                  <div style="word-wrap: break-word" v-html="collection_product.product_locker_room.product.sku.sku_id">
                   </div>
                 </template>
-
-                <div style="word-wrap: break-word">
-                  {{collection_product.product_nickname ? collection_product.product_nickname : '' }}
-                </div>
+                <template v-else>
+                  <div style="word-wrap: break-word">
+                    {{collection_product.product_nickname ? collection_product.product_nickname : '' }}
+                  </div>
+                </template>
                 <div>
                   <table class="images-holder">
                     <tbody>
@@ -60,18 +61,20 @@
                     </tbody>
                   </table>
                 </div>
-                <template v-if="collection_product.product_locker_room && collection_product.product_locker_room.model_description">
-                  <div class="pdf_description" v-if="collection_product.allow_description && (collection_product.product_locker_room.model_description.product_model_description
-                         || collection_product.product_locker_room.model_description.product_model_description != '')">
-                    <strong>Product Info: </strong>
-                    <template v-if="collection_product.product_locker_room.model_description.product_model_description">
-                      <span v-html="collection_product.product_locker_room.model_description.product_model_description"></span>
+                <template v-if="collection_product.product_locker_room && collection_product.product_locker_room.product.sku.description">
+                  <div class="pdf_description" v-if="collection_product.allow_description && (collection_product.product_locker_room.product.sku.description
+                         || collection_product.product_locker_room.product.sku.description != '')">
+                    <strong>Description: </strong>
+                    <template>
+                      <span v-html="collection_product.product_locker_room.product.sku.description"></span>
                     </template>
                   </div>
                 </template>
-                <div v-if="collection_product.product_note != ''" class="pdf_description"><strong>Description: </strong>
-                  {{ collection_product.product_note }}
-                </div>
+                <template v-else>
+                  <div v-if="collection_product.product_note != ''" class="pdf_description"><strong>Description: </strong>
+                    {{ collection_product.product_note }}
+                  </div>
+                </template>
                 <div class="pdf_price" v-if="collection_product.allow_price && collection_product.product_price"><strong>Price: </strong>
                   {{collection_product.product_price}}
                 </div>

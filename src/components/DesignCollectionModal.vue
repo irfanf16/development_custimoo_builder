@@ -318,8 +318,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   get collectionItems(){
     let items = this.$store.getters.getCollectionItems
     let collections = this.$store.getters.getCollectionItems.collection_products.map((item: Record<any, any>) => {
-        item.allow_title = false;
-        item.allow_description = false;
         return item
       })
     items.collection_products = collections
