@@ -2061,7 +2061,7 @@ const getProductById = async (product_id: number, products: Record<any, any>[]) 
 const getProductPriceDefaultObject = (update_values={}) => {
   return { ...{
     show_price: false, product_price: 0, product_price_with_quantity: 0, addons_price:0, addons_price_with_quantity:0,
-      total_price:0 , total_quantity: 0, currency_code: null, active_currency: null
+      total_price:0 , total_quantity: 0, currency_code: null, active_currency: null, is_multi_prices: false, product_multi_prices : {}
     }, ...update_values }
 }
 
@@ -2094,13 +2094,40 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
           }
         }
       })
-      const product_price_with_quantity = product_price * roster_quantity_total;
+      let product_price_with_quantity = product_price * roster_quantity_total;
       const addons_price_with_quantity =  addons_price * roster_quantity_total;
+
+
+      let is_multi_prices = false;
+      const product_multi_prices : Record<any, any> = {};
+      if(isEcommercePlatform()) {
+        const ecommerce_product = selected_product.ecommerceproduct[0];
+        if(ecommerce_product.size_variants) {
+          is_multi_prices = true;
+          const size_variants = ecommerce_product.size_variants;
+          product_price_with_quantity = 0;
+          product_roster.forEach(roster_item => {
+            const roster_price = parseFloat(size_variants[roster_item.size].price);
+            const qty =  parseInt(roster_item.quantity);
+            if(product_multi_prices[roster_item.size]) {
+              const updated_qty =  product_multi_prices[roster_item.size].quantity + qty;
+              product_multi_prices[roster_item.size] = { quantity : updated_qty, price : roster_price, sub_price : updated_qty * roster_price }
+            }else {
+              product_multi_prices[roster_item.size] = { quantity : qty, price : roster_price, sub_price : qty * roster_price }
+            }
+
+            product_price_with_quantity += qty * roster_price
+
+          })
+
+        }
+      }
+
       const total_price = product_price_with_quantity + addons_price_with_quantity;
       product_price_object = {
         product_price: product_price, product_price_with_quantity: product_price_with_quantity, addons_price: addons_price,
         addons_price_with_quantity: addons_price_with_quantity, total_price: total_price, total_quantity: roster_quantity_total,
-        currency_code: product_sku.prices[0].code, active_currency: product_sku.prices[0], show_price: true
+        currency_code: product_sku.prices[0].code, active_currency: product_sku.prices[0], show_price: true, is_multi_prices, product_multi_prices
       }
     } else {
       product_price_object = getProductPriceDefaultObject();

@@ -1,6 +1,6 @@
 import { Component, Mixins } from 'vue-property-decorator'
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
-import {handleProductPriceUpdate} from "@/helpers/Helpers";
+import {handleProductPriceUpdate, isEcommercePlatform} from "@/helpers/Helpers";
 import readXlsxFile from "read-excel-file";
 import ModalAction from "@/mixins/ModalAction";
 import {http} from "@/httpCommon";
@@ -99,7 +99,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
       roster_data['code'] = selected_size.value
     }
     self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
-    if(type == "quantity") {
+    if(type == "quantity" || (type == 'size' && isEcommercePlatform() && this.selectedProduct.ecommerceproduct[0].size_variants)) {
       await handleProductPriceUpdate()
     }
     //The custom text first item of type name and numbers are synced with the first row (name and number) of the roster.

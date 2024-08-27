@@ -28,8 +28,20 @@
             <div class="order-row total" v-if="productPriceObject.product_price > 0">
               <div class="total">Product Price</div>
               <div class="total-qty">
-                {{ productPriceObject.product_price }} X {{ productPriceObject.total_quantity }} =
-                {{ Number(productPriceObject.product_price_with_quantity).toFixed(2) }}{{ productPriceObject.active_currency.symbol }}
+                <template v-if="productPriceObject.is_multi_prices">
+                  <div>
+                    <div v-for="(item, index) in productPriceObject.product_multi_prices" :key="index">
+                      {{ item.price }} X {{ item.quantity }} =
+                      {{ Number(item.sub_price).toFixed(2) }}{{ productPriceObject.active_currency.symbol }}
+                    </div>
+                    <span> Sub Total = {{ Number(productPriceObject.product_price_with_quantity).toFixed(2) }}{{ productPriceObject.active_currency.symbol }}</span>
+                  </div>
+                </template>
+                <template v-else>
+                  {{ productPriceObject.product_price }} X {{ productPriceObject.total_quantity }} =
+                  {{ Number(productPriceObject.product_price_with_quantity).toFixed(2) }}{{ productPriceObject.active_currency.symbol }}
+                </template>
+
               </div>
             </div>
             <template v-if="productPriceObject.addons_price">
