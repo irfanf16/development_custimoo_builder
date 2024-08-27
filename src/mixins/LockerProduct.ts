@@ -1097,6 +1097,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         return true;
       }
     }
+    if (roster.some(el => (el.quantity === '' || parseInt(el.quantity) === 0))) {
+      this.showToast('Quantity cannot be 0 or empty', 'error');
+      return false;
+    }
     if (roster.some(el => (parseInt(el.quantity) > 0 &&  (el.size=="" || el.size == null || parseInt(el.size_index) < 0)  ))) {
       this.showToast(`Please provide size for all roster items`, "error");
       const is_mobile_screen = this.$store.getters.getMobileScreen
