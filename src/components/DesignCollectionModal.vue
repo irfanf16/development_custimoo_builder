@@ -471,7 +471,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
       this.adding_more_product = true
       this.$store.commit('SET_SELECTION_MODE',{
         readonly:true,
-        colleceventProductModetionAddmoreMode:true,
+        collectionAddmoreMode:true,
         eventProductMode:false,
         eventCollectionMode:false
       })
