@@ -313,17 +313,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           }
 
           if(product_edit_info_object.type == "order_product") {
-            // let order_product_info_data = getEditModeDefaultObj('order_product_info')
-            // order_product_info_data.activity_items = active_product_detail.activity_items
-            // order_product_info_data.factory_id = active_product_detail.factory_id
-            // order_product_info_data.factory_products = active_product_detail.factory_products
-            // order_product_info_data.active_product_id = active_product_id
-            // order_product_info_data.item_id = active_product_detail.id
-            // order_product_info_data.activity_id = active_product_detail.activity_id
-            // order_product_info_data.style_id = active_style_id
-            // order_product_info_data.design_id = active_design_id
-            //order_product_info_data.factory_product_active_index = factory_product_active_index
-            // self.$store.commit("SET_PRODUCT_EDIT_INFO_OBJECT", { order_product_info: order_product_info_data })
             let order_existing_updated_data = await loadState("order_updated_data");
             if(order_existing_updated_data) {
               const order_updated_data = order_existing_updated_data.order_updated_data
@@ -347,26 +336,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
                 })
               }
             }
-
-            // if(self.order_update_data && self.order_update_data.length > 0 && self.order_update_data[factory_product_active_index]) {
-            //   let order_update_active_product = self.order_update_data[factory_product_active_index]
-            //   custom_logos = order_update_active_product.custom_logos
-            //   default_colors = order_update_active_product.defaultcolors
-            //   group_colors = order_update_active_product.groupcolors
-            //   product_roster_detail = order_update_active_product.product_roster_detail
-            //   product_custom_texts = order_update_active_product.product_custom_texts
-            //   active_style_id = order_update_active_product.style_id
-            //   active_design_id = order_update_active_product.design_id
-            //   const active_product_styles = active_product.productstyles
-            //   active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
-            //     return style.id == active_style_id
-            //   })
-            //   this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
-            //   const active_style_designs = active_product_styles[active_style_index].productdesigns
-            //   active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
-            //     return design.id == active_design_id
-            //   })
-            // }
           }
 
           let customizer_data: Record<any, any> = {

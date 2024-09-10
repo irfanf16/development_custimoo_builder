@@ -18,10 +18,10 @@ import {
   setDefaultColors,
   santaClone,
   updateLastActiveProductData,
-  getDataToSetLastActiveProduct
+  getDataToSetLastActiveProduct, isAbandonedSize
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
-import {isEmpty, findIndex} from "lodash";
+import {isEmpty, findIndex, find} from "lodash";
 import {eventBus} from "@/event/eventBus";
 import Store from "@/store";
 const MAX_UNDO_REDO_ITEMS = 3;
@@ -1177,14 +1177,42 @@ const ProductAttributes:Module<any, any> = {
     SET_PRODUCTS_ROSTERS(state:Record<any, any>, payload: Record<any, any>){
       const set_all = (payload && payload.set_all) ? payload.set_all : false;
       if(set_all) {
+        Object.entries(payload.roster_data).forEach(([product_id, payload_product_roster]) => {
+          const get_product_from_id = this.getters.getProduct(product_id)
+          if(get_product_from_id) {
+            const product_sizes = get_product_from_id ?  get_product_from_id?.sizes[0]?.json_data : []
+            //@ts-ignore
+            payload_product_roster.forEach(payload_product_roster_item => {
+              if(isAbandonedSize(product_sizes, payload_product_roster_item.code)) {
+                payload_product_roster_item.size_index = 0
+                payload_product_roster_item.size = product_sizes[0].name
+                payload_product_roster_item.code = product_sizes[0].name
+              }
+            })
+          }
+        })
         state.products_rosters = {...state.products_rosters, ...payload.roster_data}
       } else {
         if(payload && 'product_id' in payload) {
+          const get_product_from_id = this.getters.getProduct(payload.product_id)
+          const product_sizes = get_product_from_id ?  get_product_from_id?.sizes[0]?.json_data : []
           if('roster_index' in payload) {
             let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
+            if(isAbandonedSize(product_sizes, payload.roster_data.code)) {
+              product_roster_item.size_index = 0
+              product_roster_item.size = product_sizes[0].name
+              product_roster_item.code = product_sizes[0].name
+            }
             product_roster_item = Object.assign(product_roster_item, payload.roster_data)
             Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
           } else {
+            payload.roster_data.forEach( payload_product_roster_item => {
+              if( isAbandonedSize(product_sizes, payload_product_roster_item.code)) {
+                payload_product_roster_item.size_index = 0
+                payload_product_roster_item.size = product_sizes[0].name
+                payload_product_roster_item.code = product_sizes[0].name
+              }
+            })
             Vue.set(state.products_rosters, payload.product_id, payload.roster_data)
           }
         }

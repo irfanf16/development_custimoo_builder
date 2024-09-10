@@ -2534,6 +2534,13 @@ const isEcommercePlatform = () => {
   return ['shopify', 'wordpress'].includes(company?.platform)
 }
 
+const isAbandonedSize = (sizes, size_code) => {
+  const is_size_found =  find(sizes,  (size) => {
+    return size.name == size_code
+  })
+  return !is_size_found;
+}
+
 
 
 
@@ -2555,5 +2562,6 @@ export {
   updateLastActiveProductData, getProductById, getProductPriceDefaultObject, handleProductPriceUpdate, toggleProductAddons, isShowProductPrice, initiateLocalStorageKeys,
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
-  updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate
+  updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
+  isAbandonedSize
 };
