@@ -1198,7 +1198,7 @@ const ProductAttributes:Module<any, any> = {
           const product_sizes = get_product_from_id ?  get_product_from_id?.sizes[0]?.json_data : []
           if('roster_index' in payload) {
             let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
-            if(isAbandonedSize(product_sizes, payload.roster_data.code)) {
+            if(payload.roster_data.code && isAbandonedSize(product_sizes, payload.roster_data.code)) {
               product_roster_item.size_index = 0
               product_roster_item.size = product_sizes[0].name
               product_roster_item.code = product_sizes[0].name
