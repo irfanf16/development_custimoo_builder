@@ -1674,7 +1674,7 @@ export class CollectionMixin extends Mixins(ErrorMessages) {
     return collections
   }
 
-  public async shareCollectionLink(collection:Record<any, any>, index:number , ){
+  public async shareCollectionLink(collection:Record<any, any>, index:number, is_index = true){
     try {
       if(collection){
         let collections = {
@@ -1692,7 +1692,11 @@ export class CollectionMixin extends Mixins(ErrorMessages) {
             collection.shared_url = shared_url;
           }
           else{
-            Vue.set(this.getCollections[index], 'shared_url', shared_url)
+            if(is_index) {
+              Vue.set(this.getCollections[index], 'shared_url', shared_url)
+            } else {
+              collection.shared_url = shared_url
+            }
           }
         }
         this.hidePopper()

@@ -8,7 +8,7 @@
             Download PDF
           </span>
       </button>
-      <div id="collectionPdfContainer">
+      <div>
         <div class="pdf_cover"
              :style="{ 'background': `url(${storageUrl + getCoverImage()}) no-repeat center` }"
              :class="{'design_hummel_us': company.id == 45}">
@@ -346,7 +346,7 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
       }
     }
   }
-public async setActionBeforeLogin(type: string ,collection: Record<any, any>, product:Record<any,any>,idxs) {
+  public async setActionBeforeLogin(type: string ,collection: Record<any, any>, product:Record<any,any>,idxs) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
     if(type === 'addToCart'){
       this.button_type = 'cart';
@@ -422,7 +422,6 @@ public async setActionBeforeLogin(type: string ,collection: Record<any, any>, pr
       resolve('done')
     }
   }
-
 
   get collectionImageMerchant() {
     if(this.isJSONString(this.$store.getters.getSetting('collection_image_merchant'))) {

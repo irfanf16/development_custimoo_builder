@@ -34,7 +34,7 @@
 
           <b-button style="margin-right: 10px" @click="downloadCollectionPdf(collectionItems.id)">Download PDF</b-button>
           <div style="display: block;position: relative">
-            <b-button style="margin-right: 10px" @click="shareCollectionLink(collectionItems,collectionItems.id)">Share Url</b-button>
+            <b-button style="margin-right: 10px" @click="shareCollectionLink(collectionItems, collectionItems.id, false)">Share Url</b-button>
             <aside :id="'popper-content'+collectionItems.id" v-show="popperID == 'share-collection'+collectionItems.id" :ref="'popper-content'+collectionItems.id"
                    :class="!opacityset ? 'opacity-0' : 'opacity-100'"
                    v-click-outside-custom="hidePopper" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip" :key="popperID" style="position: absolute;top:40px;left:20px">
@@ -158,7 +158,6 @@
 import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
 import ErrorMessages from "@/mixins/ErrorMessages";
 import DesignCollectionPdfView from "@/components/DesignCollectionPdfView.vue";
-import html2pdf from "html2pdf.js"
 import Scene from "@/components/Scene.vue"
 import draggable from "vuedraggable";
 import {
@@ -212,10 +211,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   public setCurrentUploader(current){
     this.currentUploader = -1
     this.currentUploader = current
-  }
-
-  public generateCollectionPDF() {
-    (this.$refs.collection as Record<any, any>)?.generateCollectionPDF()
   }
 
   public async retrievCollectionItems() {
@@ -316,12 +311,7 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
   }
 
   get collectionItems(){
-    let items = this.$store.getters.getCollectionItems
-    let collections = this.$store.getters.getCollectionItems.collection_products.map((item: Record<any, any>) => {
-        return item
-      })
-    items.collection_products = collections
-    return items
+    return this.$store.getters.getCollectionItems
   }
 
   public get getExportingCollections(){
@@ -479,31 +469,6 @@ export default class DesignCollectionModal extends Mixins(ErrorMessages, ModalAc
     }
 
     this.hideCollectionModal()
-  }
-
-  public  generateCollectionPdf() {
-    let self = this;
-    const element = document.getElementById("collectionPdfContainer")
-    const opt = {
-      margin: [0, 0, 0, 0],
-      filename: 'production.pdf',
-      image: {type: "jpeg", quality: 1},
-      html2canvas: {
-        dpi: 192,
-        scale: 4,
-        useCORS: true,
-        letterRendering: true,
-      },
-      jsPDF: {
-        unit: "in",
-        format: "letter",
-        orientation: 'landscape'
-      }
-    };
-    return  html2pdf().set(opt).from(element).toPdf().output('datauristring').then((pdf:any) =>{
-      let arr = pdf.split(',');
-      return  arr[1];
-    })
   }
 
   public handleLogoDeleteEvent(sort_order: number): void {

@@ -38,7 +38,6 @@
               <b-button class="btn btn-secondary fw-bold w-100 mb-2" @click="copyLink">copy url</b-button>
             </template>
           </div>
-          <button class="btn btn-secondary fw-bold w-100" v-if="$route.matched.some(({ name }) => name === 'ConfirmOrder')" @click="generateProductionPdf">Download Design File</button>
         </div>
       </div>
     </div>
@@ -50,16 +49,9 @@
 
 <script lang="ts">
 import {Component, Mixins} from 'vue-property-decorator'
-import {fabric} from 'fabric'
-import html2pdf from "html2pdf.js"
-import {default as $} from 'jquery';
-import {http} from "@/httpCommon";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ProductionScene from '@/components/ProductionScene.vue'
-import { unitConversion } from '@/helpers/Helpers'
-
-type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<OrderDetails>({
   components: {

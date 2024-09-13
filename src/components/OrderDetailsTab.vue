@@ -84,8 +84,6 @@
 
 <script lang="ts">
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
-import html2pdf from "html2pdf.js"
-import {default as $} from 'jquery';
 import {http} from "@/httpCommon";
 import ConfirmOrderTab from "@/views/ConfirmOrderTab.vue";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
@@ -93,18 +91,15 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
 import ProductionScene from '@/components/ProductionScene.vue'
 import {
-  getActiveProductData, getImageFromCanvas,
+  getActiveProductData,
   handleResponseException,
-  unitConversion
 } from '@/helpers/Helpers'
 import LoginForm from '@/components/LoginForm.vue'
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
+import {handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
 
 import {compact} from 'lodash';
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
 import AddToCartButton from "@/components/AddToCartButton.vue";
-
-type DOMParserSupportedType = "application/xhtml+xml" | "application/xml" | "image/svg+xml" | "text/html" | "text/xml";
 
 @Component<OrderDetailsTab>({
   components: {
@@ -388,66 +383,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
       console.error('error in add to cart', e)
       self.isLoading = false
     }
-  }
-
-   public async  generateProductionPdf() {
-    let self = this;
-    self.showLoader = true;
-    let style_index = this.$store.getters.getCurrentStyleIndex;
-    let selected_product = this.$store.getters.getSelectedProduct;
-    const product_id = selected_product.product_id;
-    let product_style = selected_product.productstyles[style_index];
-    const product_style_id = product_style.id;
-    let selectedDesign = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1);
-    const product_design_id = selectedDesign[0].id;
-
-    let form_data = new FormData();
-    if(self.production_file_obj.url) {
-      form_data.append('production_cutting_file', new File([new Blob([(self.production_file_obj as Record<any,any>).content])], "production_cutting_file.svg", {
-        type: "image/svg+xml",
-      }));
-    }
-    form_data.append("product_id", product_id);
-    form_data.append("product_style_id", product_style_id);
-    form_data.append("product_design_id", product_design_id);
-    let order_detail = await self.getOrderDetail();
-    this.canvasImage.scene.frontCanvas.discardActiveObject().renderAll()
-    this.canvasImage.scene.backCanvas?.discardActiveObject().renderAll()
-    form_data.append("order_detail", JSON.stringify(order_detail));
-    let p2 = new Promise((resolve) => {
-      this.pdf_front_image = getImageFromCanvas('front') as string
-      this.pdf_back_image = getImageFromCanvas('back') as string
-      resolve(1);
-    });
-
-    p2.then((value) => {
-      if(value){
-        const element = document.getElementById("production-pdf-html")
-        const opt = {
-          margin: [0, 0, 0, 0],
-          filename: 'production.pdf',
-          image: {type: "jpeg", quality: 1},
-
-          jsPDF: {
-            unit: "in",
-            format: "letter",
-            orientation: 'landscape'
-          }
-        };
-        html2pdf().set(opt).from(element).toPdf().get("pdf")
-          .output('datauristring')
-          .then(async function(pdfAsString: string) {
-            form_data.append("order_file", pdfAsString)
-            await http.post('orders/create', form_data).then(() => {
-              self.showLoader = false
-            }).catch(error => {
-              self.showLoader = false
-              console.log("Error wilde creating order", error)
-            });
-          }).save('final_design');
-
-      }
-    })
   }
 
   public async getLockers(){

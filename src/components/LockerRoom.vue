@@ -429,7 +429,6 @@ import EventModal from "@/components/EventModal.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import Scene from "@/components/Scene.vue";
 import draggable from "vuedraggable";
-import html2pdf from "html2pdf.js"
 import {http} from "@/httpCommon";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import {
@@ -618,7 +617,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-
   public locker_with_rosters(id:any) {
     return this.lockers_and_rosters.filter((item:Record<any, any>)=>item.id == id)
   }
@@ -655,13 +653,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public getCollectionData() {
 
     if(this.getCollections.length === 0){
-        this.viewLoader = true
-        this.setCollections();
-        this.viewLoader = false
+      this.viewLoader = true
+      this.setCollections();
+      this.viewLoader = false
       startExportStatusChecker()
-
     }
-
   }
 
   public get getExportingCollections(){
@@ -703,26 +699,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     return this.$store.getters.getCustomerPermissions
   }
 
-  get mainproductId():number{
-    return this.$store.getters.getEditMainProductId
-  }
-
-  @Watch('getCollections', {
-    deep: true
-  })
-  getCollectionsChanged(collections: [Record<any, any>]) {
-    collections.forEach((collection: Record<any, any>, index: number) => {
-      if (!collection.link) {
-        this.generateCollectionPdf(collection, index)
-      }
-    })
-  }
-
   public addDesignCollection = () => {
     this.$emit('hideLockerRoomModal');
     this.$emit('showCollectionModal');
   }
-
 
   get selected() {
     return this.group;
@@ -813,7 +793,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-
   public updateTab(){
     this.hidePopper();
     if(this.main_locker_tabs){
@@ -823,48 +802,10 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       this.$store.dispatch("setCollectionMode","LOCKER_STORYBOARD");
     }
   }
-  public async generateCollectionPdf(collection:Record<any, any>, index:number) {
-    let res = await this.$store.dispatch('getCollection', collection.id)
-    this.collection_available = true;
-    this.collectionData = res
-    setTimeout(() => {
-      const element = document.getElementById("collectionPdfContainer")
-      const opt = {
-        margin: [15, 10, 15, 10],
-        filename: 'production.pdf',
-        image: {type: "jpeg", quality: 1},
-        html2canvas: {
-          dpi: 192,
-          scale: 4,
-          useCORS: true,
-          letterRendering: true,
-        },
-        jsPDF: {
-          unit: "mm",
-          format: "letter",
-          orientation: 'landscape'
-        }
-      };
-      html2pdf().set(opt).from(element).output('datauristring').then((pdf: any) => {
-        let arr = pdf.split(',');
-        pdf = arr[1];
-        let data = new FormData();
-        data.append("data", pdf);
-        data.append('id', collection.id);
-        http.post('savepdf', data).then(res => {
-          Vue.set(this.getCollections[index], 'link', res.data.link)
-        })
-      });
-    }, 3000)
-  }
-
-  public lockerStatus = 'not_accepted'
-
 
   public get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject;
   }
-
 
   public async shareProduct(product: Record<any, any>, ind: number|string, lockerIndex: number|string) {
     try {
@@ -889,10 +830,6 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     } catch (error) {
       console.log(error)
     }
-  }
-
-  public downloadCollectionPDF(index) {
-    (this.$refs['collection_'+index] as Record<any, any>[])[0]?.generateCollectionPDF()
   }
 
   public copyLink(room_index: number|string, ind: number|string) {

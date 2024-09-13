@@ -120,8 +120,6 @@
 
 <script lang="ts">
 import {Component, Prop, Vue} from 'vue-property-decorator';
-import CollectionViewPDF from "@/views/CollectionViewPDF.vue";
-import html2pdf from 'html2pdf.js'
 
 @Component<CollectionPDF>({
 })
@@ -156,74 +154,6 @@ export default class CollectionPDF extends Vue {
 
   get iPad(): boolean {
     return this.$store.getters.getManageComponents.iPad
-  }
-
-  public generateCollectionPDF() {
-    this.showLoader = true;
-    this.showPdf = true;
-    let scale = 4
-    let page_size = 8
-    if(this.mobileScreen || this.iPad) {
-      scale = 1
-      page_size = 2
-    }
-    const options = {
-      margin: [0, 0, 0, 0],
-      filename: this.collection.name + '.pdf',
-      image: {
-        type: "jpeg",
-        quality: 1.0,
-      },
-      html2canvas: {
-        scale: scale,
-        dpi: 192,
-        allowTaint: true,
-        useCORS: true,
-        letterRendering: true,
-        svgRendering: true
-      },
-      jsPDF: {
-        unit: "in",
-        format: "a4",
-        orientation: "landscape",
-        compress: true,
-      },
-    }
-    setTimeout(() => {
-      const pages = this.$refs.pdf_page as (Element | Vue)[];
-      const pdf_pages_wrapper = this.$refs.pdf_pages_wrapper as Element;
-
-      (async () => {
-        let doc = html2pdf().set(options).from(this.$refs.pdf_page_header).toPdf();
-
-        for (let n = 0; n < pages.length; n += page_size) {
-          const fourth_page = n + (page_size - 1);
-          const four_pages = pdf_pages_wrapper.querySelectorAll(`.pdf_page:nth-child(n+${n}):nth-child(-n+${fourth_page})`);
-
-          const container = document.createElement('div');
-
-          four_pages.forEach(page => {
-            container.appendChild(page.cloneNode(true));
-          });
-
-          await doc.get('pdf').then(
-            pdf => {
-              pdf.addPage();
-            }
-          ).from(container).toContainer().toCanvas().toPdf();
-        }
-
-        await doc.save();
-      })()
-        .then(() => {
-          this.showLoader = false;
-          this.showPdf = false;
-        })
-        .catch(error => {
-          // Handle any errors
-          console.error('Error generating PDF:', error);
-        });
-    })
   }
 
   public getLogoColors() {
