@@ -15,6 +15,7 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
   public active_jersey_part: number[] = [];
   public text_accordion:boolean[] = [];
   public selected_font = '';
+  public is_font_auto_changed = false;
 
   get getColorType(): string {
     return this.$store.getters.getSetting('color_type');
@@ -53,6 +54,10 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
 
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
+  }
+
+  get getProductEditInfoObject() {
+    return this.$store.getters.getProductEditInfoObject;
   }
 
   public extractExactCode(code:string) {
@@ -142,6 +147,7 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
       await setUndoRedoItems('customTexts', 'input_changed')
       const self:Record<any, any> = this;
       const updated_custom_text = this.product_custom_texts[custom_text_index]
+      this.handleCustomTextFontChange(custom_text_index, updated_custom_text.font_family)
       updated_custom_text.value = updatedVal;
       const product_ids = [updated_custom_text.product_id, ...updated_custom_text.following_product_ids]
       product_ids.forEach((product_id) => {
@@ -222,11 +228,22 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     await this.hideLockerProductUpdateButton()
     await setUndoRedoItems('customTexts', 'font_updated')
     self.selected_font = selected_font;
-    self.product_custom_texts[custom_text_index].font_family = selected_font;
-    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
-    self.$eventBus.$emit("customTextUpdated", {
-      emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
-    });
+    let custom_text_indexes = [custom_text_index]
+    /*
+    * first time editing the font will be applied to all custom texts.
+    * The is_font_auto_changed is used to check that if the first time updating text font is auto applied to all custom texts or not
+    * */
+    if(!this.is_font_auto_changed && !this.getProductEditInfoObject.editing) {
+      custom_text_indexes = [...Array(self.product_custom_texts.length).keys()];
+      this.is_font_auto_changed = true
+    }
+    custom_text_indexes.forEach((custom_text_index) => {
+      self.product_custom_texts[custom_text_index].font_family = selected_font;
+      self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
+      self.$eventBus.$emit("customTextUpdated", {
+        emitter: "input", custom_text_index:custom_text_index, custom_text_item_index: null, value: self.product_custom_texts[custom_text_index]
+      });
+    })
   }
 
   async applySameTextStyle(current_custom_text_index:any) {
