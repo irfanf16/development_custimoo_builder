@@ -170,7 +170,7 @@
                       <div class="drop-file" style="white-space: nowrap;">Drop/Select the file
                       </div>
                       <div style="white-space: nowrap;">Upload excel file</div>
-                      <input type="file" @input="uploadExcelFile($event)"></div>
+                      <input type="file" @input="uploadExcelFile" ref="upload_excel_template"></div>
                   </form>
                 </div>
               </div>
@@ -1182,15 +1182,19 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
     })
   }
 
-  public async uploadExcelFile($event: Record<any, any>){
+  public async uploadExcelFile(){
     this.show_roster_warning = true;
     if (this.show_roster_warning) {
       this.showRosterWarning().then(async (update_roster) => {
         if (update_roster) {
           this.showLoader = true
           this.show_roster_warning = false;
-          const files = $event.target.files ? $event.target.files[0] : null;
-          const ext = files.name.split('.').pop();
+          const inputElement = this.$refs.upload_excel_template as HTMLInputElement;
+          const files = inputElement?.files ? inputElement?.files[0] : null;
+          let ext;
+          if (files) {
+            ext = files.name.split('.').pop();
+          }
           const updated_roster:Record<any, any>[] = []
           let derived_size_index = -1
           if (ext != 'xlsx'){
@@ -1199,56 +1203,58 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
             return false
           }
           let check_cols = false;
-          readXlsxFile(files).then((rows: any[][]) => {
-            check_cols = rows[0][0] == 'NAME ON PRODUCT' && rows[0][1] == 'NUMBER' && rows[0][2] == 'SIZE*' && rows[0][3] == 'QUANTITY*'
-            if (rows[0].length != 4){
-              alert("Please upload valid file");
-              this.showLoader = false;
-              return false
-            }else if(rows.length < 2){
-              alert("The excel file has no data in it");
-              this.showLoader = false;
-              return false
-            }else if(check_cols){
-              this.product.product_roster = []
-              rows.forEach((row: any[], index:number)=>{
-                if(index){
-                  this.product.product_sizes.forEach((size_item:Record<any, any>, size_index:number)=>{
-                    if(size_item.label ==row[2]){
-                      derived_size_index = size_index
+          if (files) {
+            readXlsxFile(files).then((rows: any[][]) => {
+              check_cols = rows[0][0] == 'NAME ON PRODUCT' && rows[0][1] == 'NUMBER' && rows[0][2] == 'SIZE*' && rows[0][3] == 'QUANTITY*'
+              if (rows[0].length != 4){
+                alert("Please upload valid file");
+                this.showLoader = false;
+                return false
+              }else if(rows.length < 2){
+                alert("The excel file has no data in it");
+                this.showLoader = false;
+                return false
+              }else if(check_cols){
+                this.product.product_roster = []
+                rows.forEach((row: any[], index:number)=>{
+                  if(index){
+                    this.product.product_sizes.forEach((size_item:Record<any, any>, size_index:number)=>{
+                      if(size_item.label ==row[2]){
+                        derived_size_index = size_index
+                      }
+                    })
+                    const typeof_number = typeof row[1];
+                    if(typeof_number === "number") {
+                      row[1] = row[1].toString();
                     }
-                  })
-                  const typeof_number = typeof row[1];
-                  if(typeof_number === "number") {
-                    row[1] = row[1].toString();
+                    //object type means the value is null
+                    if(typeof_number === "object") {
+                      row[1] = '';
+                    }
+                    if(row[1].constructor.name == "Number") {
+                      row[1] = row[1].toString()
+                    }
+                    const roster:any = {
+                      "text": row[0],
+                      "number": row[1],
+                      "size_index": derived_size_index,
+                      "size": row[2],
+                      "code": row[2],
+                      "quantity": row[3],
+                      "information": ""
+                    }
+                    this.product.product_roster.push(roster)
                   }
-                  //object type means the value is null
-                  if(typeof_number === "object") {
-                    row[1] = '';
-                  }
-                  if(row[1].constructor.name == "Number") {
-                    row[1] = row[1].toString()
-                  }
-                  const roster:any = {
-                    "text": row[0],
-                    "number": row[1],
-                    "size_index": derived_size_index,
-                    "size": row[2],
-                    "code": row[2],
-                    "quantity": row[3],
-                    "information": ""
-                  }
-                  this.product.product_roster.push(roster)
-                }
-              })
-            }else{
-              alert('Please upload the file with valid pattern');
+                })
+              }else{
+                alert('Please upload the file with valid pattern');
+                this.showLoader = false;
+              }
+              handleProductPriceUpdate()
               this.showLoader = false;
-            }
-            handleProductPriceUpdate()
-            this.showLoader = false;
-            this.showToast('Excel file uploaded successfully', 'success');
-          })
+              this.showToast('Excel file uploaded successfully', 'success');
+            })
+          }
         } else {
           this.show_roster_warning = false;
           return;
