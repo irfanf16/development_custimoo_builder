@@ -55,15 +55,20 @@
                       {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
                     </span>
                   </div>
-                  <div class="activity-text p-2 fs-2 text-muted">
-                    {{ activityStatus[item_status_activity.status].message }}
-                  </div>
-
+                  <template v-if="item_status_activity.status === ORDERINPRODUCTION || item_status_activity.status === CUSTOMERREVIEW">
+                    <div class="activity-text p-2 fs-2 text-muted" v-html="activityStatus[item_status_activity.status].message">
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div class="activity-text p-2 fs-2 text-muted">
+                      {{ activityStatus[item_status_activity.status].message }}
+                    </div>
+                  </template>
                   <div class="images-grid p-2 d-flex gap-1 w-100">
                     <div class="d-flex align-items-stretch flex-wrap gap-1">
                       <div class="feedback-block" :key="activity_item_index" v-for="(activity_item, activity_item_index) in item_status_activity.activity_items">
-                        <div class="feedback-images" v-if="activity_item.activity_files"
-                             @click="showPreview(activity_item)" style="cursor:pointer;">
+                        <div class="feedback-images skipped-block" v-if="activity_item.activity_files"
+                             @click="showPreview(activity_item)" style="cursor:pointer;" :class="evaluateClass(activity_item)">
                           <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files"
                                :src="`${storage_url}${activity_file.url}`" alt="">
                           <template>
@@ -101,6 +106,16 @@
                               </span>
                               </template>
                             </ul>
+                          </div>
+                        </div>
+                        <div class="feedback-text align-items-start mt-2 d-flex"
+                             v-if="activity_item.skip_customer_approval && activity_item.skip_customer_approval.reason && !(activity_item.skip_customer_approval.reason === null || activity_item.skip_customer_approval.reason === 'null' || activity_item.skip_customer_approval.reason === '')">
+                          <div><strong>Skip Reason:</strong></div>
+                          <div>
+                                  <span class="badge badge-light fs-1"
+                                        :key="`skipped_reason_${activity_item_index}`">
+                                    {{ activity_item.skip_customer_approval.reason }}
+                                  </span>
                           </div>
                         </div>
                         <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no)" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
@@ -270,14 +285,14 @@
           </div>
 
           <span class="badge badge-dark font-weight-lighter" style="line-height: normal">
-            {{activity_navigation_index+1}} / {{activity_items.activity_item_data.length}}
+            {{design_approval_activity_navigation_index+1}} / {{design_approval_activity_item_data.length}}
           </span>
         </div>
 
         <div class="d-flex justify-content-end" style="flex-grow: 8;">
           <button class="btn btn-secondary light mx-1" @click="$modal.hide('customer-review-modal')">Cancel</button>
-          <template v-if="activity_items.activity_item_data[activity_navigation_index] && activity_items.activity_item_data[activity_navigation_index].action">
-            <span v-if="activity_items.activity_item_data[activity_navigation_index].action == 'accept'" class="mx-1">Accepted</span>
+          <template v-if="design_approval_activity_item_data[design_approval_activity_navigation_index] && design_approval_activity_item_data[design_approval_activity_navigation_index].action">
+            <span v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action == 'accept'" class="mx-1">Accepted</span>
             <span v-else class="mx-1">Rejected</span>
           </template>
           <template v-else>
@@ -290,16 +305,16 @@
         </span>
       </div>
 
-      <template v-if="activity_items.activity_item_data[activity_navigation_index]">
+      <template v-if="design_approval_activity_item_data[design_approval_activity_navigation_index]">
 
         <div class="d-flex align-items-center justify-content-between gap-1 py-4 px-3 m-auto">
           <div class="fs-5">
             <BIconChevronLeft @click="navigateActivitySlider('back')" />
           </div>
 
-          <div v-for="(actFile, fileInd) in activity_items.activity_item_data[activity_navigation_index].files" :key="`actfile-${fileInd}`">
-            <div :id="`markerAreaDiv${fileInd}${activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${activity_navigation_index}`" :key="`designImage${fileInd}${activity_navigation_index}`" :src="`${actFile.file}`" alt="" class="w-100" style="max-height: 500px" crossorigin="anonymous">
+          <div v-for="(actFile, fileInd) in design_approval_activity_item_data[design_approval_activity_navigation_index].files" :key="`actfile-${fileInd}`">
+            <div :id="`markerAreaDiv${fileInd}${design_approval_activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${design_approval_activity_navigation_index}`"></div>
+            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${design_approval_activity_navigation_index}`" :key="`designImage${fileInd}${design_approval_activity_navigation_index}`" :src="`${actFile.file}`" alt="" class="w-100" style="max-height: 500px" crossorigin="anonymous">
           </div>
 
 
@@ -311,15 +326,15 @@
         <div class="p-4 text-left">
           <div class="fs-4">Write your feedback</div>
           <div class="mt-2">
-            <b-textarea v-model="activity_items.activity_item_data[activity_navigation_index].message" placeholder="Please write your feedback here..." rows="5"></b-textarea>
+            <b-textarea v-model="design_approval_activity_item_data[design_approval_activity_navigation_index].message" placeholder="Please write your feedback here..." rows="5"></b-textarea>
           </div>
         </div>
 
         <div class="modal-footer">
           <button class="btn btn-secondary light" @click="$modal.hide('customer-review-modal')">Cancel</button>
 
-          <template v-if="activity_items.activity_item_data[activity_navigation_index].action">
-            <span v-if="activity_items.activity_item_data[activity_navigation_index].action == 'accept'">Accepted</span>
+          <template v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action">
+            <span v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action == 'accept'">Accepted</span>
             <span v-else>Rejected</span>
           </template>
           <template v-else>
@@ -471,7 +486,14 @@ import {
   handleResponseException,
   logData,
   activityStatus,
-  urlToBase64, getDomDocument, initiateLocalStorageKeys, authenticateUser, updateOrderProducts
+  urlToBase64,
+  getDomDocument,
+  initiateLocalStorageKeys,
+  authenticateUser,
+  updateOrderProducts,
+  findActivityWithPosition,
+  findActivity,
+  mergeActivityArray
 } from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
@@ -653,7 +675,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public api_url =  ''
   public cancel_confirm_message =  `Are you sure that you want to cancel this order?`
   public cancel_quote_message =  `Are you sure that you want to cancel this quote?`
-
+  public design_approval_activity_item_data: Record<any, any>[] = []
+  public design_approval_activity_navigation_index = 0
   /*
   * data props ends
   * */
@@ -796,8 +819,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     let activity_item = Object.assign({}, order_item.status_activities[activity_item_index]);
 
-
     this.activity_items.activity_item_data = [];
+    this.design_approval_activity_item_data = [];
+
     for(let actItem of activity_item.activity_items){
       let actObj:Record<any,any> = {};
       actObj.action = null;
@@ -811,17 +835,48 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         fileObj.file_type = null;
         actObj.files.push(fileObj);
       }
+
+      let factory_product = order_item.factory_products.find(factory_product => factory_product.id === actItem.factory_product_id);
+      let skipCustomerApproval: Record<any, any> = {};
+      if (factory_product?.sku?.design_customer_approval !== undefined) {
+        skipCustomerApproval.design_customer_approval = (actItem?.skip_customer_approval?.design_customer_approval === "true" || actItem?.skip_customer_approval?.design_customer_approval === true || actItem?.skip_customer_approval?.design_customer_approval === 1 ) ? true: false;
+        skipCustomerApproval.reason = null;
+        skipCustomerApproval.show_reason_modal = false;
+        skipCustomerApproval.username = this.auth_customer?.first_name +  ' ' + this.auth_customer?.last_name;
+        skipCustomerApproval.user_id = this.auth_customer?.id;
+        skipCustomerApproval.role_name = "Customer";
+        actObj.skip_customer_approval = skipCustomerApproval;
+      }
+
       this.activity_items.activity_item_data.push(actObj);
+      if (factory_product?.sku?.design_customer_approval !== undefined) {
+        if (actObj.skip_customer_approval.design_customer_approval === "true" || actObj.skip_customer_approval.design_customer_approval === true) {
+          this.design_approval_activity_item_data.push(actObj)
+        }
+      } else {
+        this.design_approval_activity_item_data.push(actObj);
+      }
     }
 
     if(this.activity_items.activity_item_data.length > 0)
+    {
       this.activity_navigation_index = 0;
-
-
+      this.design_approval_activity_navigation_index = 0;
+    }
   }
 
   public submitActivity(submit_type:string) {
     this.showLoader = true;
+    this.activity_items.activity_item_data.skip_customer_approval = JSON.stringify(this.activity_items.activity_item_data.skip_customer_approval);
+    let artwork_created_activity = findActivityWithPosition(this.order.items[this.activity_items.order_item_index]?.status_activities, this.FACTORYREVIEW, 0)
+    if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.status === this.CUSTOMERAPPROVED) && this.activity_items.activity_item_data.length < artwork_created_activity.activity_items.length){
+        if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.action === 'accept')){
+            let submitted_customer_review_activity = findActivity(this.order.items[this.activity_items.order_item_index]?.status_activities, this.CUSTOMERREVIEW, artwork_created_activity.activity_items.length)
+            if(submitted_customer_review_activity){
+              this.activity_items.activity_item_data = mergeActivityArray(this.activity_items,artwork_created_activity.activity_items,this.CUSTOMERAPPROVED, this.order.items[this.activity_items.order_item_index].status_activities, submitted_customer_review_activity);
+            }
+        }
+    }
     let form_data = this.activity_items;
     if(submit_type == 'form_data'){
       // form_data = null;
@@ -838,7 +893,13 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
                     form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
                   }
                 });
-              }else{
+              }
+              else if (key2 == 'skip_customer_approval') {
+                Object.entries(activity_file_obj[key2]).forEach(([skipkey, skip_value]) => {
+                  form_data.append(key + '[' + actIndx + '][' + key2 + '][' + skipkey + ']', this.activity_items[key][actIndx][key2][skipkey]);
+                })
+              }
+              else{
 
                 form_data.append(key+'['+actIndx+']['+key2+']', this.activity_items[key][actIndx][key2]);
               }
@@ -866,10 +927,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
   public showMarkerArea(ref_index: number){
     this.markerActive = true
-    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+    let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
 
 
-    let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.activity_navigation_index][0];
+    let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.design_approval_activity_navigation_index][0];
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     activityObj.files[ref_index].marker_ref = markerArea
     markerArea.addEventListener('render', (event:Record<any,any>) => {
@@ -878,36 +939,36 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     });
     if(this.isWebComponent) {
       let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-      markerArea.targetRoot = shadow_dom.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+      markerArea.targetRoot = shadow_dom.getElementById('markerAreaDiv'+ref_index+this.design_approval_activity_navigation_index);
       markerjs2.Style.styleSheetRoot = shadow_dom;
     } else {
-      markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.activity_navigation_index);
+      markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.design_approval_activity_navigation_index);
     }
     markerArea.renderAtNaturalSize = true;
     markerArea.show();
   }
   public navigateActivitySlider(direction:string){
 
-    let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+    let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
 
     if(direction == 'next'){
       if(activityObj.action == null){
         this.showToast('Please accept or reject designs before navigate', 'error');
       }else{
-        let limit = this.activity_items.activity_item_data.length;
-        if((this.activity_navigation_index+1) < limit){
-          this.activity_navigation_index ++
+        let limit = this.design_approval_activity_item_data.length;
+        if((this.design_approval_activity_navigation_index+1) < limit){
+          this.design_approval_activity_navigation_index ++
         }
         if(
-          (this.activity_items.activity_item_data.length - 1) == this.activity_navigation_index
-          && this.activity_items.activity_item_data[this.activity_navigation_index].action )
+          (this.design_approval_activity_item_data.length - 1) == this.design_approval_activity_navigation_index
+          && this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].action )
         {
           this.submitActivity('')
         }
       }
     }else{
-      if((this.activity_navigation_index-1) >= 0) {
-        this.activity_navigation_index--
+      if((this.design_approval_activity_navigation_index-1) >= 0) {
+        this.design_approval_activity_navigation_index--
       }
     }
 
@@ -925,7 +986,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     this.markerActive = false
     setTimeout(() => {
-      let activityObj = this.activity_items.activity_item_data[this.activity_navigation_index];
+      let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
       let show_message = false;
       if(action == 'reject'){
         if((activityObj.message == null || activityObj.message == '' )){
@@ -937,14 +998,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       if(!show_message) {
         this.renderMarkerJsImages().then(marker_js_base64_images => {
           marker_js_base64_images.forEach((marker_js_base64_image_item, marker_js_base64_image_index) => {
-            this.activity_items.activity_item_data[this.activity_navigation_index].files[marker_js_base64_image_index].file = marker_js_base64_image_item
-            this.activity_items.activity_item_data[this.activity_navigation_index].files[marker_js_base64_image_index].file_type = 'encode'
+            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files[marker_js_base64_image_index].file = marker_js_base64_image_item
+            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files[marker_js_base64_image_index].file_type = 'encode'
           })
-          this.activity_items.activity_item_data[this.activity_navigation_index].action = action;
+          this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].action = action;
           if(action === "reject") {
-            this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERREJECTED;
+            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].status = this.CUSTOMERREJECTED;
           } else {
-            this.activity_items.activity_item_data[this.activity_navigation_index].status = this.CUSTOMERAPPROVED;
+            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].status = this.CUSTOMERAPPROVED;
           }
           this.navigateActivitySlider('next')
         })
@@ -955,7 +1016,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   public renderMarkerJsImages() {
     let marker_js_render_events: any[] = [];
-    this.activity_items.activity_item_data[this.activity_navigation_index].files.forEach(marker_js_item => {
+    this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files.forEach(marker_js_item => {
       marker_js_render_events.push(marker_js_item.marker_ref.render())
       delete marker_js_item.marker_ref
     })
@@ -1057,6 +1118,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
     }
 
+    evaluateClass(activity_item) {
+        if(activity_item.skip_customer_approval && ((activity_item.skip_customer_approval?.design_customer_approval === "false") || (activity_item.skip_customer_approval?.design_customer_approval === false))){
+          return 'skipped';
+        }
+        else {
+          return '';
+        }
+    }
     async rejectQuote(via_link = false) {
       if(this.is_quote_order && this.show_quote_buttons) {
         const order  = this.order;
@@ -1476,5 +1545,51 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
+}
+.skipped {
+  position: relative;
+}
+
+.skipped-block {
+  position: relative;
+  overflow: hidden; /* Prevent overflow */
+}
+
+.skipped::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  background-color: #219F84;
+  color: white;
+  font-size: 14px; /* Adjust font size */
+  font-weight: bold;
+  text-align: center;
+  padding: 25px;
+  width: 135px; /* Increase width to ensure space for text */
+  height: 135px; /* Increase height for the triangle */
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  display: flex;
+  align-items: flex-end; /* Align text at the top of the triangle */
+  justify-content: flex-start;
+  transform: translate(-15%, -15%); /* Fine-tune positioning */
+  writing-mode: vertical-rl; /* Optional: Rotates text for better fit */
+  line-height: 1.2;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+.skipped::after {
+  content: "Sample\aOmitted";
+  position: absolute;
+  top: 3px;
+  left: 1px;
+  right: 317px;
+  font-size: 14px;
+  color: white;
+  font-weight: bold;
+  transform: rotate(-45deg);
+  z-index: 10;
+  white-space: pre;
 }
 </style>

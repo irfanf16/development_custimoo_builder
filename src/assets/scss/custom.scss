@@ -7062,3 +7062,16 @@ html, body{
     }
 
 }
+
+.font-weight-bold {
+    font-weight: 700 !important;
+}
+
+.square-list {
+    list-style: disc; /* Remove default list styling */
+    padding-left: 1rem; /* Remove default padding */
+}
+.square-list li {
+    position: relative;
+    padding-left: rem; /* Space for the square */
+}

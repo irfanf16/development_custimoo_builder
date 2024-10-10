@@ -794,19 +794,19 @@ const activityStatus = {
   },
   submitted_for_factory_review: {
     title: "Order created",
-    message: "Please review the artwork.",
+    message: "Your order has been created and is awaiting confirmation.",
   },
   order_approve: {
-    title: "Order confirmed, pending artwork",
-    message: "Order is forwarded to factory.",
+    title: "Order Confirmed, Pending Artwork",
+    message: "Your order has been forwarded to the factory. They will review the logos and design for accuracy and quality, making any necessary adjustments for optimal printing.",
   },
   order_cancel: {
     title: "Cancelled",
     message: "Your order has been cancelled.",
   },
   factory_approved: {
-    title: "Submitted artwork approved,pending test print",
-    message: "You approved the Artwork. You can now upload the design samples here.",
+    title: "Artwork Approved, Pending Test Print",
+    message: "The factory has approved your artwork. Expect a physical sample to be uploaded within 72 hours (Monday to Friday).",
   },
   factory_rejected: {
     title: "Artwork Rejected",
@@ -814,7 +814,13 @@ const activityStatus = {
   },
   submitted_for_customer_review: {
     title: "Design Sample Submitted",
-    message: "Manufacturer has submitted these samples. Please review carefully and take action.",
+    message: "<p>The factory has provided sample images. Once the test print(s) are approved, full production will begin.</p>\n" +
+      "    <p><strong class='font-weight-bold'>Note:</strong> Any changes or comments before test print approval may delay production. Production starts after test print approval.</p>\n" +
+      "    \n" +
+      "    <ul class=\"square-list\">\n" +
+      "        <li><strong class='font-weight-bold'>Sublimation Production Time:</strong> ~2 weeks</li>\n" +
+      "        <li><strong class='font-weight-bold'>Tackle Twill Production Time:</strong> 4-5 weeks</li>\n" +
+      "    </ul>.",
   },
   customer_approved: {
     title: "Design Sample Approved",
@@ -826,7 +832,12 @@ const activityStatus = {
   },
   in_production: {
     title: "In Production",
-    message: "The manufacturer has begun creating the products. PLEASE BE AWARE, NO CHANGES CAN BE MADE TO THIS ORDER",
+    message: "<p>The factory has started manufacturing your products. <strong class='font-weight-bold'>Important:</strong> No further changes can be made at this stage.</p>\n" +
+      "    \n" +
+      "    <ul class=\"square-list\">\n" +
+      "        <li><strong class='font-weight-bold'>Sublimation Production Time:</strong> ~2 weeks</li>\n" +
+      "        <li><strong class='font-weight-bold'>Tackle Twill Production Time:</strong> 4-5 weeks</li>\n" +
+      "    </ul>",
   },
   shipped: {
     title: "Order Shipped",
@@ -2541,7 +2552,61 @@ const isAbandonedSize = (sizes, size_code) => {
   return !is_size_found;
 }
 
+const findActivityWithPosition = (activity_items, status, position) => {
+  const submittedItems = activity_items.filter(item => item.status === status);
+  // Return the second item if it exists, otherwise return the first
+  if (submittedItems.length > position) {
+    return submittedItems[position];
+  } else if (submittedItems.length === 1) {
+    return submittedItems[0];
+  }
+  return [];
+}
 
+
+const findActivity = (status_activities, status, length) => {
+  let activities = status_activities.filter( (activity_item) => activity_item.status === status);
+  let activity = activities.find((activity_item) => {
+    return activity_item.activity_items.length === length
+  });
+  if(activity){
+    return activity
+  }
+  else {
+    return null;
+  }
+}
+const mergeActivityArray = (requested_array, activity_array, status, status_activities, submitted_customer_activity_review = null) => {
+  const existingFactoryIds = requested_array.activity_item_data.map(item => item.factory_product_id);
+  let activity_items_data = JSON.parse(JSON.stringify(requested_array.activity_item_data));
+  let approved_activities = status_activities.filter((status_activity) => status_activity.status === status);
+  activity_array.forEach(item => {
+    if (!existingFactoryIds.includes(item.factory_product_id)) {
+      // Adding the oldone item to activity_item_data in original array
+      let skip_customer_approval = null
+      if(submitted_customer_activity_review){
+        // @ts-ignore
+        let submitted_activity = submitted_customer_activity_review?.activity_items?.find((activity) => activity.factory_product_id === item.factory_product_id);
+        // @ts-ignore
+        skip_customer_approval = submitted_activity?.skip_customer_approval;
+      }
+      let approved_activity = approved_activities.find((approved_activity) => {
+        return approved_activity.activity_items.find((activity_item) =>  activity_item.factory_product_id === item.factory_product_id)
+      });
+      let activity_item_data = {
+        action: (approved_activity.status === status && approved_activity.activity_items.length > 0)? "accept": null,  // default values, you can adjust as needed
+        status: status,
+        message: null,
+        files: item.activity_files,
+        factory_product_id: item.factory_product_id,
+        skip_customer_approval: skip_customer_approval
+      };
+      activity_items_data.push(activity_item_data);
+    }
+  });
+  return activity_items_data;
+
+}
 
 
 
@@ -2563,5 +2628,5 @@ export {
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
-  isAbandonedSize
+  isAbandonedSize,findActivityWithPosition,findActivity,mergeActivityArray
 };
