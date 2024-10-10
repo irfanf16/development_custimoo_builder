@@ -228,17 +228,19 @@
               </tbody>
             </table>
           </div>
-          <div v-if="(!can_finalize_order) && parseInt(moq) === 0" class="d-flex justify-content-start fs-2 text-danger mt-3">{{$t('minimum_order_cart_message',
-            {
-            product_name: $store.getters.getSelectedProduct.display_name,
-            min_products_count: sku_information.minimum_order_quantity
-            })}}
-          </div>
-          <div v-if="total_product_count < parseInt(moq)" class="d-flex justify-content-start fs-2 text-danger mt-3">{{$t('minimum_order_moq_message',
-            {
-              more_products_to_add: total_product_count < parseInt(this.moq) ? parseInt(this.moq) - this.total_product_count : 0
-            })}}
-          </div>
+          <template v-if="!customerPermissions.includes('skip-moq')">
+            <div v-if="(!can_finalize_order) && parseInt(moq) === 0" class="d-flex justify-content-start fs-2 text-danger mt-3">{{$t('minimum_order_cart_message',
+              {
+                product_name: $store.getters.getSelectedProduct.display_name,
+                min_products_count: sku_information.minimum_order_quantity
+              })}}
+            </div>
+            <div v-if="total_product_count < parseInt(moq)" class="d-flex justify-content-start fs-2 text-danger mt-3">{{$t('minimum_order_moq_message',
+              {
+                more_products_to_add: total_product_count < parseInt(this.moq) ? parseInt(this.moq) - this.total_product_count : 0
+              })}}
+            </div>
+          </template>
           <div class="fs-2 font-weight-bold mt-3">General comments</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Any comments?" type="text" name="general_comments"
@@ -258,7 +260,12 @@
         </template>
 
         <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
-          <b-button class="mt-4" @click="createOrder(false)" :disabled="(total_product_count < parseInt(moq)) || ((!can_finalize_order) && parseInt(moq) === 0)">Confirm Order</b-button>
+          <template v-if="!customerPermissions.includes('skip-moq')">
+            <b-button class="mt-4" @click="createOrder(false)" :disabled="(total_product_count < parseInt(moq)) || ((!can_finalize_order) && parseInt(moq) === 0)">Confirm Order</b-button>
+          </template>
+          <template v-else>
+            <b-button class="mt-4" @click="createOrder(false)">Confirm Order</b-button>
+          </template>
         </template>
       </div>
     </div>
@@ -395,10 +402,11 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
           product.show_in_summary = true;
         }
         product.roster_product_count = product_count;
-        if(product.roster_product_count < product.minimum_order_quantity && parseInt(this.moq) === 0) {
-          this.can_finalize_order = false;
+        if(!this.customerPermissions.includes('skip-moq')){
+          if(product.roster_product_count < product.minimum_order_quantity && parseInt(this.moq) === 0) {
+            this.can_finalize_order = false;
+          }
         }
-
         product.product_roster_detail.forEach((roster:Record<any, any>) => {
           total_products_count += parseInt(roster.quantity);
         });
@@ -449,22 +457,24 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
 
   public createOrder(is_quote=false) {
-    if(this.total_product_count < parseInt(this.moq)){
-      this.showToast(`${this.$t('minimum_order_moq_message',
-          {
-            more_products_to_add: this.total_product_count < parseInt(this.moq) ? parseInt(this.moq) - this.total_product_count : 0
-          })}`,
-        "error", 9000);
-      return false;
-    }
-    if((!this.can_finalize_order) && parseInt(this.moq) === 0){
-      this.showToast(`${this.$t('minimum_order_cart_message',
-        {
-          product_name: this.$store.getters.getSelectedProduct.display_name,
-          min_products_count: this.sku_information.minimum_order_quantity
-        })}`,
-        "error", 9000);
-      return false;
+    if(!this.customerPermissions.includes('skip-moq')){
+      if(this.total_product_count < parseInt(this.moq)){
+        this.showToast(`${this.$t('minimum_order_moq_message',
+            {
+              more_products_to_add: this.total_product_count < parseInt(this.moq) ? parseInt(this.moq) - this.total_product_count : 0
+            })}`,
+          "error", 9000);
+        return false;
+      }
+      if((!this.can_finalize_order) && parseInt(this.moq) === 0){
+        this.showToast(`${this.$t('minimum_order_cart_message',
+            {
+              product_name: this.$store.getters.getSelectedProduct.display_name,
+              min_products_count: this.sku_information.minimum_order_quantity
+            })}`,
+          "error", 9000);
+        return false;
+      }
     }
     let payload = {}
     payload['get_quote'] = is_quote;

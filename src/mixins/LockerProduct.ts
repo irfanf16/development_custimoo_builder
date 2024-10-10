@@ -1227,17 +1227,21 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
 
+
   public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null,  get_quote:boolean = false) {
-    if(!this.checkMinimumOrderQtyBYDesign(
-      this.$store.getters.getProductRosters(this.$store.getters.getSelectedProductId),
-      this.$store.getters.getSkuInformation,
-      this.$store.getters.getProductEditInfoObject,
-      this.$store.getters.getSelectedProduct.display_name
-    )) {
-      if(resolve){
-        resolve(false);
-      }
-      return;
+    const customerPermissions = this.$store.getters.getCustomerPermissions;
+    if(!customerPermissions.includes('skip-moq')){
+        if(!this.checkMinimumOrderQtyBYDesign(
+          this.$store.getters.getProductRosters(this.$store.getters.getSelectedProductId),
+          this.$store.getters.getSkuInformation,
+          this.$store.getters.getProductEditInfoObject,
+          this.$store.getters.getSelectedProduct.display_name
+        )) {
+          if(resolve){
+            resolve(false);
+          }
+          return;
+        }
     }
     this.hideVModal('rostermodal');
     let self: Record<any, any> = this;
