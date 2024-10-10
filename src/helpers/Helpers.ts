@@ -2118,16 +2118,18 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
           const size_variants = ecommerce_product.size_variants;
           product_price_with_quantity = 0;
           product_roster.forEach(roster_item => {
-            const roster_price = parseFloat(size_variants[roster_item.size].price);
-            const qty =  parseInt(roster_item.quantity);
-            if(product_multi_prices[roster_item.size]) {
-              const updated_qty =  product_multi_prices[roster_item.size].quantity + qty;
-              product_multi_prices[roster_item.size] = { quantity : updated_qty, price : roster_price, sub_price : updated_qty * roster_price }
-            }else {
-              product_multi_prices[roster_item.size] = { quantity : qty, price : roster_price, sub_price : qty * roster_price }
-            }
+            if(size_variants[roster_item.size]) {
+              const roster_price = parseFloat(size_variants[roster_item.size].price);
+              const qty =  parseInt(roster_item.quantity);
+              if(product_multi_prices[roster_item.size]) {
+                const updated_qty =  product_multi_prices[roster_item.size].quantity + qty;
+                product_multi_prices[roster_item.size] = { quantity : updated_qty, price : roster_price, sub_price : updated_qty * roster_price }
+              }else {
+                product_multi_prices[roster_item.size] = { quantity : qty, price : roster_price, sub_price : qty * roster_price }
+              }
 
-            product_price_with_quantity += qty * roster_price
+              product_price_with_quantity += qty * roster_price
+            }
 
           })
 
