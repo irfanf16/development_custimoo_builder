@@ -1227,21 +1227,21 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
   }
 
 
-
-  public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null,  get_quote:boolean = false) {
+  public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null,
+                              get_quote = {quote:false, 'admin_salesrep_id': null}) {
     const customerPermissions = this.$store.getters.getCustomerPermissions;
-    if(!customerPermissions.includes('skip-moq')){
-        if(!this.checkMinimumOrderQtyBYDesign(
-          this.$store.getters.getProductRosters(this.$store.getters.getSelectedProductId),
-          this.$store.getters.getSkuInformation,
-          this.$store.getters.getProductEditInfoObject,
-          this.$store.getters.getSelectedProduct.display_name
-        )) {
-          if(resolve){
-            resolve(false);
-          }
-          return;
+    if(!customerPermissions.includes('skip-moq')) {
+      if (!this.checkMinimumOrderQtyBYDesign(
+        this.$store.getters.getProductRosters(this.$store.getters.getSelectedProductId),
+        this.$store.getters.getSkuInformation,
+        this.$store.getters.getProductEditInfoObject,
+        this.$store.getters.getSelectedProduct.display_name
+      )) {
+        if (resolve) {
+          resolve(false);
         }
+        return;
+      }
     }
     this.hideVModal('rostermodal');
     let self: Record<any, any> = this;
@@ -1269,7 +1269,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       }
       const factory_product_id = getRandom(4, 'alpha_numeric')+getDateTimeFormatted()+getRandom(4, 'alpha_numeric');
       post_data.factory_product.id = factory_product_id;
-      (post_data as Record<any,any>).get_quote = get_quote;
+      (post_data as Record<any,any>).get_quote = get_quote.quote;
+      if(get_quote.admin_salesrep_id) {
+        (post_data as Record<any,any>).admin_salesrep_id = get_quote.admin_salesrep_id;
+      }
       let url = "carts"
       let cart_edit_mode = false;
       let product_edit_info_object = self.$store.getters.getProductEditInfoObject
@@ -1399,7 +1402,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
             if (res.data.success == true){
               let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
               let api_res:Record<any, any> = {};
-              if(get_quote) {
+              if(get_quote.quote) {
                 self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
                 await self.exitFromEditMode()
                 self.showToast(res.data.message, 'success');

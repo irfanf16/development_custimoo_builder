@@ -9,7 +9,7 @@
     <template>
       <template v-if="$store.getters.getUpdateOrderItemProducts == null">
           <b-button :key="'getQuote'" aria-label="Add to Cart" v-if="!cartLoading && show_quote_button"
-                 class="mx-2 px-5" variant="secondary" @click="addToCart(null, true)">
+                 class="mx-2 px-5" variant="secondary" @click="getQuote()">
             Get Quote
           </b-button>
          <b-button v-if="!show_cart_button && cartLoading" class="mx-2 px-5" variant="secondary" :disabled="true">
@@ -69,16 +69,16 @@
     </template>
   </template>
   </span>
+
 </template>
 
 <script lang="ts">
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import {cartModalData} from "@/mixins/LockerProduct";
 import {filter} from "lodash";
+import { hasCompanyPermission} from "@/helpers/Helpers";
 
 @Component<AddToCartButton>({
-  components: {
-  },
   computed:{
     show_cart_button : function () {
       if(!this.get_quote) {
@@ -154,6 +154,18 @@ export default class AddToCartButton extends Mixins(cartModalData) {
     this.$store.commit('SET_IS_ROSTER_OPEN', val)
   }
 
+  public getQuote() {
+    if(hasCompanyPermission('show_admin_salerep')) {
+      this.$store.commit("SET_SALES_REP_MODAL_FROM", 'cart')
+      this.showVModal('sale-representative-modal');
+    } else {
+      this.addToCart(null, {quote:true, 'admin_salesrep_id': null});
+    }
+
+  }
+
+
+
   public async setActionBeforeLogin(type: string) {
     this.$store.commit("ACTION_BEFORE_LOGIN", type);
     this.$store.commit('SET_SELECTION_MODE', {
@@ -164,7 +176,10 @@ export default class AddToCartButton extends Mixins(cartModalData) {
     })
     this.gotoLogin()
   }
-  private async addToCart(resolve:any=null, get_quote = false) {
+
+
+  private async addToCart(resolve:any=null, get_quote = {quote:false, 'admin_salesrep_id': null}) {
+
     await this.addToCartMixin(this.products_fonts, resolve, get_quote);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       let no_cart_modal_platforms = ['wordpress','shopify'];

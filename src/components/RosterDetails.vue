@@ -197,6 +197,7 @@
 
     <div class="d-flex justify-content-center mt-3" v-if="getProductEditInfoObject.editing == false || (getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product')">
       <AddToCartButton :products_fonts="products_fonts"></AddToCartButton>
+      <AdminSalesRepresentativeModal ref="cart-representative-modal" />
     </div>
   </div>
 </template>
@@ -211,11 +212,13 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 import RosterTabMixin from "@/mixins/RosterTabMixin";
 import {handleProductPriceUpdate, downloadTemplate} from "@/helpers/Helpers";
 import AddToCartButton from "@/components/AddToCartButton.vue";
+import AdminSalesRepresentativeModal from '@/components/AdminSalesRepresentativeModal.vue'
 
 
 @Component<RosterDetails>({
   components: {
-    AddToCartButton
+    AddToCartButton,
+    AdminSalesRepresentativeModal
   },
   mounted() {
     this.fontsColorsManipulation()

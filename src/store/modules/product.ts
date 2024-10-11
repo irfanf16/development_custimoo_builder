@@ -24,7 +24,8 @@ const Product:Module<any, any> = {
       vector_image_constraint:true,
     },
     factory_settings:[],
-    product_price_object: {}
+    product_price_object: {},
+    sales_rep_modal_from: ''
   },
   getters:{
     getSkuInformation(state:Record<any, any>){
@@ -75,6 +76,9 @@ const Product:Module<any, any> = {
     },
     getProductPriceObject(state:Record<any,any>) {
       return state.product_price_object;
+    },
+    getSalesRepModalFrom(state: Record<any, any>) {
+      return state.sales_rep_modal_from;
     }
   },
   mutations:{
@@ -151,6 +155,9 @@ const Product:Module<any, any> = {
     },
     SET_PRODUCT_PRICE_OBJECT(state: Record<any, any>, payload) {
       state.product_price_object = {...state.product_price_object, ...payload}
+    },
+    SET_SALES_REP_MODAL_FROM(state: Record<any, any>, payload) {
+      state.sales_rep_modal_from = payload
     }
   },
   actions: {

@@ -113,6 +113,19 @@
               </v-select>
             </b-form-group>
 
+            <b-form-group label-for="country" class="text-left" v-if="isAdminSaleRep()">
+              <label class="required"><strong>Sales Representative</strong></label>
+              <v-select
+                autocomplete="off"
+                id="admin_salesrep_id"
+                :options="getRepresentative"
+                name="country"
+                v-model="admin_salesrep_option"
+                placeholder="Select Sale Representative"
+                v-validate="{required: true}">
+              </v-select>
+            </b-form-group>
+
 
             <b-form-group id="input-group-4" class="text-left" label="Password" label-for="input-4">
               <b-form-input
@@ -221,7 +234,7 @@
 <script lang="ts">
   import {Vue, Component, Mixins } from 'vue-property-decorator'
   import ErrorMessages from "@/mixins/ErrorMessages";
-  import {getPermissions} from "@/helpers/Helpers";
+  import {getPermissions, hasCompanyPermission} from "@/helpers/Helpers";
   import {http} from "@/httpCommon";
   import ModalAction from "@/mixins/ModalAction";
 
@@ -236,6 +249,8 @@
         .catch((e: any) => {
           this.showError(e.response.data.message)
         });
+
+      this.$store.dispatch('getSalesRep');
     }
   })
   export default class LoginForm extends Mixins(ErrorMessages, ModalAction) {
@@ -254,6 +269,21 @@
       password_confirmation: '',
       company_name: '',
     }
+    public admin_salesrep_option = { id: null, label: 'Please select a sale representative' }
+
+    get getRepresentative(){
+       let admin_salesrep_options =  this.$store.getters.getAdminSalesRep;
+      let optionArray: Record<any, any>[] = [];
+
+      if(admin_salesrep_options.length > 0){
+        optionArray.push({ id: null, label: 'Please select a sale representative' })
+        admin_salesrep_options.forEach((item:any) => {
+          optionArray.push({ id: item.id, label: `${item.name} (${item.email})` })
+        })
+      }
+      return optionArray;
+    }
+
     public isActive = false
     public additionClass() {
       this.isActive = !this.isActive
@@ -301,7 +331,17 @@
     }
     public async signUp(){
       try {
-       let res = await this.$store.dispatch('signUpCustomer', this.form)
+        let payload : Record<any, any> = this.form;
+        if(this.isAdminSaleRep()) {
+          if(this.admin_salesrep_option.id) {
+            payload.admin_salesrep_id = this.admin_salesrep_option.id;
+          } else {
+            this.showToast('Please select a sales representative.', 'Error')
+            return;
+          }
+        }
+
+       let res = await this.$store.dispatch('signUpCustomer', payload)
         if (res.status == 201){
           this.$store.commit('SET_RECENT_LOGOS')
           await this.$store.dispatch('getLockerRoomColors')
@@ -347,6 +387,10 @@
         this.showError(error)
         this.loading = false;
       }
+    }
+
+    public isAdminSaleRep() {
+      return hasCompanyPermission('show_admin_salerep');
     }
 
   }

@@ -526,6 +526,7 @@
                    cancel_text="Later" confirm_text="Login" name="login-reminder" popup_icon="info" ref="login-reminder"></confirm-modal>
     <confirm-modal message="This will reset everything. All design changes will be lost. Continue?"
                    cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes" name="reset-changes"></confirm-modal>
+    <AdminSalesRepresentativeModal ref="cart-representative-modal" @submitOrderQuote="submitOrderQuote" @submitCartQuote="submitCartQuote" />
   </div>
 </template>
 
@@ -553,6 +554,7 @@ import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
 import ClickOutside from 'vue-click-outside';
+import AdminSalesRepresentativeModal from '@/components/AdminSalesRepresentativeModal.vue'
 
 import {
   logData,
@@ -574,7 +576,7 @@ import {
   getRandom,
   getOrderUpdateIdentifier,
   createOrUpdateOrderUpdateDataState,
-  updateOrder
+  updateOrder, hasCompanyPermission
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -623,7 +625,8 @@ Vue.filter('formatDate', function(value:string) {
     AddLockerRoomModal,
     SaveColorModal,
     LoginForm,
-    Scene
+    Scene,
+    AdminSalesRepresentativeModal
   },
 
   beforeDestroy() {
@@ -1387,8 +1390,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.addToCart(null)
     }
     else if (this.actionBeforeLogin == 'addQuote') {
-      this.setRosterOpen(true)
-      this.addToCart(null, true)
+      if(hasCompanyPermission('show_admin_salerep')) {
+        this.$store.commit("SET_SALES_REP_MODAL_FROM", 'cart')
+        this.showVModal('sale-representative-modal');
+      } else {
+        this.setRosterOpen(true)
+        this.addToCart(null, {quote: true, 'admin_salesrep_id': null})
+      }
     } else if (this.actionBeforeLogin == 'shareDesign') {
       this.shareDesign()
     } else if (this.actionBeforeLogin == 'generatePdf') {
@@ -1399,7 +1407,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     getLockerColors();
   }
 
-  private async addToCart(resolve:any=null, get_quote = false) {
+  private async addToCart(resolve:any=null, get_quote = {quote:false, 'admin_salesrep_id': null}) {
     await this.addToCartMixin(this.products_fonts, resolve, get_quote);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
       let no_cart_modal_platforms = ['wordpress','shopify'];
@@ -2211,6 +2219,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       //@ts-ignore
       this.$refs['add-product-designs-to-locker-room-modal'].showSaveToLockerRoomModal()
     }
+  }
+
+  public submitOrderQuote(payload) {
+    this.ref['cartModal'].createOrder({quote:true, 'admin_salesrep_id': payload.admin_salesrep_id}) ;
+  }
+
+  public submitCartQuote(payload) {
+    this.addToCart(null, {quote:true, 'admin_salesrep_id': payload.admin_salesrep_id})
   }
 }
 </script>

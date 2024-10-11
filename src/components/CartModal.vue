@@ -256,7 +256,7 @@
 
       <div class="d-flex justify-content-center">
         <template v-if="show_quote_button">
-          <b-button style="margin-right: 15px" class="mt-4" @click="createOrder(true)">Get Quote</b-button>
+          <b-button style="margin-right: 15px" class="mt-4" @click="getQuote()">Get Quote</b-button>
         </template>
 
         <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
@@ -269,8 +269,8 @@
         </template>
       </div>
     </div>
-  </modal>
 
+  </modal>
 </template>
 
 <script lang="ts">
@@ -284,9 +284,9 @@ import {
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import { FetchCategories } from '@/mixins/SelectedProductMixin'
+import { hasCompanyPermission} from "@/helpers/Helpers";
 @Component<CartModal>({
   methods: {logData},
-  components: {},
   filters: {
     itemQtyCount: (value: Record<any, any>) => {
       if (value && value.length > 0) {
@@ -456,9 +456,9 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     return this.$store.getters.getSetting("moq");
   }
 
-  public createOrder(is_quote=false) {
-    if(!this.customerPermissions.includes('skip-moq')){
-      if(this.total_product_count < parseInt(this.moq)){
+  public createOrder(get_quote = {quote:false, 'admin_salesrep_id': null}) {
+    if(!this.customerPermissions.includes('skip-moq')) {
+      if (this.total_product_count < parseInt(this.moq)) {
         this.showToast(`${this.$t('minimum_order_moq_message',
             {
               more_products_to_add: this.total_product_count < parseInt(this.moq) ? parseInt(this.moq) - this.total_product_count : 0
@@ -466,7 +466,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
           "error", 9000);
         return false;
       }
-      if((!this.can_finalize_order) && parseInt(this.moq) === 0){
+      if ((!this.can_finalize_order) && parseInt(this.moq) === 0) {
         this.showToast(`${this.$t('minimum_order_cart_message',
             {
               product_name: this.$store.getters.getSelectedProduct.display_name,
@@ -477,7 +477,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       }
     }
     let payload = {}
-    payload['get_quote'] = is_quote;
+    payload['get_quote'] = get_quote.quote;
+    payload['admin_salesrep_id'] = get_quote.admin_salesrep_id;
     // const response = await this.editModeConfirmation();
     payload['customer_reference_no'] = this.customer_reference_no
     payload['general_comments'] = this.general_comments
@@ -502,7 +503,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         this.showToast('Your pdf is generating', 'success');
         this.viewLoader = false;
         // this.hideVModal('cart-modal')
-        if(is_quote) {
+        if(get_quote.quote) {
           this.$router.push({name: 'CustomerQuotes'});
         } else {
           this.$router.push({name: 'Thankyou', params: { order: res.data.result.order } })
@@ -595,6 +596,16 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public deleteConfirm(cart_item: Record<any, any>, factory_product: Record<any, any>) {
     this.$emit("deleteCartItem", { cart_item: cart_item, factory_product: factory_product });
   }
+  public getQuote() {
+    if(hasCompanyPermission('show_admin_salerep')) {
+      this.$store.commit("SET_SALES_REP_MODAL_FROM", 'order')
+      this.showVModal('sale-representative-modal');
+    } else {
+      this.createOrder({quote:true, 'admin_salesrep_id':null})
+    }
+
+  }
+
 }
 </script>
 

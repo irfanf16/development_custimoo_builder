@@ -27,7 +27,8 @@ const Main:Module<any, any> = {
     tabIndexMain: 0,
     mainTotalTabs: 3,
     popperID: '',
-    index_db_store_time:1000
+    index_db_store_time:1000,
+    adminSalesRep: []
 
   },
   mutations: {
@@ -62,7 +63,10 @@ const Main:Module<any, any> = {
     },
     SET_INDEX_DB_STORE_TIME(state: Record<any, any>, payload: number) {
       state.index_db_store_time = payload
-    }
+    },
+    SET_ADMIN_SALES_REP(state: Record<any, any>, payload: number) {
+      state.adminSalesRep = payload
+    },
   },
   getters: {
     getApplicationMounted: state => {
@@ -88,6 +92,9 @@ const Main:Module<any, any> = {
     },
     getMobileScreen: state => {
       return state.manageComponents.mobileScreen
+    },
+    getAdminSalesRep: state => {
+      return state.adminSalesRep
     }
   },
   actions: {
@@ -121,6 +128,14 @@ const Main:Module<any, any> = {
           console.log(e)
         });
       }
+    },
+    async getSalesRep({commit}) {
+
+        http.get("get-admin-salesrep").then((response: any) => {
+          if (response.data) {
+            commit('SET_ADMIN_SALES_REP', response.data);
+          }
+        });
     },
     setBrowserToken(){
       let browserTokenString = ''

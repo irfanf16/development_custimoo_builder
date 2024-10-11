@@ -830,6 +830,10 @@ const activityStatus = {
     title: "Design Sample Rejected",
     message: "You have rejected the sample. Please wait for new samples from the manufacturer.",
   },
+  production_files_uploaded: {
+    title: "Production Files uploaded",
+    message: "Production Files uploaded",
+  },
   in_production: {
     title: "In Production",
     message: "<p>The factory has started manufacturing your products. <strong class='font-weight-bold'>Important:</strong> No further changes can be made at this stage.</p>\n" +
@@ -2586,17 +2590,17 @@ const mergeActivityArray = (requested_array, activity_array, status, status_acti
     if (!existingFactoryIds.includes(item.factory_product_id)) {
       // Adding the oldone item to activity_item_data in original array
       let skip_customer_approval = null
-      if(submitted_customer_activity_review){
+      if (submitted_customer_activity_review) {
         // @ts-ignore
         let submitted_activity = submitted_customer_activity_review?.activity_items?.find((activity) => activity.factory_product_id === item.factory_product_id);
         // @ts-ignore
         skip_customer_approval = submitted_activity?.skip_customer_approval;
       }
       let approved_activity = approved_activities.find((approved_activity) => {
-        return approved_activity.activity_items.find((activity_item) =>  activity_item.factory_product_id === item.factory_product_id)
+        return approved_activity.activity_items.find((activity_item) => activity_item.factory_product_id === item.factory_product_id)
       });
       let activity_item_data = {
-        action: (approved_activity.status === status && approved_activity.activity_items.length > 0)? "accept": null,  // default values, you can adjust as needed
+        action: (approved_activity.status === status && approved_activity.activity_items.length > 0) ? "accept" : null,  // default values, you can adjust as needed
         status: status,
         message: null,
         files: item.activity_files,
@@ -2607,6 +2611,19 @@ const mergeActivityArray = (requested_array, activity_array, status, status_acti
     }
   });
   return activity_items_data;
+}
+const hasCompanyPermission = (permission) => {
+
+  const company = Store.getters.getCompany
+  const permissions = {
+    1: ['show_admin_salerep']
+  };
+
+  if(company && permissions[company.id]) {
+    return permissions[company.id].includes(permission);
+  }
+
+  return false;
 
 }
 
@@ -2630,5 +2647,5 @@ export {
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
-  isAbandonedSize,findActivityWithPosition,findActivity,mergeActivityArray
+  isAbandonedSize,findActivityWithPosition,findActivity,mergeActivityArray, hasCompanyPermission
 };
