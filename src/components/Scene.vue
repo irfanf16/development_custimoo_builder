@@ -2491,8 +2491,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     if (!this.parts.includes(item.id)) {
                       this.parts.push(item.id);
                     }
-
-                    this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
                   }
                 }
               })

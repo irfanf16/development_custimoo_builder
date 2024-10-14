@@ -584,8 +584,8 @@ import {
   getRandom,
   getOrderUpdateIdentifier,
   createOrUpdateOrderUpdateDataState,
-  updateOrder, 
-  hasCompanyPermission
+  updateOrder,
+  hasCompanyPermission,
   getStyleSelectedAddons
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
