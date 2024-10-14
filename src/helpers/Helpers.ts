@@ -11,14 +11,15 @@ import {find, findIndex, parseInt} from "lodash";
 import {eventBus} from "@/event/eventBus"
 import LZString from 'lz-string';
 import Router from '../router/index'
+import {fabric} from "fabric";
 import {loadState, saveState} from "@/indexedDBPersistence";
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
     originalWidth: 57, originalHeight: 57, width: 57, height: 57, name_of_placement: "chest", side: "front", x_axis: 300,
-    y_axis: 300, is_locked: false, logo_name: null, original_logo: null, transparent_logo: null, smart_transparent_logo: null,
-    original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true, logo_colors: [], is_replace_success: false,
-    logo_index: 0, is_vector: false
+    y_axis: 300, x_axis_3d: 0, y_axis_3d: 0, is_locked: false, logo_name: null, original_logo: null, transparent_logo: null,
+    smart_transparent_logo: null, original_logo_url: null, is_smart_transparent: null, url: null, haveControls: true,
+    logo_colors: [], is_replace_success: false, logo_index: 0, is_vector: false
   }
   return {...default_obj, ...default_values}
 }
@@ -55,6 +56,8 @@ const getLogoObject = (index = 0) => {
     height: logo_settings_object.height,
     x_axis: logo_settings_object.x_axis,
     y_axis: logo_settings_object.y_axis,
+    x_axis_3d: 0,
+    y_axis_3d: 0,
     rotation: logo_settings_object.rotation,
     haveControls: !logo_settings_object.is_locked,
     side: "front",
@@ -529,7 +532,6 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                   }
                 }
               }
-
             }
           }
 
@@ -539,6 +541,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
       const style_index = Store.getters.getCurrentStyleIndex;
       const product_style = selected_product.productstyles[style_index];
+      let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
       const productEditInfo = Store.getters.getProductEditInfoObject;
       let product_name = selected_product.display_name
       //selected_design will always return array having single object
@@ -627,15 +630,44 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         }),
         product_price_object:{ product_price, currency_code, currency_symbol, quantity },
         svg_groups: Store.getters.getSvgGroups,
+        svg_parts: scene_ref.parts,
+        shuffle_color_number: Store.getters.getShuffleColorNumber,
         ecommerce_cart_id:null,
         reorder_data,
-        is_custom_product: false
+        is_custom_product: false,
+        grouped_addons: selected_grouped_addons,
+        ungrouped_addons: selected_ungrouped_addons
       }
-     // if(product_price_object)
+      let grouped_selected_addons = []
+      if(selected_product.group_addons && selected_product.group_addons.length > 0) {
+        grouped_selected_addons = selected_product.group_addons.filter((group_addon, group_name) => {
+          return group_addon.selected;
+        })
+        if(grouped_selected_addons.length > 0) {
+          post_data.addons = post_data.addons.concat(grouped_selected_addons)
+        }
+      }
 
-      const svg_content = await fetchUrlContent(post_data.production_url);
-      const production_file = await parseSvgStringFile(svg_content, post_data);
-      post_data.svg_content = production_file
+
+      if(selected_product.is_3d_product) {
+        const three_d_scene = Store.getters.getCanvasImage.scene
+        const objects = three_d_scene.cloneFabricObjects(three_d_scene.canvas.getObjects())
+        const group = new fabric.Group(objects)
+        const element = three_d_scene.$refs.temp_canvas as HTMLCanvasElement
+        const tempCanvas = new fabric.Canvas(element);
+        tempCanvas.setWidth(three_d_scene.canvas.width);
+        tempCanvas.setHeight(three_d_scene.canvas.height);
+        group.set('flipY', true);
+        tempCanvas.add(group);
+        tempCanvas.requestRenderAll()
+
+        post_data.svg_content = tempCanvas.toSVG()
+        tempCanvas.dispose()
+      } else {
+        const svg_content = await fetchUrlContent(post_data.production_url);
+        const production_file = await parseSvgStringFile(svg_content, post_data);
+        post_data.svg_content = production_file
+      }
 
       resolve(post_data)
     }, 500)
@@ -1506,7 +1538,7 @@ const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   const default_obj = {
     fixed_logo_index: 0, category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: {}, default_colors: [], group_colors: {}, logo_colors: [],
-    roster_detail: [], products_rosters: {}
+    roster_detail: [], products_rosters: {}, shuffle_color_number: 1, addons_info: {}
   }
   return {...default_obj, ...keys_default_values}
 }
@@ -1678,6 +1710,21 @@ const getTeamLogo = (product_id: number|null = null) => {
 const getImageFromCanvas = (side: string, options={}, scene=null) => {
   eventBus.$emit("storeCanvasImage")
   const canvas_options = {...{original_width: 600, original_height: 600, image_type: 'image/png', width: 1200, height: 1200, zoom: 2}, ...options}
+  const is_3d_product = Store.getters.getSelectedProduct?.is_3d_product
+  if(is_3d_product) {
+    const three_d_scene = scene? scene : Store.getters.getCanvasImage.scene
+    three_d_scene.canvas.discardActiveObject().renderAll()
+    if(side == 'back') {
+      three_d_scene.backAnimate()
+    } else {
+      three_d_scene.frontAnimate()
+    }
+    const base64_image = three_d_scene.renderer.domElement.toDataURL(canvas_options.image_type)
+    setTimeout(() => {
+      three_d_scene.animate()
+    })
+    return base64_image;
+  }
   //@ts-ignore
   let canvas = scene ? scene.frontCanvas : Store.getters.getCanvasImage.scene.frontCanvas
   if(side == 'back') {
@@ -2083,6 +2130,7 @@ const getProductPriceDefaultObject = (update_values={}) => {
 const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={}, product_sku_info:Record<any, any>={}):Promise<Record<any, any>> => {
   let product_sku = Store.getters.getSkuInformation
   let selected_product = Store.getters.getSelectedProduct
+  const active_style_index = Store.getters.getCurrentStyleIndex
   let product_roster = Store.getters.getProductRosters()
   let show_product_price = isShowProductPrice()
   if(!checkIsEmpty(product)) {
@@ -2109,6 +2157,27 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
           }
         }
       })
+      // grouped addons prices calculate
+      const grouped_addons = selected_product.productstyles[active_style_index].customized_addons.grouped_addons;
+      for(let group_name in grouped_addons) {
+        grouped_addons[group_name].forEach(grouped_addon => {
+          if(grouped_addon.selected) {
+            if(grouped_addon.currencies.length > 0) {
+              addons_price =  addons_price + parseFloat(grouped_addon.currencies[0].price)
+            }
+          }
+        })
+      }
+
+
+      // ungrouped addons prices calculate
+      selected_product.productstyles[active_style_index].customized_addons.ungrouped_addons.forEach(ungrouped_addon => {
+        if(ungrouped_addon.selected) {
+          if(ungrouped_addon.currencies.length > 0) {
+            addons_price =  addons_price + parseFloat(ungrouped_addon.currencies[0].price)
+          }
+        }
+      })
       let product_price_with_quantity = product_price * roster_quantity_total;
       const addons_price_with_quantity =  addons_price * roster_quantity_total;
 
@@ -2122,18 +2191,16 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
           const size_variants = ecommerce_product.size_variants;
           product_price_with_quantity = 0;
           product_roster.forEach(roster_item => {
-            if(size_variants[roster_item.size]) {
-              const roster_price = parseFloat(size_variants[roster_item.size].price);
-              const qty =  parseInt(roster_item.quantity);
-              if(product_multi_prices[roster_item.size]) {
-                const updated_qty =  product_multi_prices[roster_item.size].quantity + qty;
-                product_multi_prices[roster_item.size] = { quantity : updated_qty, price : roster_price, sub_price : updated_qty * roster_price }
-              }else {
-                product_multi_prices[roster_item.size] = { quantity : qty, price : roster_price, sub_price : qty * roster_price }
-              }
-
-              product_price_with_quantity += qty * roster_price
+            const roster_price = parseFloat(size_variants[roster_item.size].price);
+            const qty =  parseInt(roster_item.quantity);
+            if(product_multi_prices[roster_item.size]) {
+              const updated_qty =  product_multi_prices[roster_item.size].quantity + qty;
+              product_multi_prices[roster_item.size] = { quantity : updated_qty, price : roster_price, sub_price : updated_qty * roster_price }
+            }else {
+              product_multi_prices[roster_item.size] = { quantity : qty, price : roster_price, sub_price : qty * roster_price }
             }
+
+            product_price_with_quantity += qty * roster_price
 
           })
 
@@ -2203,6 +2270,34 @@ const isGetCategories = async () => {
     get_categories = false;
   }
   return get_categories;
+}
+
+const factorial = (n: number) => {
+  return n <= 1 ? 1 : n * factorial(n - 1);
+}
+
+const getPermutation = (n: number, number_of_parts: number) => {
+  let result: number[] = [];
+  let sequences: number[] = [];
+  let nums = [1, 2, 3, 4]
+  let k = n - 1; // Convert to 0-based index
+
+  while (nums.length > 0) {
+    let fact = factorial(nums.length - 1);
+    let index = Math.floor(k / fact);
+    sequences.push(nums.splice(index, 1)[0]);
+    k %= fact;
+  }
+
+  for (let i = 0; i < Math.ceil(number_of_parts / 4); i++) {
+    sequences.forEach((sequence: number) => {
+      let value = sequence + i * 4 - 1; // Scale and adjust the sequence value
+      if (value < number_of_parts) {
+        result.push(value);
+      }
+    });
+  }
+  return result;
 }
 
 const downloadTemplate = async (prod_id:any, product_name) => {
@@ -2558,6 +2653,86 @@ const isAbandonedSize = (sizes, size_code) => {
   return !is_size_found;
 }
 
+const getProductAddonInfoDefaultObject = (product_id): {[product_id: string]: {grouped_addons: Record<any, any>, ungrouped_addons: number[], simple_addons: number[]}} => {
+  return { [product_id]: { grouped_addons: {}, ungrouped_addons: [], simple_addons: [] } }
+}
+
+const includesLoose = (array, value) => {
+  return array.some(item => item == value);
+};
+
+const handleExistingAddonsSelection = (existing_addons) => {
+  const product_ids = Object.keys(existing_addons)
+  const products = Store.getters.getProducts.filter(product => {
+    return includesLoose(product_ids, product.id)
+  })
+
+  products.forEach(product => {
+    const product_existing_addons = existing_addons[product.id]
+    product.active_addons.forEach(active_addon => {
+      if(includesLoose(product_existing_addons.simple_addons, active_addon.addon_id)) {
+        active_addon.selected = true
+      }
+    })
+    product.productstyles.forEach(product_style => {
+      const { grouped_addons: product_style_grouped_addons, ungrouped_addons: product_style_ungrouped_addons } = product_style.customized_addons;
+      product_style_ungrouped_addons.forEach(product_style_ungrouped_addon => {
+        if(includesLoose(product_existing_addons.ungrouped_addons, product_style_ungrouped_addon.addon_id)) {
+          product_style_ungrouped_addon.selected = true
+        }
+      })
+      for(const group_name in product_style_grouped_addons) {
+        const existing_group_selected_addon_id = product_existing_addons.grouped_addons[group_name]
+        if(existing_group_selected_addon_id) {
+          product_style_grouped_addons[group_name].forEach(product_style_grouped_addon => {
+            if(existing_group_selected_addon_id == product_style_grouped_addon.addon_id) {
+              product_style_grouped_addon.selected = true
+            }
+          })
+        }
+      }
+    })
+  })
+}
+
+const getStyleSelectedAddons = async (style) => {
+  const selected_customized_addons = {
+    grouped_addons: {}, ungrouped_addons: []
+  }
+  if(style.customized_addons) {
+    let {grouped_addons, ungrouped_addons} = style.customized_addons
+    if(ungrouped_addons && ungrouped_addons.length > 0) {
+      selected_customized_addons.ungrouped_addons = ungrouped_addons.filter(ungrouped_addons => {
+        return ungrouped_addons.selected
+      })
+    }
+    if(grouped_addons && grouped_addons.constructor.name === "Object") {
+      for(const group_name in grouped_addons) {
+        grouped_addons[group_name].forEach(grouped_addon => {
+          if(grouped_addon.selected) {
+            selected_customized_addons.grouped_addons[group_name] = grouped_addon
+          }
+        })  }
+    }
+  }
+  return selected_customized_addons;
+
+}
+const hasCompanyPermission = (permission) => {
+
+  const company = Store.getters.getCompany
+  const permissions = {
+    1: ['show_admin_salerep']
+  };
+
+  if(company && permissions[company.id]) {
+    return permissions[company.id].includes(permission);
+  }
+
+  return false;
+
+}
+
 const findActivityWithPosition = (activity_items, status, position) => {
   const submittedItems = activity_items.filter(item => item.status === status);
   // Return the second item if it exists, otherwise return the first
@@ -2590,17 +2765,17 @@ const mergeActivityArray = (requested_array, activity_array, status, status_acti
     if (!existingFactoryIds.includes(item.factory_product_id)) {
       // Adding the oldone item to activity_item_data in original array
       let skip_customer_approval = null
-      if (submitted_customer_activity_review) {
+      if(submitted_customer_activity_review){
         // @ts-ignore
         let submitted_activity = submitted_customer_activity_review?.activity_items?.find((activity) => activity.factory_product_id === item.factory_product_id);
         // @ts-ignore
         skip_customer_approval = submitted_activity?.skip_customer_approval;
       }
       let approved_activity = approved_activities.find((approved_activity) => {
-        return approved_activity.activity_items.find((activity_item) => activity_item.factory_product_id === item.factory_product_id)
+        return approved_activity.activity_items.find((activity_item) =>  activity_item.factory_product_id === item.factory_product_id)
       });
       let activity_item_data = {
-        action: (approved_activity.status === status && approved_activity.activity_items.length > 0) ? "accept" : null,  // default values, you can adjust as needed
+        action: (approved_activity.status === status && approved_activity.activity_items.length > 0)? "accept": null,  // default values, you can adjust as needed
         status: status,
         message: null,
         files: item.activity_files,
@@ -2611,23 +2786,26 @@ const mergeActivityArray = (requested_array, activity_array, status, status_acti
     }
   });
   return activity_items_data;
-}
-const hasCompanyPermission = (permission) => {
-
-  const company = Store.getters.getCompany
-  const permissions = {
-    1: ['show_admin_salerep']
-  };
-
-  if(company && permissions[company.id]) {
-    return permissions[company.id].includes(permission);
-  }
-
-  return false;
 
 }
-
-
+const resetCustomizedAddons = () => {
+  const products = Store.getters.getProducts
+  products.forEach((product) => {
+    product.productstyles.forEach((style)=> {
+      const grouped_addons = style.customized_addons['grouped_addons'];
+      const ungrouped_addons = style.customized_addons['ungrouped_addons'];
+      for (const [key, addons] of Object.entries(grouped_addons) as [string: any]) {
+        addons?.forEach((addon: Record<any, any>) => {
+          addon.selected = false
+        })
+      }
+      ungrouped_addons?.forEach((addon: Record<any, any>) => {
+        addon.selected = false
+      })
+    })
+  })
+  eventBus.$emit("addAddons")
+}
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -2638,7 +2816,7 @@ export {
   unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, getTeamLogo, getDataToSetLastActiveProduct, getImageFromCanvas, getUrlParameter,
-  rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject,
+  rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getPermutation,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
   routerPush, getSantaModalConfig, getDomDocument, getWebComponentNames, isShadowDom, hideLockerProductSaveBtn, santaClone, setUndoRedoItems,
   classObserver, getCustomizerIframe, getWindowObject, getLockerColors, getSize, getDeviceInfo, syncGroupColorsWithSvgGroups, getCollectionLogoDefaultObj,
@@ -2647,5 +2825,6 @@ export {
   isGetCategories, isFilePreviewable, getCustomLockers, getCustomProductData, getCustomProductInitialData, navigateToCustomProduct,
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
-  isAbandonedSize,findActivityWithPosition,findActivity,mergeActivityArray, hasCompanyPermission
+  isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
+  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons
 };

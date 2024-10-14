@@ -40,43 +40,62 @@
             <div class="col-10 col-sm-8 col-md-6 col-lg-4 mb-5" :key="`bulk-save-products-${designIndex}`">
               <div class="batch-locker-design-wrapper">
                 <div class="batch-locker-scene-wrapper my-2">
-                  <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio"
-                         :ref="`product-selected-design-${designIndex}-ref`" :key="`product-selected-design-${designIndex}`"
-                         :front="{
-                                      textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                      safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                      boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                                      models: selectedProduct.productstyles[styleIndex].front_models
-                                   }"
-                         :back="{
-                                      textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
-                                      safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
-                                      boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
-                                      models: selectedProduct.productstyles[styleIndex].back_models
-                                   }"
-                         :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
-                         :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-                         :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
-                         :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"
-                         :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
-                         :design_id="design.id"
-                  />
-                  <Scene  v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio"
-                          :ref="`product-selected-design-${designIndex}-ref`" :key="`product-selected-design-${designIndex}`"
-                          :front="{
-                                      textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
-                                      safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                                      boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                                      models: selectedProduct.productstyles[styleIndex].front_models
-                                   }"
-                          :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
-                          :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
-                          :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
-                          :productColors="selectedProduct.colors"
-                          :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"
-                          :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
-                          :design_id="design.id"
-                  />
+                  <template v-if="selectedProduct.is_3d_product">
+                    <ThreeDScene :ref="`product-selected-design-${designIndex}-ref`" :key="`product-selected-design-${designIndex}`"
+                           :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url,
+                                      texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url,
+                                      design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
+                           :svg_parts="design.svg_parts"
+                           :measurement-ratio="selectedProduct.measurement_ratio"
+                           :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                           :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                           :colorGrouping="[]" :productType="selectedProduct.product_type"
+                           :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                           :design_id="design.id" :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
+                    />
+                  </template>
+                  <template v-else>
+                    <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio"
+                           :ref="`product-selected-design-${designIndex}-ref`" :key="`product-selected-design-${designIndex}`"
+                           :front="{
+                                        textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                        safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                        boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                        models: selectedProduct.productstyles[styleIndex].front_models
+                                     }"
+                           :back="{
+                                        textureUrl: storageUrl+design.back_design.file_base_url, file_extension:design.back_design.file_extension,
+                                        safe_zone_url: design.backsafezone_design? storageUrl+design.backsafezone_design.file_url : '',
+                                        boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
+                                        models: selectedProduct.productstyles[styleIndex].back_models
+                                     }"
+                           :svg_parts="design.svg_parts"
+                           :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                           :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                           :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors"
+                           :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"
+                           :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                           :design_id="design.id" :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
+                    />
+                    <Scene  v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio"
+                            :ref="`product-selected-design-${designIndex}-ref`" :key="`product-selected-design-${designIndex}`"
+                            :front="{
+                                        textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
+                                        safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                                        boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                                        models: selectedProduct.productstyles[styleIndex].front_models
+                                     }"
+                            :svg_parts="design.svg_parts"
+                            :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
+                            :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
+                            :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
+                            :productColors="selectedProduct.colors"
+                            :colorGrouping="JSON.parse(design.front_design.color_group)" :productType="selectedProduct.product_type"
+                            :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                            :design_id="design.id" :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
+                    />
+                  </template>
                 </div>
                 <div class="d-flex justify-content-center align-items-center my-2">
                   <b-input-group style="width: 300px">
@@ -119,9 +138,11 @@ import {getImageFromCanvas, getLockerColors, santaClone} from "@/helpers/Helpers
 import {http} from "@/httpCommon";
 import {reject} from "lodash";
 import {success} from "concurrently/dist/src/defaults";
+import ThreeDScene from "@/components/ThreeDScene.vue";
 
 @Component<AddProductWithDesignsToLockerRoom>({
   components: {
+    ThreeDScene,
     Scene,
     ConfirmModal,
     LockerRoom,
@@ -245,6 +266,9 @@ public errors = [];
 
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
+  }
+  get shuffle_color_number(): number {
+    return this.$store.getters.getShuffleColorNumber
   }
 
   get productRosterDetail(): [Record<any, any>] {
@@ -411,11 +435,13 @@ public errors = [];
           room_id: this.room_id,
           product_id: this.selectedProduct.product_id,
           product_name: productSelectedDesign.suggested_product_name,
+          svg_parts: scene_ref.parts,
           style_id: this.selectedProduct.productstyles[this.styleIndex].id,
           design_id: productSelectedDesign.id,
           custom_logos: this.customLogos,
           text: this.customTexts,
           colors: this.logoColors,
+          shuffle_color_number: this.shuffle_color_number,
           defaultcolors: default_colors,
           groupcolors: group_colors,
           locker_front_png: front_image_base64,
@@ -446,7 +472,7 @@ public errors = [];
       const filteredCollectionIds = collectionIds.filter(value => value !== null);
       const [collection_id] = [...new Set(filteredCollectionIds)];
       await this.executeCollectionPdfJob(collection_id);
-      
+
       this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
       this.loadingLocker = false
       await getLockerColors();

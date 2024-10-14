@@ -91,7 +91,7 @@
       checkIsEmpty,
       getEditModeDefaultObj,
       getImageFromCanvas,
-      getLockerColors,
+      getLockerColors, getStyleSelectedAddons,
       // syncGroupColorsWithSvgGroups
     } from '@/helpers/Helpers'
     import { Canvas } from 'fabric/fabric-impl'
@@ -166,6 +166,9 @@
       }
       get customLogos(): [] {
         return this.$store.getters.getCustomLogos()
+      }
+      get shuffle_color_number(): number {
+        return this.$store.getters.getShuffleColorNumber
       }
       get defaultColors() : [Record<any, any>] {
         return this.$store.getters.getDefaultColors
@@ -297,11 +300,13 @@
           room_id: this.room_id,
           product_id: product_id,
           product_name: this.product_name,
+          svg_parts: scene_ref.parts,
           style_id: style_id,
           design_id: design_id,
           custom_logos: custom_logos ? custom_logos : [],
           text: product_custom_texts,
           colors: logo_colors,
+          shuffle_color_number: this.shuffle_color_number,
           defaultcolors: defaultcolors,
           groupcolors: groupcolors,
           locker_front_png: front_image,
@@ -346,26 +351,32 @@
               unique[svgGroups[i].color] = 1;
             }
           }
+          const product_style = this.selectedProduct.productstyles[this.styleIndex]
           const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
-
+          let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
           const scene_ref = Store.getters.getCanvasImage.scene
           let locker = {
             roster_url: this.rosterUrl,
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
             product_name: this.product_name,
-            style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+            svg_parts: scene_ref.parts,
+            style_id: product_style.id,
             design_id: currentDesign[0].id,
             custom_logos: this.customLogos,
             text: this.customTexts,
             colors: this.logoColors,
+            shuffle_color_number: this.shuffle_color_number,
             defaultcolors: scene_ref.appliedDefaultColors,
             groupcolors: scene_ref.appliedGroupColors,
             locker_front_png: locker_front_png,
             locker_back_png: locker_back_png,
             product_roster_detail: this.productRosterDetail,
             fixed_logo_index: fixed_logo_index,
-            svgcolors: distinct
+            svgcolors: distinct,
+            grouped_addons: selected_grouped_addons,
+            ungrouped_addons: selected_ungrouped_addons
+
           }
           let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker).catch(errorResponse => {
             this.showLoader = false
@@ -443,11 +454,13 @@
           room_id: null,
           product_id: this.selectedProduct.product_id,
           product_name: this.product_name,
+          svg_parts: scene_ref.parts,
           style_id: this.selectedProduct.productstyles[this.styleIndex].id,
           design_id: currentDesign[0].id,
           custom_logos: this.customLogos,
           text: this.customTexts,
           colors: this.logoColors,
+          shuffle_color_number: this.shuffle_color_number,
           defaultcolors: scene_ref.appliedDefaultColors,
           groupcolors: scene_ref.appliedGroupColors,
           locker_front_png: locker_front_png,

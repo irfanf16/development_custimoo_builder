@@ -92,6 +92,26 @@
                       </div>
                     </template>
                   </template>
+                  <template v-if="factory_product.ungrouped_addons && factory_product.ungrouped_addons.length > 0">
+                    <template v-for="(ungrouped_addon, ungrouped_addon_index) in factory_product.ungrouped_addons">
+                      <div :key="`cart-addon-${ungrouped_addon.addon_id}`" class="d-flex w-100" :class="{'border-top mt-1': ungrouped_addon_index > 0}">
+                        {{ ungrouped_addon.sku_id }}
+                        <template v-if="product_price_object.show_price">
+                          :<strong class="font-weight-bold ml-auto">{{ ungrouped_addon.currencies[0].symbol }} {{Number(ungrouped_addon.currencies[0].price).toFixed(2) }}</strong>
+                        </template>
+                      </div>
+                    </template>
+                  </template>
+                  <template v-if="factory_product.grouped_addons && Object.keys(factory_product.grouped_addons).length > 0">
+                    <template v-for="(grouped_addon, group_name, group_index) in factory_product.grouped_addons">
+                      <div :key="`cart-grouped-addon-${group_name}`" class="d-flex w-100" :class="{'border-top mt-1': group_index > 0}">
+                        {{ group_name }} ({{grouped_addon.sku_id}})
+                        <template v-if="product_price_object.show_price">
+                          :<strong class="font-weight-bold ml-auto">{{ grouped_addon.currencies[0].symbol }} {{Number(grouped_addon.currencies[0].price).toFixed(2) }}</strong>
+                        </template>
+                      </div>
+                    </template>
+                  </template>
                 </td>
                 <td>
                   <template v-if="editingCartProductInfo.cart_product_info.cart_item_product && editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
@@ -215,6 +235,46 @@
                         </template>
                       </tr>
                     </template>
+                    <template v-if="factory_product.ungrouped_addons && factory_product.ungrouped_addons.length > 0">
+                      <template v-for="(ungrouped_addon, ungrouped_addon_index) in factory_product.ungrouped_addons">
+                        <tr class="bg-light" :key="`cart-item-${index}-${factory_product.id}-ungrouped-addon-${ungrouped_addon.addon_id}-${ungrouped_addon_index}`">
+                          <td :style="{'border-bottom-color': factory_product.ungrouped_addons.length-1 === ungrouped_addon_index && '#ccc'}">
+                            {{ungrouped_addon.sku_id}}
+                          </td>
+                          <td :style="{'border-bottom-color': factory_product.ungrouped_addons.length-1 === ungrouped_addon_index && '#ccc'}">
+                            {{factory_product.product_price_object.quantity}}
+                          </td>
+                          <template v-if="product_price_object.show_price">
+                            <td :style="{'border-bottom-color': factory_product.ungrouped_addons.length-1 === ungrouped_addon_index && '#ccc'}">
+                              {{ ungrouped_addon.currencies[0].symbol }}{{ Number(ungrouped_addon.currencies[0].price).toFixed(2) }}
+                            </td>
+                            <td :style="{'border-bottom-color': factory_product.ungrouped_addons.length-1 === ungrouped_addon_index && '#ccc'}">
+                              {{ ungrouped_addon.currencies[0].symbol }}{{ Number(parseInt(factory_product.product_price_object.quantity) * Number(ungrouped_addon.currencies[0].price).toFixed(2)).toFixed(2) }}
+                            </td>
+                          </template>
+                        </tr>
+                      </template>
+                    </template>
+                    <template v-if="factory_product.grouped_addons && Object.keys(factory_product.grouped_addons).length > 0">
+                      <template v-for="(grouped_addon, group_name) in factory_product.grouped_addons">
+                        <tr class="bg-light" :key="`cart-item-${index}-${factory_product.id}-${group_name}-addon-${grouped_addon.addon_id}`">
+                          <td :style="{'border-bottom-color':'#ccc'}">
+                            {{ group_name }} ({{grouped_addon.sku_id}})
+                          </td>
+                          <td :style="{'border-bottom-color':'#ccc'}">
+                            {{factory_product.product_price_object.quantity}}
+                          </td>
+                          <template v-if="product_price_object.show_price">
+                            <td :style="{'border-bottom-color': '#ccc'}">
+                              {{ grouped_addon.currencies[0].symbol }}{{ Number(grouped_addon.currencies[0].price).toFixed(2) }}
+                            </td>
+                            <td :style="{'border-bottom-color': '#ccc'}">
+                              {{ grouped_addon.currencies[0].symbol }}{{ Number(parseInt(factory_product.product_price_object.quantity) * Number(grouped_addon.currencies[0].price).toFixed(2)).toFixed(2) }}
+                            </td>
+                          </template>
+                        </tr>
+                      </template>
+                    </template>
                   </template>
                 </template>
 
@@ -279,6 +339,7 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
+  checkIsEmpty,
   getEditModeDefaultObj, handleResponseException, logData, navigateToCustomProduct, santaClone
 } from "@/helpers/Helpers";
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
@@ -370,6 +431,21 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
             total_price += factory_product_addon.currencies.length > 0 && factory_product_addon.currencies[0].price ?
               parseInt(cart_item_factory_product.product_price_object.quantity) * parseFloat(factory_product_addon.currencies[0].price) : 0;
          })
+          if(!checkIsEmpty(cart_item_factory_product.grouped_addons)) {
+            for(const group_name in cart_item_factory_product.grouped_addons) {
+              const group_addon =  cart_item_factory_product.grouped_addons[group_name]
+              if(group_addon.currencies.length > 0 && group_addon.currencies[0].price) {
+                total_price += parseInt(cart_item_factory_product.product_price_object.quantity) * parseFloat(group_addon.currencies[0].price)
+              }
+            }
+          }
+          if(!checkIsEmpty(cart_item_factory_product.ungrouped_addons)) {
+            cart_item_factory_product.ungrouped_addons.forEach(ungrouped_addon => {
+              if(ungrouped_addon.currencies.length > 0 && ungrouped_addon.currencies[0].price) {
+                total_price += parseInt(cart_item_factory_product.product_price_object.quantity) * parseFloat(ungrouped_addon.currencies[0].price)
+              }
+            })
+          }
         })
       })
     }

@@ -201,8 +201,9 @@
                   </div>
 
                   <div v-if="selectedProduct.is_3d_product" class="ml-auto">
-                    <img @click="switchView()" class="cursor-pointer" src="@/assets/images/3Dicon.svg" v-if="!selectedProduct.show_3d" height="20">
-                    <img @click="switchView()" class="cursor-pointer" src="@/assets/images/2Dicon.svg" v-else height="20">
+                    <a title="Reset view" style="font-size: 20px" @click="resetCameraToOriginalPosition()">
+                      <font-awesome-icon :icon="['fas', 'expand']"/>
+                    </a>
                   </div>
                 </div>
                 <div v-if="mobileScreen" class="undo-btn-area text-left pt-3 d-flex align-items-center justify-content-between">
@@ -377,19 +378,22 @@
                       <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <template v-if="!initializingProductData">
-                            <template v-if="selectedProduct.is_3d_product && selectedProduct.show_3d">
-                              <ThreeDScene :key="'main3dScene'+design.id"
+                            <template v-if="selectedProduct.is_3d_product">
+                              <ThreeDScene :key="'main3dScene'+design.id" ref="mainScene"
                                            :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url,
                                               texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url,
                                               design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
+                                           :svg_parts="design.svg_parts"
                                            :measurement-ratio="selectedProduct.measurement_ratio"
                                            :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
                                            :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                                            :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                           :colorGrouping="[]" :productType="selectedProduct.product_type"
-                                           :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"></ThreeDScene>
+                                           :colorGrouping="[]" mainPreview="true" :productType="selectedProduct.product_type"
+                                           :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
+                                           :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
+                              />
                             </template>
-                            <div v-show="!selectedProduct.show_3d">
+                            <div v-else>
                               <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
                                      :front="{
                                         textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
@@ -403,11 +407,13 @@
                                         boundary_url: design.backboundary_design? storageUrl+design.backboundary_design.file_url : '',
                                         models: selectedProduct.productstyles[styleIndex].back_models
                                      }"
+                                     :svg_parts="design.svg_parts"
                                      :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
                                      :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                                      :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                      :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
                                      :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
+                                     :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
                               />
 
                               <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
@@ -417,12 +423,14 @@
                                         boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
                                         models: selectedProduct.productstyles[styleIndex].front_models
                                      }"
+                                     :svg_parts="design.svg_parts"
                                      :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
                                      :logoAllowed="Boolean(selectedProduct.is_logo_allowed)"
                                      :logosLimit="selectedProduct.allowed_logos_count" :productNamesSetting="selectedProduct.productnames"
                                      :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
                                      :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
                                      :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
+                                     :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
                               />
                             </div>
                           </template>
@@ -576,7 +584,9 @@ import {
   getRandom,
   getOrderUpdateIdentifier,
   createOrUpdateOrderUpdateDataState,
-  updateOrder, hasCompanyPermission
+  updateOrder, 
+  hasCompanyPermission
+  getStyleSelectedAddons
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1087,10 +1097,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     return this.$store.getters.getCanvasReady
   }
 
-  get customTextObjects() {
-    return this.$store.getters.customTextObjects;
-  }
-
   @Watch('canvasReady')
   canvasReadyChanged(newValL: [Record<any, any>]) {
     if (this.isCustomerAuthenticated && newValL && this.actionBeforeLogin) {
@@ -1270,6 +1276,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get editStatus(): boolean {
     return this.$store.getters.getEditStatus
   }
+  get shuffle_color_number(): number {
+    return this.$store.getters.getShuffleColorNumber
+  }
 
   public getUrlParams() {
     if (this.$route.params.product && this.$route.params.name && this.productUpdated) {
@@ -1311,8 +1320,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       func2();
     },500)
   }
-  public switchView() {
-    this.selectedProduct.show_3d = !this.selectedProduct.show_3d
+  public resetCameraToOriginalPosition() {
+    this.ref['mainScene'][0].resetCameraToOriginalPosition()
   }
 
   public async initProductsFonts(products: Record<any, any>[], resolve: any) {
@@ -1428,16 +1437,26 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private addToCartAnimation() {
     this.genImages()
-    const canvasFront = this.ref['mainScene'][0].$refs['front']
-    const canvasBack = this.ref['mainScene'][0].$refs['back']
-
     setTimeout(() => {
-      this.ref['frontImg'].height = canvasFront.clientHeight
-      this.ref['frontImg'].width = canvasFront.clientWidth
-      if(canvasBack) {
-        this.ref['backImg'].height = canvasBack.clientHeight
-        this.ref['backImg'].width = canvasBack.clientWidth
+      const scene_ref = this.ref['mainScene'][0]
+      if(this.selectedProduct?.is_3d_product) {
+        const height = scene_ref.container.clientHeight / 2
+        const width = scene_ref.container.clientWidth / 2
+        this.ref['frontImg'].height = height
+        this.ref['frontImg'].width = width
+        this.ref['backImg'].height = height
+        this.ref['backImg'].width = width
+      }else {
+        const canvasFront = scene_ref.$refs['front']
+        const canvasBack = scene_ref.$refs['back']
+        this.ref['frontImg'].height = canvasFront.clientHeight
+        this.ref['frontImg'].width = canvasFront.clientWidth
+        if(canvasBack) {
+          this.ref['backImg'].height = canvasBack.clientHeight
+          this.ref['backImg'].width = canvasBack.clientWidth
+        }
       }
+
     }, 100)
 
     this.ref['cartAnim'] && this.ref['cartAnim'].classList.add('cart-animation')
@@ -1514,9 +1533,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     let self: Record<any, any> = this;
     this.$store.commit('setIsShareDesign', false)
     this.generate_share_url = share_url
+    const scene_ref = this.$store.getters.getCanvasImage.scene
     if (show_add_to_locker_modal) {
-      const scene_ref = this.$store.getters.getCanvasImage.scene
-      if (scene_ref) {
+      if (!this.selectedProduct?.is_3d_product && scene_ref) {
         scene_ref.frontCanvas.discardActiveObject().renderAll()
         scene_ref.backCanvas?.discardActiveObject().renderAll()
       }
@@ -1527,9 +1546,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
       return item.design_show
     })
-    let main_scene = this.ref.mainScene[0];
-    main_scene && main_scene.frontCanvas.discardActiveObject().renderAll();
-    main_scene && main_scene.backCanvas?.discardActiveObject().renderAll();
+    if(!this.selectedProduct?.is_3d_product) {
+      const main_scene = this.ref.mainScene[0];
+      main_scene && main_scene.frontCanvas.discardActiveObject().renderAll();
+      main_scene && main_scene.backCanvas?.discardActiveObject().renderAll();
+    }
     let locker_front_png = (getImageFromCanvas('front') as string ).split(',')[1]
     let locker_back_png: string|null = null;
     if (this.mainProductType == "front_back") {
@@ -1544,22 +1565,29 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         unique[svgGroups[i].color] = 1;
       }
     }
+    {}
     const fixed_logo_index = Store.getters.getFixedLogoIndex;
+    const product_style = this.selectedProduct.productstyles[this.styleIndex]
+    let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
     let locker = {
       product_id: this.selectedProduct.product_id,
-      style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+      style_id: product_style.id,
       design_id: currentDesign[0].id,
+      svg_parts: scene_ref.parts,
       custom_logos: this.customLogos,
       text: this.customTexts,
       colors: this.imageColors,
-      defaultcolors: this.$store.getters.getDefaultColors,
-      groupcolors: this.$store.getters.getGroupColors,
+      shuffle_color_number: this.shuffle_color_number,
+      defaultcolors: scene_ref.appliedDefaultColors,
+      groupcolors: scene_ref.appliedGroupColors,
       id: this.getProductEditInfoObject.locker_product_info.locker_product_id,
       locker_front_png: locker_front_png,
       locker_back_png: locker_back_png,
       product_roster_detail: this.rosterDetails,
       fixed_logo_index: fixed_logo_index,
-      svgcolors: distinct
+      svgcolors: distinct,
+      grouped_addons: selected_grouped_addons,
+      ungrouped_addons: selected_ungrouped_addons
     }
 
     if (self.getProductEditInfoObject.editing) {

@@ -18,7 +18,7 @@ import {
   setDefaultColors,
   santaClone,
   updateLastActiveProductData,
-  getDataToSetLastActiveProduct, isAbandonedSize
+  getDataToSetLastActiveProduct, isAbandonedSize, resetCustomizedAddons
 } from '@/helpers/Helpers'
 import product from "@/store/modules/product";
 import {isEmpty, findIndex, find} from "lodash";
@@ -58,6 +58,7 @@ const ProductAttributes:Module<any, any> = {
     },
     customTexts: {},
     styleIndex: 0,
+    shuffle_color_number: 1,
     // changing defaultColors object will also need to change value in helper method getDefaultColorsObject
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
     groupColors: {},
@@ -121,7 +122,6 @@ const ProductAttributes:Module<any, any> = {
     start_load_designs: false,
     start_load_products: false,
     notifications:[],
-    customLogoObjects:[],
     cartItemId:'',
     editCart: {
       cartId: 0,
@@ -673,6 +673,10 @@ const ProductAttributes:Module<any, any> = {
           })
       }
     },
+    SET_SHUFFLE_COLOR_NUMBER(state:  Record<any, any>, payload:number){
+      updateLastActiveProductData({ shuffle_color_number: payload })
+      state.shuffle_color_number = payload;
+    },
     defaultColor (state: Record<any, any>, color: Record<any, any>) {
       if(color) {
         Vue.set(state.defaultColors[color.index], 'color', color.color)
@@ -681,7 +685,6 @@ const ProductAttributes:Module<any, any> = {
       }
       updateLastActiveProductData({ default_colors: state.defaultColors })
     },
-
     removeDefaultColor (state: Record<any, any>, removeIndex: number) {
       Vue.set(state.defaultColors[removeIndex], 'color', '')
       Vue.set(state.defaultColors[removeIndex], 'pantone', '')
@@ -866,6 +869,7 @@ const ProductAttributes:Module<any, any> = {
       state.undoItems = []
       state.redoItems = []
       state.edit_locker_product = []
+      state.shuffle_color_number = 1
       //state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}];
       state.groupColors = {};
@@ -905,7 +909,6 @@ const ProductAttributes:Module<any, any> = {
     },
     RESET_CUSTOM_LOGOS: async (state: Record<any, any>) => {
       state.logoTabIndex = 0;
-      state.customLogoObjects = [];
       state.customLogos = {};
       await initCustomLogosNew(state.products)
       eventBus.$emit('set-logo-tab-index')
@@ -1067,14 +1070,6 @@ const ProductAttributes:Module<any, any> = {
     STORE_CANVAS_IMAGE(state:Record<any, any>, payload){
       state.canvasImage.ref_front = payload.scene.$refs.front
       state.canvasImage.ref_back = payload.scene.$refs.back
-      state.canvasImage.scene = payload.scene
-    },
-    UPDATE_CUSTOM_LOGO_OBJECTS(state:Record<any, any>, payload){
-      if(Object.prototype.hasOwnProperty.call(payload, "index")) {
-        state.customLogoObjects[payload.index] = payload.data
-      } else {
-        state.customLogoObjects.push(payload.data)
-      }
       state.canvasImage.scene = payload.scene
     },
     SET_HIDE_SAVE_LOCKER_BUTTON(state:Record<any, any>, payload){
@@ -1524,6 +1519,9 @@ const ProductAttributes:Module<any, any> = {
         return state.product_custom_texts
       return state.product_custom_texts[product_id] ? state.product_custom_texts[product_id] : []
     },
+    getShuffleColorNumber: state => {
+      return state.shuffle_color_number
+    },
     getDefaultColors: state => {
       return state.defaultColors
     },
@@ -1607,9 +1605,6 @@ const ProductAttributes:Module<any, any> = {
     },
     getUsingColorLogos(state:Record<any, any>){
       return state.using_logo_colors
-    },
-    customLogoObjects(state:Record<any, any>){
-      return state.customLogoObjects
     },
     getStockCount(state:Record<any,any>){
       return state.stock_count;
@@ -1896,6 +1891,7 @@ const ProductAttributes:Module<any, any> = {
       })
     },
     resetStore({commit}){
+      resetCustomizedAddons()
       commit('RESET_STORE')
       commit('RESET_CUSTOM_TEXTS')
       commit('RESET_CUSTOM_LOGOS')

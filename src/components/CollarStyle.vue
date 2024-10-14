@@ -32,16 +32,44 @@
               </div>
           </div>
 
-          <div class="choose-stuff" v-if="selectedProduct.active_addons.length > 0">
+          <div class="choose-stuff" v-if="selectedProduct.active_addons.length || Object.keys(customizedAddons.grouped_addons).length || customizedAddons.ungrouped_addons.length">
               <h2 class="fw-bold mb-3 fz-18">Addons</h2>
-              <div class="stuff-row addons d-flex gap-2">
-                  <div class="addon d-inline-flex gap-1" :class="{'selected': addon.selected}" v-for="addon in selectedProduct.active_addons"
-                       :key="addon.id">
-                    <b-form-checkbox size="lg" v-model="addon.selected"   @change="handleAddonSelectionUpdate">
-                      {{ addon.title }}
-                      <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
-                    </b-form-checkbox>
-                  </div>
+              <div class="stuff-row addons d-block gap-2">
+                <template v-if="customizedAddons">
+                  <template v-for="(grouped_addons, group_name) in customizedAddons.grouped_addons">
+                    <h3>{{group_name}}</h3>
+                    <div class="addon d-inline-flex gap-1" style="margin: 6px 8px" :class="{'selected': group_addon.selected}" v-for="(group_addon, gaIdx) in grouped_addons"
+                         :key="group_addon.addon_id">
+                      <b-form-checkbox size="lg" v-model="group_addon.selected" :name="`group-${group_name}-addon`"
+                                       @change="handleAddonSelectionUpdate($event, gaIdx, group_name)">
+                        {{ group_addon.sku_id }}
+                        <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{group_addon.currencies[0].symbol}}{{group_addon.currencies[0].price}}</span>
+                      </b-form-checkbox>
+                    </div>
+                  </template>
+                  <hr v-if="Object.keys(customizedAddons.ungrouped_addons).length > 0"/>
+                  <template v-for="(ungroup_addon, uaIdx) in customizedAddons.ungrouped_addons">
+                    <div class="addon d-inline-flex gap-1" style="margin: 6px 8px" :class="{'selected': ungroup_addon.selected}"
+                         :key="`ungroupe-${uaIdx}`">
+                      <b-form-checkbox size="lg" v-model="ungroup_addon.selected"
+                                       @change="handleAddonSelectionUpdate($event, uaIdx)">
+                        {{ ungroup_addon.sku_id }}
+                        <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{ungroup_addon.currencies[0].symbol}}{{ungroup_addon.currencies[0].price}}</span>
+                      </b-form-checkbox>
+                    </div>
+                  </template>
+                </template>
+
+                <template v-if="customizedAddons.ungrouped_addons.length > 0">
+                  <hr />
+                </template>
+                <div class="addon d-inline-flex gap-1" :class="{'selected': addon.selected}" v-for="addon in selectedProduct.active_addons"
+                     :key="addon.id">
+                  <b-form-checkbox size="lg" v-model="addon.selected"   @change="handleAddonSelectionUpdate">
+                    {{ addon.title }}
+                    <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
+                  </b-form-checkbox>
+                </div>
               </div>
           </div>
 
@@ -64,7 +92,12 @@
 <script lang="ts">
 import {Component, Mixins} from 'vue-property-decorator'
 import {changeSelectedProduct} from "@/mixins/LockerProduct"
-import {handleProductPriceUpdate} from "@/helpers/Helpers";
+import {
+  getProductAddonInfoDefaultObject,
+  handleProductPriceUpdate, hideLockerProductUpdateButton,
+  lastActiveProductDefaultObject
+} from "@/helpers/Helpers";
+import Store from "@/store";
     @Component<CollarStyle>({
     })
 
@@ -101,9 +134,58 @@ import {handleProductPriceUpdate} from "@/helpers/Helpers";
       get productPriceObject() {
         return this.$store.getters.getProductPriceObject
       }
-      handleAddonSelectionUpdate(): void {
-        handleProductPriceUpdate()
+
+      get customizedAddons() {
+        return this.selectedProduct.productstyles[this.styleIndex].customized_addons
       }
+      public async handleAddonSelectionUpdate(val, addon_index=-1, group_name='') {
+        if(group_name) {
+          this.selectedProduct.productstyles[this.styleIndex].customized_addons.grouped_addons[group_name].forEach((grouped_addon, groupedAddonIndex) => {
+            if(val) {
+              if(groupedAddonIndex != addon_index) {
+                grouped_addon.selected = false;
+              }
+            }
+
+          })
+        }
+        await handleProductPriceUpdate()
+        await this.updateLastActiveProductAddonsInfo()
+        const self: Record<any, any> = this
+        self.$eventBus.$emit("addAddons")
+        if(addon_index >= 0) {
+          hideLockerProductUpdateButton()
+        }
+      }
+
+      public updateLastActiveProductAddonsInfo() {
+        const selected_product = Store.getters.getSelectedProduct
+        const last_active_product_data = Store.getters.getLastActiveProductData
+        const selected_product_id = selected_product.id
+        const addons_info = getProductAddonInfoDefaultObject(selected_product_id)
+        const { grouped_addons, ungrouped_addons } = selected_product.productstyles[this.styleIndex].customized_addons;
+        selected_product.active_addons.forEach((active_addon: Record<any, any>) => {
+          if(active_addon.selected) {
+            addons_info[selected_product_id].simple_addons.push(active_addon.addon_id)
+          }
+        })
+        ungrouped_addons.forEach((ungrouped_addon: Record<any, any>) => {
+          if(ungrouped_addon.selected) {
+            addons_info[selected_product_id].ungrouped_addons.push(ungrouped_addon.addon_id)
+          }
+        })
+        for(const group_name in grouped_addons) {
+          grouped_addons[group_name].forEach((grouped_addon: Record<any, any>) => {
+            if(grouped_addon.selected) {
+              addons_info[selected_product_id].grouped_addons[group_name] = grouped_addon.addon_id
+            }
+          })
+        }
+        const last_product_addons_info = last_active_product_data.addons_info
+        last_product_addons_info[selected_product_id] = addons_info[selected_product_id]
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {addons_info: last_product_addons_info})
+      }
+
 
       public changeFixedLogo(selectedIndex) {
         this.selectedProduct.productstyles[this.styleIndex].logo.forEach((logo, index) => {

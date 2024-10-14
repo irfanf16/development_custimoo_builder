@@ -21,13 +21,15 @@
                     boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
                     models: selectedProduct.productstyles[styleIndex].front_models
                   }"
+                 :svg_parts="design.svg_parts"
                  :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
                  :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
                  :logos="selectedProduct.productstyles[styleIndex].logo"
                  :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                  :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
                  :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
-                 :design_id="design.id"/>
+                 :design_id="design.id" :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
+          />
         </a>
         <div v-else :style="{width: design_width+ 'px', height: design_height+ 'px'}"></div>
         <h3>{{ design.design_name }}</h3>

@@ -23,7 +23,11 @@ import {
   getColorType,
   santaClone,
   navigateToCustomProduct,
-  createOrUpdateOrderUpdateDataState, getBase64FileInfo, getDateTimeFormatted
+  createOrUpdateOrderUpdateDataState,
+  getBase64FileInfo,
+  getDateTimeFormatted,
+  handleExistingAddonsSelection,
+  getProductAddonInfoDefaultObject
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -291,6 +295,23 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         let last_active_prod_data = this.$store.getters.getLastActiveProductData;
         if(active_product_detail) {
           const { factory_product_active_index, factory_products } = active_product_detail
+          let editing_product_addons_info = getProductAddonInfoDefaultObject(active_product_id)
+          factory_products.forEach(factory_product => {
+            const {grouped_addons, ungrouped_addons} = factory_product
+            if(ungrouped_addons && ungrouped_addons.length > 0) {
+              editing_product_addons_info[active_product_id].ungrouped_addons = ungrouped_addons.map(ungrouped_addon => {
+                return ungrouped_addon.addon_id
+              })
+            }
+            if(grouped_addons && !checkIsEmpty(grouped_addons)) {
+              for(const group_name in grouped_addons) {
+                editing_product_addons_info[active_product_id].grouped_addons[group_name] = grouped_addons[group_name].id
+              }
+            }
+          })
+          handleExistingAddonsSelection(editing_product_addons_info)
+
+
           let active_factory_product = factory_products[factory_product_active_index]
           this.handleFactoryProductAddons(active_factory_product)
 
@@ -306,7 +327,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             product_custom_texts = active_factory_product.product_custom_texts
           }
 
-          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail } = active_factory_product
+          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail, shuffle_color_number } = active_factory_product
           fixed_logo_index = active_factory_product.fixed_logo_index
          if(product_edit_info_object.type == "cart_product" && active_product_detail.factory_products[0].reorder_data) {
            this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', { cart_product_info : {...product_edit_info_object.cart_product_info, reorder_data : active_product_detail.factory_products[0].reorder_data} })
@@ -319,6 +340,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
               if(order_updated_data && order_updated_data.length > 0 && order_updated_data[factory_product_active_index]) {
                 let order_update_active_product = order_updated_data[factory_product_active_index]
                 custom_logos = order_update_active_product.custom_logos
+                shuffle_color_number = order_update_active_product.shuffle_color_number
                 default_colors = order_update_active_product.defaultcolors
                 group_colors = order_update_active_product.groupcolors
                 product_roster_detail = order_update_active_product.product_roster_detail
@@ -340,7 +362,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
 
           let customizer_data: Record<any, any> = {
             active_product_id: active_product_id, custom_logos:custom_logos, product_custom_texts:product_custom_texts,
-            default_colors:default_colors, group_colors:group_colors, product_roster_detail: product_roster_detail
+            default_colors:default_colors, group_colors:group_colors, product_roster_detail: product_roster_detail,
+            shuffle_color_number: shuffle_color_number
           }
           await this.setCustomizerData(customizer_data)
           this.$store.commit('RESET_UNDO');
@@ -356,6 +379,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           }
         }
         else {
+          let addons_info = {}
           if(last_active_prod_data.product_id) {
             fixed_logo_index = last_active_prod_data.fixed_logo_index
             let custom_logos = last_active_prod_data.custom_logos;
@@ -375,7 +399,12 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             * no need to set product rosters from last active product it will be set automatically vuex action setProductsRosters
             * */
             await this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors,
-              default_colors: last_active_prod_data.default_colors, product_roster_detail: product_roster_detail})
+              default_colors: last_active_prod_data.default_colors, product_roster_detail: product_roster_detail,
+              shuffle_color_number: last_active_prod_data.shuffle_color_number })
+            if(last_active_prod_data.addons_info && !checkIsEmpty(last_active_prod_data.addons_info)) {
+              addons_info = last_active_prod_data.addons_info
+              handleExistingAddonsSelection(addons_info)
+            }
           }
 
           const selected_category = this.$store.getters.getSelectedCategory;
@@ -389,7 +418,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             search_products: self.search_products, customized: this.$store.getters.getCustomized,
             personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
             products_rosters: this.$store.getters.getProductRosters('all'), default_colors: last_active_prod_data.default_colors,
-            group_colors: last_active_prod_data.group_colors
+            group_colors: last_active_prod_data.group_colors, addons_info: addons_info
           })
 
 
@@ -456,7 +485,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
 
   public async setCustomizerData(customizer_data) {
     let self: Record<any, any> = this;
-    let {active_product_id, custom_logos, product_custom_texts, default_colors, group_colors, product_roster_detail} = customizer_data
+    let {active_product_id, custom_logos, product_custom_texts, default_colors, group_colors, product_roster_detail, shuffle_color_number} = customizer_data
     if(custom_logos) {
       const custom_logos_type = custom_logos.constructor.name
       if(custom_logos_type == "Array" && custom_logos.length > 0) {
@@ -494,6 +523,9 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
 
     }
     let emit_color_change_event = false;
+    if(shuffle_color_number) {
+      this.$store.commit('SET_SHUFFLE_COLOR_NUMBER', shuffle_color_number)
+    }
     if(default_colors && default_colors.length > 0) {
       emit_color_change_event = true
       await this.$store.dispatch('overRideDefaultColors', default_colors);

@@ -218,6 +218,8 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     await this.hideLockerProductUpdateButton()
     await setUndoRedoItems('customTexts', 'placement_updated')
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].placement = placement;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis_3d = 0;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis_3d = 0;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextUpdated", {
       emitter: "placement", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index, value: self.product_custom_texts[custom_text_index]

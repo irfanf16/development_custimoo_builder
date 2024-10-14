@@ -156,6 +156,8 @@ export class LogoPlacementTabMixin extends Mixins(CustomLogosMixin) {
     const self: Record<any, any> = this;
     await setUndoRedoItems('customLogos', 'placement_updated')
     this.customLogos[custom_logo_index].side = updated_value
+    this.customLogos[custom_logo_index].x_axis_3d = 0
+    this.customLogos[custom_logo_index].y_axis_3d = 0
     this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: custom_logo_index, custom_logos:  this.customLogos[custom_logo_index]})
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
   }

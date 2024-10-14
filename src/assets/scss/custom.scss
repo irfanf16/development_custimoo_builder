@@ -4568,6 +4568,7 @@ $fontSize: 0.5;
 
 .main-preview {
     width: 100% !important;
+    padding: 0 !important;
 
     .canvas-container {
         width: 100% !important;
@@ -7055,6 +7056,18 @@ html, body{
                     canvas{
                         max-width: 100%;
                         max-height: 100%;
+                    }
+                }
+            }
+            .loading-holder {
+                .canvas-area-holder{
+                    height: 300px;
+                    width: 300px;
+                    #renderer{
+                        canvas{
+                            max-width: 100%;
+                            max-height: 100%;
+                        }
                     }
                 }
             }

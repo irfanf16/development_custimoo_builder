@@ -310,10 +310,6 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   public show_roster = false;
 
-  get customTextObjects(){
-    return this.$store.getters.customTextObjects;
-  }
-
   get editing_roster_player_index(): number {
     return this.$store.getters.getEditingRosterPlayerIndex
   }

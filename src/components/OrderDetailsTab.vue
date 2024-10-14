@@ -237,14 +237,6 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     return this.$store.getters.getActionBeforeLogin
   }
 
-  get customTextObjects(): Record<any, any>[] {
-    return this.$store.getters.customTextObjects;
-  }
-
-  get customLogoObjects(): Record<any, any>[] {
-    return compact(this.$store.getters.customLogoObjects);
-  }
-
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
   }
@@ -422,28 +414,7 @@ export default class OrderDetailsTab extends Mixins(ErrorMessages, ModalAction, 
     if(self.$store.getters.getUsingColorLogos) {
       order_detail.logo_colors = self.logoColors
     }
-    let custom_text_objects = compact(this.customTextObjects);
-    let custom_logo_objects = compact(this.customLogoObjects);
-    let custom_text_svgs: Record<any, any> = [];
-    for (const custom_text_object of custom_text_objects) {
-      if (custom_text_object.constructor.name == "klass") {
-        custom_text_svgs.push(custom_text_object.toSVG());
-      }
-    }
-    order_detail.custom_text_svgs = custom_text_svgs
-    let custom_logo_svgs: Record<any, any> = [];
-    for (const custom_logo_svg of custom_logo_objects) {
-      if(custom_logo_svg.constructor.name == "klass") {
-        custom_logo_svgs.push({
-          width:custom_logo_svg.width,
-          height:custom_logo_svg.height,
-          svg: custom_logo_svg.toSVG(),
-          scaleX:custom_logo_svg.scaleX,
-          scaleY:custom_logo_svg.scaleY
-        });
-      }
-    }
-    order_detail.custom_logo_svgs = custom_logo_svgs
+
     return order_detail;
   }
 }

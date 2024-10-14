@@ -49,7 +49,7 @@ import {
   faTrashAlt,
   faTshirt,
   faUserFriends,
-  faUserSecret, faSignOutAlt, faBell, faCartArrowDown, faFileExport, faSpinner, faSync
+  faUserSecret, faSignOutAlt, faBell, faCartArrowDown, faFileExport, faSpinner, faSync, faExpand
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -95,6 +95,7 @@ library.add(faBell)
 library.add(faFileExport)
 library.add(faSpinner)
 library.add(faSync)
+library.add(faExpand)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 import Vue2TouchEvents from 'vue2-touch-events';
