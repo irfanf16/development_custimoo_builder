@@ -868,7 +868,11 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public submitActivity(submit_type:string) {
     this.showLoader = true;
     this.activity_items.activity_item_data.skip_customer_approval = JSON.stringify(this.activity_items.activity_item_data.skip_customer_approval);
-    let artwork_created_activity = findActivityWithPosition(this.order.items[this.activity_items.order_item_index]?.status_activities, this.FACTORYREVIEW, 0)
+    let status_to_check = this.FACTORYREVIEW;
+    if(this.order && this.ecommerce_order_id){
+      status_to_check = this.ORDERAPPROVE;
+    }
+    let artwork_created_activity = findActivityWithPosition(this.order.items[this.activity_items.order_item_index]?.status_activities, status_to_check, 0)
     if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.status === this.CUSTOMERAPPROVED) && this.activity_items.activity_item_data.length < artwork_created_activity.activity_items.length){
         if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.action === 'accept')){
             let submitted_customer_review_activity = findActivity(this.order.items[this.activity_items.order_item_index]?.status_activities, this.CUSTOMERREVIEW, artwork_created_activity.activity_items.length)
