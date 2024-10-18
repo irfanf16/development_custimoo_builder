@@ -155,7 +155,8 @@ export default class AddToCartButton extends Mixins(cartModalData) {
   }
 
   public getQuote() {
-    if(hasCompanyPermission('show_admin_salerep')) {
+    let admin_salesrep_options =  this.$store.getters.getAdminSalesRep;
+    if(hasCompanyPermission('show_admin_salerep') && admin_salesrep_options.length > 0) {
       this.$store.commit("SET_SALES_REP_MODAL_FROM", 'cart')
       this.showVModal('sale-representative-modal');
     } else {

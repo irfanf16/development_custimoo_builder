@@ -673,7 +673,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     this.$emit("deleteCartItem", { cart_item: cart_item, factory_product: factory_product });
   }
   public getQuote() {
-    if(hasCompanyPermission('show_admin_salerep')) {
+    let admin_salesrep_options =  this.$store.getters.getAdminSalesRep;
+    if(hasCompanyPermission('show_admin_salerep')  && admin_salesrep_options.length > 0) {
       this.$store.commit("SET_SALES_REP_MODAL_FROM", 'order')
       this.showVModal('sale-representative-modal');
     } else {

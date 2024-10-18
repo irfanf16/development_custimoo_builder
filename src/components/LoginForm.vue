@@ -390,7 +390,8 @@
     }
 
     public isAdminSaleRep() {
-      return hasCompanyPermission('show_admin_salerep');
+      let admin_salesrep_options =  this.$store.getters.getAdminSalesRep;
+      return hasCompanyPermission('show_admin_salerep') && admin_salesrep_options.length > 0;
     }
 
   }
