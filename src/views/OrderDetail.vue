@@ -967,7 +967,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
           (this.design_approval_activity_item_data.length - 1) == this.design_approval_activity_navigation_index
           && this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].action )
         {
-          this.submitActivity('')
+          this.submitActivity('form_data')
         }
       }
     }else{
