@@ -115,9 +115,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>;
 
   private scene = new THREE.Scene()
-  private camera !: THREE.Camera
-  private frontCamera !: THREE.Camera
-  private backCamera !: THREE.Camera
+  private camera !: THREE.PerspectiveCamera
+  private frontCamera !: THREE.OrthographicCamera
+  private backCamera !: THREE.OrthographicCamera
   private renderer = new THREE.WebGLRenderer({ 'alpha': false, 'antialias': true })
   private container!: HTMLDivElement
   private controls!: OrbitControls
@@ -847,75 +847,68 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.$eventBus.$on("changeColors", this.changeColors)
   }
 
-  public fitCameraToCenteredObject (camera, object, offset, orbitControls ) {
-    const boundingBox = new THREE.Box3();
-    boundingBox.setFromObject( object );
+public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.OrthographicCamera, object: THREE.Object3D, offset: number, orbitControls: OrbitControls, renderer?: THREE.WebGLRenderer) {
+  const boundingBox = new THREE.Box3();
+  boundingBox.setFromObject(object);
 
-    var middle = new THREE.Vector3();
-    var size = new THREE.Vector3();
-    boundingBox.getSize(size);
+  const size = new THREE.Vector3();
+  boundingBox.getSize(size); // Get object size
 
-    // figure out how to fit the box in the view:
-    // 1. figure out horizontal FOV (on non-1.0 aspects)
-    // 2. figure out distance from the object in X and Y planes
-    // 3. select the max distance (to fit both sides in)
-    //
-    // The reason is as follows:
-    //
-    // Imagine a bounding box (BB) is centered at (0,0,0).
-    // Camera has vertical FOV (camera.fov) and horizontal FOV
-    // (camera.fov scaled by aspect, see fovh below)
-    //
-    // Therefore if you want to put the entire object into the field of view,
-    // you have to compute the distance as: z/2 (half of Z size of the BB
-    // protruding towards us) plus for both X and Y size of BB you have to
-    // figure out the distance created by the appropriate FOV.
-    //
-    // The FOV is always a triangle:
-    //
-    //  (size/2)
-    // +--------+
-    // |       /
-    // |      /
-    // |     /
-    // | F° /
-    // |   /
-    // |  /
-    // | /
-    // |/
-    //
-    // F° is half of respective FOV, so to compute the distance (the length
-    // of the straight line) one has to: `size/2 / Math.tan(F)`.
-    //
-    // FTR, from https://threejs.org/docs/#api/en/cameras/PerspectiveCamera
-    // the camera.fov is the vertical FOV.
+  const center = new THREE.Vector3();
+  boundingBox.getCenter(center); // Get object center
 
-    const fov = camera.fov * ( Math.PI / 180 );
-    const fovh = 2*Math.atan(Math.tan(fov/2) * camera.aspect);
-    let dx = size.z / 2 + Math.abs( size.x / 2 / Math.tan( fovh / 2 ) );
-    let dy = size.z / 2 + Math.abs( size.y / 2 / Math.tan( fov / 2 ) );
-    let cameraZ = Math.max(dx, dy);
+  if (camera instanceof THREE.PerspectiveCamera) {
+    // PerspectiveCamera handling:
+    const fov = camera.fov * (Math.PI / 180); // Convert vertical FOV to radians
+    const fovh = 2 * Math.atan(Math.tan(fov / 2) * camera.aspect); // Horizontal FOV
 
-    // offset the camera, if desired (to avoid filling the whole canvas)
-    if( offset !== undefined && offset !== 0 ) cameraZ *= offset;
+    let dx = size.z / 2 + Math.abs(size.x / 2 / Math.tan(fovh / 2));
+    let dy = size.z / 2 + Math.abs(size.y / 2 / Math.tan(fov / 2));
+    let cameraZ = Math.max(dx, dy); // Compute distance for fitting
 
-    camera.position.set( 0, 0, cameraZ );
+    if (offset !== undefined && offset !== 0) cameraZ *= offset; // Apply offset
 
-    // set the far plane of the camera so that it easily encompasses the whole object
+    camera.position.set(center.x, center.y, cameraZ); // Set camera position based on computed distance
+
+    // Set the far plane to ensure the object is fully visible
     const minZ = boundingBox.min.z;
-    const cameraToFarEdge = ( minZ < 0 ) ? -minZ + cameraZ : cameraZ - minZ;
-
+    const cameraToFarEdge = minZ < 0 ? -minZ + cameraZ : cameraZ - minZ;
     camera.far = cameraToFarEdge * 3;
-    camera.updateProjectionMatrix();
+    camera.updateProjectionMatrix(); // Update camera projection
+  } else {
+    // Calculate aspect ratio using renderer dimensions
+    const aspect = renderer
+      ? renderer.domElement.width / renderer.domElement.height
+      : 1; // Default to 1 if no renderer is provided
 
-    if ( orbitControls !== undefined ) {
-        // set camera to rotate around the center
-        orbitControls.target = new THREE.Vector3(0, 0, 0);
+    const maxDim = Math.max(size.x, size.y, size.z); // Use largest dimension to scale frustum
+    const frustumHeight = maxDim; // Add padding
+    const frustumWidth = frustumHeight * aspect;
 
-        // prevent camera from zooming out far enough to create far plane cutoff
-        orbitControls.maxDistance = cameraToFarEdge * 2;
+    // Set orthographic camera frustum
+    camera.left = -frustumWidth / 2;
+    camera.right = frustumWidth / 2;
+    camera.top = frustumHeight / 2;
+    camera.bottom = -frustumHeight / 2;
+
+    if (offset !== undefined && offset !== 0) {
+      camera.left *= offset;
+      camera.right *= offset;
+      camera.top *= offset;
+      camera.bottom *= offset;
     }
+
+    camera.position.set(center.x, center.y, maxDim); // Position the orthographic camera
+    camera.updateProjectionMatrix(); // Update the camera projection
   }
+
+  if (orbitControls !== undefined) {
+    // Set orbit controls to rotate around the object's center
+    orbitControls.target.copy(center);
+    orbitControls.update(); // Update orbit controls
+  }
+}
+
 
   public resetCameraToOriginalPosition() {
     this.controls.reset()
@@ -931,11 +924,11 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         this.model['material'].shininess = 10
         this.model['material'].needsUpdate = true
 
-        this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls);
+        this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls, this.renderer);
         this.originalCameraPosition = this.camera.position.clone()
 
-        this.frontCamera = new THREE.OrthographicCamera(-3.6, 3.6, 3.6, -3.6, 0.01, 500)
-        this.frontCamera.position.set(this.originalCameraPosition.x, this.originalCameraPosition.y, this.originalCameraPosition.z)
+        this.frontCamera = new THREE.OrthographicCamera(-0.3, 0.3, 0.3, -0.3, 0.01, 500)
+        this.fitCameraToCenteredObject(this.frontCamera, this.model, 0, this.controls, this.renderer)
         this.backCamera = this.frontCamera.clone()
         this.backCamera.position.z = -this.camera.position.z
         this.backCamera.lookAt(0, 0, 0);
@@ -1003,7 +996,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     })
   }
 
-  public renderScene(camera = this.camera) {
+  public renderScene(camera: THREE.OrthographicCamera|THREE.PerspectiveCamera = this.camera) {
     this.renderer.render(this.scene, camera)
   }
 
