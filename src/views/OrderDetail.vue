@@ -688,6 +688,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     return this.$store.getters.isCustomerAuthenticated
   }
 
+  get customerPermissions(){
+    return this.$store.getters.getCustomerPermissions
+  }
+
   getOrderItemStatusActivityInfoDefaultObject(values = {}) {
     const default_obj =  {
       item_index: null, status_activity_index: null, status_activity_item_index: null, factory_product: null
@@ -872,6 +876,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     if(this.order && this.ecommerce_order_id){
       status_to_check = this.ORDERAPPROVE;
     }
+    else if(this.customerPermissions.includes('order-approve-by-default')){
+      status_to_check = this.ORDERAPPROVE;
+    }
+
     let artwork_created_activity = findActivityWithPosition(this.order.items[this.activity_items.order_item_index]?.status_activities, status_to_check, 0)
     if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.status === this.CUSTOMERAPPROVED) && this.activity_items.activity_item_data.length < artwork_created_activity.activity_items.length){
         if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.action === 'accept')){
