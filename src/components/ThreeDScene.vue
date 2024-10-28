@@ -1,12 +1,14 @@
 <template>
   <div class="loading-holder">
-    <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
-    <div class="canvas-area-holder" :class="{ 'fix-space': !manageComponents.mobileScreen }" style="display: flex; justify-content: space-between;">
+    <div v-if="showLoader" class="loader"><img src="@assets/images/loading.gif"/></div>
+    <div :class="{ 'fix-space': !manageComponents.mobileScreen }" class="canvas-area-holder"
+         style="display: flex; justify-content: space-between;">
       <div id="canvas_container">
-        <canvas ref="canvas" id="canvas" class="canvas" :width="canvasResolution" :height="canvasResolution"></canvas>
-        <canvas ref="temp_canvas" id="temp_canvas" class="canvas" :width="canvasResolution" :height="canvasResolution"></canvas>
+        <canvas id="canvas" ref="canvas" :height="canvasResolution" :width="canvasResolution" class="canvas"></canvas>
+        <canvas id="temp_canvas" ref="temp_canvas" :height="canvasResolution" :width="canvasResolution"
+                class="canvas"></canvas>
       </div>
-      <div ref="renderer" id="renderer"></div>
+      <div id="renderer" ref="renderer"></div>
     </div>
   </div>
 </template>
@@ -15,8 +17,8 @@
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import {fabric} from 'fabric'
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js"
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js"
+import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader.js"
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import {
@@ -33,10 +35,10 @@ import SceneMixin from "@/mixins/SceneMixin";
   beforeDestroy() {
     const self: Record<any, any> = this;
     self.$eventBus.$off("customTextUpdated", this.addTextsNew)
-    if((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
+    if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
       self.$eventBus.$off("rosterTextUpdated", this.addTextsNew)
     }
-    if(this.mainPreview) {
+    if (this.mainPreview) {
       self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
     }
     self.$eventBus.$off("customTextRemoved", this.deleteExistingTextsFromCanvas)
@@ -93,50 +95,34 @@ import SceneMixin from "@/mixins/SceneMixin";
 })
 
 export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLogosMixin, SceneMixin) {
-  @Prop({ required: true }) readonly imageData!: Record<string, unknown>
-  @Prop({ required: false }) readonly logos !: [Record<string, any>];
-  @Prop({ required: false, default: () => { return [] } }) readonly texts !: [Record<string, any>];
-  @Prop({ required: false }) readonly product_id !: number
-  @Prop({ required: false }) readonly product_index !: number
-  @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
-  @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
-  @Prop({ required: false }) readonly logosLimit !: number
-  @Prop({ required: false }) readonly productColors !: [Record<string, any>];
-  @Prop({ required: true, default: 10 }) readonly measurementRatio!: number;
-  @Prop({ required: false, default: 2048 }) readonly mainCanvasResolution!: number;
-  @Prop({ required: false, default: 2048 }) readonly canvasResolution!: number;
-  @Prop({ required: false, default: 512 }) readonly containerWidth!: number;
-  @Prop({ required: false, default: 512 }) readonly containerHeight!: number;
-  @Prop({ required: false, default: 600 }) readonly twoDCanvasWidth!: number;
-  @Prop({ required: false, default: 600 }) readonly twoDCanvasHeight!: number;
-  @Prop({ required: false, default: true }) readonly canvasSelection!: boolean;
-  @Prop({ required: false, default: 'customized' }) readonly productType!: string;
-  @Prop({ required: false }) readonly colorGrouping!: Record<any, any>;
-  @Prop({ required: true }) readonly products_fonts!: Record<any, any>;
-
-  private scene = new THREE.Scene()
-  private camera !: THREE.PerspectiveCamera
-  private frontCamera !: THREE.OrthographicCamera
-  private backCamera !: THREE.OrthographicCamera
-  private renderer = new THREE.WebGLRenderer({ 'alpha': false, 'antialias': true })
-  private container!: HTMLDivElement
-  private controls!: OrbitControls
-  private raycaster = new THREE.Raycaster()
-  private onClickPosition = new THREE.Vector2()
-  private mouse = new THREE.Vector2()
-  private isMobile = false
-  private device_info = getDeviceInfo()
-  private last_known_image_pos = {left: 0, top: 0}
-  private canvas !: fabric.Canvas
-  private design !: any
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
-  private custom_logo_objects: any[] = []
-  private fixed_logo_objects: any[] = []
-  private mounted = false
-  private model!: Object3D
-  private texture!: Texture
-  private svgGroups: any[] = []
-  private initialSvgGroups: any[] = []
+  @Prop({required: true}) readonly imageData!: Record<string, unknown>
+  @Prop({required: false}) readonly logos !: [Record<string, any>];
+  @Prop({
+    required: false, default: () => {
+      return []
+    }
+  }) readonly texts !: [Record<string, any>];
+  @Prop({required: false}) readonly product_id !: number
+  @Prop({required: false}) readonly product_index !: number
+  @Prop({
+    required: false, default: () => {
+      return []
+    }
+  }) readonly productNamesSetting !: [Record<any, any>]
+  @Prop({required: false, default: false}) readonly logoAllowed !: boolean
+  @Prop({required: false}) readonly logosLimit !: number
+  @Prop({required: false}) readonly productColors !: [Record<string, any>];
+  @Prop({required: true, default: 10}) readonly measurementRatio!: number;
+  @Prop({required: false, default: 2048}) readonly mainCanvasResolution!: number;
+  @Prop({required: false, default: 2048}) readonly canvasResolution!: number;
+  @Prop({required: false, default: 512}) readonly containerWidth!: number;
+  @Prop({required: false, default: 512}) readonly containerHeight!: number;
+  @Prop({required: false, default: 600}) readonly twoDCanvasWidth!: number;
+  @Prop({required: false, default: 600}) readonly twoDCanvasHeight!: number;
+  @Prop({required: false, default: true}) readonly canvasSelection!: boolean;
+  @Prop({required: false, default: 'customized'}) readonly productType!: string;
+  @Prop({required: false}) readonly colorGrouping!: Record<any, any>;
+  @Prop({required: true}) readonly products_fonts!: Record<any, any>;
   public dimText = new fabric.Text('', {
     fontSize: 14,
     backgroundColor: '#fff',
@@ -155,9 +141,42 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   public positionOnScene = {x: 0, y: 0}
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[] | null[] = []
-  private storage_url = process.env.VUE_APP_STORAGE_URL
-  public fabric_control_visibility = { tl: false, bl: false, tr: true, br: true, ml: false, mb: false, mr: false, mt: false, mtr: false }
+  public fabric_control_visibility = {
+    tl: false,
+    bl: false,
+    tr: true,
+    br: true,
+    ml: false,
+    mb: false,
+    mr: false,
+    mt: false,
+    mtr: false
+  }
   public originalCameraPosition = {x: 0, y: 0, z: 0} as Vector3
+  private scene = new THREE.Scene()
+  private camera !: THREE.PerspectiveCamera
+  private frontCamera !: THREE.OrthographicCamera
+  private backCamera !: THREE.OrthographicCamera
+  private renderer = new THREE.WebGLRenderer({'alpha': false, 'antialias': true})
+  private container!: HTMLDivElement
+  private controls!: OrbitControls
+  private raycaster = new THREE.Raycaster()
+  private onClickPosition = new THREE.Vector2()
+  private mouse = new THREE.Vector2()
+  private isMobile = false
+  private device_info = getDeviceInfo()
+  private last_known_image_pos = {left: 0, top: 0}
+  private canvas !: fabric.Canvas
+  private design !: any
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  private custom_logo_objects: any[] = []
+  private fixed_logo_objects: any[] = []
+  private mounted = false
+  private model!: Object3D
+  private texture!: Texture
+  private svgGroups: any[] = []
+  private initialSvgGroups: any[] = []
+  private storage_url = process.env.VUE_APP_STORAGE_URL
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -167,7 +186,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     return this.$store.getters.getDefaultFilledColors
   }
 
-  get getColorType() : string {
+  get getColorType(): string {
     return this.$store.getters.getSetting('color_type');
   }
 
@@ -181,7 +200,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   get defaultColors(): [Record<any, any>] {
-    return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => { return defaultColor.color })
+    return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => {
+      return defaultColor.color
+    })
   }
 
   get groupColors(): [Record<any, any>] {
@@ -192,18 +213,18 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     return this.$store.getters.getSelectedProduct
   }
 
-  get styleIndex():number{
+  get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
   }
 
   get productCustomTexts(): Record<any, any>[] {
-    if(this.product_id) {
+    if (this.product_id) {
       return this.$store.getters.productCustomTexts(this.product_id)
     }
     return []
   }
 
-  get sku_information(){
+  get sku_information() {
     return this.$store.getters.getSkuInformation
   }
 
@@ -216,7 +237,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   public async sceneMountedAction() {
-    if(!this.initializingProductData && !this.mounted) {
+    if (!this.initializingProductData && !this.mounted) {
       await this.loadScene(this.imageData)
 
       this.renderControls()
@@ -230,7 +251,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   public async changeColors() {
-    if(this.mounted) {
+    if (this.mounted) {
       await this.callChangeColors()
     }
   }
@@ -241,24 +262,24 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   public async changeGroupColors() {
-    if(this.productType == 'customized') {
+    if (this.productType == 'customized') {
       if (Object.keys(this.appliedGroupColors).length) {
         let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
         let groupColors = this.appliedGroupColors
         let design = this.design._objects ? this.design._objects : [this.design]
         this.logos.forEach((logo, index) => {
-          if(logo.is_customizable) {
-            if(groupColors[`${logo.placement_title} logo`]) {
+          if (logo.is_customizable) {
+            if (groupColors[`${logo.placement_title} logo`]) {
               this.changeFixedLogoColor(index, groupColors[`${logo.placement_title} logo`].color)
             }
           }
         })
         design.forEach((item: Record<any, any>) => {
-          if(item.id) {
+          if (item.id) {
             item.id = item.id.toLowerCase()
             if (groupColors[item.id]) {
               if (item.fill && item.fill.gradientUnits) {
-                if(groupColors[item.id].gradient_colors) {
+                if (groupColors[item.id].gradient_colors) {
                   groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
                     if (item.fill.colorStops[gradient_color_index]) {
                       const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
@@ -273,13 +294,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                 }
                 item.set('fill', new fabric.Gradient(item.fill))
               } else {
-                const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
+                const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors ? 0 : null)
                 item.set('fill', final_color.color)
               }
               this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
                 if (svgGroup.id == item.id) {
                   if (svgGroup.gradient_colors) {
-                    if(groupColors[item.id].gradient_colors) {
+                    if (groupColors[item.id].gradient_colors) {
                       groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
                         if (item.fill.colorStops[gradient_color_index]) {
                           const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
@@ -297,7 +318,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                       }
                     }
                   } else {
-                    const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
+                    const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors ? 0 : null)
                     svgGroup.color = final_color.color
                     svgGroup.name = final_color.name
                     svgGroup.pantone = final_color.pantone
@@ -344,17 +365,17 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   public changeFixedLogoColor(logo_index: number, color: string, default_colors: Record<any, any> = {}) {
     this.fixed_logo_objects.forEach((fixed_logo_object) => {
-      if(fixed_logo_object.fixed_logo_index == logo_index){
+      if (fixed_logo_object.fixed_logo_index == logo_index) {
         fixed_logo_object.getObjects().forEach((item) => {
           if (['path', 'rect', 'circle', 'polygon', 'polyline', 'line', 'ellipse', 'text'].includes(item.type as string)) {
-            item.set({ fill: color });
+            item.set({fill: color});
           }
         })
 
         this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
           if (svgGroup.id == `${this.logos[logo_index].placement_title} logo`) {
             let final_color;
-            if(Object.entries(default_colors).length) {
+            if (Object.entries(default_colors).length) {
               final_color = this.getDefaultColorBySvgGroup(`${this.logos[logo_index].placement_title} logo`, default_colors)
             } else {
               final_color = this.getGroupColorBySvgGroup(`${this.logos[logo_index].placement_title} logo` as string, null)
@@ -375,15 +396,15 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     })
   }
 
-  public getGroupColorBySvgGroup(svg_group: string, gradient_color_index: number|null = null) {
+  public getGroupColorBySvgGroup(svg_group: string, gradient_color_index: number | null = null) {
     let groupColor
-    if(gradient_color_index != null) {
+    if (gradient_color_index != null) {
       groupColor = this.groupColors[svg_group].gradient_colors[gradient_color_index]
     } else {
       groupColor = this.groupColors[svg_group]
     }
     let final_color
-    if(this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === groupColor.color)) {
+    if (this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === groupColor.color)) {
       const selectProductPantonesList = getSelectedProductPantones(this.product_id, svg_group)
       final_color = getClosestColor(groupColor.color as string, selectProductPantonesList, getColorType(svg_group, this.product_id))
       final_color.color = final_color.hex
@@ -395,7 +416,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   public getDefaultColorBySvgGroup(svg_group: string, defaultColorOriginal) {
     let final_color
-    if(this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === defaultColorOriginal.color)) {
+    if (this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === defaultColorOriginal.color)) {
       const selectProductPantonesList = getSelectedProductPantones(this.product_id, svg_group)
       final_color = getClosestColor(defaultColorOriginal.color as string, selectProductPantonesList, getColorType(svg_group, this.product_id))
       final_color.color = final_color.hex
@@ -406,7 +427,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   public async changeDefaultColors(render_time = 300): Promise<void> {
-    if(this.productType == 'customized') {
+    if (this.productType == 'customized') {
       let defaultColors = this.appliedDefaultColors
       if (defaultColors.length) {
         let appliedDefaultColors: any = []
@@ -414,13 +435,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         const sequences = getPermutation(this.shuffle_color_number, this.parts.length)
         sequences.forEach((sequence: number) => {
           const svg_part = this.parts[sequence]
-          if(svg_part) {
+          if (svg_part) {
             const [part, index] = svg_part.split('_');
             const gradient_color_index = parseInt(index) - 1 as number;
             const svgIndex = this.svgGroups.findIndex(group => group.id === part);
-            if(svgIndex !== -1) {
+            if (svgIndex !== -1) {
               const svgGroup = this.svgGroups[svgIndex]
-              if(svgGroup.gradient_colors) {
+              if (svgGroup.gradient_colors) {
                 const final_color = this.getDefaultColorBySvgGroup(svgGroup.id, defaultColors[useColorIndex])
                 svgGroup.gradient_colors[gradient_color_index].color = final_color.color
                 svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
@@ -453,7 +474,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
         let design = this.design._objects ? this.design._objects : [this.design]
         design.forEach((item: Record<any, any>) => {
-          if(item.id) {
+          if (item.id) {
             item.id = item.id.toLowerCase()
             if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
               item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
@@ -467,7 +488,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         })
 
         this.logos.forEach((logo, index) => {
-          if(logo.is_customizable) {
+          if (logo.is_customizable) {
             if (appliedDefaultColors[`${logo.placement_title} logo`]) {
               useColorIndex++
               if (useColorIndex >= defaultColors.length) {
@@ -490,10 +511,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       defaultSvgGroups[svgGroup.id] = svgGroup
     })
 
-    let appliedDefaultColors: string[]|string[][] = []
+    let appliedDefaultColors: string[] | string[][] = []
     this.svgGroups.forEach((svgGroup: Record<any, any>, index: number) => {
-      if(Object.keys(defaultSvgGroups).length && defaultSvgGroups[svgGroup.id]) {
-        if(svgGroup.gradient_colors) {
+      if (Object.keys(defaultSvgGroups).length && defaultSvgGroups[svgGroup.id]) {
+        if (svgGroup.gradient_colors) {
           let gradient_colors: string[] = []
           svgGroup.gradient_colors.forEach((gradient_color, gradient_color_index) => {
             gradient_colors.push(defaultSvgGroups[svgGroup.id].gradient_colors[gradient_color_index].color)
@@ -511,9 +532,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       }
     })
 
-    let design = this.design._objects? this.design._objects : [this.design]
+    let design = this.design._objects ? this.design._objects : [this.design]
     design.forEach((item: Record<any, any>) => {
-      if(item.id) {
+      if (item.id) {
         item.id = item.id.toLowerCase()
         if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
           item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
@@ -533,9 +554,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   public unHideColorGrouping() {
     if (this.colorGrouping) {
       for (let key in this.colorGrouping) {
-        const distinguishPart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == key.toLowerCase() })
+        const distinguishPart = this.svgGroups.filter((svgGroup: Record<any, any>) => {
+          return svgGroup.id == key.toLowerCase()
+        })
         this.colorGrouping[key].forEach((comparePartId: string) => {
-          const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == comparePartId.toLowerCase() })
+          const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => {
+            return svgGroup.id == comparePartId.toLowerCase()
+          })
           if (distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
             let changeColor: Record<any, any> = {}
             for (let index in this.productColors) {
@@ -552,14 +577,14 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             }
             if (!Object.keys(changeColor).length) {
               let pantone_product_id = 0;
-              if(this.product_id){
+              if (this.product_id) {
                 pantone_product_id = this.product_id;
               }
               const selectProductPantonesList = getSelectedProductPantones(pantone_product_id)
               const closestColor = getClosestColor('#000000', selectProductPantonesList, getColorType(key, this.product_id));
-              changeColor = { value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone }
+              changeColor = {value: closestColor.hex, name: closestColor.name, pantone: closestColor.pantone}
             }
-            let design = this.design._objects? this.design._objects : [this.design]
+            let design = this.design._objects ? this.design._objects : [this.design]
             design.forEach((item: Record<any, any>) => {
               item.id = item.id.toLowerCase()
               if (key.toLowerCase() == item.id) {
@@ -590,9 +615,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   public async getSvgGroups() {
     this.svgGroups = []
     this.initialSvgGroups = []
-    let design = this.design._objects? this.design._objects : [this.design]
+    let design = this.design._objects ? this.design._objects : [this.design]
     design.forEach((item: Record<any, any>) => {
-      if(item.id) {
+      if (item.id) {
         item.set('id', item.id.split('_')[0])
         item.id = item.id.toLowerCase()
         if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
@@ -615,7 +640,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             })
 
             this.svgGroups.push({id: item.id, count: count, gradient_colors: gradient_colors})
-          } else if(item.fill) {
+          } else if (item.fill) {
             if (item.fill.includes('rgb')) {
               item.fill = rgbHex(item.fill as string).includes('#') ? rgbHex(item.fill as string) : '#' + rgbHex(item.fill as string)
             }
@@ -639,7 +664,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
     this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
 
-    if(!this.parts) {
+    if (!this.parts) {
       this.parts = this.svgGroups.map(group => group.id)
     }
 
@@ -647,7 +672,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
 
-    if(!this.logos.length) {
+    if (!this.logos.length) {
       this.callChangeColors()
     }
 
@@ -668,7 +693,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     this.container = this.$refs.renderer as HTMLDivElement
 
-    this.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000)
+    this.camera = new THREE.PerspectiveCamera(20, 1, 1, 10)
     this.camera.position.set(0, 0.5, 11.5);
 
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -681,7 +706,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     this.scene.background = new THREE.Color(0xffffff);
 
-    const intensity = 0.7;
+    const light = new THREE.HemisphereLight(0xffffff, 0x080820, 1.4)
+    this.scene.add(light)
+
+    /*const intensity = 0.7;
     const directionalLight = new THREE.DirectionalLight(0xffffff, intensity);
     directionalLight.position.set(0, 20, 50);
     this.scene.add(directionalLight);
@@ -709,6 +737,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     // const helper4 = new THREE.DirectionalLightHelper( directionalLight4, 5 );
     // this.scene.add( helper4);
+    */
 
     const element = this.$refs.canvas as HTMLCanvasElement
     this.canvas = new fabric.Canvas(element)
@@ -720,20 +749,20 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.controls.target.set(0, 0, 0)
     this.controls.update()
 
-    if(!this.mainPreview) {
+    if (!this.mainPreview) {
       this.controls.enableZoom = false;
     }
 
     this.texture = new THREE.CanvasTexture(element)
-    this.texture.anisotropy = this.renderer.capabilities.getMaxAnisotropy()
+    this.texture.anisotropy = 1;
 
     let promises = []
     promises.push(this.addModel(ImageData.model_url, ImageData.texture_url) as never)
-    promises.push(this.addDesign(ImageData.design_url +'.'+ ImageData.file_extension) as never)
+    promises.push(this.addDesign(ImageData.design_url + '.' + ImageData.file_extension) as never)
 
     Promise.all(promises).then((values) => {
       const self: Record<any, any> = this
-      if(this.mainPreview) {
+      if (this.mainPreview) {
         self.$eventBus.$emit('setTotalTabs')
       }
       this.getSvgGroups()
@@ -756,16 +785,15 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         })
       }
 
-      if(this.productCustomTexts) {
+      if (this.productCustomTexts) {
         this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
-          if(custom_text.value) {
-            const text = { value: custom_text, custom_text_index: index }
+          if (custom_text.value) {
+            const text = {value: custom_text, custom_text_index: index}
             this.addTextsNew(text, true)
           }
         })
       }
 
-      this.scene.add(this.model)
       this.renderScene()
       this.controls.update()
       this.animate()
@@ -807,15 +835,15 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     const fabric_object = evt.target
     let vector = new THREE.Vector3()
     let side_changed = false
-    if(evt.action == 'drag') {
+    if (evt.action == 'drag') {
       // minus correction values
       const x = evt.e.clientX + 4.5
       const y = evt.e.clientY + 5.5;
-      ({ vector, side_changed } = this.findPositionOn2D(x, y, fabric_object))
+      ({vector, side_changed} = this.findPositionOn2D(x, y, fabric_object))
 
     }
     // vector is the variable to look
-    if(fabric_object.get("type") == "text") {
+    if (fabric_object.get("type") == "text") {
       await setUndoRedoItems('customTexts', 'modified')
       this.handleCustomTextModifiedEvent(fabric_object, vector.x, vector.y, side_changed)
     } else {
@@ -828,10 +856,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   public listenEvents() {
     const self: Record<any, any> = this;
     self.$eventBus.$on("customTextUpdated", this.addTextsNew)
-    if((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
+    if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
       self.$eventBus.$on("rosterTextUpdated", this.addTextsNew)
     }
-    if(this.mainPreview) {
+    if (this.mainPreview) {
       self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
     }
     self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
@@ -847,68 +875,85 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.$eventBus.$on("changeColors", this.changeColors)
   }
 
-public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.OrthographicCamera, object: THREE.Object3D, offset: number, orbitControls: OrbitControls, renderer?: THREE.WebGLRenderer) {
-  const boundingBox = new THREE.Box3();
-  boundingBox.setFromObject(object);
+  public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera | THREE.OrthographicCamera, object: THREE.Object3D, offset: number, orbitControls: OrbitControls, renderer?: THREE.WebGLRenderer) {
+    const boundingBox = new THREE.Box3();
+    boundingBox.setFromObject(object);
 
-  const size = new THREE.Vector3();
-  boundingBox.getSize(size); // Get object size
+    const size = new THREE.Vector3();
+    boundingBox.getSize(size); // Get object size
 
-  const center = new THREE.Vector3();
-  boundingBox.getCenter(center); // Get object center
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center); // Get object center
 
-  if (camera instanceof THREE.PerspectiveCamera) {
-    // PerspectiveCamera handling:
-    const fov = camera.fov * (Math.PI / 180); // Convert vertical FOV to radians
-    const fovh = 2 * Math.atan(Math.tan(fov / 2) * camera.aspect); // Horizontal FOV
+    if (camera instanceof THREE.PerspectiveCamera) {
+      // PerspectiveCamera handling:
+      const fov = camera.fov * (Math.PI / 180); // Convert vertical FOV to radians
+      const fovh = 2 * Math.atan(Math.tan(fov / 2) * camera.aspect); // Horizontal FOV
 
-    let dx = size.z / 2 + Math.abs(size.x / 2 / Math.tan(fovh / 2));
-    let dy = size.z / 2 + Math.abs(size.y / 2 / Math.tan(fov / 2));
-    let cameraZ = Math.max(dx, dy); // Compute distance for fitting
+      let dx = size.z / 2 + Math.abs(size.x / 2 / Math.tan(fovh / 2));
+      let dy = size.z / 2 + Math.abs(size.y / 2 / Math.tan(fov / 2));
+      let cameraZ = Math.max(dx, dy); // Compute distance for fitting
 
-    if (offset !== undefined && offset !== 0) cameraZ *= offset; // Apply offset
+      if (offset !== undefined && offset !== 0) cameraZ *= offset; // Apply offset
 
-    camera.position.set(center.x, center.y, cameraZ); // Set camera position based on computed distance
+      camera.position.set(0, 0, cameraZ); // Set camera position based on computed distance
 
-    // Set the far plane to ensure the object is fully visible
-    const minZ = boundingBox.min.z;
-    const cameraToFarEdge = minZ < 0 ? -minZ + cameraZ : cameraZ - minZ;
-    camera.far = cameraToFarEdge * 3;
-    camera.updateProjectionMatrix(); // Update camera projection
-  } else {
-    // Calculate aspect ratio using renderer dimensions
-    const aspect = renderer
-      ? renderer.domElement.width / renderer.domElement.height
-      : 1; // Default to 1 if no renderer is provided
+      // Set the far plane to ensure the object is fully visible
+      const minZ = boundingBox.min.z;
+      const cameraToFarEdge = (minZ < 0) ? -minZ + cameraZ : cameraZ - minZ;
+      camera.far = cameraToFarEdge * 3;
+      camera.updateProjectionMatrix(); // Update camera projection
 
-    const maxDim = Math.max(size.x, size.y, size.z); // Use largest dimension to scale frustum
-    const frustumHeight = maxDim; // Add padding
-    const frustumWidth = frustumHeight * aspect;
+      if (orbitControls !== undefined) {
+        // set camera to rotate around the center
+        orbitControls.target = new THREE.Vector3(0, 0, 0);
+        // prevent camera from zooming out far enough to create far plane cutoff
+        orbitControls.maxDistance = cameraToFarEdge
+      }
+    } else {
+      const aspect = renderer ? renderer.domElement.width / renderer.domElement.height : 1;
 
-    // Set orthographic camera frustum
-    camera.left = -frustumWidth / 2;
-    camera.right = frustumWidth / 2;
-    camera.top = frustumHeight / 2;
-    camera.bottom = -frustumHeight / 2;
+      // Calculate the size of the bounding box for the object
+      const boxSize = new THREE.Vector3();
+      boundingBox.getSize(boxSize);
 
-    if (offset !== undefined && offset !== 0) {
-      camera.left *= offset;
-      camera.right *= offset;
-      camera.top *= offset;
-      camera.bottom *= offset;
+      // Set a minimum threshold for dimensions to avoid zero values
+      const minDimensionThreshold = 0.1; // Minimum size to avoid zero dimensions
+      const effectiveBoxSize = new THREE.Vector3(
+        Math.max(boxSize.x, minDimensionThreshold),
+        Math.max(boxSize.y, minDimensionThreshold),
+        Math.max(boxSize.z, minDimensionThreshold)
+      );
+
+      // Use the largest dimension of the object for frustum height and add padding
+      const maxDim = Math.max(effectiveBoxSize.x, effectiveBoxSize.y, effectiveBoxSize.z);
+
+      // Set frustum height and width dynamically
+      const frustumHeight = maxDim; // Frustum height is based on the largest dimension
+      const frustumWidth = frustumHeight * aspect; // Adjust frustum width based on aspect ratio
+
+      // Update the orthographic camera’s frustum with correct aspect ratio
+      camera.left = -frustumWidth / 2;
+      camera.right = frustumWidth / 2;
+      camera.top = frustumHeight / 2;
+      camera.bottom = -frustumHeight / 2;
+
+      // Set near and far planes based on object size
+      camera.near = -maxDim * 2; // Ensure near plane covers object depth
+      camera.far = maxDim * 2; // Ensure far plane covers object depth
+
+      // Update the camera’s position and orientation
+      camera.position.set(center.x, center.y, maxDim); // Position the orthographic camera
+      camera.lookAt(center); // Ensure the camera looks at the object center
+      camera.updateProjectionMatrix(); // Update the projection matrix
+
+      if (orbitControls) {
+        // Ensure orbit controls are set to target the center of the object
+        orbitControls.target.copy(center);
+        orbitControls.update();
+      }
     }
-
-    camera.position.set(center.x, center.y, maxDim); // Position the orthographic camera
-    camera.updateProjectionMatrix(); // Update the camera projection
   }
-
-  if (orbitControls !== undefined) {
-    // Set orbit controls to rotate around the object's center
-    orbitControls.target.copy(center);
-    orbitControls.update(); // Update orbit controls
-  }
-}
-
 
   public resetCameraToOriginalPosition() {
     this.controls.reset()
@@ -919,39 +964,111 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     return new Promise((resolve, reject) => {
       const gltfLoader = new GLTFLoader(undefined)
       gltfLoader.load(this.storage_url + modelUrl, (gltf) => {
-        this.model = gltf.scene.children[0]
-        this.model['material'] = new THREE.MeshPhongMaterial({ 'map': this.texture })
-        this.model['material'].shininess = 10
-        this.model['material'].needsUpdate = true
+        const object = gltf.scene.children[0];
+        if (!(object instanceof THREE.Mesh)) {
+          reject('The loaded model is not a mesh.');
+          return;
+        }
+        this.model = object
 
         this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls, this.renderer);
         this.originalCameraPosition = this.camera.position.clone()
 
-        this.frontCamera = new THREE.OrthographicCamera(-0.3, 0.3, 0.3, -0.3, 0.01, 500)
+        this.frontCamera = new THREE.OrthographicCamera(-3.6, 3.6, 3.6, -3.6, 1, 10);
         this.fitCameraToCenteredObject(this.frontCamera, this.model, 0, this.controls, this.renderer)
+
         this.backCamera = this.frontCamera.clone()
-        this.backCamera.position.z = -this.camera.position.z
-        this.backCamera.lookAt(0, 0, 0);
+
+        // Position the back camera directly opposite to the front camera's Z position
+        this.backCamera.position.z = -this.frontCamera.position.z;
+
+        // Ensure the back camera is facing the center of the model
+        const center = new THREE.Vector3();
+        const boundingBox = new THREE.Box3().setFromObject(this.model); // Get the bounding box of the model
+        boundingBox.getCenter(center); // Get the center of the model
+
+        // Make the back camera look at the center of the model
+        this.backCamera.lookAt(center);
+
         this.scene.add(this.frontCamera)
         this.scene.add(this.backCamera)
 
+        // todo part from master
+
+        // this.scene.add(this.model)
+        //
+        // this.model['material'] = new THREE.MeshPhongMaterial({ 'map': this.texture })
+        // this.model['material'].shininess = 10
+        // this.model['material'].needsUpdate = true
+        //
+        // if (this.model['material'].normalMap) return
+        // // add normal map to the material
+        // const textureLoader = new THREE.TextureLoader()
+        // const normalMap = textureLoader.load(this.storage_url + designUrl)
+        // normalMap.flipY = false;
+        // this.model['material'].normalMap = normalMap
+        //
+        // this.model['material'].side = THREE.DoubleSide
+        // this.model['material'].metalness = 0.99
+        //
+        // this.model['material'].needsUpdate = true
+        // this.model['material'].map.needsUpdate = true
+        //
+        // this.canvas.on("after:render", () => {
+        //   this.model['material'].needsUpdate = true
+        //   this.model['material'].map.needsUpdate = true
+        // })
+
+
+        // todo part from task-2988-AL
+
+        // Create the front side material (Phong)
+        const frontMaterial = new THREE.MeshPhongMaterial({map: this.texture});
+        frontMaterial.shininess = 10;
+        frontMaterial.needsUpdate = true;
+        frontMaterial.side = THREE.FrontSide; // Only render the front side
+
+        // Create the back side material (Basic white material)
+        const backMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
+        backMaterial.side = THREE.BackSide; // Only render the back side
+
+
+        // First object: the front-facing material (Phong)
+        //@ts-ignore
+        const frontMesh = new THREE.Mesh(this.model.geometry, frontMaterial);
+        frontMesh.position.copy(this.model.position);
+        frontMesh.rotation.copy(this.model.rotation);
+        frontMesh.scale.copy(this.model.scale);
+        this.scene.add(frontMesh);
+
+        // Second object: the back-facing material (Basic white)
+        //@ts-ignore
+        const backMesh = new THREE.Mesh(this.model.geometry, backMaterial);
+        backMesh.position.copy(this.model.position);
+        backMesh.rotation.copy(this.model.rotation);
+        backMesh.scale.copy(this.model.scale);
+        this.scene.add(backMesh);
+
+
+        // Ensure materials are updated after rendering
         this.canvas.on("after:render", () => {
-          this.model['material'].needsUpdate = true
-          this.model['material'].map.needsUpdate = true
-        })
+          frontMaterial.needsUpdate = true;
+          if (frontMaterial.map) {
+            frontMaterial.map.needsUpdate = true;
+          }
+        });
 
-        if (this.model['material'].normalMap) return
-        // add normal map to the material
-        const textureLoader = new THREE.TextureLoader()
-        const normalMap = textureLoader.load(this.storage_url + designUrl)
+        // Add normal map to the front material
+        const textureLoader = new THREE.TextureLoader();
+        const normalMap = textureLoader.load(this.storage_url + designUrl);
         normalMap.flipY = false;
-        this.model['material'].normalMap = normalMap
+        frontMaterial.normalMap = normalMap;
+        backMaterial.normalMap = normalMap;
+        frontMaterial.needsUpdate = true;
 
-        this.model['material'].side = THREE.DoubleSide
-        this.model['material'].metalness = 0.99
 
-        this.model['material'].needsUpdate = true
-        this.model['material'].map.needsUpdate = true
+        // todo end
+
 
         this.container.addEventListener('pointerup', (evt) => {
           // Resetting the front and back camera positions to their original positions
@@ -996,7 +1113,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     })
   }
 
-  public renderScene(camera: THREE.OrthographicCamera|THREE.PerspectiveCamera = this.camera) {
+  public renderScene(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera = this.camera) {
     this.renderer.render(this.scene, camera)
   }
 
@@ -1071,11 +1188,11 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
                     })
                     this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
 
-                    if(this.mainPreview) {
+                    if (this.mainPreview) {
                       this.$store.dispatch('setSvgGroups', this.svgGroups)
                     }
 
-                    if(!this.parts.filter((part) => part == id)) {
+                    if (!this.parts.filter((part) => part == id)) {
                       this.parts.push(id)
                     }
 
@@ -1101,7 +1218,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   }
 
   public async resetAndAddFixedLogos() {
-    if(this.mounted) {
+    if (this.mounted) {
       await this.resetFixedLogosFromCanvas()
       this.addFixedLogos()
     }
@@ -1111,8 +1228,8 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     if (this.logos.length) {
       let promises: Promise<boolean>[] = []
       this.logos.forEach((logo: Record<any, any>, index: number) => {
-        const is_fixed_logos_all =  this.selectedProduct.productstyles[this.styleIndex].is_fixed_logos_all
-        if(is_fixed_logos_all || (is_fixed_logos_all == false && logo.is_default))
+        const is_fixed_logos_all = this.selectedProduct.productstyles[this.styleIndex].is_fixed_logos_all
+        if (is_fixed_logos_all || (is_fixed_logos_all == false && logo.is_default))
           if (logo && logo.url) {
             logo.fixed_logo_index = index
             promises.push(this.addSvgLogos(logo, index))
@@ -1120,7 +1237,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       })
 
       Promise.all(promises).then(() => {
-        if(this.groupColors.length || this.defaultColors.length) {
+        if (this.groupColors.length || this.defaultColors.length) {
           this.callChangeColors()
         }
       })
@@ -1128,10 +1245,10 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   }
 
   public async resetFixedLogosFromCanvas() {
-    if(this.selectedProductId == this.product_id && this.fixed_logo_objects) {
+    if (this.selectedProductId == this.product_id && this.fixed_logo_objects) {
       for (let objectIndex = 0; objectIndex < this.fixed_logo_objects.length; objectIndex++) {
         const fixed_logo = this.fixed_logo_objects[objectIndex]
-        if(fixed_logo) {
+        if (fixed_logo) {
           this.canvas.remove(fixed_logo)
         }
       }
@@ -1168,7 +1285,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
         this.deleteExistingLogoFromCanvas(logo.logo_index)
       }
       if (logo.url && !this.custom_logo_objects[logo.logo_index as number]) {
-        if(this.mainPreview && !from_load) {
+        if (this.mainPreview && !from_load) {
           this.$store.commit('SET_UPDATING_LOGO', true)
         }
         if (logo.customLogo) {
@@ -1179,7 +1296,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
         const base64_logo = await this.convertImageURLToBase64(logoUrl) as string
         fabric.Image.fromURL(base64_logo, async (img: any) => {
           const aspect_ratio = img.width / img.height
-          if(aspect_ratio > 1) {
+          if (aspect_ratio > 1) {
             img.scaleToWidth(logo.height as number * this.canvasWidthRatio)
           } else {
             img.scaleToHeight(logo.height as number * this.canvasHeightRatio)
@@ -1192,7 +1309,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
           })
 
           let fabricJSPoint = {x: 0, y: 0}
-          if(logo.x_axis_3d && logo.y_axis_3d) {
+          if (logo.x_axis_3d && logo.y_axis_3d) {
             fabricJSPoint.x = logo.x_axis_3d
             fabricJSPoint.y = logo.y_axis_3d
           } else {
@@ -1220,8 +1337,8 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
           })
 
           if (logo.scaleX && logo.scaleY) {
-            img.scaleX =  logo.scaleX * this.canvasWidthRatio
-            img.scaleY =  logo.scaleY * this.canvasHeightRatio
+            img.scaleX = logo.scaleX * this.canvasWidthRatio
+            img.scaleY = logo.scaleY * this.canvasHeightRatio
           }
 
           if (this.mainPreview && this.selectedProductId == this.product_id) {
@@ -1248,104 +1365,9 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
 
           this.renderScene()
 
-        }, { crossOrigin: 'Anonymous' })
+        }, {crossOrigin: 'Anonymous'})
       }
     }
-  }
-
-  private getIntersects(point, objects, camera) {
-    this.mouse.set(point.x * 2 - 1, -(point.y * 2) + 1);
-    this.raycaster.setFromCamera(this.mouse, camera)
-    // Debugging projection rays
-    // this.scene.add(new THREE.ArrowHelper( this.raycaster.ray.direction, this.raycaster.ray.origin, 100, Math.random() * 0xffffff ));
-    return this.raycaster.intersectObjects(objects, false);
-  }
-
-  private getMousePosition(dom, x, y, by_screen = false): [number, number] {
-    let rect = dom.getBoundingClientRect();
-    let screen_left = 0
-    let screen_top = 0
-    if(by_screen) {
-      screen_left = rect.left
-      screen_top = rect.top
-    }
-    return [(x - screen_left) / rect.width, (y - screen_top) / rect.height]
-  }
-
-  private getRealPosition(axis, value) {
-    const CORRECTION_VALUE = axis === "x" ? 4.5 : 5.5;
-    // Value * number(should be equal to canvas width)
-    return Math.round(value * this.canvasResolution) - CORRECTION_VALUE;
-  }
-
-  // Function to find intersection point in Three.js and map to Fabric.js
-  private async findPositionOn3D(x: number, y: number, side: string) {
-    let camera = this.frontCamera
-    if(side.toLowerCase() == 'back') {
-      camera = this.backCamera
-    }
-    const point = this.getMousePosition(this.container, x, y)
-    this.onClickPosition.fromArray(point)
-
-    const intersects = this.getIntersects(this.onClickPosition, this.scene.children, camera)
-
-    if (intersects.length > 0 && intersects[0].uv) {
-      const uv = intersects[0].uv
-      intersects[0].object['material'].map.transformUv(uv)
-      return {
-        x: this.getRealPosition('x', uv.x),
-        y: this.getRealPosition('y', uv.y)
-      }
-    }
-
-    return { x: 0, y: 0 };
-  }
-
-  private findPositionOn2D(x: number, y: number, fabric_object) {
-    let side_changed = false
-    let vector = new THREE.Vector3()
-    let array = this.getMousePosition(this.container, x, y, true)
-    this.onClickPosition.fromArray(array)
-    let intersects = this.getIntersects(this.onClickPosition, this.scene.children, this.camera)
-
-    let side = "front"
-    // this vector will store 2d screen coordinates, 3d dimension will be 0
-    if (intersects.length > 0) {
-      //find intersection point and map to 2d screen coordinates
-      vector = intersects[0].point;
-
-      //IF interscetion point is closer to back, we switch cameras
-      if (vector.z < 0) {
-        vector.project(this.backCamera);
-        side = "back";
-      } else {
-        vector.project(this.frontCamera)
-      }
-      if (fabric_object.side.toLowerCase() != side) {
-        fabric_object.side = side
-        side_changed = true
-      }
-      // map to 2D screen space
-      vector.x = Math.round((vector.x + 1) * this.containerWidth / 2)
-      vector.y = Math.round((-vector.y + 1) * this.containerHeight / 2)
-      vector.z = 0;
-
-      let divided_by = 3
-      if (fabric_object.type == 'logo') {
-        divided_by = 1
-      }
-      vector.x += fabric_object.width * fabric_object.scaleX / divided_by
-      vector.y += fabric_object.height * fabric_object.scaleY / divided_by
-
-      // if (fabric_object.type == 'logo') {
-      //   vector.x += fabric_object.width * fabric_object.scaleX
-      //   vector.y += (fabric_object.height * this.canvasHeightRatio) * (fabric_object.scaleY * this.canvasHeightRatio)
-      // } else {
-      //   vector.x += (fabric_object.width / this.canvasWidthRatio) * (fabric_object.scaleX / this.canvasWidthRatio)
-      //   vector.y += (fabric_object.height * this.canvasHeightRatio) * (fabric_object.scaleY * this.canvasHeightRatio)
-      // }
-    }
-    return {vector: vector, side_changed: side_changed}
   }
 
   public oppositeAngle(angle) {
@@ -1353,7 +1375,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   }
 
   public async deleteExistingLogoFromCanvas(custom_logo_index: number) {
-    if(custom_logo_index == 0 || this.custom_logos[custom_logo_index] && this.custom_logos[custom_logo_index].product_id == this.product_id) {
+    if (custom_logo_index == 0 || this.custom_logos[custom_logo_index] && this.custom_logos[custom_logo_index].product_id == this.product_id) {
       const custom_logo = this.custom_logo_objects[custom_logo_index]
       if (custom_logo) {
         this.canvas.remove(custom_logo)
@@ -1364,7 +1386,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   }
 
   public async resetAndAddLogos() {
-    if(this.mounted) {
+    if (this.mounted) {
       await this.resetLogosFromCanvas()
       let logos: Record<any, any>[] = []
       if (this.custom_logos && this.logoAllowed) {
@@ -1385,10 +1407,10 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   }
 
   public async resetLogosFromCanvas() {
-    if(this.custom_logo_objects) {
+    if (this.custom_logo_objects) {
       for (let objectIndex = 0; objectIndex < this.custom_logo_objects.length; objectIndex++) {
         const custom_logo = this.custom_logo_objects[objectIndex]
-        if(custom_logo) {
+        if (custom_logo) {
           this.canvas.remove(custom_logo)
         }
       }
@@ -1404,7 +1426,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     if (width != 0 || height != 0) {
       const converted_width = unitConversion(width)
       const converted_height = unitConversion(height)
-      if(object.type == 'text') {
+      if (object.type == 'text') {
         const stroke_width = (object.strokeWidth * object.scaleX * this.measurementRatio) / this.canvasWidthRatio
         converted_width.value = (parseFloat(converted_width.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
         converted_height.value = (parseFloat(converted_height.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
@@ -1421,11 +1443,11 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   }
 
   public async resetTextsFromCanvas() {
-    if(this.product_custom_text_objects) {
+    if (this.product_custom_text_objects) {
       for (let objectIndex = 0; objectIndex < this.product_custom_text_objects.length; objectIndex++) {
         const custom_text = this.product_custom_text_objects[objectIndex] as Record<any, any>
-        if(custom_text != null) {
-          for(let i = 0; i < custom_text.length; i++) {
+        if (custom_text != null) {
+          for (let i = 0; i < custom_text.length; i++) {
             this.canvas.remove(custom_text[i])
           }
         }
@@ -1435,11 +1457,11 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     }
   }
 
-  public async deleteExistingTextsFromCanvas(custom_text_index:  number, remove_custom_text_object = true) {
+  public async deleteExistingTextsFromCanvas(custom_text_index: number, remove_custom_text_object = true) {
     const self: Record<any, any> = this;
     const custom_text = self.product_custom_text_objects[custom_text_index]
-    if(custom_text) {
-      for(let i = 0; i < custom_text.length; i++) {
+    if (custom_text) {
+      for (let i = 0; i < custom_text.length; i++) {
         self.canvas.remove(custom_text[i])
       }
       this.canvas.requestRenderAll()
@@ -1447,19 +1469,20 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     /*
     * remove_custom_text_object will be true only when we remove custom text that has been manuallya dded
     * */
-    if(remove_custom_text_object) {
+    if (remove_custom_text_object) {
       self.product_custom_text_objects.splice(custom_text_index, 1)
     } else {
       self.product_custom_text_objects[custom_text_index] = null
     }
   }
+
   /*
  * This method check if custom text have following products. If yes then add custom text to the follwoing product
  * */
   public async isCustomTextAllowed(custom_text_index: number) {
     let custom_text = this.product_custom_texts[custom_text_index];
     let is_custom_text_allowed = this.product_id == custom_text.product_id;
-    if(Object.prototype.hasOwnProperty.call(custom_text, "following_product_ids") && custom_text.following_product_ids.includes(this.product_id)) {
+    if (Object.prototype.hasOwnProperty.call(custom_text, "following_product_ids") && custom_text.following_product_ids.includes(this.product_id)) {
       const following_product_custom_text = this.allProductsCustomTexts[this.product_id]?.[custom_text_index];
       is_custom_text_allowed = following_product_custom_text && following_product_custom_text.type == custom_text.type
     }
@@ -1467,15 +1490,15 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   }
 
   public async addTextsNew(custom_text_info: Record<any, any>, from_load = false) {
-    if(!this.selectedProduct.preview_custom_texts) {
+    if (!this.selectedProduct.preview_custom_texts) {
       return false
     }
-    if(this.mounted || from_load) {
+    if (this.mounted || from_load) {
       const custom_text_index = custom_text_info.custom_text_index;
-      if(this.allProductsCustomTexts[this.product_id] && this.allProductsCustomTexts[this.product_id][custom_text_index]) {
+      if (this.allProductsCustomTexts[this.product_id] && this.allProductsCustomTexts[this.product_id][custom_text_index]) {
         const self: Record<any, any> = this
         await this.syncCustomTextsWithCustomTextsObjects()
-        if(custom_text_info.emitter == 'add_button') {
+        if (custom_text_info.emitter == 'add_button') {
           /* in case of add button we just need to execute method syncCustomTextsWithCustomTextsObjects() that's why returning here  */
           return false;
         }
@@ -1483,7 +1506,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
         this.product_custom_texts[custom_text_index] = custom_text_info.value;
 
         let add_custom_text = await this.isCustomTextAllowed(custom_text_index);
-        if(add_custom_text) {
+        if (add_custom_text) {
           let custom_text = this.allProductsCustomTexts[this.product_id][custom_text_index];
           /*
            * delete existing texts first and re render them
@@ -1496,11 +1519,16 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
               let fabric_text: fabric.Text | fabric.Group | Record<any, any>
 
               let font = this.products_fonts[custom_text.font_family]
-              if(!font) {
+              if (!font) {
                 font = this.products_fonts[Object.keys(this.products_fonts)[0]]
               }
               if (font) {
-                const path = font.opentype_font.getPath(custom_text.value, 0, 0, 72, {features: { liga: true, rlig: true }})
+                const path = font.opentype_font.getPath(custom_text.value, 0, 0, 72, {
+                  features: {
+                    liga: true,
+                    rlig: true
+                  }
+                })
 
                 let textSvg = '<?xml version="1.0" encoding="utf-8"?>\n' +
                   '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve">\n'
@@ -1517,7 +1545,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
                   self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
                   let fabricJSPoint = {x: 0, y: 0}
-                  if(custom_text_item.x_axis_3d && custom_text_item.y_axis_3d) {
+                  if (custom_text_item.x_axis_3d && custom_text_item.y_axis_3d) {
                     fabricJSPoint.x = custom_text_item.x_axis_3d
                     fabricJSPoint.y = custom_text_item.y_axis_3d
                   } else {
@@ -1530,7 +1558,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
                   fabric_text.set({
                     left: fabricJSPoint.x,
                     top: fabricJSPoint.y,
-                    angle: custom_text_item.rotation < 0? this.oppositeAngle(360 - custom_text_item.rotation) : this.oppositeAngle(custom_text_item.rotation)  as number,
+                    angle: custom_text_item.rotation < 0 ? this.oppositeAngle(360 - custom_text_item.rotation) : this.oppositeAngle(custom_text_item.rotation) as number,
                     flipX: true,
                     selectable: true,
                     hasControls: true,
@@ -1571,7 +1599,10 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
                   custom_text_item.x_axis_3d = fabric_text.left
                   custom_text_item.y_axis_3d = fabric_text.top
 
-                  this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: { items: custom_text.items }})
+                  this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {
+                    index: custom_text_index,
+                    value: {items: custom_text.items}
+                  })
 
                   fabric_text.setControlsVisibility(this.fabric_control_visibility)
 
@@ -1594,8 +1625,8 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   public async syncCustomTextsWithCustomTextsObjects() {
     let custom_texts_count = this.$store.getters.getCustomTexts().length
     let difference = custom_texts_count - this.product_custom_text_objects.length
-    if(difference > 0) {
-      for(let i=1; i <= difference; i++) {
+    if (difference > 0) {
+      for (let i = 1; i <= difference; i++) {
         this.product_custom_text_objects.push(null as never)
       }
     }
@@ -1603,8 +1634,8 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
 
   public async handleCustomLogoModifiedEvent(fabric_object: Record<any, any>, x_axis: number, y_axis: number, side_changed) {
     this.isObjectMoving = 0
-    const logo_index =  fabric_object.get("logo_index");
-    if(this.custom_logos[logo_index]) {
+    const logo_index = fabric_object.get("logo_index");
+    if (this.custom_logos[logo_index]) {
       const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio) / this.canvasWidthRatio
       const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio) / this.canvasWidthRatio
       const converted_width = unitConversion(width)
@@ -1613,8 +1644,8 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
         custom_logo_index: logo_index,
         data: {
-          x_axis: x_axis? x_axis : this.custom_logos[logo_index].x_axis,
-          y_axis: y_axis? y_axis : this.custom_logos[logo_index].y_axis,
+          x_axis: x_axis ? x_axis : this.custom_logos[logo_index].x_axis,
+          y_axis: y_axis ? y_axis : this.custom_logos[logo_index].y_axis,
           x_axis_3d: fabric_object.left,
           y_axis_3d: fabric_object.top,
           rotation: angle,
@@ -1627,7 +1658,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       })
     }
     const self: Record<any, any> = this;
-    if(side_changed) {
+    if (side_changed) {
       self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.custom_logos[logo_index])
     } else {
       self.$eventBus.$emit("customLogoStoreUpdated", logo_index, true);
@@ -1637,9 +1668,9 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   public handleCustomTextModifiedEvent(fabric_object: Record<any, any>, x_axis, y_axis, side_changed) {
     this.isObjectMoving = 0
     const angle = fabric_object.get("angle") < 0 ? this.oppositeAngle(360 - fabric_object.get("angle")) : this.oppositeAngle(fabric_object.get("angle")) as number
-    const custom_text_index =  fabric_object.get("custom_text_index");
-    const custom_text_item_index =  fabric_object.get("custom_text_item_index")
-    if(x_axis || y_axis) {
+    const custom_text_index = fabric_object.get("custom_text_index");
+    const custom_text_item_index = fabric_object.get("custom_text_item_index")
+    if (x_axis || y_axis) {
       this.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis = x_axis
       this.product_custom_texts[custom_text_index].items[custom_text_item_index].y_axis = y_axis
       this.product_custom_texts[custom_text_index].items[custom_text_item_index].x_axis_3d = fabric_object.left
@@ -1659,19 +1690,25 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     this.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height!.value;
     this.product_custom_texts[custom_text_index].items[custom_text_item_index].outlineConvertedWidth = converted_outline_width!.value;
     this.product_custom_texts[custom_text_index].items[custom_text_item_index].side = fabric_object.side;
-    this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: this.product_custom_texts[custom_text_index]})
+    this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {
+      index: custom_text_index,
+      value: this.product_custom_texts[custom_text_index]
+    })
     const self: Record<any, any> = this;
-    if(side_changed) {
+    if (side_changed) {
       self.$eventBus.$emit("customTextUpdated", {
         emitter: "placement", custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index,
         value: this.product_custom_texts[custom_text_index]
       });
     } else {
-      self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index}, true);
+      self.$eventBus.$emit("customTextStoreUpdated", {
+        custom_text_index: custom_text_index,
+        custom_text_item_index: custom_text_item_index
+      }, true);
     }
   }
 
-  public removeGetPointerFromFabricPrototype () {
+  public removeGetPointerFromFabricPrototype() {
     //restore fabric js function
     fabric.Canvas.prototype.getPointer = function (e, ignoreZoom) {
       // return cached values if we are in the event processing chain
@@ -1682,17 +1719,17 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
         return this._pointer;
       }
       var pointer = fabric.util.getPointer(e, this.upperCanvasEl),
-          upperCanvasEl = this.upperCanvasEl,
-          bounds = upperCanvasEl.getBoundingClientRect(),
-          boundsWidth = bounds.width || 0,
-          boundsHeight = bounds.height || 0,
-          cssScale;
-      if (!boundsWidth || !boundsHeight ) {
+        upperCanvasEl = this.upperCanvasEl,
+        bounds = upperCanvasEl.getBoundingClientRect(),
+        boundsWidth = bounds.width || 0,
+        boundsHeight = bounds.height || 0,
+        cssScale;
+      if (!boundsWidth || !boundsHeight) {
         if ('top' in bounds && 'bottom' in bounds) {
-          boundsHeight = Math.abs( bounds.top - bounds.bottom );
+          boundsHeight = Math.abs(bounds.top - bounds.bottom);
         }
         if ('right' in bounds && 'left' in bounds) {
-          boundsWidth = Math.abs( bounds.right - bounds.left );
+          boundsWidth = Math.abs(bounds.right - bounds.left);
         }
       }
       this.calcOffset();
@@ -1708,9 +1745,8 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       }
       if (boundsWidth === 0 || boundsHeight === 0) {
         // If bounds are not available (i.e. not visible), do not apply scale.
-        cssScale = { width: 1, height: 1 };
-      }
-      else {
+        cssScale = {width: 1, height: 1};
+      } else {
         cssScale = {
           width: upperCanvasEl.width / boundsWidth,
           height: upperCanvasEl.height / boundsHeight
@@ -1786,7 +1822,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       if (e.target !== this.upperCanvasEl) {
         let positionOnScene;
         if (self.isMobile == true) {
-          if(self.isObjectMoving < 4) {
+          if (self.isObjectMoving < 4) {
             positionOnScene = getPositionOnSceneTouch(e);
             self.positionOnScene = positionOnScene
             self.isObjectMoving += 1
@@ -1799,7 +1835,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
             pointer.y = self.positionOnScene?.y;
           }
         } else {
-          if(self.isObjectMoving < 4) {
+          if (self.isObjectMoving < 4) {
             positionOnScene = getPositionOnScene(e);
             self.positionOnScene = positionOnScene
             self.isObjectMoving += 1
@@ -1819,9 +1855,8 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       }
 
       if (boundsWidth === 0 || boundsHeight === 0) {
-        cssScale = { width: 1, height: 1 };
-      }
-      else {
+        cssScale = {width: 1, height: 1};
+      } else {
         cssScale = {
           width: upperCanvasEl.width / boundsWidth,
           height: upperCanvasEl.height / boundsHeight
@@ -1844,21 +1879,24 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     }
 
     //fixing bug when object is dropped outside of 3d model
-    self.canvas.on('object:moving', function(evt) {
+    self.canvas.on('object:moving', function (evt) {
       self.isObjectMoving = 0
       let array = self.getMousePosition(self.container, evt.e.clientX, evt.e.clientY, true);
       self.onClickPosition.fromArray(array);
       let intersects = self.getIntersects(self.onClickPosition, self.scene.children, self.camera);
-      if(intersects.length === 0) {
+      if (intersects.length === 0) {
         //return to the last known position
         let active_object = self.canvas.getActiveObject()
-        if(active_object) {
+        if (active_object) {
           active_object.left = self.last_known_image_pos.left as number
           active_object.top = self.last_known_image_pos.top as number
           active_object.setCoords()
         }
       } else {
-        self.last_known_image_pos = {left: evt.target? evt.target.left as number : 0, top: evt.target? evt.target.top as number : 0}
+        self.last_known_image_pos = {
+          left: evt.target ? evt.target.left as number : 0,
+          top: evt.target ? evt.target.top as number : 0
+        }
       }
     })
 
@@ -1933,6 +1971,101 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       self.isObjectMoving = 0
     }
   }
+
+  private getIntersects(point, objects, camera) {
+    this.mouse.set(point.x * 2 - 1, -(point.y * 2) + 1);
+    this.raycaster.setFromCamera(this.mouse, camera)
+    // Debugging projection rays
+    // this.scene.add(new THREE.ArrowHelper( this.raycaster.ray.direction, this.raycaster.ray.origin, 100, Math.random() * 0xffffff ));
+    return this.raycaster.intersectObjects(objects, false);
+  }
+
+  private getMousePosition(dom, x, y, by_screen = false): [number, number] {
+    let rect = dom.getBoundingClientRect();
+    let screen_left = 0
+    let screen_top = 0
+    if (by_screen) {
+      screen_left = rect.left
+      screen_top = rect.top
+    }
+    return [(x - screen_left) / rect.width, (y - screen_top) / rect.height]
+  }
+
+  private getRealPosition(axis, value) {
+    const CORRECTION_VALUE = axis === "x" ? 4.5 : 5.5;
+    // Value * number(should be equal to canvas width)
+    return Math.round(value * this.canvasResolution) - CORRECTION_VALUE;
+  }
+
+  // Function to find intersection point in Three.js and map to Fabric.js
+  private async findPositionOn3D(x: number, y: number, side: string) {
+    let camera = this.frontCamera
+    if (side.toLowerCase() == 'back') {
+      camera = this.backCamera
+    }
+    const point = this.getMousePosition(this.container, x, y)
+    this.onClickPosition.fromArray(point)
+
+    const intersects = this.getIntersects(this.onClickPosition, this.scene.children, camera)
+
+    if (intersects.length > 0 && intersects[0].uv) {
+      const uv = intersects[0].uv
+      intersects[0].object['material'].map.transformUv(uv)
+      return {
+        x: this.getRealPosition('x', uv.x),
+        y: this.getRealPosition('y', uv.y)
+      }
+    }
+
+    return {x: 0, y: 0};
+  }
+
+  private findPositionOn2D(x: number, y: number, fabric_object) {
+    let side_changed = false
+    let vector = new THREE.Vector3()
+    let array = this.getMousePosition(this.container, x, y, true)
+    this.onClickPosition.fromArray(array)
+    let intersects = this.getIntersects(this.onClickPosition, this.scene.children, this.camera)
+
+    let side = "front"
+    // this vector will store 2d screen coordinates, 3d dimension will be 0
+    if (intersects.length > 0) {
+      //find intersection point and map to 2d screen coordinates
+      vector = intersects[0].point;
+
+      //IF interscetion point is closer to back, we switch cameras
+      if (vector.z < 0) {
+        vector.project(this.backCamera);
+        side = "back";
+      } else {
+        vector.project(this.frontCamera)
+      }
+      if (fabric_object.side.toLowerCase() != side) {
+        fabric_object.side = side
+        side_changed = true
+      }
+      // map to 2D screen space
+      vector.x = Math.round((vector.x + 1) * this.containerWidth / 2)
+      vector.y = Math.round((-vector.y + 1) * this.containerHeight / 2)
+      vector.z = 0;
+
+      let divided_by = 3
+      if (fabric_object.type == 'logo') {
+        divided_by = 1
+      }
+      vector.x += fabric_object.width * fabric_object.scaleX / divided_by
+      vector.y += fabric_object.height * fabric_object.scaleY / divided_by
+
+      // if (fabric_object.type == 'logo') {
+      //   vector.x += fabric_object.width * fabric_object.scaleX
+      //   vector.y += (fabric_object.height * this.canvasHeightRatio) * (fabric_object.scaleY * this.canvasHeightRatio)
+      // } else {
+      //   vector.x += (fabric_object.width / this.canvasWidthRatio) * (fabric_object.scaleX / this.canvasWidthRatio)
+      //   vector.y += (fabric_object.height * this.canvasHeightRatio) * (fabric_object.scaleY * this.canvasHeightRatio)
+      // }
+    }
+    return {vector: vector, side_changed: side_changed}
+  }
 }
 </script>
 
@@ -1956,7 +2089,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     }
   }
 
-  .main_size_guide_btn{
+  .main_size_guide_btn {
     display: none;
   }
 }
@@ -1970,7 +2103,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
       }
     }
 
-    .main_size_guide_btn{
+    .main_size_guide_btn {
       display: block;
     }
   }
@@ -1998,6 +2131,7 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
     height: auto;
   }
 }
+
 .zoom_in_out {
   font-size: 20px;
   display: flex;
@@ -2014,13 +2148,13 @@ public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera|THREE.Orthograp
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
 
-  &:active{
+  &:active {
     color: var(--theme-color) !important;
     background: var(--theme-color-light);
   }
 }
 
-.main_size_guide_btn{
+.main_size_guide_btn {
   position: absolute;
   left: 0;
   top: 0;
