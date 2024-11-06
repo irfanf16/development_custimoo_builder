@@ -45,6 +45,10 @@ export default {
       // run time adding css for royalsports1974.com as it is not accept any direct css
       ele = getWindowObject().document.getElementById('8f0c327b-2b7b-4e88-a62a-c3cebee4bc9d')?.querySelector('[data-ux="Container"]')
     }
+    if(!ele) {
+      // run time adding css for keystonesourceforsports.ca as it is not accept any direct css
+      ele = getWindowObject().document.getElementById('04e68071-6532-4228-a74a-7f3cbe5d5971').querySelector('[data-ux="Container"]')
+    }
     if(ele) {
       ele.style.width = '100%'
       ele.style.paddingLeft = '0'
