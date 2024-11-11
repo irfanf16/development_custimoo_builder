@@ -20,13 +20,18 @@ export default class SceneMixin extends Vue {
   @Prop({ required: false, default: false }) readonly mainPreview!: boolean;
   @Prop({required: false, default: false}) readonly fromRosterModal!: boolean;
   @Prop({ required: false }) readonly product_id !: number
+  @Prop({ required: false }) readonly product_index !: number
   @Prop({ required: false }) readonly design_id !: number
+  @Prop({ required: false }) readonly productColors !: [Record<string, any>];
   @Prop({ required: true }) readonly svg_parts !: [string]
   @Prop({ required: true }) readonly visual_addons !: {}
 
   public isObjectMoving = 0
   public parts: string[] = []
 
+  get product(): Record<any, any> {
+    return this.$store.getters.getProductByIndex(this.product_index)
+  }
   get selectedProductId(): number {
     return this.$store.getters.getSelectedProductId
   }
@@ -83,10 +88,10 @@ export default class SceneMixin extends Vue {
     return this.areColorsEqual(this.defaultColors, defaultColorsObject) ? defaultColorsObject : this.defaultColors
   }
   public getSvgGroupColors(svg_group: string) {
-    if(svg_group && this.selectedProduct.svg_group_color_container && this.selectedProduct.svg_group_color_container[svg_group]) {
-      return this.selectedProduct.svg_group_color_container[svg_group]
+    if(svg_group && this.product?.svg_group_color_container && this.product.svg_group_color_container[svg_group]) {
+      return this.product.svg_group_color_container[svg_group]
     }
-    return false
+    return this.productColors[0]
   }
 
   public renderControls() {
@@ -246,7 +251,15 @@ export default class SceneMixin extends Vue {
     } else {
       groupColor = this.appliedGroupColors[svg_group]
     }
-    return groupColor
+    let final_color
+    if(this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === groupColor.color)) {
+      const selectProductPantonesList = getSelectedProductPantones(this.product_id, svg_group)
+      final_color = getClosestColor(groupColor.color as string, selectProductPantonesList, getColorType(svg_group, this.product_id))
+      final_color.color = final_color.hex
+    } else {
+      final_color = groupColor
+    }
+    return final_color
   }
   public getDefaultColorBySvgGroup(svg_group: string, defaultColorOriginal: Record<any, any>) {
     let final_color

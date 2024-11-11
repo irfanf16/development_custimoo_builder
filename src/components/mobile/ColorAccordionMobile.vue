@@ -51,11 +51,11 @@
             <li v-for="(colorName, index) in productColors" :key="index">
               <a class="faded_text" :class="selectTypeIndex == index ? 'active_dark' : ''" @click="selectType(index)">{{colorName.name | capitalize}}</a>
             </li>
-            <li v-if="logoColorsInfo && logoColorsInfo.length">
+            <li v-if="selectedProduct.is_custom_color_allowed && logoColorsInfo && logoColorsInfo.length">
               <a class="faded_text" :class="selectTypeIndex == productColors.length ? 'active_dark' : ''"
                  @click="selectType(productColors.length)">Team logo colors</a>
             </li>
-            <li v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length">
+            <li v-if="selectedProduct.is_custom_color_allowed && isCustomerAuthenticated && lockerroomColors && lockerroomColors.length">
               <a class="faded_text" :class="selectTypeIndex == productColors.length + 1 ? 'active_dark' : ''"
                  @click="selectType(productColors.length + 1)">Locker colors</a>
             </li>

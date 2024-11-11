@@ -218,8 +218,10 @@ const getColorType = (svg_group = '', product_id: number|null = null, color_type
   const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
   if(svg_group && product && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
     return 'product_color'
-  } else if(product && !product.is_custom_color_allowed) {
+  } else if(product && !product.is_custom_color_allowed && color_type == 'color_type') {
     return 'product_color'
+  } else if(product.is_custom_color_allowed && Store.getters.getSetting(color_type) == 'product_color') { // if other colors allowed on product and color_type is 'product_color' then use logo_color_type
+    return Store.getters.getSetting('logo_color_type')
   }
   return Store.getters.getSetting(color_type);
 }

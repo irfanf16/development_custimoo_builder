@@ -147,11 +147,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   @Prop({ required: false }) readonly backTextrueExtension !: string;
   @Prop({ required: false }) readonly logos !: [Record<string, any>];
   @Prop({ required: false, default: () => { return [] } }) readonly texts !: [Record<string, any>];
-  @Prop({ required: false }) readonly product_index !: number
   @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
   @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
   @Prop({ required: false }) readonly logosLimit !: number
-  @Prop({ required: false }) readonly productColors !: [Record<string, any>];
   @Prop({ required: true, default: 10 }) readonly measurementRatio!: number;
   @Prop({ required: false, default: 600 }) readonly mainCanvasWidth!: number;
   @Prop({ required: false, default: 600 }) readonly mainCanvasHeight!: number;
@@ -240,10 +238,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
-  }
-
-  get product(): Record<any, any> {
-    return this.$store.getters.getProductByIndex(this.product_index)
   }
 
   get styleIndex():number{
@@ -543,28 +537,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         })
       }
     })
-  }
-
-  public getGroupColorBySvgGroup(svg_group: string, gradient_color_index: number|null = null) {
-    let groupColor
-    if(gradient_color_index != null) {
-      groupColor = this.appliedGroupColors[svg_group].gradient_colors[gradient_color_index]
-    } else {
-      groupColor = this.appliedGroupColors[svg_group]
-    }
-    return groupColor
-  }
-
-  public getDefaultColorBySvgGroup(svg_group: string, defaultColorOriginal: Record<any, any>) {
-    let final_color
-    if(this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === defaultColorOriginal.color)) {
-      const selectProductPantonesList = getSelectedProductPantones(this.product_id, svg_group)
-      final_color = getClosestColor(defaultColorOriginal.color as string, selectProductPantonesList, getColorType(svg_group, this.product_id))
-      final_color.color = final_color.hex
-    } else {
-      final_color = defaultColorOriginal
-    }
-    return final_color
   }
 
   public areColorsEqual(defaultColors, logoColors, property = 'color') {

@@ -97,21 +97,10 @@ import SceneMixin from "@/mixins/SceneMixin";
 export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLogosMixin, SceneMixin) {
   @Prop({required: true}) readonly imageData!: Record<string, unknown>
   @Prop({required: false}) readonly logos !: [Record<string, any>];
-  @Prop({
-    required: false, default: () => {
-      return []
-    }
-  }) readonly texts !: [Record<string, any>];
-  @Prop({required: false}) readonly product_id !: number
-  @Prop({required: false}) readonly product_index !: number
-  @Prop({
-    required: false, default: () => {
-      return []
-    }
-  }) readonly productNamesSetting !: [Record<any, any>]
+  @Prop({required: false, default: () => {return []}}) readonly texts !: [Record<string, any>]
+  @Prop({required: false, default: () => {return []}}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false, default: false}) readonly logoAllowed !: boolean
   @Prop({required: false}) readonly logosLimit !: number
-  @Prop({required: false}) readonly productColors !: [Record<string, any>];
   @Prop({required: true, default: 10}) readonly measurementRatio!: number;
   @Prop({required: false, default: 2048}) readonly mainCanvasResolution!: number;
   @Prop({required: false, default: 2048}) readonly canvasResolution!: number;
@@ -199,20 +188,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     return this.$store.getters.getManageComponents
   }
 
-  get defaultColors(): [Record<any, any>] {
-    return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => {
-      return defaultColor.color
-    })
-  }
-
-  get groupColors(): [Record<any, any>] {
-    return this.$store.getters.getGroupColors
-  }
-
-  get selectedProduct(): Record<any, any> {
-    return this.$store.getters.getSelectedProduct
-  }
-
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
   }
@@ -266,7 +241,51 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       if (Object.keys(this.appliedGroupColors).length) {
         let defaultColors = this.defaultColors.filter((color: Record<any, any>) => color.color) as [Record<any, any>]
         let groupColors = this.appliedGroupColors
-        let design = this.design._objects ? this.design._objects : [this.design]
+
+        this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
+          if (groupColors[svgGroup.id]) {
+            if (svgGroup.gradient_colors) {
+              if(groupColors[svgGroup.id].gradient_colors) {
+                groupColors[svgGroup.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
+                  const final_color = this.getGroupColorBySvgGroup(svgGroup.id as string, gradient_color_index)
+                  svgGroup.gradient_colors[gradient_color_index].color = final_color.color
+                  svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
+                  svgGroup.gradient_colors[gradient_color_index].name = final_color.name
+                })
+              } else { // here we are changing color for first gradient if other product same group change color without gradient
+                if (svgGroup.gradient_colors[0]) {
+                  const final_color = this.getGroupColorBySvgGroup(svgGroup.id as string)
+                  svgGroup.gradient_colors[0].color = final_color.color
+                  svgGroup.gradient_colors[0].pantone = final_color.pantone
+                  svgGroup.gradient_colors[0].name = final_color.name
+                }
+              }
+            } else {
+              const final_color = this.getGroupColorBySvgGroup(svgGroup.id as string, groupColors[svgGroup.id].gradient_colors? 0 : null)
+              svgGroup.color = final_color.color
+              svgGroup.name = final_color.name
+              svgGroup.pantone = final_color.pantone
+            }
+            if (this.mainPreview) {
+              this.$store.dispatch('updateSvgGroups', {
+                index: svgIndex,
+                ...svgGroup
+              })
+            }
+          } else if (!groupColors.length) {
+            if (this.initialSvgGroups[svgIndex]) {
+              Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
+
+              if (this.mainPreview) {
+                this.$store.dispatch('updateSvgGroups', {
+                  index: svgIndex,
+                  ...svgGroup
+                })
+              }
+            }
+          }
+        })
+
         this.logos.forEach((logo, index) => {
           if (logo.is_customizable) {
             if (groupColors[`${logo.placement_title} logo`]) {
@@ -274,12 +293,13 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             }
           }
         })
+        let design = this.design._objects ? this.design._objects : [this.design]
         design.forEach((item: Record<any, any>) => {
-          if (item.id) {
+          if(item.id) {
             item.id = item.id.toLowerCase()
             if (groupColors[item.id]) {
               if (item.fill && item.fill.gradientUnits) {
-                if (groupColors[item.id].gradient_colors) {
+                if(groupColors[item.id].gradient_colors) {
                   groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
                     if (item.fill.colorStops[gradient_color_index]) {
                       const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
@@ -294,43 +314,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                 }
                 item.set('fill', new fabric.Gradient(item.fill))
               } else {
-                const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors ? 0 : null)
+                const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors? 0 : null)
                 item.set('fill', final_color.color)
               }
-              this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
-                if (svgGroup.id == item.id) {
-                  if (svgGroup.gradient_colors) {
-                    if (groupColors[item.id].gradient_colors) {
-                      groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
-                        if (item.fill.colorStops[gradient_color_index]) {
-                          const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
-                          svgGroup.gradient_colors[gradient_color_index].color = final_color.color
-                          svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
-                          svgGroup.gradient_colors[gradient_color_index].name = final_color.name
-                        }
-                      })
-                    } else { // here we are changing color for first gradient if other product same group change color without gradient
-                      if (svgGroup.gradient_colors[0]) {
-                        const final_color = this.getGroupColorBySvgGroup(item.id as string)
-                        svgGroup.gradient_colors[0].color = final_color.color
-                        svgGroup.gradient_colors[0].pantone = final_color.pantone
-                        svgGroup.gradient_colors[0].name = final_color.name
-                      }
-                    }
-                  } else {
-                    const final_color = this.getGroupColorBySvgGroup(item.id as string, groupColors[item.id].gradient_colors ? 0 : null)
-                    svgGroup.color = final_color.color
-                    svgGroup.name = final_color.name
-                    svgGroup.pantone = final_color.pantone
-                  }
-                  if (this.mainPreview) {
-                    this.$store.dispatch('updateSvgGroups', {
-                      index: svgIndex,
-                      ...svgGroup
-                    })
-                  }
-                }
-              })
             } else if (!defaultColors.length) {
               this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
                 if (svgGroup.id == item.id) {
@@ -343,14 +329,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                     item.set('fill', new fabric.Gradient(item.fill));
                   } else {
                     item.set('fill', this.initialSvgGroups[svgIndex].color)
-                  }
-                  Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
-
-                  if (this.mainPreview) {
-                    this.$store.dispatch('updateSvgGroups', {
-                      index: svgIndex,
-                      ...svgGroup
-                    })
                   }
                 }
               })
@@ -394,36 +372,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         })
       }
     })
-  }
-
-  public getGroupColorBySvgGroup(svg_group: string, gradient_color_index: number | null = null) {
-    let groupColor
-    if (gradient_color_index != null) {
-      groupColor = this.groupColors[svg_group].gradient_colors[gradient_color_index]
-    } else {
-      groupColor = this.groupColors[svg_group]
-    }
-    let final_color
-    if (this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === groupColor.color)) {
-      const selectProductPantonesList = getSelectedProductPantones(this.product_id, svg_group)
-      final_color = getClosestColor(groupColor.color as string, selectProductPantonesList, getColorType(svg_group, this.product_id))
-      final_color.color = final_color.hex
-    } else {
-      final_color = groupColor
-    }
-    return final_color
-  }
-
-  public getDefaultColorBySvgGroup(svg_group: string, defaultColorOriginal) {
-    let final_color
-    if (this.getSvgGroupColors(svg_group) && !this.getSvgGroupColors(svg_group).json_data.some(color => color.value === defaultColorOriginal.color)) {
-      const selectProductPantonesList = getSelectedProductPantones(this.product_id, svg_group)
-      final_color = getClosestColor(defaultColorOriginal.color as string, selectProductPantonesList, getColorType(svg_group, this.product_id))
-      final_color.color = final_color.hex
-    } else {
-      final_color = defaultColorOriginal
-    }
-    return final_color
   }
 
   public async changeDefaultColors(render_time = 300): Promise<void> {

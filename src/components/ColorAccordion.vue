@@ -37,13 +37,13 @@
                           @click="selectType(index, false)">
                 {{ colorType.name | capitalize }}
               </b-nav-item>
-              <b-nav-item v-if="logoColorsInfo && logoColorsInfo.length"
+              <b-nav-item v-if="selectedProduct.is_custom_color_allowed && logoColorsInfo && logoColorsInfo.length"
                           :class="{ 'active' : selectTypeIndex == (productColors.length) && !showOtherColors}" class="mr-2 "
                           @click="selectType(productColors.length, false)">
                 Team logo colors
               </b-nav-item>
               <b-nav-item :class="{ 'active' : selectTypeIndex == (productColors.length + 1) && !showOtherColors}" class="mr-2 "
-                          v-if="isCustomerAuthenticated && lockerroomColors && lockerroomColors.length"
+                          v-if="selectedProduct.is_custom_color_allowed && isCustomerAuthenticated && lockerroomColors && lockerroomColors.length"
                           @click="selectType(productColors.length + 1, false)">
                 Locker colors
               </b-nav-item>
