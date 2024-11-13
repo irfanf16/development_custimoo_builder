@@ -1425,7 +1425,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           }
           cart_assets_promises.push(http.post('upload_file_to_s3', svg_content_info))
         }
-        Promise.allSettled(cart_assets_promises).then(async (all_promises_response) => {
+        Promise.all(cart_assets_promises).then(async (all_promises_response) => {
           delete post_data.factory_product.svg_content
           post_data.factory_product.front_image = front_image_info.file_path
           post_data.factory_product.back_image = back_image_info.file_path ? back_image_info.file_path : ''
@@ -1529,8 +1529,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               }
             }
           })
+        }).catch(() => {
+          this.showErrorValidation(['Error uploading file to the cart. Please try again.']);
+          self.$store.dispatch('setCartLoading', false);
         })
-
       }
 
   }
