@@ -1014,16 +1014,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         backMaterial.normalMap = normalMap;
         frontMaterial.needsUpdate = true;
 
-
         // todo end
-
-
-        this.container.addEventListener('pointerup', (evt) => {
-          // Resetting the front and back camera positions to their original positions
-          this.frontCamera.position.set(this.originalCameraPosition.x, this.originalCameraPosition.y, this.originalCameraPosition.z)
-          this.backCamera.position.set(this.originalCameraPosition.x, this.originalCameraPosition.y, -this.originalCameraPosition.z)
-
-        })
 
         resolve('done')
       })

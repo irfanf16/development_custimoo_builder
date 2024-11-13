@@ -49,6 +49,10 @@ export default {
       // run time adding css for keystonesourceforsports.ca as it is not accept any direct css
       ele = getWindowObject().document.getElementById('04e68071-6532-4228-a74a-7f3cbe5d5971').querySelector('[data-ux="Container"]')
     }
+    if(!ele) {
+      // run time adding css for https://edgewear.ca/customizer as it is not accept any direct css
+      ele = getWindowObject().document.getElementById('0105581a-6b1a-4745-a822-ee75618f4d1e').querySelector('[data-ux="Container"]')
+    }
     if(ele) {
       ele.style.width = '100%'
       ele.style.paddingLeft = '0'
