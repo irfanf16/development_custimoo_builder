@@ -1,8 +1,9 @@
 import {Component, Mixins} from "vue-property-decorator";
 import Store from '@/store'
-import {santaClone, setDefaultColors, setUndoRedoItems} from '@/helpers/Helpers'
+import {getSelectedProductPantones, santaClone, setDefaultColors, setUndoRedoItems} from '@/helpers/Helpers'
 
 import { HideUpdateLockerButton } from '@/mixins/SelectedProductMixin'
+import {getClosestColor} from "@/pantoneColor";
 
 @Component
 export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
@@ -22,6 +23,22 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
 
   get allow_shuffle_colors() : string {
     return this.$store.getters.getSetting('allow_shuffle_colors');
+  }
+
+  get products() {
+    return this.$store.getters.getProducts
+  }
+
+  get product_custom_texts() {
+    return this.$store.getters.productCustomTexts()
+  }
+
+  get defaultColors(): Record<any, any>[] {
+    return this.$store.getters.getDefaultColors.filter((defaultColor: Record<any, any>) => { return defaultColor.color })
+  }
+
+  get getColorType(): string {
+    return this.$store.getters.getSetting('color_type');
   }
 
   public setSwatchColor(color: Record<any, any>) {
@@ -61,11 +78,13 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
       again_from_logo = false
     }
     setDefaultColors(again_from_logo)
+    Store.commit('SET_SHUFFLE_COLOR_NUMBER', 1)
     this.$store.commit('SET_LOGO_COLORS_INFO', {data: {using_logo_colors: true}})
     if(fire_event) {
       self.$eventBus.$emit('changeDefaultColors')
     }
     this.hideLockerProductUpdateButton()
+    this.setTextColorsToLogoColors()
   }
 
   public async shuffleLogoColors() {
@@ -90,5 +109,21 @@ export class LogoUploaderColors extends Mixins(HideUpdateLockerButton) {
       this.active_logo_color_index = logo_color_index || 0
     }
     this.hideLockerProductUpdateButton()
+  }
+
+  public setTextColorsToLogoColors() {
+    const hex = this.defaultColors.length > 1? this.defaultColors[1]?.color : this.defaultColors[0]?.color;
+    for (const [product_id, product_custom_text] of Object.entries(this.product_custom_texts) as [string: any]) {
+      const selectProductPantonesList = getSelectedProductPantones(product_id)
+      const pantoneColor = getClosestColor(hex, selectProductPantonesList, this.getColorType)
+      for (const [key, custom_text] of Object.entries(product_custom_text) as [string: any]) {
+        if(custom_text.value == '') {
+          custom_text.items.forEach((text_item) => {
+            text_item.color = pantoneColor.hex
+            text_item.color_pantone = pantoneColor.pantone
+          })
+        }
+      }
+    }
   }
 }
