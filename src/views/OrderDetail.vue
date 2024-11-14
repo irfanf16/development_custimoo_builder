@@ -145,6 +145,16 @@
                     <strong class="font-weight-bold">General Comments:</strong>
                     <span class="text-muted">{{ order.general_comments }}</span>
                   </div>
+                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                       v-if="order.additional_fields && order.additional_fields.po_number && item_status_activity_index === 0">
+                    <strong class="font-weight-bold">PO Number:</strong>
+                    <span class="text-muted">{{ order.additional_fields.po_number }}</span>
+                  </div>
+                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                       v-if="order.additional_fields && order.additional_fields.is_manual_order && item_status_activity_index === 0">
+                    <strong class="font-weight-bold">Customer Reference No:</strong>
+                    <span class="text-muted">{{ order.customer_reference_no }}</span>
+                  </div>
 
                   <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
                        v-if="order.quote_text && item_status_activity.status == QUOTEPROVIDED">
@@ -841,7 +851,14 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
 
       let factory_product = order_item.factory_products.find(factory_product => factory_product.id === actItem.factory_product_id);
-      let skipCustomerApproval: Record<any, any> = {};
+      let skipCustomerApproval: Record<any, any> =  {
+        design_customer_approval: true,
+        reason: null,
+        show_reason_modal: false,
+        username: this.auth_customer?.first_name +  ' ' + this.auth_customer?.last_name,
+        user_id: this.auth_customer?.id,
+        role_name: "Customer"
+      };
       if (factory_product?.sku?.design_customer_approval !== undefined) {
         skipCustomerApproval.design_customer_approval = (actItem?.skip_customer_approval?.design_customer_approval === "true" || actItem?.skip_customer_approval?.design_customer_approval === true || actItem?.skip_customer_approval?.design_customer_approval === 1 ) ? true: false;
         skipCustomerApproval.reason = null;
@@ -849,9 +866,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         skipCustomerApproval.username = this.auth_customer?.first_name +  ' ' + this.auth_customer?.last_name;
         skipCustomerApproval.user_id = this.auth_customer?.id;
         skipCustomerApproval.role_name = "Customer";
-        actObj.skip_customer_approval = skipCustomerApproval;
       }
-
+      actObj.skip_customer_approval = skipCustomerApproval;
       this.activity_items.activity_item_data.push(actObj);
       if (factory_product?.sku?.design_customer_approval !== undefined) {
         if (actObj.skip_customer_approval.design_customer_approval === "true" || actObj.skip_customer_approval.design_customer_approval === true) {
