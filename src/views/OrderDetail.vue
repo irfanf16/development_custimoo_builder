@@ -118,7 +118,7 @@
                                   </span>
                           </div>
                         </div>
-                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no)" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no) && !shipOnlyToStore" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
                         <template v-else>
                           <div class="feedback-text" :key="`afd-${activity_item_index}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
@@ -700,6 +700,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
+  }
+
+  get shipOnlyToStore() {
+    return this.$store.getters.getSetting('ship_only_to_store');
   }
 
   getOrderItemStatusActivityInfoDefaultObject(values = {}) {
