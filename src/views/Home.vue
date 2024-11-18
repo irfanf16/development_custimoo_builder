@@ -1387,10 +1387,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.$router.push(this.prevRoute.fullPath)
     }
     if (this.actionBeforeLogin == 'lockerRoom') {
-      this.getLockerRoomProducts(null)
       this.showVModal('locker-modal')
     } else if (this.actionBeforeLogin == 'saveToLockerRoom') {
-      this.getLockers()
       this.ref['saveToLockerModal'].showSaveToLockerRoomModal()
     } else if (this.actionBeforeLogin == 'summary') {
       this.buyNow()
@@ -1783,20 +1781,24 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       eventCollectionMode: false
     })
     if (this.isCustomerAuthenticated) {
-      let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
-      if (res == true) {
-        if (locker_index) {
-          let payload = {index: locker_index, attribute: 'active_tab', value: true}
-          this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
-        } else {
-          locker_index = this.$store.getters.getLockerTabsIndex;
+      if (this.roomWithProducts.length === 0) {
+        let res = await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+        if (res == true) {
           if (locker_index) {
             let payload = {index: locker_index, attribute: 'active_tab', value: true}
             this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+          } else {
+            locker_index = this.$store.getters.getLockerTabsIndex;
+            if (locker_index) {
+              let payload = {index: locker_index, attribute: 'active_tab', value: true}
+              this.$store.commit('SET_LOCKER_ATTRIBUTE', payload)
+            }
           }
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
         }
-        this.showVModal('locker-modal')
       }
+
+      this.showVModal('locker-modal')
 
       if (this.ref.saveToLockerModal) {
         this.hideVModal('add-to-lockerroom')
@@ -2183,7 +2185,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
 
     if (this.editStatus || (this.lockerIndex >= 0 && this.lockerProductIndex !== undefined) && (this.undoItems.length > 0 || this.redoItems.length > 0)) {
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+        if (res) {
+          this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+        }
+      });
       this.product = this.roomWithProducts[this.lockerIndex].product[this.lockerProductIndex];
       await this.shareProduct(this.product, this.lockerProductIndex, this.lockerIndex)
       this.hideVModal('locker-modal')

@@ -1302,7 +1302,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     self.renameLoader = true;
     if(data.id && data.room_name && data.room_name !=''){
       http.put(`locker/room-name/changed`, data).then((res) => {
-        self.$store.dispatch("GET_LOCKER_PRODUCTS");
+        self.$store.dispatch("GET_LOCKER_PRODUCTS").then((res) => {
+          if (res) {
+            this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+          }
+        });
         self.lockerToRename = {};
         self.newLockerName = "";
         self.showToast(res.data.message, 'success')

@@ -160,7 +160,11 @@ export default class AddProductWithDesignsToLockerRoom extends Mixins(ErrorMessa
   async recallProducts() {
     if (!(this.locker_room_product_type === 'collection_product')) {
       this.showLoader = true;
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+        if (res) {
+          this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+        }
+      });
       this.showLoader = false;
       if (this.roomWithProducts.length) {
         this.productData = this.roomWithProducts[0].product
@@ -331,7 +335,11 @@ public errors = [];
     return new Promise<Record<any, any>>(async (resolve) => {
       let res: Record<any, any> = this.$store.dispatch('createLocker', name);
       if (res.status == 201) {
-        this.$store.dispatch('GET_LOCKER_PRODUCTS');
+        this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+          if (res) {
+            this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+          }
+        });
         this.lockerAdded()
       } else if (res.status == 422) {
         this.showError(res.message)
@@ -341,7 +349,11 @@ public errors = [];
   }
 
   public async handleModalOpenEvent() {
-    await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+    await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+      if (res) {
+        this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+      }
+    });
   }
 
   public validateProductNames(productNames, customer_id, room_id): Record<any, any>{

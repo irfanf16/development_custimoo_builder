@@ -321,13 +321,6 @@ export default class CommonImportMixin extends Vue{
       return confirmationMessage;
     }
   }
-
-  @Watch('isCustomerAuthenticated')
-  async isCustomerAuthenticatedChanged(newVal: boolean, oldVaL: boolean){
-    if(newVal) {
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS')
-    }
-  }
 }
 </script>
 

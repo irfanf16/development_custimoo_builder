@@ -44,7 +44,11 @@ import ModalAction from "@/mixins/ModalAction";
         let res = await this.$store.dispatch('createLocker', this.name);
         if (res.status == 201){
           this.name = ''
-          await this.$store.dispatch('GET_LOCKER_PRODUCTS');
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+            if (res) {
+              this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+            }
+          });
           this.showLoader = false;
           this.hideVModal('create-modal')
           this.$emit('lockerAdded')

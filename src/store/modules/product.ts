@@ -200,8 +200,8 @@ const Product:Module<any, any> = {
         });
       });
     },
-    async GET_LOCKER_PRODUCTS({commit}){
-      return  await http.get("locker/products").then(async (res) => {
+    async GET_LOCKER_PRODUCTS({commit}, fetch_all = ''){
+      return  await http.get(`locker/products?${fetch_all}`).then(async (res) => {
         if (res.status == 200){
           await commit('SET_LOCKER_PRODUCTS', res.data)
           return true

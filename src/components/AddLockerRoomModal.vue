@@ -114,7 +114,11 @@
       async recallProducts(){
         if(!(this.locker_room_product_type === 'collection_product')){
           this.showLoader = true;
-          await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+            if (res) {
+              this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+            }
+          });
           this.showLoader = false;
           if (this.roomWithProducts.length){
             this.productData = this.roomWithProducts[0].product
@@ -411,6 +415,7 @@
               // }
               this.hideVModal('add-to-lockerroom');
             }
+            await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
           }else{
             //as the exception has been caught above so here we just need to return if there is any error in api response
             return
@@ -531,7 +536,11 @@
         return new Promise<Record<any,any>>(async (resolve) => {
           let res:Record<any,any> = this.$store.dispatch('createLocker', name);
           if (res.status == 201) {
-            this.$store.dispatch('GET_LOCKER_PRODUCTS');
+            this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+              if (res) {
+                this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+              }
+            });
             this.lockerAdded()
           } else if (res.status == 422) {
             this.showError(res.message)
@@ -542,7 +551,11 @@
       public async handleModalOpenEvent() {
         this.$emit('genImages')
         if(!checkIsEmpty(this.locker_room_product)) {
-          await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+            if (res) {
+              this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+            }
+          });
           this.product_name = this.locker_room_product.product_name
           if(this.locker_room_product_type === "order_product"){
               this.tabIndex = 0;
@@ -566,7 +579,11 @@
                 this.createLocker(this.locker_room_product.collection.name).then(async (room) => {
                   this.locker_room_action.created = true;
                   this.locker_room_product.room_id = room.data.data.id;
-                  await this.$store.dispatch('GET_LOCKER_PRODUCTS')
+                  await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+                    if (res) {
+                      this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+                    }
+                  });
                   this.tabIndex = this.roomWithProducts.length - 1;
                   this.productData = this.roomWithProducts[this.tabIndex].product
                   this.room_id = room.data.data.id
