@@ -118,7 +118,8 @@
                                   </span>
                           </div>
                         </div>
-                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no) && !shipOnlyToStore" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold">{{order_item.tracking_no}}</strong>.</div>
+                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no)" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold"><a
+                          :href="order_item.tracking_link">{{order_item.tracking_no}}</a></strong>.</div>
                         <template v-else>
                           <div class="feedback-text" :key="`afd-${activity_item_index}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
                         </template>
@@ -242,7 +243,7 @@
                             </template>
                           </template>
                           </div>
-                          <p> {{ activity_comment.message }} </p>
+                          <p v-html="linkifyComment(activity_comment.message)"></p>
                           <div class="d-flex justify-content-end">
                             <span> <small class="text-muted">{{ evaluateRole(activity_comment) }}</small> </span>
                           </div>
@@ -1188,6 +1189,13 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         }
       }
 
+    }
+
+    linkifyComment(text) {
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      return text.replace(urlRegex, (url) => {
+        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+      });
     }
 }
 </script>
