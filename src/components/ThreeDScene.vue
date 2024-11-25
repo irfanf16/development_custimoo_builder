@@ -272,7 +272,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                 ...svgGroup
               })
             }
-          } else if (!groupColors.length) {
+          } else if (!defaultColors.length) {
             if (this.initialSvgGroups[svgIndex]) {
               Object.assign(this.svgGroups[svgIndex], this.initialSvgGroups[svgIndex])
 
@@ -502,9 +502,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   public unHideColorGrouping() {
     if (this.colorGrouping) {
       for (let key in this.colorGrouping) {
-        const distinguishPart = this.svgGroups.filter((svgGroup: Record<any, any>) => {
-          return svgGroup.id == key.toLowerCase()
-        })
+        const distinguishPart = this.svgGroups.filter((svgGroup: Record<any, any>) => { return svgGroup.id == key.toLowerCase() })
         this.colorGrouping[key].forEach((comparePartId: string) => {
           const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => {
             return svgGroup.id == comparePartId.toLowerCase()

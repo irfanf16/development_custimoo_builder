@@ -388,7 +388,7 @@
                                            :logos="selectedProduct.productstyles[styleIndex].logo" :logosSettings="selectedProduct.logos_setting"
                                            :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                                            :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" @setCustomTextIndex="setCustomTextIndex"
-                                           :colorGrouping="[]" mainPreview="true" :productType="selectedProduct.product_type"
+                                           :colorGrouping="JSON.parse(design.front_design.color_group)" mainPreview="true" :productType="selectedProduct.product_type"
                                            :product_id="selectedProduct.id" :product_index="selectedProductIndex" :products_fonts="products_fonts" :design_id="design.id"
                                            :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
                               />
