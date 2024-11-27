@@ -540,6 +540,11 @@ import QuoteModal from "@/components/QuoteModal.vue";
      else {
       this.order_id = this.$route.params.order_id;
     }
+     //check if order_id still not set and is ecommerce platform then it means it's manual order
+    if(!this.order_id && ["wordpress", "shopify"].includes(this.company.platform)) {
+      this.order_id = this.$route.params.order_id;
+    }
+
     comment_id = this.$route.query.comment_id;
 
      let customer_authenticated = this.isCustomerAuthenticated;
