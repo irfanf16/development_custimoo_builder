@@ -116,7 +116,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     return count
   }
 
-  public async uploadExcelFile($event: Record<any, any>){
+  public async uploadExcelFile($event: Record<any, any>, from_locker = false){
     this.showLoader = true
     const files = $event.target.files ? $event.target.files[0] : null;
     const ext = files.name.split('.').pop();
@@ -177,7 +177,15 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
         alert('Please upload the file with valid pattern');
         this.showLoader = false;
       }
-      this.$store.dispatch('setProductsRosters', {roster_data: updated_roster, product_id: this.selectedProduct.id});
+      if(from_locker) {
+        // @ts-ignore this variable is available in EditRosterDetails
+        this.product_locker_roster = updated_roster
+        // @ts-ignore this function is available in EditRosterDetails
+        this.fixRosterSizes()
+      } else {
+        this.$store.dispatch('setProductsRosters', {roster_data: updated_roster, product_id: this.selectedProduct.id});
+      }
+
       handleProductPriceUpdate()
       this.showLoader = false;
       this.showToast('Excel file uploaded successfully', 'success');

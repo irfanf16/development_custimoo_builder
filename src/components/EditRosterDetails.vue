@@ -33,7 +33,7 @@
                   <b-icon-file-earmark-excel-fill />
                   <div style="white-space: nowrap" class="drop-file">Upload roster excel template</div>
                   <div style="white-space: nowrap">Upload roster excel template</div>
-                  <input type="file" @input="uploadExcelFile($event)">
+                  <input type="file" @input="uploadExcelFile($event, true)">
                 </div>
               </form>
             </div>
@@ -273,8 +273,8 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   public custom_name_exists = true;
   public custom_number_exists = true;
   public display_name = null;
-
   public loading = false;
+
   get company() {
     return this.$store.getters.getCompany
   }
@@ -291,8 +291,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   public addRosterItemOnTab($event:Record<any, any>) {
     (this.active_roster_index + 1 == this.productRoster.length) && !$event.shiftKey && this.addRosterItem();
   }
-
-
 
   public close() {
    this.selected_locker_roster = null
@@ -327,7 +325,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
     })
   }
 
-
   public handleLockerUpdate(updated_val: Record<any, any>[]) {
     this.selected_locker_roster = null
     if(updated_val) {
@@ -336,8 +333,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
       this.locker_rosters = []
     }
   }
-
-
 
   public loadLastRoster() {
     this.product_locker_roster = this.roster_previous_state;
@@ -352,7 +347,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.product_locker_roster[0])));
     this.product_locker_roster = Array.isArray(this.product_locker_roster) ? [...this.product_locker_roster, roster_items] : [this.product_locker_roster, roster_items];
   }
-
 
   public async handleLockerProductChange(locker_product_id: any) {
     const self = this as Record<any, any>;
@@ -392,8 +386,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
     }
   }
 
-
-
   public selectLockerProductRoster(){
     let self: Record<any, any> = this;
     let selected_roster = this.locker_rosters && find(this.locker_rosters, ["id", this.selected_locker_roster])
@@ -413,8 +405,21 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
     this.product_locker_roster = roster_items;
   }
 
-
-
+  public fixRosterSizes() {
+    let roster_items = this.product_locker_roster;
+    roster_items = roster_items.map((roster_item: Record<any, any>) => {
+      let size_index = findIndex(this.productSizes, ["value", roster_item.size])
+      let roster_size = roster_item.size;
+      if(size_index === -1 ) {
+        size_index = 0
+        if(this.productSizes.length > 0){
+          roster_size = this.productSizes[0].text
+        }
+      }
+      return Object.assign(roster_item, {code: roster_size, size: roster_size, size_index: size_index})
+    })
+    this.product_locker_roster = roster_items;
+  }
 
   public resetRosterItem(roster_item: Record<any, any>) {
     roster_item = JSON.parse(JSON.stringify(roster_item))
@@ -443,14 +448,13 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   public handleRosterItemUpdate( newValue, property, roster_index){
     if(property === 'size'){
       let size = this.productSizes[newValue]
-      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], [property]: size.value });
-      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], ['code']: size.value });
+      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], [property]: size?.value });
+      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], ['code']: size?.value });
       this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], ['size_index']: newValue });
     }
     else {
       this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], [property]: newValue });
     }
-
   }
 
   public updateRoster(){
@@ -481,8 +485,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
       link.click();
     })
   }
-
-
 
   public setEditRosterMounted(){
     setTimeout(()=> {
@@ -525,11 +527,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
     }, 200)
 
   }
-
-  /*
-  * methods ends
-  * */
-
 }
 </script>
 
@@ -608,48 +605,6 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
       }
     }
   }
-}
-
-.shirt-size{
-  //.tooltip.guide{
-  //  display: none;
-  //  background: #333;
-  //  color: white;
-  //  padding: 7px 10px;
-  //  border-radius: 7px;
-  //  white-space: nowrap;
-  //  margin-top: 10px;
-  //  animation: fadeInUp 0.2s ease;
-  //
-  //  &:before{
-  //    display: block;
-  //    position: absolute;
-  //    content: "";
-  //    height: 0;
-  //    width: 0;
-  //    border-color: transparent transparent #333;
-  //    border-style: solid;
-  //    border-width: 7px;
-  //    top: -14px;
-  //    left: 30%;
-  //  }
-  //}
-
-  //select {
-  //  &:focus{
-  //    &+.tooltip.guide{
-  //      display: block;
-  //      opacity: 1;
-  //    }
-  //  }
-  //
-  //  &:hover{
-  //    &+.tooltip.guide{
-  //      display: none;
-  //      opacity: 0;
-  //    }
-  //  }
-  //}
 }
 
 .excel-file-uploader{
