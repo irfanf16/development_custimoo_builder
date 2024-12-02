@@ -507,7 +507,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           const comparePart = this.svgGroups.filter((svgGroup: Record<any, any>) => {
             return svgGroup.id == comparePartId.toLowerCase()
           })
-          if (distinguishPart.length && comparePart.length && distinguishPart[0].color == comparePart[0].color) {
+          if (distinguishPart.length && comparePart.length && (distinguishPart[0].color == comparePart[0].color ||
+            (distinguishPart[0].name && comparePart[0].name && distinguishPart[0].name == comparePart[0].name) ||
+            (distinguishPart[0].pantone && comparePart[0].pantone && distinguishPart[0].pantone == comparePart[0].pantone))) {
             let changeColor: Record<any, any> = {}
             for (let index in this.productColors) {
               let colors = this.productColors[index].json_data
