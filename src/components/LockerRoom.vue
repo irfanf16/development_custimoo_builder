@@ -453,7 +453,6 @@ import ModalAction from "@/mixins/ModalAction";
 import {AxiosError} from "axios";
 import EditRosterDetails from "@/components/EditRosterDetails.vue";
 import CollectionPDF from "@/components/CollectionPDF.vue";
-
 @Component<LockerRoom>({
   components: {
     CollectionPDF,

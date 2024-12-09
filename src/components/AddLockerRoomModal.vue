@@ -9,7 +9,7 @@
          :shiftY="0"
          :clickToClose="false"
          class="absolute-modals"
-         id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal">
+         id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal" style="top: 450px">
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Save your design <span v-if="$store.getters.getIsShareDesign">before sharing</span></span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="handleModalCloseEvent"><BIconX /></span>
@@ -94,7 +94,7 @@
       getLockerColors, getStyleSelectedAddons,
       // syncGroupColorsWithSvgGroups
     } from '@/helpers/Helpers'
-    import { Canvas } from 'fabric/fabric-impl'
+    import { Canvas, log } from 'fabric/fabric-impl'
     import {lowerCase} from "lodash";
     import Store from "@/store";
     @Component<AddLockerRoomModal>({
@@ -299,12 +299,18 @@
           }
         }
         const scene_ref = Store.getters.getCanvasImage.scene
+        let svg_parts = []
+        if (scene_ref) {
+          svg_parts = scene_ref.part
+        } else {
+          svg_parts = locker_room_product.svg_parts ? locker_room_product.svg_parts : []
+        }
         let locker_data: Record<any, any> = {
           roster_url: this.rosterUrl,
           room_id: this.room_id,
           product_id: product_id,
           product_name: this.product_name,
-          svg_parts: scene_ref.parts,
+          svg_parts,
           style_id: style_id,
           design_id: design_id,
           custom_logos: custom_logos ? custom_logos : [],
@@ -562,10 +568,10 @@
               this.room_id = this.roomWithProducts[0].id;
           }
           //create locker room with collection name if not exists
-          if(this.locker_room_product_type === "collection_product") {
+          if (this.locker_room_product_type === "collection_product") {
             if (this.roomWithProducts.length){
               let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
-                return lowerCase(locker_product.room_name) === lowerCase(this.locker_room_product.collection.name)
+                return lowerCase(locker_product.room_name) === lowerCase(this.locker_room_product.room_name)
               });
               if(lockerRoomIndex > -1 ){
                 this.tabIndex = lockerRoomIndex;
