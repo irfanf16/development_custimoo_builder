@@ -647,8 +647,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       return false;
     }
 
-    self.$store.dispatch('setProductsRosters', {product_id: cart_item_product.product_id, roster_data: cart_item_product.product_roster_detail })
-
     //this.$store.commit('UPDATE_ROSTER', JSON.parse(JSON.stringify(cart_item_product.roster_detail)));
     this.$root.$emit('rostershared', '')
     let query_string = `item_id=${cart_item.id}&active_product_id=${cart_item_product.product_id}&active_product_type=cart_product&paginate=false`
