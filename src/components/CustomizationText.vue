@@ -170,7 +170,7 @@
                               </b-tab>
                               <b-tab v-if="selectedProduct.is_custom_color_allowed">
                                 <template #title>
-                                  Other
+                                  Custom color
                                 </template>
                                 <div class="color-holder" @wheel="bindScroll" @scroll="bindScroll" @touchmove="bindScroll">
                                   <div class="color-container">

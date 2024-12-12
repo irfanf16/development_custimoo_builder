@@ -60,7 +60,7 @@
                  @click="selectType(productColors.length + 1)">Locker colors</a>
             </li>
             <li v-if="selectedProduct.is_custom_color_allowed">
-              <a class="faded_text" @click="showOther">Other</a>
+              <a class="faded_text" @click="showOther">Custom color</a>
             </li>
           </template>
         </ul>
