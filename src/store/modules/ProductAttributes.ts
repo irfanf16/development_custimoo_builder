@@ -96,6 +96,7 @@ const ProductAttributes:Module<any, any> = {
       productName:null
     },
     activeTab : 0,
+    copied_color: '',
     showShuffle : true,
     canvasImage:{
       ref_front:'',
@@ -192,6 +193,9 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_VECTOR_LOGOS(state:Record<any, any>, payload) {
       state.vector_logos  = payload
+    },
+    SET_COPIED_COLOR(state:Record<any, any>, copied_color) {
+      state.copied_color  = copied_color
     },
     setIsShareDesign(state:Record<any, any>, payload) {
       state.isShareDesign  = payload
@@ -1369,6 +1373,9 @@ const ProductAttributes:Module<any, any> = {
     },
     getBackFromRoster: state => {
       return state.back_from_roster;
+    },
+    getCopiedColor: state => {
+      return state.copied_color
     },
     getIsShareDesign: state => {
       return state.isShareDesign

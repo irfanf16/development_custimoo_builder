@@ -2,7 +2,7 @@
   <div class="accordion color-accordion" role="tablist">
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="'color-accordion'+index">
       <b-card-header header-tag="header" class="p-0" role="tab">
-        <b-button block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index, svgElement.gradient_colors? gradient_index === undefined? 0 : gradient_index : undefined)">
+        <b-button class="color-accordion-header" block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index, svgElement.gradient_colors? gradient_index === undefined? 0 : gradient_index : undefined)">
           <span class="text-uppercase text">{{ svgElement.id | capitalize }} </span>
           <span class="color">
             <template v-if="svgElement.gradient_colors">
@@ -16,6 +16,10 @@
             <template v-else>
               <span class="color-box" :style="{ background : svgElement.color }"></span>
               <span class="color-pantone-name text-uppercase">{{ svgElement.pantone }} {{ svgElement.name }}</span>
+              <div class="d-flex justify-content-end gap-1 ml-5 copy-paste-btn">
+                <b-button class="border border-dark h-25 opacity-50 pt-0 pb-0 pl-1 pr-1 f-14 fz-14" @click.stop="copyColor(svgElement.color)">Copy</b-button>
+                <b-button class="border border-dark h-25 opacity-50 pt-0 pb-0 pl-1 pr-1 pr-1 f-14 fz-14" v-if="copied_color" @click.stop="pasteColor(index)">Paste</b-button>
+              </div>
             </template>
           </span>
           <span class="accordion-icon"></span>
@@ -26,6 +30,13 @@
           <div v-if="svgElement.gradient_colors" class="d-flex w-100 flex-wrap gap-1 mt-1">
             <button v-for="(gradient_color, g_index) in svgElement.gradient_colors" @click="showColor(index, g_index)"
                     :key="g_index" :class="{'light': gradient_index == g_index}" class="btn btn-secondary isBtn btn-sm">Gradient {{ g_index + 1 }}</button>
+
+            <template v-for="(gradient_color, g_index) in svgElement.gradient_colors">
+              <div v-if="gradient_index == g_index" :key="'copy_buttons_'+g_index" class="d-flex justify-content-start w-100 gap-1">
+                <b-button class="border border-dark p-1 opacity-50 ml-1" @click.stop="copyColor(gradient_color.color)">Copy</b-button>
+                <b-button class="border border-dark p-1 opacity-50" v-if="copied_color" @click.stop="pasteColor(index, g_index)">Paste</b-button>
+              </div>
+            </template>
           </div>
           <b-nav class="d-flex flex-wrap align-items-center">
             <template v-if="getSvgGroupColors(svgElement.id)">
@@ -76,7 +87,7 @@
               <template v-if="getSvgGroupColors(svgElement.id)">
                 <div v-for="(color, c_index) in getSvgGroupColors(svgElement.id).json_data" v-if="color.value" class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
-                  <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
+                  <span v-if="isColorSelected(color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
                   </span>
                 </div>
@@ -114,7 +125,7 @@
               <template v-else-if="selectTypeIndex == (productColors.length + 1) && !showOtherColors" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
                 <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
-                  <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
+                  <span v-if="isColorSelected(color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
                   </span>
                 </div>
@@ -123,7 +134,7 @@
               <template v-else-if="!showOtherColors" v-for="(color, c_index) in productColors[selectTypeIndex]?.color_text">
                 <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
-                  <span v-if="color.value == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == color.value)" class="selected" style="z-index: 100; opacity: 1">
+                  <span v-if="isColorSelected(color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
                   </span>
                 </div>
@@ -182,25 +193,30 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     this.selectType(this.selectTypeIndex, false)
   }
 
-  // @Watch('tabIndex', {
-  //   deep: true
-  // })
-  //
-  // tabIndexChanged(){
-  //   console.log('sdfsdf', this.selectTypeIndex, this.productColors)
-  //   if(this.productColors[this.selectTypeIndex]){
-  //     return false;
-  //   }else{
-  //     this.selectType(this.selectTypeIndex, false)
-  //   }
-  // }
-
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
 
   get groupColors(){
     return this.$store.getters.getGroupColors
+  }
+
+  public isColorSelected(color, svgElement, gradient_index) {
+    // Check if color or name matches
+    if (color.value === svgElement.color ||
+      (color.name && svgElement.name && color.name === svgElement.name)) {
+      return true;
+    }
+
+    // Check for gradient color match
+    if (gradient_index !== undefined && svgElement.gradient_colors) {
+      const gradientColor = svgElement.gradient_colors[gradient_index];
+      if (gradientColor.color === color.value || (gradientColor.name && color.name && gradientColor.name === color.name)) {
+        return true;
+      }
+    }
+
+    return false
   }
 
   public getColorTypeBySvgGroup(svg_group: string, color_type) {
@@ -221,5 +237,20 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
         font-size: 0.8rem;
       }
       .hu-color-picker{box-shadow: none !important;}
+  }
+
+  .copy-paste-btn {
+    display: none !important;
+    flex: auto;
+    margin-right: .5rem;
+    margin-left: 0 !important;
+  }
+
+  .color-accordion-header {
+    &:hover {
+      .copy-paste-btn {
+        display: flex !important;
+      }
+    }
   }
 </style>

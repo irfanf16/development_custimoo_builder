@@ -52,12 +52,26 @@ export default class ColorsTabMixin extends Vue{
     return this.$store.getters.getLockerroomColors;
   }
 
+  get copied_color(): Record<any, any> {
+    return this.$store.getters.getCopiedColor;
+  }
+
   get logoColorsInfo() {
     return this.$store.getters.getLogoColorsInfo('extracted_colors');
   }
 
   get locked_design() {
     return selectedDesign()?.id? this.$store.getters.getLockedDesigns(selectedDesign().id) : undefined
+  }
+
+  public copyColor(color: string) {
+    this.$store.commit('SET_COPIED_COLOR', color)
+  }
+
+  public pasteColor(index: number, gradient_index: number|undefined = undefined) {
+    this.selectAccordionIndex = index
+    this.gradient_index = gradient_index
+    this.changeColor({hex: this.copied_color})
   }
 
   public getSvgGroupColors(svg_group) {
