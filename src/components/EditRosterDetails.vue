@@ -468,6 +468,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
       this.hide()
       this.loading = false
       this.showToast('Roster updated Successfully', 'success');
+      this.$emit('roster-updated',{id: this.locker_id, totalQuantity: this.totalQuantity});
     }).catch(err => {
       this.loading = false
       this.showToast('Something went wrong, pleas try again', 'error');

@@ -416,7 +416,7 @@
         </div>
       </div>
     </modal>
-    <EditRosterDetails ref="editrostermodal"  :lockers="lockers_and_rosters" :locker_id="locker_roster_id" />
+    <EditRosterDetails ref="editrostermodal" @roster-updated="updateProductCount" :lockers="lockers_and_rosters" :locker_id="locker_roster_id" />
   </span>
 </template>
 
@@ -1328,6 +1328,25 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public editRoster(product:Record<any, any>){
     this.locker_roster_id = product.id;
     this.ref["editrostermodal"].show()
+  }
+
+  public updateProductCount(product:Record<number,number>): void{
+    let locker_index = -1
+    let product_index = -1
+    this.getLockerProducts.forEach((locker,index) => {
+      locker.product.forEach((locker_product,prod_index) => {
+        if (product['id'] == locker_product.id) {
+          locker_index = index;
+          product_index = prod_index;
+        }
+      });
+    });
+
+   if(locker_index != -1 && product_index != -1){
+      let updatedLockerProducts = this.getLockerProducts[locker_index];
+      updatedLockerProducts.product[product_index].roster_total_quantity = product['totalQuantity'];
+      this.$store.commit('SET_LOCKER_PRODUCTS', {locker_index: locker_index, products: updatedLockerProducts.product})
+   }
   }
 
   public showStoryBoard($event,room){
