@@ -138,7 +138,6 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
   }
 
   public async validateLogoFile(logo_file: File, replaceLogo = false) {
-
     const self: Record<any, any> = this;
     const extension = logo_file.name.toLowerCase().split('.').pop() as string;
     let logo_allowed_extensions = getExtensionsFor()
@@ -153,18 +152,25 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
 
     const raster_extensions = getExtensionsFor('raster')
     if (raster_extensions.includes(extension)) {
-
       if (logo_file.size > 20 * 1024 * 1024 ) { // 20MB in bytes
-         self.showToast('The file size must not be greater than 20MB.', 'Error');
-         is_allowed = false;
+       self.showToast('The file size must not be greater than 20MB.', 'Error');
+       is_allowed = false;
       } else {
-          const {width, height} = await this.getImageDimensions(logo_file);
-          if (width > 3840 || height > 2160) {
-            self.showToast('The file resolution must not be greater than 4K (3840x2160).', 'Error');
-            is_allowed = false;
-          }
+        const {width, height} = await this.getImageDimensions(logo_file);
+        if (width > 4096 || height > 4096) {
+          const text = 'This logo is very large. Consider rescaling the logo to less than 4096x4096 pixels. You can continue with the upload but it may take a very long time to process. Continue?'
+          await self.$santaModal.show({
+            icon: 'confirm', text: text, confirm_text: 'Confirm', cancel_text: 'Cancel',
+          },self).then((confirmation) => {
+            if(confirmation){
+              self.$santaModal.hide();
+              is_allowed = true
+            } else {
+              is_allowed = false
+            }
+          })
+        }
       }
-
     }
     return is_allowed;
   }
