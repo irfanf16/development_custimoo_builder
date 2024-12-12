@@ -66,8 +66,10 @@
                                     </label>
 
                                     <template v-if="room.active_tab">
-                                      <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                                      <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
+                                      <div class="locker-image-holder">
+                                        <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode" v-lazyImage:noUnload="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
+                                        <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  v-lazyImage:noUnload="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
+                                    </div>
                                     </template>
                                   </div>
                                 </div>
@@ -453,6 +455,8 @@ import ModalAction from "@/mixins/ModalAction";
 import {AxiosError} from "axios";
 import EditRosterDetails from "@/components/EditRosterDetails.vue";
 import CollectionPDF from "@/components/CollectionPDF.vue";
+import lazyImage from '@/directives/lazyImage.js';
+
 @Component<LockerRoom>({
   components: {
     CollectionPDF,
@@ -466,6 +470,9 @@ import CollectionPDF from "@/components/CollectionPDF.vue";
     ContactModal,
     Popper,
     draggable
+  },
+  directives: {
+    lazyImage
   },
   mounted() {
     const doc = getDomDocument() as Record<any, any>;
@@ -1548,6 +1555,11 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
         height: auto;
         min-height: 100px;
       }
+    }
+
+    .locker-image-holder{
+      width:160px;
+      height:160px;
     }
 
     .product-icons {
