@@ -166,6 +166,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private svgGroups: any[] = []
   private initialSvgGroups: any[] = []
   private storage_url = process.env.VUE_APP_STORAGE_URL
+  private safe_zone: fabric.Group
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -708,7 +709,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     promises.push(this.addModel(ImageData.model_url, ImageData.texture_url) as never)
     promises.push(this.addDesign(ImageData.design_url + '.' + ImageData.file_extension) as never)
 
-    Promise.all(promises).then((values) => {
+    Promise.all(promises).then(async (values) => {
+      if(ImageData.safe_zone_url) {
+        await this.addSafeZone(ImageData.safe_zone_url)
+      }
       const self: Record<any, any> = this
       if (this.mainPreview) {
         self.$eventBus.$emit('setTotalTabs')
@@ -1294,6 +1298,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             })
           }
           img.setControlsVisibility(this.fabric_control_visibility)
+          img.clipPath = this.safe_zone
           this.canvas.add(img)
           this.canvas.requestRenderAll()
 
@@ -1549,6 +1554,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                     this.showDimensions(e)
                   })
 
+                  fabric_text.clipPath = this.safe_zone
                   self.canvas.add(fabric_text)
                   fabric_text.bringToFront()
                   this.canvas.renderAll()
@@ -1645,6 +1651,35 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         custom_text_item_index: custom_text_item_index
       }, true);
     }
+  }
+
+  public addSafeZone(url: string) {
+    return new Promise((resolve) => {
+      fabric.loadSVGFromURL(url, (img: any, options: any) => {
+        options.crossOrigin = 'Anonymous'
+
+        const safe_zone_clip = fabric.util.groupSVGElements(img) as fabric.Group
+        this.canvas.viewportCenterObject(safe_zone_clip)
+        safe_zone_clip.set({
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true,
+          absolutePositioned: true,
+          inverted: true,
+          flipY: true
+        })
+
+        safe_zone_clip.scaleToHeight(this.canvasResolution as number).set({
+          left: 0x0,
+          top: 0x0
+        }).setCoords()
+
+        this.safe_zone = safe_zone_clip
+        resolve(1)
+      })
+    })
   }
 
   public removeGetPointerFromFabricPrototype() {
@@ -2106,4 +2141,12 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   user-select: none;
   position: relative;
 }
+/* // for future use to hide 3d and show 2d canvas
+#canvas_container > canvas {
+  width: 948px !important;
+  height: 948px !important;
+}
+#renderer {
+  display: none;
+}*/
 </style>
