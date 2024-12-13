@@ -2482,8 +2482,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       });
     }
     sortedObjects.forEach((object) => {
-      this.frontCanvas.bringToFront(object)
-      if(this.back) {
+      if(object.side.toLowerCase() == 'front') {
+        this.frontCanvas.bringToFront(object)
+      }else if(this.back) {
         this.backCanvas.bringToFront(object)
       }
     })
