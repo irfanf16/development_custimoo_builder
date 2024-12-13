@@ -77,7 +77,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
   get getLockerProducts() {
     let main_product_id = this.$store.getters.getEditProductId;
     let locker_products:Record<any, any> = this.$store.getters.getLockerProducts;
-    locker_products = santaClone(locker_products)
+    //locker_products = santaClone(locker_products)
     let locker_products_count = locker_products.length
     let locker_room_index = locker_products.findIndex((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
     if (this.searchText) {

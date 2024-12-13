@@ -329,13 +329,15 @@ export default class SceneMixin extends Vue {
       }
       this.logos.forEach((group_logos: Record<any, any>, index: number) => {
         if(is_fixed_logos_all || (!is_fixed_logos_all && group_logos.is_default)) {
-          group_logos.logos.forEach((logo, logo_index) => {
-            if (logo && logo.url) {
-              logo.fixed_logo_index = logo.id
-              // @ts-ignore
-              promises.push(this.addSvgLogos(logo, logo.id))
-            }
-          })
+          if (group_logos && Array.isArray(group_logos.logos)) {
+            group_logos.logos.forEach((logo, logo_index) => {
+              if (logo && logo.url) {
+                logo.fixed_logo_index = logo.id;
+                // @ts-ignore
+                promises.push(this.addSvgLogos(logo, logo.id));
+              }
+            });
+          }
         }
       })
 

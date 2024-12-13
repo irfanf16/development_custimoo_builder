@@ -67,8 +67,8 @@
 
                                     <template v-if="room.active_tab">
                                       <div class="locker-image-holder">
-                                        <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode" v-lazyImage:noUnload="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="">
-                                        <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) "  v-lazyImage:noUnload="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="">
+                                        <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode" :key="`${product.id}-${ind}-${product.is_back_img}`" :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="nadeem">
+                                        <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) " :key="`${product.id}-${ind}-${product.is_back_img}`"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="faisal">
                                     </div>
                                     </template>
                                   </div>

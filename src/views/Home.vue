@@ -10,7 +10,7 @@
                                  @setOpacity="setOpacity"
                                  @isElementOverflowingContainer="isElementOverflowingContainer"
           />
-    <modal name="product-rejection-info-modal" class="absolute-modals" v-if="getProductEditInfoObject.order_product_info.activity_items.length > 0">
+    <modal name="product-rejection-info-modal" class="absolute-modals" v-if="getProductEditInfoObject && getProductEditInfoObject.editing && getProductEditInfoObject.order_product_info.activity_items.length > 0">
       <h1>
         {{getProductEditInfoObject.order_product_info.activity_items[getProductEditInfoObject.order_product_info.factory_product_active_index].message}}
       </h1>
