@@ -5,16 +5,22 @@
     </div>
     <div class="order-wrapper" v-if="order && order.id">
       <div class="d-flex justify-content-between align-items-center">
-        <div class="fs-4 font-weight-bolder order-title p-2">
-          {{ is_quote_order ? 'Quote' : 'Order' }} # {{ order.order_no }}
-        </div>
+        <template v-if="is_quote_order">
+          <div class="fs-4 font-weight-bolder order-title p-2">Quote pending</div>
+        </template>
+        <template v-else>
+          <template v-if="order.order_no">
+            <div class="fs-4 font-weight-bolder order-title p-2">Order # {{order.order_no}}</div>
+          </template>
+          <template v-else>
+            <div class="fs-4 font-weight-bolder order-title p-2">Order pending confirmation</div>
+          </template>
+        </template>
         <div class="font-weight-bolder d-flex order-title p-2">
           <template v-if="is_quote_order && show_quote_buttons">
             <button class="btn btn-secondary mx-2 cursor-pointer fs-2" @click.stop="acceptQuote()">Accept Quote</button>
             <button class="btn btn-danger mx-2 cursor-pointer fs-2" @click.stop="rejectQuote(false)" >Reject Quote</button>
-
           </template>
-
           <button class="btn btn-dark mx-2 cursor-pointer fs-2" @click.stop="cancelOrder(order)"
                   v-if="order.items[order.items.length-1].status === FACTORYREVIEW">Cancel order</button>
 
@@ -74,7 +80,7 @@
                           <template>
                             <div class="actions nested-actions" :key="`details-btn-${activity_item_index}`">
                               <button class="order-detail-btn btn btn-secondary btn-sm" title="Buy again"
-                                      v-if="order_item.factory_products[activity_item_index].can_reorder && (company.platform == 'wordpress' || company.platform == 'shopify')"
+                                      v-if="order.order_no && order_item.factory_products[activity_item_index].can_reorder && (company.platform == 'wordpress' || company.platform == 'shopify')"
                                       @click.stop="reorder(order,order_item.id, order_item.factory_products[activity_item_index])"
                                       style="padding: 3px 5px !important;" :key="`reorder-btn-${activity_item_index}`">
                                 Reorder
@@ -418,12 +424,22 @@
             <a :href="`${storage_url}${order.design_file}`"  class="btn btn-dark mx-1" v-if="order.design_file">Download Pdf</a>
           </b-col>
           <b-col class="col-2">
-            <a :href="`${api_url}/order/${order_id}/product/${activity_item_info.factory_product.id}/export`"
-               :download="`order_${order.order_no}_product_${activity_item_info.factory_product.product_name}.xlsx`"
-               class="btn btn-dark mx-1"
-            >
-              Download Excel
-            </a>
+            <template v-if="order.order_no">
+              <a :href="`${api_url}/order/${order_id}/product/${activity_item_info.factory_product.id}/export`"
+                 :download="`order_${order.order_no}_product_${activity_item_info.factory_product.product_name}.xlsx`"
+                 class="btn btn-dark mx-1"
+              >
+                Download Excel
+              </a>
+            </template>
+            <template v-else>
+              <a :href="`${api_url}/order/${order_id}/product/${activity_item_info.factory_product.id}/export`"
+                 :download="`order_${getCurrentDatetime()}_product_${activity_item_info.factory_product.product_name}.xlsx`"
+                 class="btn btn-dark mx-1"
+              >
+                Download Excel
+              </a>
+            </template>
           </b-col>
         </b-row>
         <b-row class="mt-3 mx-2 pt-2 pb-5">
@@ -757,7 +773,11 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   public async cancelOrder(order:Record<any, any>) {
-    this.cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+    let cancel_confirm_message = `<h3 class="text-primary">Order pending confirmation</h3> Are you sure that you want to cancel this order?`
+    if(order.order_no){
+      cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+    }
+    this.cancel_confirm_message = cancel_confirm_message;
     const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
     const confirm = await confirm_modal.showConfirm();
 
@@ -1171,7 +1191,11 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         if(via_link) {
           confirm = true;
         } else {
-          this.cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+          let cancel_confirm_message = `<h3 class="text-primary">Order pending confirmation</h3> Are you sure that you want to cancel this order?`
+          if(order.order_no){
+            cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+          }
+          this.cancel_confirm_message = cancel_confirm_message
           const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
           confirm = await confirm_modal.showConfirm();
         }
@@ -1201,6 +1225,11 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       return text.replace(urlRegex, (url) => {
         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
       });
+    }
+    getCurrentDatetime() {
+      const now = new Date();
+      return now.toISOString().replace(/:/g, '-').split('.')[0];
+      // Formats to "YYYY-MM-DDTHH-MM-SS" (compatible for filenames)
     }
 }
 </script>

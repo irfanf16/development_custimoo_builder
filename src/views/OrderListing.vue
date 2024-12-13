@@ -141,7 +141,7 @@
                                         </span>
                                         <span v-else class="btn btn-dark btn-sm mx-xxl-2" @click="addToCart(item.id, product)">Add To Cart</span>
                                       </template>
-                                      <template v-if="product.can_reorder">
+                                      <template v-if="order.order_no && product.can_reorder">
                                         <span class="btn btn-dark btn-sm mx-xxl-2" @click="reorderItem(order, item, product, factoryProductIndex)">Reorder</span>
                                       </template>
                                       <template v-else>
@@ -327,7 +327,11 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
   }
 
   public async cancelOrder(order:Record<any, any>){
-    this.cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+    let cancel_confirm_message = `<h3 class="text-primary">Order pending confirmation</h3> Are you sure that you want to cancel this order?`
+    if(order.order_no){
+       cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+    }
+    this.cancel_confirm_message = cancel_confirm_message;
     const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
     const confirm = await confirm_modal.showConfirm();
 
