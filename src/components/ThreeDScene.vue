@@ -96,7 +96,6 @@ import SceneMixin from "@/mixins/SceneMixin";
 
 export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLogosMixin, SceneMixin) {
   @Prop({required: true}) readonly imageData!: Record<string, unknown>
-  @Prop({required: false}) readonly logos !: [Record<string, any>];
   @Prop({required: false, default: () => {return []}}) readonly texts !: [Record<string, any>]
   @Prop({required: false, default: () => {return []}}) readonly productNamesSetting !: [Record<any, any>]
   @Prop({required: false, default: false}) readonly logoAllowed !: boolean
@@ -159,11 +158,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private design !: any
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private custom_logo_objects: any[] = []
-  private fixed_logo_objects: any[] = []
   private mounted = false
   private model!: Object3D
   private texture!: Texture
-  private svgGroups: any[] = []
   private initialSvgGroups: any[] = []
   private storage_url = process.env.VUE_APP_STORAGE_URL
   private safe_zone: fabric.Group
@@ -187,10 +184,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   get manageComponents(): Record<any, any> {
     return this.$store.getters.getManageComponents
-  }
-
-  get styleIndex(): number {
-    return this.$store.getters.getCurrentStyleIndex;
   }
 
   get productCustomTexts(): Record<any, any>[] {
@@ -287,12 +280,12 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           }
         })
 
-        this.logos.forEach((logo, index) => {
-          if (logo.is_customizable) {
-            if (groupColors[`${logo.placement_title} logo`]) {
-              this.changeFixedLogoColor(index, groupColors[`${logo.placement_title} logo`].color)
+        this.logos.forEach((group_logos, index) => {
+          group_logos.logos.forEach((logo, logo_index) => {
+            if (logo.is_customizable && groupColors[`${logo.placement_title}`]) {
+              this.changeFixedLogoColor(logo.id, logo.placement_title, groupColors[`${logo.placement_title}`].color)
             }
-          }
+          })
         })
         let design = this.design._objects ? this.design._objects : [this.design]
         design.forEach((item: Record<any, any>) => {
@@ -340,39 +333,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         this.unHideColorGrouping()
       }
     }
-  }
-
-  public changeFixedLogoColor(logo_index: number, color: string, default_colors: Record<any, any> = {}) {
-    this.fixed_logo_objects.forEach((fixed_logo_object) => {
-      if (fixed_logo_object.fixed_logo_index == logo_index) {
-        fixed_logo_object.getObjects().forEach((item) => {
-          if (['path', 'rect', 'circle', 'polygon', 'polyline', 'line', 'ellipse', 'text'].includes(item.type as string)) {
-            item.set({fill: color});
-          }
-        })
-
-        this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
-          if (svgGroup.id == `${this.logos[logo_index].placement_title} logo`) {
-            let final_color;
-            if (Object.entries(default_colors).length) {
-              final_color = this.getDefaultColorBySvgGroup(`${this.logos[logo_index].placement_title} logo`, default_colors)
-            } else {
-              final_color = this.getGroupColorBySvgGroup(`${this.logos[logo_index].placement_title} logo` as string, null)
-            }
-            svgGroup.color = final_color.color
-            svgGroup.name = final_color.name
-            svgGroup.pantone = final_color.pantone
-
-            if (this.mainPreview) {
-              this.$store.dispatch('updateSvgGroups', {
-                index: svgIndex,
-                ...svgGroup
-              })
-            }
-          }
-        })
-      }
-    })
   }
 
   public async changeDefaultColors(render_time = 300): Promise<void> {
@@ -436,16 +396,16 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           }
         })
 
-        this.logos.forEach((logo, index) => {
-          if (logo.is_customizable) {
-            if (appliedDefaultColors[`${logo.placement_title} logo`]) {
+        this.logos.forEach((group_logos, index) => {
+          group_logos.logos.forEach((logo, logo_index) => {
+            if (logo.is_customizable && appliedDefaultColors[`${logo.placement_title}`]) {
               useColorIndex++
               if (useColorIndex >= defaultColors.length) {
                 useColorIndex = 0
               }
-              this.changeFixedLogoColor(index, appliedDefaultColors[`${logo.placement_title} logo`], defaultColors[useColorIndex])
+              this.changeFixedLogoColor(logo.id, logo.placement_title, appliedDefaultColors[`${logo.placement_title}`], defaultColors[useColorIndex])
             }
-          }
+          })
         })
 
         this.canvas.requestRenderAll()
@@ -1081,7 +1041,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.renderScene(this.backCamera)
   }
 
-  public addSvgLogos(logo: Record<any, any>, index: number): Promise<boolean> {
+  public addSvgLogos(logo: Record<any, any>, index: string): Promise<boolean> {
     return new Promise((resolve) => {
       let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
       fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
@@ -1108,11 +1068,12 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           })
 
           if (logo.is_customizable) {
-            const id = logo.placement_title + ' logo'
+            const id = `${logo.placement_title}`
             if (!this.containsObject({id: id})) {
               let fill_color = ''
-              img.getObjects().forEach((item: any) => {
-                if (['path', 'rect', 'circle', 'polygon', 'polyline', 'line', 'ellipse', 'text'].includes(item.type) && item.fill) {
+              const logo_objects = img._objects? img._objects : [img]
+              logo_objects.forEach((item: any) => {
+                if (item.fill && typeof item.fill === 'string') {
                   if (item.fill.includes('rgb')) {
                     item.fill = rgbHex(item.fill as string).includes('#') ? rgbHex(item.fill as string) : '#' + rgbHex(item.fill as string)
                   }
@@ -1138,8 +1099,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                     if (!this.parts.filter((part) => part == id)) {
                       this.parts.push(id)
                     }
-
-                    this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
                   }
                 }
               })
@@ -1152,7 +1111,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             side: logo.side,
             type: 'fixed_logo'
           })
-          this.fixed_logo_objects.push(img)
+          this.fixed_logo_objects[logo.fixed_logo_index] = img
           this.canvas.requestRenderAll()
           resolve(true)
         })
@@ -1167,24 +1126,18 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }
   }
 
-  public addFixedLogos() {
-    if (this.logos.length) {
-      let promises: Promise<boolean>[] = []
-      this.logos.forEach((logo: Record<any, any>, index: number) => {
-        const is_fixed_logos_all = this.selectedProduct.productstyles[this.styleIndex].is_fixed_logos_all
-        if (is_fixed_logos_all || (is_fixed_logos_all == false && logo.is_default))
-          if (logo && logo.url) {
-            logo.fixed_logo_index = index
-            promises.push(this.addSvgLogos(logo, index))
-          }
-      })
-
-      Promise.all(promises).then(() => {
-        if (this.groupColors.length || this.defaultColors.length) {
-          this.callChangeColors()
-        }
-      })
+  public reStackObjectsInCanvas(objects, order_key: string|null = null) {
+    let sortedObjects = objects;
+    if (order_key) {
+      sortedObjects = objects.sort((a, b) => {
+        if (a[order_key] < b[order_key]) return -1;
+        if (a[order_key] > b[order_key]) return 1;
+        return 0;
+      });
     }
+    sortedObjects.forEach((object) => {
+      this.canvas.bringToFront(object)
+    })
   }
 
   public async resetFixedLogosFromCanvas() {

@@ -25,9 +25,12 @@ export default class SceneMixin extends Vue {
   @Prop({ required: false }) readonly productColors !: [Record<string, any>];
   @Prop({ required: true }) readonly svg_parts !: [string]
   @Prop({ required: true }) readonly visual_addons !: {}
+  @Prop({ required: false }) readonly logos !: [Record<string, any>];
 
   public isObjectMoving = 0
   public parts: string[] = []
+  public fixed_logo_objects: any[] = []
+  public svgGroups: any[] = []
 
   get product(): Record<any, any> {
     return this.$store.getters.getProductByIndex(this.product_index)
@@ -87,13 +90,16 @@ export default class SceneMixin extends Vue {
 
     return this.areColorsEqual(this.defaultColors, defaultColorsObject) ? defaultColorsObject : this.defaultColors
   }
+  get styleIndex():number{
+    return this.$store.getters.getCurrentStyleIndex;
+  }
+
   public getSvgGroupColors(svg_group: string) {
     if(svg_group && this.product?.svg_group_color_container && this.product.svg_group_color_container[svg_group]) {
       return this.product.svg_group_color_container[svg_group]
     }
     return this.productColors[0]
   }
-
   public renderControls() {
     const self: Record<any, any> = this
     const fabricObj: Record<any, any> = fabric
@@ -271,5 +277,75 @@ export default class SceneMixin extends Vue {
       final_color = defaultColorOriginal
     }
     return final_color
+  }
+  public changeFixedLogoColor(logo_index: string, placement_title: string, color: string, default_colors: Record<any, any> = {}) {
+    if (this.fixed_logo_objects && this.fixed_logo_objects[logo_index]) {
+      const fixed_logo_object = this.fixed_logo_objects[logo_index]
+      const logo_objects = fixed_logo_object._objects? fixed_logo_object._objects : [fixed_logo_object]
+      logo_objects.forEach((item) => {
+        item.set({fill: color});
+      })
+
+      this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
+        if (svgGroup.id == placement_title) {
+          let final_color;
+          if (Object.entries(default_colors).length) {
+            final_color = this.getDefaultColorBySvgGroup(placement_title, default_colors)
+          } else {
+            final_color = this.getGroupColorBySvgGroup(placement_title, null)
+          }
+          svgGroup.color = final_color.color
+          svgGroup.name = final_color.name
+          svgGroup.pantone = final_color.pantone
+
+          if (this.mainPreview) {
+            this.$store.dispatch('updateSvgGroups', {
+              index: svgIndex,
+              ...svgGroup
+            })
+          }
+        }
+      })
+    }
+  }
+  public async callChangeColors() {
+    // @ts-ignore
+    await this.changeDefaultColors()
+    // @ts-ignore
+    await this.changeGroupColors()
+  }
+  public addFixedLogos() {
+    if (this.logos.length) {
+      let promises: Promise<boolean>[] = []
+      let is_fixed_logos_all: boolean
+      if(this.selectedProductId == this.product_id) {
+        is_fixed_logos_all = this.product.productstyles[this.styleIndex].is_fixed_logos_all
+      } else {
+        is_fixed_logos_all = this.product.productstyles[0].is_fixed_logos_all
+      }
+      this.svgGroups = this.svgGroups.filter(item => !Object.prototype.hasOwnProperty.call(item, 'logo_index'));
+      if(this.mainPreview) {
+        this.$store.dispatch('setSvgGroups', this.svgGroups)
+      }
+      this.logos.forEach((group_logos: Record<any, any>, index: number) => {
+        if(is_fixed_logos_all || (!is_fixed_logos_all && group_logos.is_default)) {
+          group_logos.logos.forEach((logo, logo_index) => {
+            if (logo && logo.url) {
+              logo.fixed_logo_index = logo.id
+              // @ts-ignore
+              promises.push(this.addSvgLogos(logo, logo.id))
+            }
+          })
+        }
+      })
+
+      Promise.all(promises).then(() => {
+        // @ts-ignore
+        this.reStackObjectsInCanvas(this.fixed_logo_objects)
+        if (Object.keys(this.appliedGroupColors).length || this.defaultColors.length) {
+          this.callChangeColors()
+        }
+      })
+    }
   }
 }

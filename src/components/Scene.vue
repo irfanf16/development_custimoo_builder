@@ -145,7 +145,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   @Prop({ required: false }) readonly back!: Record<string, unknown>;
   @Prop({ required: false }) readonly backTextureUrl!: string;
   @Prop({ required: false }) readonly backTextrueExtension !: string;
-  @Prop({ required: false }) readonly logos !: [Record<string, any>];
   @Prop({ required: false, default: () => { return [] } }) readonly texts !: [Record<string, any>];
   @Prop({ required: false, default: () => { return [] } }) readonly productNamesSetting !: [Record<any, any>]
   @Prop({ required: false, default: false }) readonly logoAllowed !: boolean
@@ -176,12 +175,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private addon_objects: fabric.Group[][] = []
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private custom_logo_objects: any[] = []
-  private fixed_logo_objects: any[] = []
   private mounted = false
   private front_models: fabric.Image[]= []
   private back_models: fabric.Image[] = []
   private showSmall = { front: false, back: this.mobileScreen }
-  private svgGroups: any[] = []
   private initialSvgGroups: any[] = []
   public dimTextFront = new fabric.Text('', {
     fontSize: 20,
@@ -238,10 +235,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
-  }
-
-  get styleIndex():number{
-    return this.$store.getters.getCurrentStyleIndex;
   }
 
   get productCustomTexts(): Record<any, any>[] {
@@ -337,11 +330,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public async callChangeColors() {
-    await this.changeDefaultColors()
-    await this.changeGroupColors()
-  }
-
   public changeGroupColorsEvent() {
     let render_time = 0
     if(!this.mainPreview) {
@@ -400,12 +388,12 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
         })
 
-        this.logos.forEach((logo, index) => {
-          if(logo.is_customizable) {
-            if(groupColors[`${logo.placement_title}`]) {
-              this.changeFixedLogoColor(index, groupColors[`${logo.placement_title}`].color)
+        this.logos.forEach((group_logos, index) => {
+          group_logos.logos.forEach((logo, logo_index) => {
+            if (logo.is_customizable && groupColors[`${logo.placement_title}`]) {
+              this.changeFixedLogoColor(logo.id, logo.placement_title, groupColors[`${logo.placement_title}`].color)
             }
-          }
+          })
         })
 
         if(this.addon_objects.length) {
@@ -507,38 +495,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public changeFixedLogoColor(logo_index: number, color: string, default_colors: Record<any, any> = {}) {
-    this.fixed_logo_objects.forEach((fixed_logo_object) => {
-      if(fixed_logo_object.fixed_logo_index == logo_index){
-        const logo_objects = fixed_logo_object._objects ? fixed_logo_object._objects : [fixed_logo_object]
-        logo_objects.forEach((item) => {
-          item.set({ fill: color });
-        })
-
-        this.svgGroups.forEach((svgGroup: Record<any, any>, svgIndex: number) => {
-          if (svgGroup.id == `${this.logos[logo_index].placement_title}`) {
-            let final_color;
-            if(Object.entries(default_colors).length) {
-              final_color = this.getDefaultColorBySvgGroup(`${this.logos[logo_index].placement_title}`, default_colors)
-            } else {
-              final_color = this.getGroupColorBySvgGroup(`${this.logos[logo_index].placement_title}` as string, null)
-            }
-            svgGroup.color = final_color.color
-            svgGroup.name = final_color.name
-            svgGroup.pantone = final_color.pantone
-
-            if (this.mainPreview) {
-              this.$store.dispatch('updateSvgGroups', {
-                index: svgIndex,
-                ...svgGroup
-              })
-            }
-          }
-        })
-      }
-    })
-  }
-
   public areColorsEqual(defaultColors, logoColors, property = 'color') {
     const sortedDefaultColors = JSON.stringify(defaultColors.slice().sort((a, b) => (a[property] > b[property] ? 1 : -1)))
     const sortedLogoColors = JSON.stringify(logoColors.slice().sort((a, b) => (a[property] > b[property] ? 1 : -1)))
@@ -638,16 +594,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           })
         }
 
-        this.logos.forEach((logo, index) => {
-          if(logo.is_customizable) {
-            if (appliedDefaultColors[`${logo.placement_title}`]) {
-              useColorIndex++
-              if (useColorIndex >= defaultColors.length) {
-                useColorIndex = 0
+        this.logos.forEach((group_logos, index) => {
+          group_logos.logos.forEach((logo, logo_index) => {
+            if (group_logos.is_customizable) {
+              if (appliedDefaultColors[`${logo.placement_title}`]) {
+                useColorIndex++
+                if (useColorIndex >= defaultColors.length) {
+                  useColorIndex = 0
+                }
+                this.changeFixedLogoColor(logo.id, logo.placement_title, appliedDefaultColors[`${logo.placement_title}`], defaultColors[useColorIndex])
               }
-              this.changeFixedLogoColor(index, appliedDefaultColors[`${logo.placement_title}`], defaultColors[useColorIndex])
             }
-          }
+          })
         })
 
 
@@ -2411,7 +2369,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     return apply_boundary;
   }
 
-  public addSvgLogos(logo: Record<any, any>, index: number): Promise<boolean> {
+  public addSvgLogos(logo: Record<any, any>, index: string): Promise<boolean> {
     return new Promise((resolve) => {
       if (logo.side == 'front' || (logo.side == 'back' && this.back)) {
         let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
@@ -2434,10 +2392,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           })
 
           if(logo.is_customizable) {
-            const id = logo.placement_title
+            const id = `${logo.placement_title}`
             if(!this.containsObject({id: id})) {
               let fill_color = ''
-              const logo_objects = img._objects ? img._objects : [img]
+              const logo_objects = img._objects? img._objects : [img]
               logo_objects.forEach((item: any) => {
                 if (item.fill && typeof item.fill === 'string') {
                   if (item.fill.includes('rgb')) {
@@ -2490,7 +2448,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             type: 'fixed_logo'
           })
           const render_time = 300
-          this.fixed_logo_objects.push(img)
+          this.fixed_logo_objects[logo.fixed_logo_index] = img
           if (logo.side == 'back') {
             this.backCanvasRender()
           } else {
@@ -2514,34 +2472,27 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public addFixedLogos() {
-    if (this.logos.length) {
-      let promises: Promise<boolean>[] = []
-      this.logos.forEach((logo: Record<any, any>, index: number) => {
-        let is_fixed_logos_all: boolean
-        if(this.selectedProductId == this.product_id) {
-          is_fixed_logos_all = this.product.productstyles[this.styleIndex].is_fixed_logos_all
-        } else {
-          is_fixed_logos_all = this.product.productstyles[0].is_fixed_logos_all
-        }
-
-        this.svgGroups = this.svgGroups.filter(item => !Object.prototype.hasOwnProperty.call(item, 'logo_index'));
-        if(this.mainPreview) {
-          this.$store.dispatch('setSvgGroups', this.svgGroups)
-        }
-        this.initialSvgGroups = JSON.parse(JSON.stringify(this.svgGroups))
-
-        if(is_fixed_logos_all || (!is_fixed_logos_all && logo.is_default)) {
-          if (logo && logo.url) {
-            logo.fixed_logo_index = index
-            promises.push(this.addSvgLogos(logo, index))
-          }
-        }
-      })
-      Promise.all(promises).then(() => {
-        if(this.groupColors.length || this.defaultColors) {
-          this.callChangeColors()
-        }
+  public reStackObjectsInCanvas(objects, order_key: string|null = null) {
+    let sortedObjects = objects;
+    if (order_key) {
+      sortedObjects = objects.sort((a, b) => {
+        if (a[order_key] < b[order_key]) return -1;
+        if (a[order_key] > b[order_key]) return 1;
+        return 0;
+      });
+    }
+    sortedObjects.forEach((object) => {
+      this.frontCanvas.bringToFront(object)
+      if(this.back) {
+        this.backCanvas.bringToFront(object)
+      }
+    })
+    this.front_models.forEach((model: fabric.Image) => {
+      model.bringToFront()
+    })
+    if(this.back) {
+      this.back_models.forEach((model: fabric.Image) => {
+        model.bringToFront()
       })
     }
   }
