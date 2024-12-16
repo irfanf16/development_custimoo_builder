@@ -522,7 +522,9 @@ import {
   updateOrderProducts,
   findActivityWithPosition,
   findActivity,
-  mergeActivityArray
+  mergeActivityArray,
+  base64ToFile,
+  isBase64File
 } from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
@@ -786,7 +788,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     if(confirm){
       this.showLoader = true;
       http.put(`customer-orders/cancel/${order.id}`).then(async (res:Record<any, any>) => {
-        console.log('res', res.data)
         if(res.data.success){
           await this.getOrderDetail();
           this.showToast(res.data.message, 'success');
@@ -950,7 +951,22 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
               if(key2 == 'files'){
                 activity_file_obj[key2].forEach((activity_file:Record<any,any> , fileInd:number) => {
                   for(const key3 in activity_file){
-                    form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
+                    if(key3 === "file"){
+                      if(this.activity_items[key][actIndx][key2][fileInd][key3] && isBase64File(this.activity_items[key][actIndx][key2][fileInd][key3])){
+                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', base64ToFile(this.activity_items[key][actIndx][key2][fileInd][key3], true));
+                      }
+                      else {
+                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
+                      }
+                    }
+                    if(key3 === "file_type"){
+                      if(this.activity_items[key][actIndx][key2][fileInd][key3] == "encode"){
+                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', "object");
+                      }
+                      else {
+                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
+                      }
+                    }
                   }
                 });
               }
@@ -988,8 +1004,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public showMarkerArea(ref_index: number){
     this.markerActive = true
     let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
-
-
     let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.design_approval_activity_navigation_index][0];
     const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
     activityObj.files[ref_index].marker_ref = markerArea
@@ -1207,7 +1221,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
           let payload = {}
           payload['order_id'] = order.id
           http.post(`reject-quote-order`, payload).then(async (res:Record<any, any>) => {
-            console.log('res', res.data)
             if(res.data.success){
               await this.getOrderDetail();
               this.showToast(res.data.message, 'success');

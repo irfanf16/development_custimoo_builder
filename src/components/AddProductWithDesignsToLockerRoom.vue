@@ -5,7 +5,6 @@
          :scrollable="true"
          height="auto"
          :reset="true"
-         @opened="handleModalOpenEvent"
          :shiftY="0"
          :clickToClose="false"
          class="absolute-modals"
@@ -16,7 +15,7 @@
         v-if="$store.getters.getIsShareDesign">before sharing</span></span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="handleModalCloseEvent"><BIconX/></span>
     </div>
-    <div class="p-4">
+    <div class="p-4" v-if="!loading">
       <div class="lockerroom-header">
         <div class="locker-opener w-100 theme-scroll-h" style="max-width: 100%; overflow-x: auto">
           <b-button style="white-space: nowrap" v-for="(locker, index) in lockers" :key="index" variant="secondary"
@@ -140,6 +139,7 @@ import {http} from "@/httpCommon";
 import {reject} from "lodash";
 import {success} from "concurrently/dist/src/defaults";
 import ThreeDScene from "@/components/ThreeDScene.vue";
+import { base64ToFile, createFormData} from "@/helpers/Helpers";
 
 @Component<AddProductWithDesignsToLockerRoom>({
   components: {
@@ -149,6 +149,14 @@ import ThreeDScene from "@/components/ThreeDScene.vue";
     LockerRoom,
     CreateLockerRoomModal
   },
+  async created() {
+    if(!this.roomWithProducts.length) {
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+      this.loading = false
+    } else {
+      this.loading = false
+    }
+  }
 })
 export default class AddProductWithDesignsToLockerRoom extends Mixins(ErrorMessages, ModalAction) {
   @Prop({required: false, default: false}) rosterUrl !: boolean
@@ -160,13 +168,6 @@ export default class AddProductWithDesignsToLockerRoom extends Mixins(ErrorMessa
   @Prop({required: false, default: ''}) locker_room_product_type: string  //possible values are order_product, collection_product
   async recallProducts() {
     if (!(this.locker_room_product_type === 'collection_product')) {
-      this.showLoader = true;
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
-        if (res) {
-          this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
-        }
-      });
-      this.showLoader = false;
       if (this.roomWithProducts.length) {
         this.productData = this.roomWithProducts[0].product
         this.tabIndex = 0
@@ -176,6 +177,7 @@ export default class AddProductWithDesignsToLockerRoom extends Mixins(ErrorMessa
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public showLoader = false
+  public loading = true
   private baseUrl = location.host + "/#/"
   public room_id = this.lockers.length ? this.lockers[0].id : 0
   public product_name = '';
@@ -336,24 +338,12 @@ public errors = [];
     return new Promise<Record<any, any>>(async (resolve) => {
       let res: Record<any, any> = this.$store.dispatch('createLocker', name);
       if (res.status == 201) {
-        this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
-          if (res) {
-            this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
-          }
-        });
+        this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
         this.lockerAdded()
       } else if (res.status == 422) {
         this.showError(res.message)
       }
       resolve(res);
-    });
-  }
-
-  public async handleModalOpenEvent() {
-    await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
-      if (res) {
-        this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
-      }
     });
   }
 
@@ -424,8 +414,10 @@ public errors = [];
     try {
       for (const [productSelectedDesignIndex, productSelectedDesign] of this.productSelectedDesignsData.entries()) {
         const scene_ref = this.$refs[`product-selected-design-${productSelectedDesignIndex}-ref`]?.[0]
-        const front_image_base64 = await this.getImageFromCanvasAsPromise('front', {}, scene_ref);
-        const back_image_base64 = await this.getImageFromCanvasAsPromise('back', {}, scene_ref);
+        const front_image = await this.getImageFromCanvasAsPromise('front', {}, scene_ref);
+        const front_image_base64 = base64ToFile(`data:image/png;base64,${front_image}`,true);
+        const back_image = await this.getImageFromCanvasAsPromise('back', {}, scene_ref);
+        const back_image_base64 = base64ToFile(`data:image/png;base64,${back_image}`,true);
         const svg_groups = this.$refs[`product-selected-design-${productSelectedDesignIndex}-ref`]?.[0].svgGroups;
         let default_colors = []
         let group_colors = {}
@@ -442,7 +434,8 @@ public errors = [];
           this.showToast(`svg groups are undefined for Product Design ${productSelectedDesign.id}`,"error")
           return;
         }
-
+        console.log(front_image_base64);
+        console.log(back_image_base64);
         locker_design_data.push({
           roster_url: this.rosterUrl,
           room_id: this.room_id,
@@ -457,8 +450,8 @@ public errors = [];
           shuffle_color_number: this.shuffle_color_number,
           defaultcolors: default_colors,
           groupcolors: group_colors,
-          locker_front_png: front_image_base64,
-          locker_back_png: back_image_base64,
+          locker_front_png: base64ToFile(front_image_base64,true),
+          locker_back_png: base64ToFile(back_image_base64, true),
           product_roster_detail: product_rosters,
           fixed_logo_index: fixed_logo_index,
           svgcolors: svg_groups,
@@ -467,7 +460,8 @@ public errors = [];
       }
 
       const savePromises = locker_design_data.map((lockerDesignData) => {
-        return this.$store.dispatch('SAVE_TO_LOCKER', lockerDesignData).then((response) => {
+        let formData = createFormData(lockerDesignData);
+        return this.$store.dispatch('SAVE_TO_LOCKER', formData).then((response) => {
           return response; // Return the response for Promise.all
         }).catch((error) => {
           return error

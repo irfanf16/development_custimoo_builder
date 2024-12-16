@@ -171,7 +171,7 @@ const Product:Module<any, any> = {
       return new Promise(function(resolve, reject) {
         http.post("save/product/locker", payload).then((res) => {
           if (res.status == 201){
-            commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.room_id, data: res.data.data})
+            commit('ADD_PRODUCT_TO_LOCKER', {room_id : payload.get("room_id"), data: res.data.data})
             resolve(res);
           }
         }).catch((errors)=>{

@@ -88,10 +88,12 @@
     import LockerRoom from "@/components/LockerRoom.vue";
     import ModalAction from "@/mixins/ModalAction";
     import {
+      base64ToFile,
       checkIsEmpty,
       getEditModeDefaultObj,
       getImageFromCanvas,
       getLockerColors, getStyleSelectedAddons,
+      createFormData
       // syncGroupColorsWithSvgGroups
     } from '@/helpers/Helpers'
     import { Canvas, log } from 'fabric/fabric-impl'
@@ -265,7 +267,7 @@
           locker_data.locker_id = this.locker_room_product.locker_id;
           locker_data.fixed_logo_index = this.locker_room_product.fixed_logo_index;
         }
-        this.$store.dispatch("SAVE_TO_LOCKER", locker_data).then((response) => {
+        this.$store.dispatch("SAVE_TO_LOCKER", createFormData(locker_data)).then((response) => {
           this.showLoader = false
           if(this.locker_room_product_type === 'collection_product'){
             this.locker_room_action.saved = true;
@@ -350,8 +352,8 @@
           }
           this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
           this.canvasImage.back = (getImageFromCanvas('back') as string )?.split(',')[1]
-          let locker_front_png = this.canvasImage.front
-          let locker_back_png = this.canvasImage.back
+          let locker_front_png = base64ToFile(`data:image/png;base64,${this.canvasImage.front}`,true);
+          let locker_back_png = base64ToFile(`data:image/png;base64,${this.canvasImage.back}`, true);
           let distinct:Record<any, any> = []
           let svgGroups = this.$store.getters.getSvgGroups
           let unique:any = [];
@@ -388,11 +390,12 @@
             ungrouped_addons: selected_ungrouped_addons
 
           }
-          let res = await this.$store.dispatch("SAVE_TO_LOCKER", locker).catch(errorResponse => {
+          let res = await this.$store.dispatch("SAVE_TO_LOCKER", createFormData(locker)).catch(errorResponse => {
             this.showLoader = false
             this.showError(errorResponse);
           });
           if (res && res.status == 201){
+            this.showLoader = false;
             let is_customized = this.$store.getters.getCustomized
             let is_personalized = this.$store.getters.getPersonalized
 
@@ -446,8 +449,8 @@
         this.product_name = this.selectedProduct.product_name;
         this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
         this.canvasImage.back = (getImageFromCanvas('back') as string )?.split(',')[1]
-        let locker_front_png = this.canvasImage.front
-        let locker_back_png = this.canvasImage.back
+        let locker_front_png = base64ToFile(`data:image/png;base64,${this.canvasImage.front}`,true);
+        let locker_back_png = base64ToFile(`data:image/png;base64,${this.canvasImage.back}`, true);
         let distinct:Record<any, any> = []
         let svgGroups = this.$store.getters.getSvgGroups
         let unique:any = [];
@@ -480,7 +483,8 @@
           fixed_logo_index: fixed_logo_index,
           svgcolors: distinct
         }
-        let res = await this.$store.dispatch("SHARE_DESIGN_URL", locker);
+
+        let res = await this.$store.dispatch("SHARE_DESIGN_URL", createFormData(locker));
 
         if (res.status == 201){
           Vue.set(product, 'shared_url', res.data.url);
@@ -649,7 +653,7 @@
       async shareOrderProductDesignUrl() {
         let locker_data = await this.getLockerProductData()
         this.showLoader = true
-        return await this.$store.dispatch("SHARE_DESIGN_URL", locker_data);
+        return await this.$store.dispatch("SHARE_DESIGN_URL", createFormData(locker_data));
 
       }
     }

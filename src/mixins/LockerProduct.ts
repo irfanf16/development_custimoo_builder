@@ -27,7 +27,8 @@ import {
   getBase64FileInfo,
   getDateTimeFormatted,
   handleExistingAddonsSelection,
-  getProductAddonInfoDefaultObject
+  getProductAddonInfoDefaultObject,
+  base64ToFile
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -1405,31 +1406,49 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         }
         self.$store.dispatch('setCartLoading',true);
         const cart_data = santaClone(post_data)
-        const front_image_info = getBase64FileInfo(cart_data.factory_product.front_image, base_path)
+        const front_image_info = base64ToFile(cart_data.factory_product.front_image, true)
         const is_back_image = cart_data.factory_product.back_image
-        let back_image_info: Record<any, any> = {}
+        let back_image_info: File | null = null
         if(is_back_image) {
-          back_image_info = getBase64FileInfo(cart_data.factory_product.back_image, base_path)
+          back_image_info = base64ToFile(cart_data.factory_product.back_image, true)
         }
+        const formDataFrontImage = new FormData();
+        // @ts-ignore
+        formDataFrontImage.append('file', front_image_info);
+        formDataFrontImage.append('base_path', base_path);
         const cart_assets_promises = [
-          http.post('upload_file_to_s3', front_image_info)
+          http.post('upload_cart_assets', formDataFrontImage)
         ]
         if(is_back_image) {
-          cart_assets_promises.push(http.post('upload_file_to_s3', back_image_info))
+          const formDataBackImage = new FormData();
+          // @ts-ignore
+          formDataBackImage.append('file', back_image_info);
+          formDataBackImage.append('base_path', base_path);
+          cart_assets_promises.push(http.post('upload_cart_assets', formDataBackImage))
         }
-        let svg_content_info: Record<any, any> = {}
+        let svg_content_info: File | null = null
+
         if(cart_data.factory_product.svg_content) {
-          svg_content_info = {
-            file_name: `${factory_product_id}.svg`, file_path: `${base_path}/${factory_product_id}.svg`, file_extension: 'svg',
-            file_content: cart_data.factory_product.svg_content
-          }
-          cart_assets_promises.push(http.post('upload_file_to_s3', svg_content_info))
+          // svg_content_info = {
+          //   file_name: `${factory_product_id}.svg`, file_path: `${base_path}/${factory_product_id}.svg`, file_extension: 'svg',
+          //   file_content: cart_data.factory_product.svg_content
+          // }
+          svg_content_info = base64ToFile(cart_data.factory_product.svg_content, false,`${factory_product_id}.svg`);
+          const formDataSVG = new FormData();
+          // @ts-ignore
+          formDataSVG.append('file', svg_content_info);
+          formDataSVG.append('base_path', `${base_path}`);
+          cart_assets_promises.push(http.post('upload_cart_assets', formDataSVG))
         }
         Promise.all(cart_assets_promises).then(async (all_promises_response) => {
           delete post_data.factory_product.svg_content
-          post_data.factory_product.front_image = front_image_info.file_path
-          post_data.factory_product.back_image = back_image_info.file_path ? back_image_info.file_path : ''
-          post_data.factory_product.svg_url = svg_content_info.file_path ? svg_content_info.file_path : ''
+          post_data.factory_product.front_image = all_promises_response[0].data.result.file_path
+          if (is_back_image) {
+            post_data.factory_product.back_image = all_promises_response[1].data.result.file_path
+            post_data.factory_product.svg_url = all_promises_response[2].data.result.file_path
+          } else {
+              post_data.factory_product.svg_url = all_promises_response[1].data.result.file_path
+          }
           await http.post(url, post_data).then(async (res: any) => {
             if (res.data.success == true){
               let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;

@@ -2809,6 +2809,68 @@ const resetCustomizedAddons = () => {
   eventBus.$emit("addAddons")
 }
 
+const base64ToFile = (base64String, isBase64String, fileName = '')=>  {
+  let response_file: File | null = null
+    if(isBase64String){
+      const mime_type_matched = base64String.match(/^data:(.*);base64,/);
+      const in_valid_base64_string = base64String.includes(',')
+      // Ensure the base64 string is valid
+      if(mime_type_matched && in_valid_base64_string) {
+        const mimetype: string = mime_type_matched[1];
+        const file_extension = getExtensionFromMimeType(mimetype);
+        if(!fileName) {
+          const date_time_formatted = getRandom(5)+'_'+getDateTimeFormatted()
+          fileName =  `${date_time_formatted}.${file_extension}`
+        }
+        // Remove the prefix (if present)
+        const base64Data = base64String.split(',')[1];
+
+        // Decode the base64 string
+        const byteString = atob(base64Data);
+
+        // Create an array buffer
+        const arrayBuffer = new ArrayBuffer(byteString.length);
+        const intArray = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < byteString.length; i++) {
+          intArray[i] = byteString.charCodeAt(i);
+        }
+
+        // Create a Blob and then a File
+        const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
+        response_file =  new File([blob], fileName, { type: 'application/octet-stream' });
+      }
+    }
+    else {
+      const blob = new Blob([base64String], { type: 'application/octet-stream' });
+      response_file =  new File([blob], fileName, { type: 'application/octet-stream' });
+    }
+   return response_file;
+}
+const isBase64File = (str) => {
+  return str && typeof str === 'string' && str.startsWith('data:') && str.includes('base64,');
+}
+
+const createFormData = (locker) => {
+  const formData = new FormData();
+  for (const key in locker) {
+    if (locker.hasOwnProperty(key)) {
+      if (locker[key] instanceof File) {
+        // Directly append files
+        formData.append(key, locker[key]);
+      } else if (Array.isArray(locker[key]) || typeof locker[key] === 'object') {
+        // Convert arrays or objects to JSON strings
+        formData.append(key, JSON.stringify(locker[key]));
+      } else {
+        // Append primitive values directly
+        formData.append(key, locker[key]);
+      }
+    }
+  }
+  return formData;
+}
+
+
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
@@ -2828,5 +2890,5 @@ export {
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
-  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons
+  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData
 };

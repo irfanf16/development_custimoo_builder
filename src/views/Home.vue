@@ -21,7 +21,7 @@
 
     <AddLockerRoomModal :frontPreview="frontPreview" :backPreview="backPreview" @genImages="genImages" @open-locker-room="getLockerRoomProducts" ref="saveToLockerModal" :roster-url="generate_share_url" :close_on_add="generate_share_url" @showPopper="showPopper"/>
     <!-- this component is being used in itemToCustomize component   -->
-    <AddProductWithDesignsToLockerRoom ref="add-product-designs-to-locker-room-modal" :products_fonts="products_fonts" :roster-url="generate_share_url"/>
+    <AddProductWithDesignsToLockerRoom ref="add-product-designs-to-locker-room-modal" :products_fonts="products_fonts" :roster-url="generate_share_url" v-if="designs_to_save_in_locker_room.selection_mode"/>
     <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer && $store.getters.getCartItems.length > 0"/>
     <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
     <EditRosterAreaTab @open-add-to-locker="getLockers(true)"
@@ -587,7 +587,7 @@ import {
   createOrUpdateOrderUpdateDataState,
   updateOrder,
   hasCompanyPermission,
-  getStyleSelectedAddons
+  getStyleSelectedAddons, base64ToFile, createFormData
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -879,6 +879,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
+  }
+
+  get designs_to_save_in_locker_room() {
+    return this.$store.getters.getProductSelectionDesignInfo
   }
 
   get mainTabIndex() {
@@ -1580,8 +1584,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       defaultcolors: scene_ref.appliedDefaultColors,
       groupcolors: scene_ref.appliedGroupColors,
       id: this.getProductEditInfoObject.locker_product_info.locker_product_id,
-      locker_front_png: locker_front_png,
-      locker_back_png: locker_back_png,
+      locker_front_png: base64ToFile(`data:image/png;base64,${locker_front_png}`,true),
+      locker_back_png: base64ToFile(`data:image/png;base64,${locker_back_png}`,true),
       product_roster_detail: this.rosterDetails,
       fixed_logo_index: fixed_logo_index,
       svgcolors: distinct,
@@ -1591,7 +1595,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
     if (self.getProductEditInfoObject.editing) {
       this.showLoader = true
-      await http.post('updatelockerproduct', locker).then(async (successResponse) => {
+      await http.post('updatelockerproduct', createFormData(locker)).then(async (successResponse) => {
         let response_data = successResponse.data;
         let toast_type = "success"
         self.showLoader = false
