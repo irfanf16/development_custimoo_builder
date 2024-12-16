@@ -249,7 +249,9 @@
                             </template>
                           </template>
                           </div>
-                          <p v-html="linkifyComment(activity_comment.message)"></p>
+                          <template v-if="activity_comment.message">
+                            <p v-html="linkifyComment(activity_comment.message)"></p>
+                          </template>
                           <div class="d-flex justify-content-end">
                             <span> <small class="text-muted">{{ evaluateRole(activity_comment) }}</small> </span>
                           </div>
@@ -1222,7 +1224,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
     linkifyComment(text) {
       const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return text.replace(urlRegex, (url) => {
+      return text && text.replace(urlRegex, (url) => {
         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
       });
     }
