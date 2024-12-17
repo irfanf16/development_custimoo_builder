@@ -1429,10 +1429,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         let svg_content_info: File | null = null
 
         if(cart_data.factory_product.svg_content) {
-          // svg_content_info = {
-          //   file_name: `${factory_product_id}.svg`, file_path: `${base_path}/${factory_product_id}.svg`, file_extension: 'svg',
-          //   file_content: cart_data.factory_product.svg_content
-          // }
           svg_content_info = base64ToFile(cart_data.factory_product.svg_content, false,`${factory_product_id}.svg`);
           const formDataSVG = new FormData();
           // @ts-ignore
@@ -1445,7 +1441,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           post_data.factory_product.front_image = all_promises_response[0].data.result.file_path
           if (is_back_image) {
             post_data.factory_product.back_image = all_promises_response[1].data.result.file_path
-            post_data.factory_product.svg_url = all_promises_response[2].data.result.file_path
+            if(all_promises_response[2]){
+              post_data.factory_product.svg_url = all_promises_response[2].data.result.file_path
+            }
           } else {
               post_data.factory_product.svg_url = all_promises_response[1].data.result.file_path
           }
@@ -1548,7 +1546,8 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               }
             }
           })
-        }).catch(() => {
+        }).catch((e) => {
+          console.log(e);
           this.showErrorValidation(['Error uploading file to the cart. Please try again.']);
           self.$store.dispatch('setCartLoading', false);
         })
