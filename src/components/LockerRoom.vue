@@ -1560,6 +1560,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     .locker-image-holder{
       width:160px;
       height:160px;
+      margin: 0 15px;
     }
 
     .product-icons {
