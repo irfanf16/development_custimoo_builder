@@ -1,5 +1,5 @@
 <template>
-  <div class="page-wrapper m-lg-4">
+  <div class="page-wrapper position-relative p-lg-4">
     <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     <div v-else class="container-fluid bg-white">
       <div class="text-left">
@@ -73,8 +73,8 @@
           </div>
         </div>
       </div>
-      <AddAddressModal ref="add-address-modal" @actionAfterAddressSave="actionAfterAddressSave" />
-      <EditAddressModal ref="update-address-modal" @actionAfterAddressSave="actionAfterAddressSave" />
+      <AddAddressModal ref="add-address-modal" @actionAfterAddressSave="actionAfterAddressSave" @onHide="hideModal" />
+      <EditAddressModal ref="update-address-modal" @actionAfterAddressSave="actionAfterAddressSave"  @onHide="hideModal"  />
       <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes"
         name="delete-address" ref="delete-address"></confirm-modal>
     </div>
@@ -90,7 +90,7 @@ import ErrorMessages from "@/mixins/ErrorMessages";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import AddAddressModal from "@/components/AddAddressModal.vue";
 import EditAddressModal from "@/components/EditAddressModal.vue";
-
+import { getDomDocument } from "@/helpers/Helpers"
 
 
 @Component<Addresses>({
@@ -125,11 +125,17 @@ export default class Addresses extends Mixins(ErrorMessages) {
 
   addAddressModalShow(): void {
     this.ref['add-address-modal'].show()
+    this.updateSectionHeight('expand');
+  }
+
+  hideModal(): void {
+    this.updateSectionHeight('collapse');
   }
 
   editAddressModalShow(address: Record<any, any>): void {
     this.ref['update-address-modal'].updateForm(address);
     this.ref['update-address-modal'].show()
+    this.updateSectionHeight('expand');
   }
 
   useAddress(address: Record<any, any>){
@@ -186,11 +192,25 @@ export default class Addresses extends Mixins(ErrorMessages) {
         window.location.reload();
       });
     }
+    this.updateSectionHeight('collapse')
 
     await this.getAddressDetails();
   }
-
-}
+  
+  updateSectionHeight(action: 'expand' | 'collapse'): void {
+    const shadowHost = getDomDocument();
+    if (shadowHost) {
+      const scrollableContainer = shadowHost.querySelector('.page-wrapper') as HTMLElement | null;
+      if (scrollableContainer) {
+        if (action === 'expand') {
+          scrollableContainer.style.minHeight = "100vh";
+        } else {
+          scrollableContainer.style.minHeight = "auto";
+        }
+      }
+    }
+  }
+  } 
 </script>
 
 <style lang="scss" scoped>

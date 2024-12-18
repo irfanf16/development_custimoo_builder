@@ -4,6 +4,7 @@
           :scrollable="true"
           height="auto"
           :reset="true"
+         class="absolute-modals"
           :shiftY="0" name="AddAdressModal" ref="AddAdressModal" hide-title hide-footer>
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Add Address</span>
@@ -214,6 +215,7 @@ export default class AddAddressModal extends Mixins(ErrorMessages) {
   public hide(){
     this.clearForm()
     this.$modal.hide('AddAdressModal')
+    this.$emit('onHide');
   }
   public async submitForm(){
     try {

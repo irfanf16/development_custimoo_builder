@@ -4,6 +4,7 @@
           :scrollable="true"
           height="auto"
           :reset="true"
+         class="absolute-modals"
          :shiftY="0" name="EditAddressModal" ref="EditAddressModal" id="edit-modal-login" hide-title hide-footer>
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Edit Address</span>
@@ -209,6 +210,7 @@
     public hide(){
       this.clearForm()
       this.$modal.hide('EditAddressModal')
+      this.$emit('onHide');
     }
     public async submitForm(){
       try {
