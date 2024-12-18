@@ -73,7 +73,7 @@
               </div>
           </div>
 
-          <div v-if="selectedProduct.productstyles[styleIndex].logo.length && selectedProduct.productstyles[styleIndex].is_fixed_logos_all == false" class="choose-collar mt-4 mb-3">
+          <div v-if="selectedProduct.productstyles[styleIndex]?.logo.length && selectedProduct.productstyles[styleIndex].is_fixed_logos_all == false" class="choose-collar mt-4 mb-3">
             <h2 class="fw-bold mb-2 fz-18">Choose logo position</h2>
             <div class="collar-designs">
               <template v-for="(logo, index) in selectedProduct.productstyles[styleIndex].logo">
@@ -136,7 +136,7 @@ import Store from "@/store";
       }
 
       get customizedAddons() {
-        return this.selectedProduct.productstyles[this.styleIndex].customized_addons
+        return this.selectedProduct.productstyles[this.styleIndex]? this.selectedProduct.productstyles[this.styleIndex].customized_addons : {grouped_addons: [], ungrouped_addons: {}}
       }
       public async handleAddonSelectionUpdate(val, addon_index=-1, group_name='') {
         if(group_name) {
