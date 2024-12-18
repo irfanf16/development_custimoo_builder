@@ -1495,9 +1495,10 @@ const ProductAttributes:Module<any, any> = {
       product_id = product_id == null ? state.selectedPrdId : product_id
       if(product_id == 'all')
         return state.customLogos
-      if(logo_index >= 0)
+      if(logo_index >= 0) {
         return state.customLogos[product_id][logo_index]
-      return state.customLogos[product_id]
+      }
+      return state.customLogos[product_id]? state.customLogos[product_id] : []
     },
     getFixedLogoIndex: state => {
       return state.fixed_logo_index
