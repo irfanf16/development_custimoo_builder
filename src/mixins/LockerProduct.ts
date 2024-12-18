@@ -1445,7 +1445,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               post_data.factory_product.svg_url = all_promises_response[2].data.result.file_path
             }
           } else {
+            if(all_promises_response[1]) {
               post_data.factory_product.svg_url = all_promises_response[1].data.result.file_path
+            }
           }
           await http.post(url, post_data).then(async (res: any) => {
             if (res.data.success == true){
