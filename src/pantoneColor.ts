@@ -92,11 +92,19 @@ const getClosestColor = (inputHex: string, pantonesArray: Record<any, any>[]= []
       return x.hex.toLowerCase() == `#${nearestColorHex.toLowerCase()}`
     })
     const nearestColorObject =  sample_pantones[indexInColorList]
+    if(nearestColorObject) {
+      if (nearestColorObject.hasOwnProperty("name") && (!nearestColorObject.name)) {
+        nearestColorObject.name = nearestColorObject.pantone;
+      }
+    }
     return nearestColorObject
   }else{
     sample_pantones = pantonesArray as { pantone: string; name: string; hex: string; }[];
     const colorObject = sample_pantones.find((pantone) => pantone.hex === inputHex);
     if(colorObject){
+      if(colorObject.hasOwnProperty("name") && (!colorObject.name)){
+        colorObject.name = colorObject.pantone;
+      }
       return colorObject;
     }
     else{
