@@ -671,8 +671,8 @@ const pantonesCoated =
     {pantone : "Black 3 C", name: "",hex: "#212721"}, {pantone : "Black 4 C", name: "",hex: "#31261D"},
     {pantone : "Black 5 C", name: "",hex: "#3E2B2E"}, {pantone : "Black 6 C", name: "",hex: "#101820"},
     {pantone : "7 C", name: "",hex: "#3D3935"}, {pantone : "9224 C", name: "9224 C", hex: "#F2E9DB"},
-    {pantone : "2257 C", name: "", hex: "#00AD50"},
-    {pantone : "2173 C", name: "", hex: "#0084D5"}
+    {pantone : "2257 C", name: "", hex: "#00AD50"}, {pantone : "2173 C", name: "", hex: "#0084D5"},
+    {pantone : "4248 C", name: "", hex: "#D5C2A5"}
   ]
 
 export {pantonesCoated};
