@@ -83,7 +83,7 @@
 
                             <ul class="product-icons">
                               <li v-if="!getSelectionMode.readonly">
-                                <a style="font-size: 12px;" data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id)"
+                                <a style="font-size: 12px;" data-title="Delete design" class="remove" @click="deleteProduct(i, ind, product.id, product.collections)"
                                    @mouseleave="hideTooltip" @mouseenter="showTooltip"><font-awesome-icon
                                   :icon="['fas', 'trash-alt']" /></a>
                               </li>
@@ -354,8 +354,13 @@
       </b-tabs>
     </div>
 
-    <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes"
-                  ref="reset-confirm-modal" name=""></confirm-modal>
+    <confirm-modal
+      :message="confirmMessage"
+      :cancel_text="cancelButtonText"
+      :confirm_text="confirmButtonText"
+      ref="reset-confirm-modal"
+      name="reset-confirm-modal"
+    ></confirm-modal>
 
     <span class="hover_tooltip" ref="hoover_tooltip"></span>
     <modal ref="copy-product-modal" name="copy-product-modal" hide-footer @closed="resetModal" class="lockerroom-modal " id="modal-center-copydesign" :scrollable="true" size="xl">
@@ -543,6 +548,9 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
   public colors: [] = []
+  public confirmMessage = 'Do you really want to delete?'; // Default message
+  public confirmButtonText = 'Yes'; // Default confirm button text
+  public cancelButtonText = 'Cancel'; // Default cancel button text
   public viewLoader = false
   public renameLoader = false
   public copiedProductId = 0
@@ -850,16 +858,50 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     }
   }
 
-  public async deleteProduct(i: number|string, ind: number|string, id: number) {
+  public async deleteProduct(
+    i: number | string,
+    ind: number | string,
+    id: number,
+    collections: { id: number; name: string }[] = []
+  ) {
+
+    // Generate the collection confirmation message
+    if (collections.length > 0) {
+      const collectionNames = collections.map(col => col.name).join('" and "');
+      const collectionWord = collections.length === 1 ? 'collection' : 'collections'; // Singular or plural
+      this.confirmMessage = `This product is used in the ${collectionWord} "${collectionNames}". If you delete the design, it will also be removed from the ${collectionWord}. Do you want to delete the product from both the locker and ${collectionWord}?`;
+    } else {
+      this.confirmMessage = `This product is not associated with any collections. Do you really want to delete it from the locker?`;
+    }
+
+    this.confirmButtonText = 'Delete';
+    this.cancelButtonText = 'Cancel';
+    
+    // Show the confirmation modal
     const ok = await this.ref['reset-confirm-modal'].showConfirm()
-    if (ok) {
-      let res = await this.$store.dispatch('deleteRoomProduct', {room_index: i, product_index: ind, id: id});
-      if (res == true) {
-        this.$store.commit('SET_RECENT_LOGOS')
-        this.showToast('Product Deleted', 'success')
-      } else {
-        this.showError(res)
-      }
+
+    // Reset the modal text to default values
+    this.confirmMessage = 'Do you really want to delete?';
+    this.confirmButtonText = 'Yes';
+    this.cancelButtonText = 'Cancel';
+
+    if (!ok) {
+      console.log('clicked cancel');
+      return false; // User canceled the operation
+    }
+
+    // Proceed with deletion if no collections or user confirmed
+    const res = await this.$store.dispatch('deleteRoomProduct', {
+      room_index: i,
+      product_index: ind,
+      id: id,
+    });
+
+    if (res === true) {
+      this.$store.commit('SET_RECENT_LOGOS');
+      this.showToast('Product Deleted', 'success');
+    } else {
+      this.showError(res);
     }
   }
 
