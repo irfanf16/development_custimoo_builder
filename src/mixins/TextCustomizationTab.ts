@@ -108,7 +108,7 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
   public changeColor($event:Record<any, any>, customTextIndex:number, productCustomTextItemIndex:number, select_color_type:string) {
     const selectProductPantonesList = getSelectedProductPantones()
     const pantoneColor = getClosestColor($event.hex,selectProductPantonesList, this.getColorType);
-    const color = {value: pantoneColor.hex, position: '1', name: pantoneColor.pantone}
+    const color = {value: pantoneColor.hex, position: '1', name: pantoneColor.pantone? pantoneColor.pantone: pantoneColor.name}
     this.customTextColorUpdated(customTextIndex, productCustomTextItemIndex, color, select_color_type)
   }
 
