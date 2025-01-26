@@ -1821,6 +1821,9 @@ const getUrlParameter = (name = '') => {
     const results = regex.exec(url);
     if (!results) return null;
     if (!results[2]) return '';
+    if(results[2].includes('?reloaded')) {
+      results[2] = results[2].split('?')[0]
+    }
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
   // const hash_url = window.parent.window.location.hash
