@@ -1827,7 +1827,10 @@ const getUrlParameter = (name = '') => {
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
   // const hash_url = window.parent.window.location.hash
-  const hash_url = getWindowObject().window.location.hash
+  let hash_url = getWindowObject().window.location.hash
+  if(hash_url.includes('?reloaded')) {
+    hash_url = hash_url.split('?')[0]
+  }
   return hash_url.replace('#/', '')
 }
 
