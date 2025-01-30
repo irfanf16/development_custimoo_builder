@@ -353,7 +353,7 @@
           this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
           this.canvasImage.back = (getImageFromCanvas('back') as string )?.split(',')[1]
           let locker_front_png = base64ToFile(`data:image/png;base64,${this.canvasImage.front}`, true);
-          let locker_back_png: File | null = null
+          let locker_back_png: any = ''
           if (locker_back_png) {
             locker_back_png = base64ToFile(`data:image/png;base64,${this.canvasImage.back}`, true);
           }
