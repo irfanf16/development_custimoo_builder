@@ -352,8 +352,11 @@
           }
           this.canvasImage.front = (getImageFromCanvas('front') as string ).split(',')[1]
           this.canvasImage.back = (getImageFromCanvas('back') as string )?.split(',')[1]
-          let locker_front_png = base64ToFile(`data:image/png;base64,${this.canvasImage.front}`,true);
-          let locker_back_png = base64ToFile(`data:image/png;base64,${this.canvasImage.back}`, true);
+          let locker_front_png = base64ToFile(`data:image/png;base64,${this.canvasImage.front}`, true);
+          let locker_back_png: File | null = null
+          if (locker_back_png) {
+            locker_back_png = base64ToFile(`data:image/png;base64,${this.canvasImage.back}`, true);
+          }
           let distinct:Record<any, any> = []
           let svgGroups = this.$store.getters.getSvgGroups
           let unique:any = [];
