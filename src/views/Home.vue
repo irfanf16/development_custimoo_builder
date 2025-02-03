@@ -692,9 +692,15 @@ Vue.filter('formatDate', function(value:string) {
     }
     let { sync_id } = this.$route.query;
     if(sync_id) {
-      this.$store.commit('SET_DURING_RESET', true)
-      await resetLastActiveProductData()
-      this.$store.commit('SET_DURING_RESET', false)
+
+      let last_sync_id = this.$store.getters.getLastSyncId;
+      if(last_sync_id != sync_id) {
+        this.$store.commit('SET_DURING_RESET', true)
+        await resetLastActiveProductData()
+        this.$store.commit('SET_DURING_RESET', false)
+      }
+
+
     }
     const sendCategoryCall = await isGetCategories()
 

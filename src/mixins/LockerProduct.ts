@@ -154,12 +154,17 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     let self: Record<any, any> = this;
     let url = '/list/products';
     let url_obj = new URL(`${process.env.VUE_APP_API_BASE_URL}${url}`);
+    let last_sync_id: string | null = null;
     query_params.forEach((query_param: string) => {
       let query_param_array = query_param.split("=");
       if (url_obj.searchParams.has(query_param_array[0])) {
         url_obj.searchParams.set(query_param_array[0], query_param_array[1])
-      } else {
+       } else {
         url_obj.searchParams.append(query_param_array[0], query_param_array[1])
+      }
+
+      if(query_param_array[0] == 'sync_id') {
+        last_sync_id = query_param_array[1];
       }
     })
     url = url_obj.pathname + url_obj.search;
@@ -167,6 +172,9 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       const response_data = response.data;
       const {active_product_id, products: {data: retrieved_products}} = response_data
       if(retrieved_products.length > 0) {
+        if(last_sync_id) {
+          this.$store.commit('SET_LAST_SYNC_ID', last_sync_id)
+        }
         const is_active_product_valid = await getProductById(active_product_id, retrieved_products)
         if (is_active_product_valid) {
           await this.handleMainProducts(response);

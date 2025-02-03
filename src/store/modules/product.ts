@@ -25,7 +25,8 @@ const Product:Module<any, any> = {
     },
     factory_settings:[],
     product_price_object: {},
-    sales_rep_modal_from: ''
+    sales_rep_modal_from: '',
+    last_sync_id: null
   },
   getters:{
     getSkuInformation(state:Record<any, any>){
@@ -79,6 +80,9 @@ const Product:Module<any, any> = {
     },
     getSalesRepModalFrom(state: Record<any, any>) {
       return state.sales_rep_modal_from;
+    },
+    getLastSyncId(state: Record<any, any>) {
+      return state.last_sync_id;
     }
   },
   mutations:{
@@ -158,6 +162,9 @@ const Product:Module<any, any> = {
     },
     SET_SALES_REP_MODAL_FROM(state: Record<any, any>, payload) {
       state.sales_rep_modal_from = payload
+    },
+    SET_LAST_SYNC_ID(state: Record<any, any>, payload) {
+      state.last_sync_id = payload
     }
   },
   actions: {
