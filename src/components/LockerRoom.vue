@@ -67,8 +67,8 @@
 
                                     <template v-if="room.active_tab">
                                       <div class="locker-image-holder">
-                                        <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode" :key="`${product.id}-${ind}-${product.is_back_img}`" :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" alt="nadeem">
-                                        <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) " :key="`${product.id}-${ind}-${product.is_back_img}`"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" alt="faisal">
+                                        <img @dblclick="editProduct(room.id, product.id, ind)" v-if="!getSelectionMode.eventProductMode" :key="`${product.id}-${ind}-${product.is_back_img}`" :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url ? '' : 'placeholder'" :alt="`${product.is_back_img ? 'back': 'front'}`">
+                                        <img v-else @click="setEventProduct(product.id, product.product_front_url, product.product_name ) " :key="`${product.id}-${ind}-${product.is_back_img}`"  :src="`${storageUrl+product.product_url}?q=${product.random_string}`" :class="product.product_url? '' : 'placeholder'" :alt="`${product.is_back_img ? 'back': 'front'}`">
                                     </div>
                                     </template>
                                   </div>
@@ -876,7 +876,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
 
     this.confirmButtonText = 'Delete';
     this.cancelButtonText = 'Cancel';
-    
+
     // Show the confirmation modal
     const ok = await this.ref['reset-confirm-modal'].showConfirm()
 

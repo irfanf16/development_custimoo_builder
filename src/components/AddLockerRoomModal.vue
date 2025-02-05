@@ -354,7 +354,7 @@
           this.canvasImage.back = (getImageFromCanvas('back') as string )?.split(',')[1]
           let locker_front_png = base64ToFile(`data:image/png;base64,${this.canvasImage.front}`, true);
           let locker_back_png: any = ''
-          if (locker_back_png) {
+          if (this.canvasImage.back) {
             locker_back_png = base64ToFile(`data:image/png;base64,${this.canvasImage.back}`, true);
           }
           let distinct:Record<any, any> = []
