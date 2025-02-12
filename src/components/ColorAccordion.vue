@@ -1,5 +1,6 @@
 <template>
   <div class="accordion color-accordion" role="tablist">
+    <span class="hover_tooltip" ref="hoover_pattern_tooltip"></span>  
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="'color-accordion'+index">
       <b-card-header header-tag="header" class="p-0" role="tab">
         <b-button class="color-accordion-header" block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index, svgElement.gradient_colors? gradient_index === undefined? 0 : gradient_index : undefined)">
@@ -40,7 +41,11 @@
           </div>
           <b-nav class="d-flex flex-wrap align-items-center">
             <template v-if="getSvgGroupColors(svgElement.id)">
-              <b-nav-item class="active mr-2">{{ getSvgGroupColors(svgElement.id).name | capitalize }}</b-nav-item>
+              <b-nav-item @click="selectType(index, false)" :class="{ 'active' : selectTypeIndex !== (productColors.length + 3) && !showOtherColors}" class="mr-2">{{ getSvgGroupColors(svgElement.id).name | capitalize }}</b-nav-item>
+              <b-nav-item v-if="selectedProduct.patterns?.length" :class="{ 'active': selectTypeIndex == (productColors.length + 3) }"
+                          @click="selectType(productColors.length + 3, false)">
+                Patterns
+              </b-nav-item>
             </template>
             <template v-else>
               <b-nav-item :class="{ 'active' : index == selectTypeIndex && !showOtherColors}" class="mr-2 "
@@ -61,6 +66,10 @@
               <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ 'active': selectTypeIndex == (productColors.length + 2) && showOtherColors }"
                           @click="selectType(productColors.length + 2, true)">
                 Others
+              </b-nav-item>
+              <b-nav-item v-if="selectedProduct.patterns?.length" :class="{ 'active': selectTypeIndex == (productColors.length + 3) }"
+                          @click="selectType(productColors.length + 3, false)">
+                Patterns
               </b-nav-item>
             </template>
           </b-nav>
@@ -84,7 +93,7 @@
           <div class="color-holder" style="padding-top: 5px;" ref="ColorAccordion">
             <div class="color-container">
               <!-- SVG group wise colors -->
-              <template v-if="getSvgGroupColors(svgElement.id)">
+              <template v-if="getSvgGroupColors(svgElement.id) && selectTypeIndex !== (productColors.length + 3)">
                 <div v-for="(color, c_index) in getSvgGroupColors(svgElement.id).json_data" v-if="color.value" class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
                      :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
                   <span v-if="isColorSelected(color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
@@ -93,7 +102,7 @@
                 </div>
               </template>
               <!-- other colors -->
-              <div v-else-if="showOtherColors && selectedProduct.is_custom_color_allowed && getColorTypeBySvgGroup(svgElement.id, 'logo_color_type') !== 'product_color'" class="custom-color-picker">
+              <div v-else-if="showOtherColors && selectedProduct.is_custom_color_allowed && getColorTypeBySvgGroup(svgElement.id, 'logo_color_type') !== 'product_color' && selectTypeIndex !== (productColors.length + 3)" class="custom-color-picker">
                 <b-form class="pantone-color-field" v-on:submit.prevent>
                   <label for="inline-form-input-pantone-color" v-if="getColorType === 'cmyk'">CMYK (x,x,x,x)</label>
                   <label for="inline-form-input-pantone-color" v-else-if="getColorType === 'pantone-coated'">Pantone: (xxx c)</label>
@@ -139,6 +148,140 @@
                   </span>
                 </div>
               </template>
+              <template v-if="selectTypeIndex == (productColors.length + 3)">
+                <template v-for="(pattern, pattern_index) in selectedProduct.patterns[0].json_data">
+                  <div class="pattern-designs" :key="'pattern_' + pattern_index">
+                    <b-button :class="{'active': isPatternActive(svgElement.id, pattern)}" variant="outline-light" class="p-0 btn" @click="setSelectedPattern(svgElement.id, pattern)">
+                      <img @mouseenter="showTooltip" @mouseleave="hideTooltip" :data-title="pattern.name" :src="storageUrl+pattern.path" alt="Pattern" :key="'pattern_image' + pattern_index"/>
+                    </b-button>
+                  </div>
+                </template>
+                <div class="d-flex justify-content-between align-items-center w-100 gap-x-5" v-if="groupPatterns[svgElement.id]">
+                  <div class="w-100 w-md-50">
+                    <label>Scale: {{ getPatternScale(svgElement.id) }}%</label>
+                    <b-form-input
+                      v-model="patternScales[svgElement.id]"
+                      @change="setPatternScale(svgElement.id, patternScales[svgElement.id])"
+                      type="range"
+                      min="10"
+                      max="100"
+                      step="1"
+                    />
+                  </div>
+                  <div class="w-100 w-md-50">
+                    <label>Angle: {{ getPatternAngle(svgElement.id) }}°</label>
+                    <b-form-input
+                      v-model="patternAngles[svgElement.id]"
+                      @change="setPatternAngle(svgElement.id, patternAngles[svgElement.id])"
+                      type="range"
+                      min="0"
+                      max="360"
+                    />
+                  </div>
+                </div>
+                <b-nav class="d-flex flex-wrap align-items-center" v-if="groupPatterns[svgElement.id]">
+                  <template v-if="getSvgGroupColors(svgElement.id)">
+                    <b-nav-item @click="selectPatternType(index, false)" :class="{ 'active' : patternTypeIndex !== (productColors.length + 3) && !showOtherColors}" class="mr-2">{{ getSvgGroupColors(svgElement.id).name | capitalize }}</b-nav-item>
+                  </template>
+                  <template v-else>
+                    <b-nav-item :class="{ 'active' : index == patternTypeIndex && !showOtherColors}" class="mr-2 "
+                                v-for="(colorType, index) in productColors" :key="'color-nav'+index"
+                                @click="selectPatternType(index, false)">
+                      {{ colorType.name | capitalize }}
+                    </b-nav-item>
+                    <b-nav-item v-if="selectedProduct.is_custom_color_allowed && logoColorsInfo && logoColorsInfo.length"
+                                :class="{ 'active' : patternTypeIndex == (productColors.length) && !showOtherColors}" class="mr-2 "
+                                @click="selectPatternType(productColors.length, false)">
+                      Team logo colors
+                    </b-nav-item>
+                    <b-nav-item :class="{ 'active' : patternTypeIndex == (productColors.length + 1) && !showOtherColors}" class="mr-2 "
+                                v-if="selectedProduct.is_custom_color_allowed && isCustomerAuthenticated && lockerroomColors && lockerroomColors.length"
+                                @click="selectPatternType(productColors.length + 1, false)">
+                      Locker colors
+                    </b-nav-item>
+                    <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ 'active': patternTypeIndex == (productColors.length + 2) && showOtherColors }"
+                                @click="selectPatternType(productColors.length + 2, true)">
+                      Others
+                    </b-nav-item>
+                  </template>
+                </b-nav>
+                <div v-if="patternTypeIndex == (productColors.length + 1) && !showOtherColors && groupPatterns[svgElement.id]" class="overflow-hidden fade-right pr-4">
+                  <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 py-2">
+                    <template v-for="(room, i) in lockerroomColors">
+                      <b-button size="sm" class="btn-locker-color" variant="secondary" @click="setActiveLockerIndex(i)" :class="{'active': i == activeLockerIndex}"
+                                :key="`locker_${i}`">
+                        {{room && room.room_name}}
+                      </b-button>
+                    </template>
+                  </div>
+
+                  <div class="d-flex align-items-center overflow-auto theme-scroll-h gap-1 pb-2">
+                    <b-button size="sm" class="btn-locker-folder" variant="secondary" :class="{'active': folder_i == activeFolderIndex}" @click="setActiveFolderIndex(activeLockerIndex, folder_i)"
+                              v-for="(folder, folder_i) in lockerroomColors[activeLockerIndex].folders" :key="`folder_${activeLockerIndex}${folder_i}`">
+                      {{folder.folder_name}}
+                    </b-button>
+                  </div>
+                </div>
+                <div v-if="groupPatterns[svgElement.id]" class="color-holder" style="padding-top: 5px" ref="ColorAccordion">
+                  <div class="color-container">
+                    <template v-if="getSvgGroupColors(svgElement.id) && patternTypeIndex !== (productColors.length + 3)">
+                      <div v-for="(color, c_index) in getSvgGroupColors(svgElement.id).json_data" v-if="color.value" class="color-box"  @click="color.value == svgElement.color ? null : setPattern(false, selectedPattern, color)"
+                          :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
+                        <span v-if="isPatternColorSelected(color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
+                      </div>
+                    </template>
+                    <!-- other colors -->
+                    <div v-else-if="showOtherColors && selectedProduct.is_custom_color_allowed && getColorTypeBySvgGroup(svgElement.id, 'logo_color_type') !== 'product_color' && selectTypeIndex !== (productColors.length + 3)" class="custom-color-picker">
+                      <b-form class="pantone-color-field" v-on:submit.prevent>
+                        <label for="inline-form-input-pantone-color" v-if="getColorType === 'cmyk'">CMYK (x,x,x,x)</label>
+                        <label for="inline-form-input-pantone-color" v-else-if="getColorType === 'pantone-coated'">Pantone: (xxx c)</label>
+                        <label class="mb-2" for="inline-form-input-pantone-color" v-else>Pantone: (TCX xx-xxxx)</label>
+                        <b-form-input
+                          @focusin="($event)=>$event.target.select()"
+                          v-model="svgGroups[selectAccordionIndex].pantone"
+                          class="mb-2 mr-sm-2 mb-sm-0"
+                          :placeholder="place_holder"
+                          @input="changePantoneColor"
+                          :disabled="getColorType === 'cmyk'"
+                        ></b-form-input>
+                        <div class="pantone-message p-1 text-danger">
+                          {{ pantoneMessage }}
+                        </div>
+                      </b-form>
+                      <color-picker @changeColor="changeColor" theme="light" :key="svgElement.color" :color="svgElement.color" :sucker-hide="true" />
+                  </div>
+                    <!-- logo colors -->
+                    <template v-else-if="patternTypeIndex == productColors.length && !showOtherColors" v-for="(ext_color, ext_index) in logoColorsInfo">
+                      <div v-if="ext_color.hex"  class="color-box" @click="ext_color.hex == svgElement.color ? null : setPattern(false, selectedPattern, ext_color)"
+                          :title="ext_color.pantone ? ext_color.pantone : ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
+                        <span v-if="isPatternColorSelected(ext_color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
+                      </div>
+                    </template>
+                    <!-- locker colors -->
+                    <template v-else-if="patternTypeIndex == (productColors.length + 1) && !showOtherColors" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
+                      <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setPattern(false, selectedPattern, color)"
+                          :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
+                        <span v-if="isPatternColorSelected(color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
+                      </div>
+                    </template>
+                    <!-- product colors -->
+                    <template v-else-if="!showOtherColors" v-for="(color, c_index) in productColors[patternTypeIndex]?.color_text">
+                      <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setPattern(false, selectedPattern, color)"
+                          :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
+                        <span v-if="isPatternColorSelected(color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                          <BIconCheck />
+                        </span>
+                      </div>
+                    </template>
+                  </div>
+                </div>
+              </template>
             </div>
           </div>
         </b-card-body>
@@ -181,6 +324,7 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
   @Prop({required: true}) tabIndex!: any
 
   // public color= '#59c7f9'
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
   public pantoneColorVal= '18-0107'
   public selectedColorTab = 0;
   public colorImage = '/img/images/color-placeholder.png'
@@ -201,6 +345,10 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     return this.$store.getters.getGroupColors
   }
 
+  get groupPatterns() {
+    return this.$store.getters.getGroupPatterns
+  }
+
   public isColorSelected(color, svgElement, gradient_index) {
     // Check if color or name matches
     if (color.value === svgElement.color ||
@@ -219,8 +367,34 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     return false
   }
 
+  public isPatternColorSelected(color, patternColor) {
+    return color.value === patternColor.value
+  }
+
   public getColorTypeBySvgGroup(svg_group: string, color_type) {
     return getColorType(svg_group, null,'logo_color_type')
+  }
+
+  public isPatternActive(svgGroupId: string, pattern: Record<any, any>): boolean {
+    const groupPattern = this.$store.getters.getGroupPatternsById(svgGroupId);
+    return groupPattern && groupPattern.name === pattern.name;
+  }
+
+  private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>;
+    element.style.opacity = '1'
+    element.style.zIndex = '100'
+    element.style.left = ($event.clientX + (leftOffset)) + 'px'
+    element.style.top = ($event.clientY + (5 + topOffset)) + 'px'
+    element.innerHTML = $event.target.getAttribute('data-title')
+  }
+
+  private hideTooltip() {
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
+    element.style.opacity = '0'
+    element.style.left = '0'
+    element.style.top = '0'
+    element.style.zIndex = '-10'
   }
 }
 </script>
@@ -252,5 +426,40 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
         display: flex !important;
       }
     }
+  }
+
+  .pattern-designs {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 15px;
+
+      .btn {
+          width: 40px;
+          height:30px;
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid #ccc;
+          background: none;
+
+          @media only screen and (min-width: 992px) {
+              width: 75px;
+              height: 75px;
+          }
+
+          &.active,
+          &:hover {
+              border-color: #219f84;
+          }
+
+          img {
+              display: block;
+              max-width: 100%;
+              margin: 0 auto;
+              height: auto;
+          }
+      }
   }
 </style>

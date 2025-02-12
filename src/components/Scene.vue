@@ -93,7 +93,7 @@ import {
   unitConversion,
   selectedDesign, getPermutation
 } from '@/helpers/Helpers'
-import {find} from "lodash";
+import {find, unset} from "lodash";
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
 import hexRgb from "hex-rgb";
@@ -125,6 +125,8 @@ import SceneMixin from "@/mixins/SceneMixin";
     self.$eventBus.$off("changeColors", this.changeColors)
     self.$eventBus.$off("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
     self.$eventBus.$off("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
+    self.$eventBus.$off("applyPattern", this.applyPattern)
+    self.$eventBus.$off("applyAllPatterns", this.applyAllPatterns)
     if (this.front_time) {
       clearTimeout(this.front_time)
     }
@@ -216,6 +218,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private front_time
   private back_time
   private mounted_time
+  public front_patterns = {}
+  public back_patterns = {}
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -317,6 +321,265 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.frontCanvasRender()
   }
 
+  public async applyAllPatterns() {
+    if (this.svgGroups) {
+      await Promise.all(
+        this.svgGroups.map((svgGroup: Record<any, any>) =>
+          this.applyPattern(svgGroup.id, 300, false)
+        )
+      )
+    }
+  }
+
+  public removePattern(design: any, pattern_objects: any, svg_part, side = 'front', render_time) {
+    const patternId = `pattern_${svg_part}`;
+    design._objects = design._objects.filter(obj => obj.id !== patternId);
+    this.regroupDesign(design._objects, side);
+
+    delete pattern_objects[svg_part];
+    if (!this.groupPatterns[svg_part]) {
+      if(side == 'front') {
+        this.frontCanvasRender(render_time)
+      } else {
+        this.backCanvasRender(render_time)
+      }
+    }
+  }
+
+  public async applyPattern(svg_part: string, render_time = 0, re_stack = true): Promise<void> {
+    if (this.front_patterns[svg_part]) {
+      this.removePattern(this.frontDesign, this.front_patterns, svg_part, 'front', render_time)
+    }
+    if (this.back_patterns[svg_part]) {
+      this.removePattern(this.backDesign, this.back_patterns, svg_part, 'back', render_time)
+    }
+
+    if (this.groupPatterns[svg_part] && this.groupPatterns[svg_part].name && this.product.patterns && Object.entries(this.product.patterns).length) {
+      const pattern_data = this.product.patterns[0].json_data.find(
+        (obj) => obj.name === this.groupPatterns[svg_part].name
+      );
+
+      if (pattern_data) {
+        const pattern_url = pattern_data.path;
+        return new Promise((resolve) => {
+          fabric.loadSVGFromURL(`${this.storageUrl}${pattern_url}?q=${pattern_data.random_string}`, (objects: any, options: any) => {
+            if(objects.length) {
+              options.crossOrigin = 'Anonymous';
+              const img = fabric.util.groupSVGElements(objects) as fabric.Group;
+
+              if (this.groupPatterns[svg_part].color?.value) {
+                img.fill = this.groupPatterns[svg_part].color.value;
+              }
+
+              const patternSourceCanvas = new fabric.StaticCanvas(null);
+              patternSourceCanvas.setDimensions({
+                width: img.getScaledWidth(),
+                height: img.getScaledHeight(),
+              });
+
+              patternSourceCanvas.add(img);
+              patternSourceCanvas.renderAll();
+
+              const pattern = new fabric.Pattern({
+                // @ts-ignore
+                source: patternSourceCanvas.getElement(),
+                repeat: 'repeat'
+              });
+
+              // Scaling and transformation logic
+              const scale = this.groupPatterns[svg_part].scale / 100;
+              const rotationAngle = this.groupPatterns[svg_part]?.angle || 0;
+              const angleInRadians = (rotationAngle * Math.PI) / 180;
+              const cos = Math.cos(angleInRadians);
+              const sin = Math.sin(angleInRadians);
+              const patternWidth = img.getScaledWidth();
+              const patternHeight = img.getScaledHeight();
+              const tx = (patternWidth / 2) * (1 - cos) * scale + (patternHeight / 2) * sin * scale;
+              const ty = (patternHeight / 2) * (1 - cos) * scale - (patternWidth / 2) * sin * scale;
+
+              pattern.patternTransform = [
+                scale * cos,
+                scale * sin,
+                -scale * sin,
+                scale * cos,
+                -tx,
+                -ty,
+              ];
+
+              const designSides = ['front'];
+              if (this.back) {
+                designSides.push('back');
+              }
+
+              designSides.forEach((side) => {
+                let designObjects = this.frontDesign._objects ? this.frontDesign._objects : [this.frontDesign];
+                let canvas = this.frontCanvas
+                let zoom_point = this.front_zoom_point
+                if (side == 'back') {
+                  designObjects = this.backDesign._objects ? this.backDesign._objects : [this.backDesign];
+                  canvas = this.backCanvas;
+                  zoom_point = this.back_zoom_point
+                }
+
+                let zoom = canvas.getZoom();
+                if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
+                  canvas.zoomToPoint({
+                    x: zoom_point.x,
+                    y: zoom_point.y
+                  }, 1);
+                }
+
+                designObjects.flat().forEach((designObject, index: number) => {
+                  if (designObject.id?.toLowerCase() === svg_part) {
+                    const patternRect = new fabric.Rect({
+                      left: designObject.left,
+                      top: designObject.top,
+                      width: designObject.width,
+                      height: designObject.height,
+                      hasControls: false,
+                      selectable: false,
+                      evented: false,
+                      originX: designObject.originX || 'left',
+                      originY: designObject.originY || 'top',
+                      lockMovementX: true,
+                      lockMovementY: true,
+                      absolutePositioned: true,
+                      // globalCompositeOperation: 'source-atop',
+                      fill: pattern,
+                    });
+
+                    let latest_design_objects = this.frontDesign._objects
+                    if(side == 'back') {
+                      latest_design_objects = this.backDesign._objects
+                    }
+
+                    const clipGroup = new fabric.Group(
+                      this.cloneFabricObjects(latest_design_objects),
+                      {
+                        hasControls: false,
+                        selectable: false,
+                        evented: false,
+                        originX: 'center',
+                        originY: 'center',
+                        lockMovementX: true,
+                        lockMovementY: true,
+                        absolutePositioned: true,
+                      }
+                    );
+
+                    const pattern_id = 'pattern_' + svg_part
+                    const occurrence_count = latest_design_objects.filter(obj => obj.id === pattern_id).length;
+                    const object_number = index + occurrence_count
+
+                    const objectToClip = clipGroup._objects.filter((obj, clip_id) => clip_id !== object_number);
+
+                    objectToClip.forEach((obj) => clipGroup.remove(obj));
+
+                    const groupWidth = clipGroup.width!;
+                    const groupHeight = clipGroup.height!;
+
+                    if(groupWidth > groupHeight) {
+                      clipGroup.scaleToWidth(this.canvasWidth - 10)
+                    } else {
+                      clipGroup.scaleToHeight(this.canvasHeight - 10)
+                    }
+                    clipGroup.center().setCoords()
+                    canvas.viewportCenterObject(clipGroup)
+
+                    patternRect.clipPath = clipGroup;
+
+                    Object.assign(patternRect, {
+                      id: pattern_id,
+                      side: side
+                    })
+
+                    let design_with_rect = this.cloneFabricObjects(latest_design_objects)
+
+                    // @ts-ignore
+                    design_with_rect.splice(object_number + 1, 0, patternRect);
+
+                    this.regroupDesign(design_with_rect, side)
+
+                    if(side == 'front') {
+                      this.front_patterns[svg_part] = patternRect;
+                    } else {
+                      this.back_patterns[svg_part] = patternRect;
+                    }
+                  }
+                });
+
+                if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
+                  canvas.zoomToPoint({
+                    x: zoom_point.x,
+                    y: zoom_point.y
+                  }, zoom);
+                }
+
+                if (re_stack) {
+                  const all_fabric_object = [
+                    ...this.fixed_logo_objects,
+                    ...this.other_side_fixed_logos,
+                    ...this.custom_logo_objects,
+                    ...this.other_side_logos,
+                    ...this.product_custom_text_objects.flat(),
+                    ...this.otherSideTexts
+                  ].filter((obj) => obj !== null && obj !== undefined)
+
+                  this.reStackObjectsInCanvas(all_fabric_object);
+                }
+
+                if (side == 'front') {
+                  this.frontCanvasRender(render_time);
+                } else {
+                  this.backCanvasRender(render_time);
+                }
+              });
+
+              resolve(); // Resolve after all processing is complete
+            }
+          })
+        })
+      }
+    }
+
+    return Promise.resolve(); // Return an already resolved Promise if no pattern is found
+  }
+
+  public regroupDesign(design_objects: fabric.Object[], side = 'front') {
+    let design = this.frontDesign
+    let canvas = this.frontCanvas
+    if(side == 'back') {
+      design = this.backDesign
+      canvas = this.backCanvas
+    }
+    const final_design = new fabric.Group(design_objects, {
+      hasControls: false,
+      selectable: false,
+      evented: false,
+      originX: 'center',
+      originY: 'center',
+      lockMovementX: true,
+      lockMovementY: true,
+    })
+    if(design.width! > design.height!) {
+      final_design.scaleToWidth(this.canvasWidth - 10)
+    } else {
+      final_design.scaleToHeight(this.canvasHeight - 10)
+    }
+    final_design.center().setCoords();
+
+    canvas.remove(design)
+    canvas.add(final_design)
+    canvas.viewportCenterObject(final_design)
+    final_design.sendToBack()
+
+    if(side == 'back') {
+      this.backDesign = final_design
+    } else {
+      this.frontDesign = final_design
+    }
+  }
+
   public getSvgGroupColors(svg_group: string) {
     if(svg_group && this.product?.svg_group_color_container && this.product.svg_group_color_container[svg_group]) {
       return this.product.svg_group_color_container[svg_group]
@@ -401,7 +664,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             addon_objects_by_placement.forEach((addon_object) => {
               addon_object._objects.forEach((item: Record<any, any>) => {
                 if (item.id && item.fill) {
-                  item.id = item.id.toLowerCase()
+                  item.id = item.id?.toLowerCase()
                   if (groupColors[item.id]) {
                     if (item.fill.gradientUnits) {
                       item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
@@ -442,7 +705,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         designs.forEach((design) => {
           design.forEach((item: Record<any, any>) => {
             if(item.id) {
-              item.id = item.id.toLowerCase()
+              item.id = item.id?.toLowerCase()
               if (groupColors[item.id]) {
                 if (item.fill && item.fill.gradientUnits) {
                   if(groupColors[item.id].gradient_colors) {
@@ -562,7 +825,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         let design = this.frontDesign._objects ? this.frontDesign._objects : [this.frontDesign]
         design.forEach((item: Record<any, any>) => {
           if(item.id) {
-            item.id = item.id.toLowerCase()
+            item.id = item.id?.toLowerCase()
             if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
               item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
                 gradient.color = appliedDefaultColors[item.id][gradient_index]
@@ -579,7 +842,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             addon_objects_by_placement.forEach((addon_object) => {
               addon_object._objects.forEach((item: Record<any, any>) => {
                 if (item.id) {
-                  item.id = item.id.toLowerCase()
+                  item.id = item.id?.toLowerCase()
                   if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
                     item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
                       gradient.color = appliedDefaultColors[item.id][gradient_index]
@@ -613,7 +876,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           design = this.backDesign._objects ? this.backDesign._objects : [this.backDesign]
           design.forEach((item: Record<any, any>) => {
             if(item.id) {
-              item.id = item.id.toLowerCase()
+              item.id = item.id?.toLowerCase()
               if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
                 item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
                   gradient.color = appliedDefaultColors[item.id][gradient_index]
@@ -715,7 +978,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]
     design.forEach((item: Record<any, any>) => {
       if(item.id) {
-        item.id = item.id.toLowerCase()
+        item.id = item.id?.toLowerCase()
         if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
           item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
             gradient.color = appliedDefaultColors[item.id][gradient_index]
@@ -736,7 +999,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
       design.forEach((item: Record<any, any>) => {
         if(item.id) {
-          item.id = item.id.toLowerCase()
+          item.id = item.id?.toLowerCase()
           if (appliedDefaultColors[item.id] && item.fill && item.fill.gradientUnits) {
             item.fill.colorStops.forEach((gradient: Record<any, any>, gradient_index: number) => {
               gradient.color = appliedDefaultColors[item.id][gradient_index]
@@ -786,7 +1049,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
             let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]
             design.forEach((item: Record<any, any>) => {
-              item.id = item.id.toLowerCase()
+              item.id = item.id?.toLowerCase()
               if (key.toLowerCase() == item.id) {
                 item.set('fill', changeColor.value);
               }
@@ -794,7 +1057,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if (this.back) {
               design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
               design.forEach((item: Record<any, any>) => {
-                item.id = item.id.toLowerCase()
+                item.id = item.id?.toLowerCase()
                 if (key.toLowerCase() == item.id) {
                   item.set('fill', changeColor.value);
                 }
@@ -831,7 +1094,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]
     design.forEach((item: Record<any, any>) => {
       if(item.id) {
-        item.id = item.id.toLowerCase()
+        item.id = item.id?.toLowerCase()
         if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
           let count = 1
           if (item.id == 'base') {
@@ -877,7 +1140,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       design = this.backDesign._objects? this.backDesign._objects : [this.backDesign]
       design.forEach((item: Record<any, any>) => {
         if(item.id) {
-          item.id = item.id.toLowerCase()
+          item.id = item.id?.toLowerCase()
           if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
             let count = 1
             if (item.id == 'base') {
@@ -1036,6 +1299,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
 
           await this.addFixedLogos()
+
+          await this.applyAllPatterns()
 
           await this.addAddons(300)
 
@@ -1241,15 +1506,16 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.$eventBus.$on("changeColors", this.changeColors)
     self.$eventBus.$on("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
     self.$eventBus.$on("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
+    self.$eventBus.$on("applyPattern", this.applyPattern)
+    self.$eventBus.$on("applyAllPatterns", this.applyAllPatterns)
   }
 
   public customTextStoreUpdatedHandler(indexes: Record<any, any>, from_3d = false) {
-    const self: Record<any, any> = this;
     if((from_3d || !this.mainPreview) && this.selectedProductId == this.product_id) {
       const text = this.product_custom_texts[indexes.custom_text_index].items[indexes.custom_text_item_index]
-      if(text && self.product_custom_text_objects[indexes.custom_text_index] && self.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
-        const textObject = self.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
-        const otherSideObject = self.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
+      if(text && this.product_custom_text_objects[indexes.custom_text_index] && this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]) {
+        const textObject = this.product_custom_text_objects[indexes.custom_text_index][indexes.custom_text_item_index]
+        const otherSideObject = this.product_custom_text_objects[indexes.custom_text_index + '' + indexes.custom_text_item_index]
         this.eventAction(text, textObject, otherSideObject)
       }
     }
@@ -1888,7 +2154,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             otherSideObjects[add_index] = objectAdd
           }
           if (side == 'back') {
-            // objectAdd.clipPath = this.clip_path_front
+            objectAdd.side = 'front'
             this.frontCanvas.add(objectAdd)
             if (this.productType == 'customized') {
               this.front_models.forEach((model: fabric.Image) => {
@@ -1898,6 +2164,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             this.frontCanvasRender()
           } else {
             if (this.back) {
+              objectAdd.side = 'back'
               this.backCanvas.add(objectAdd)
               if (this.productType == 'customized') {
                 this.back_models.forEach((model: fabric.Image) => {
@@ -2101,7 +2368,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             if(item.id.indexOf('_') !== -1) {
               item.id = item.id.substring(0, item.id.indexOf('_'))
             }
-            item.id = item.id.toLowerCase()
+            item.id = item.id?.toLowerCase()
             if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
               if (item.fill.includes('rgb')) {
                 item.fill = rgbHex(item.fill as string).includes('#') ? rgbHex(item.fill as string) : '#' + rgbHex(item.fill as string)

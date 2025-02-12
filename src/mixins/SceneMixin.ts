@@ -50,6 +50,9 @@ export default class SceneMixin extends Vue {
   get shuffle_color_number(): number {
     return this.$store.getters.getShuffleColorNumber
   }
+  get groupPatterns(): [Record<any, any>] {
+    return this.$store.getters.getGroupPatterns
+  }
   get groupColors(): [Record<any, any>] {
     return this.$store.getters.getGroupColors
   }
@@ -314,7 +317,7 @@ export default class SceneMixin extends Vue {
     // @ts-ignore
     await this.changeGroupColors()
   }
-  public addFixedLogos() {
+  public async addFixedLogos() {
     if (this.logos.length) {
       let promises: Promise<boolean>[] = []
       let is_fixed_logos_all: boolean
@@ -341,7 +344,7 @@ export default class SceneMixin extends Vue {
         }
       })
 
-      Promise.all(promises).then(() => {
+      await Promise.all(promises).then(() => {
         // @ts-ignore
         this.reStackObjectsInCanvas(this.fixed_logo_objects)
         if (Object.keys(this.appliedGroupColors).length || this.defaultColors.length) {

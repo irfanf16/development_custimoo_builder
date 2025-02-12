@@ -8,7 +8,7 @@
          <div v-if="product.show_product_in_list" ref="products" v-on:click="productDesigns(index)" :key="product.product_id">
            <template v-for="design in product.productstyles[0].productdesigns.filter(product_design => product_design.is_default)">
              <div class="image-holder" :key="'front'+design.id">
-               <Scene canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio"
+               <Scene :canvasWidth="150" :canvasHeight="150" :measurement-ratio="product.measurement_ratio"
                       :front="{
                       textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
                       safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',

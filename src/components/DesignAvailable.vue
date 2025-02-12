@@ -14,7 +14,7 @@
           </button>
         </div>
         <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
-          <Scene canvas-width="150" canvas-height="150" :measurement-ratio="selectedProduct.measurement_ratio" :ref="`design_scene_${design.id}`"
+          <Scene :canvasWidth="150" :canvasHeight="150" :measurement-ratio="selectedProduct.measurement_ratio" :ref="`design_scene_${design.id}`"
                  :front="{
                     textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
                     safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',

@@ -17,8 +17,15 @@ export default class ColorsTabMixin extends Vue{
   public activeLockerIndex = 0
   public activeFolderIndex = 0
   public selectTypeIndex = 0
-  public othersActive = false
+  public patternTypeIndex = 0
+  public othersActive = false;
   public gradient_index: number|undefined = 0
+  public patternColor = {};
+  public selectedPattern = null;
+  public selectedPatterns = {}
+  public patternScales: Record<string, number> = {};
+  public patternAngles: Record<string, number> = {};
+  public patternColors: Record<string, Record<any, any>> = {};
 
 
   get lastActiveProductData() {
@@ -64,6 +71,10 @@ export default class ColorsTabMixin extends Vue{
     return selectedDesign()?.id? this.$store.getters.getLockedDesigns(selectedDesign().id) : undefined
   }
 
+  get groupPatterns() {
+    return this.$store.getters.getGroupPatterns
+  }
+
   public copyColor(color: string) {
     this.$store.commit('SET_COPIED_COLOR', color)
   }
@@ -107,6 +118,18 @@ export default class ColorsTabMixin extends Vue{
     this.showOtherColors = showOtherColors
   }
 
+  public selectPatternType(index: number, showOtherColors = false) {
+    if (showOtherColors){
+      this.othersActive = true;
+    }
+    else {
+      this.othersActive = false;
+    }
+
+    this.patternTypeIndex = index
+    this.showOtherColors = showOtherColors
+  }
+
   public showColor(index: number, gradient_index: number|undefined) {
     this.selectAccordionIndex = index
     this.gradient_index = gradient_index
@@ -144,6 +167,93 @@ export default class ColorsTabMixin extends Vue{
         this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {group_colors: this.$store.getters.getGroupColors})
       }
     }
+  }
+
+  public getPatternScale(groupId: string): number {
+    return this.patternScales[groupId] || 30;
+  }
+
+  public setPatternScale(groupId: string, scale: number) {
+    this.$set(this.patternScales, groupId, scale);
+    this.setPattern(false, this.selectedPattern);
+  }
+
+  public getPatternAngle(groupId: string): number {
+    return this.patternAngles[groupId] || 0;
+  }
+
+  public setPatternAngle(groupId: string, angle: number) {
+    this.$set(this.patternAngles, groupId, angle);
+    this.setPattern(false, this.selectedPattern);
+  }
+
+  public getPatternColor(groupId: string): Record<any, any> {
+    return this.patternColors[groupId] || {};
+  }
+
+  public setPatternColor(groupId: string, color: Record<any, any>) {
+    this.$set(this.patternColors, groupId, color);
+  }
+
+  public setSelectedPattern(groupId: string, pattern: Record<any, any>) {
+    if (pattern === this.selectedPatterns[groupId]) {
+      this.unsetPattern();
+      return;
+    }
+    this.$set(this.selectedPatterns, groupId, pattern);
+    this.$set(this.patternScales, groupId, (this.patternScales[groupId] ? this.patternScales[groupId] : 30));
+    this.$set(this.patternAngles, groupId, (this.patternAngles[groupId] ? this.patternAngles[groupId] : 0));
+    this.setPattern(false, pattern);
+  }
+
+  public getSelectedPattern(groupId: string) {
+    return this.selectedPatterns[groupId].name || {};
+  }
+
+  public async setPattern(unset = false, pattern, color = {}) {
+    const group_id = this.svgGroups[this.selectAccordionIndex].id;
+    if (pattern == this.selectedPatterns[group_id] && unset) {
+      this.unsetPattern();
+      return;
+    }
+    const self: Record<any, any> = this;
+    this.selectedPattern = pattern;
+    if (Object.keys(color).length > 0) {
+      this.setPatternColor(group_id, color);
+    }
+    await setUndoRedoItems('groupPatterns','updated')
+    await hideLockerProductUpdateButton(false)
+    if (pattern.name) {
+      this.$store.commit('UPDATE_GROUP_PATTERNS', {
+        index: group_id,
+        name: this.getSelectedPattern(group_id),
+        scale: this.getPatternScale(group_id),
+        angle: this.getPatternAngle(group_id),
+        color: this.getPatternColor(group_id),
+      })
+      if(this.lastActiveProductData && !this.lastActiveProductData.editing ) {
+        this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {group_patterns: this.$store.getters.getGroupPatterns})
+      }
+      self.$eventBus.$emit("applyPattern", group_id)
+    }
+  }
+
+  public unsetPattern() {
+    const self: Record<any, any> = this;
+    this.selectedPattern = null;
+    const group_id = this.svgGroups[this.selectAccordionIndex].id
+    this.selectedPatterns[group_id] = null;
+    this.$store.commit('UPDATE_GROUP_PATTERNS', {
+      index: group_id,
+      name: null,
+      scale: this.getPatternScale(group_id),
+      angle: this.getPatternAngle(group_id),
+      color: this.getPatternColor(group_id)
+    })
+    if(this.lastActiveProductData && !this.lastActiveProductData.editing ) {
+      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {group_patterns: this.$store.getters.getGroupPatterns})
+    }
+    self.$eventBus.$emit("applyPattern", group_id)
   }
 
   public changeColor(color: Record<any, any>) {

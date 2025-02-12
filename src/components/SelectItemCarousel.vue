@@ -7,7 +7,7 @@
            :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
           <template v-for="design in product.productstyles[0].productdesigns.filter(product_design => product_design.is_default)">
             <div class="image-holder" :key="'front'+design.id">
-              <Scene canvas-width="150" canvas-height="150" :measurement-ratio="product.measurement_ratio" :key="`scene${product.id}`"
+              <Scene :canvasWidth="150" :canvasHeight="150" :measurement-ratio="product.measurement_ratio" :key="`scene${product.id}`"
                      :front="{
                         textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
                         safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',

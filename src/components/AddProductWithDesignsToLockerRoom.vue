@@ -434,8 +434,7 @@ public errors = [];
           this.showToast(`svg groups are undefined for Product Design ${productSelectedDesign.id}`,"error")
           return;
         }
-        console.log(front_image_base64);
-        console.log(back_image_base64);
+
         locker_design_data.push({
           roster_url: this.rosterUrl,
           room_id: this.room_id,

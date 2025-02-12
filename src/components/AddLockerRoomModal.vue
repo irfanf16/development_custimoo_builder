@@ -390,8 +390,8 @@
             fixed_logo_index: fixed_logo_index,
             svgcolors: distinct,
             grouped_addons: selected_grouped_addons,
-            ungrouped_addons: selected_ungrouped_addons
-
+            ungrouped_addons: selected_ungrouped_addons,
+            group_patterns: Store.getters.getGroupPatterns
           }
           let res = await this.$store.dispatch("SAVE_TO_LOCKER", createFormData(locker)).catch(errorResponse => {
             this.showLoader = false
@@ -463,8 +463,9 @@
             unique[svgGroups[i].color] = 1;
           }
         }
+        const product_style = this.selectedProduct.productstyles[this.styleIndex]
         const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
-
+        let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
         const scene_ref = Store.getters.getCanvasImage.scene
         let locker = {
           roster_url: this.rosterUrl,
@@ -484,7 +485,10 @@
           locker_back_png: locker_back_png,
           product_roster_detail: this.productRosterDetail,
           fixed_logo_index: fixed_logo_index,
-          svgcolors: distinct
+          svgcolors: distinct,
+          grouped_addons: selected_grouped_addons,
+          ungrouped_addons: selected_ungrouped_addons,
+          group_patterns: Store.getters.getGroupPatterns
         }
 
         let res = await this.$store.dispatch("SHARE_DESIGN_URL", createFormData(locker));

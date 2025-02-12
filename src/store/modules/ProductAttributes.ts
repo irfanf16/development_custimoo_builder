@@ -62,6 +62,7 @@ const ProductAttributes:Module<any, any> = {
     // changing defaultColors object will also need to change value in helper method getDefaultColorsObject
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
     groupColors: {},
+    groupPatterns: {},
     svgGroups: [],
     currentColorApplied: 'group',
     rosterDetails: {},
@@ -706,6 +707,16 @@ const ProductAttributes:Module<any, any> = {
       }
       updateLastActiveProductData({ group_colors: state.groupColors })
     },
+    SET_GROUP_PATTERNS (state: Record<any, any>, groupPatterns: Record<any, any>) {
+      if(groupPatterns) {
+        if(isEmpty(groupPatterns)){
+          state.groupPatterns = {}
+        } else {
+          state.groupPatterns = groupPatterns
+        }
+      }
+      updateLastActiveProductData({ group_patterns: state.groupPatterns })
+    },
     UPDATE_GROUP_COLORS (state: Record<any, any>, color: Record<any, any>) {
       if (color) {
         if(color.gradient_index != undefined) {
@@ -718,6 +729,13 @@ const ProductAttributes:Module<any, any> = {
         } else {
           Vue.set(state.groupColors, color.index, { color: color.color, pantone: color.pantone, name: color.name })
         }
+      }
+    },
+    UPDATE_GROUP_PATTERNS (state: Record<any, any>, pattern: Record<any, any>) {
+      if (pattern.name) {
+        Vue.set(state.groupPatterns, pattern.index, { name: pattern.name, scale: pattern.scale, angle: pattern.angle, color: pattern.color })
+      } else {
+        Vue.delete(state.groupPatterns, pattern.index)
       }
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
@@ -799,6 +817,14 @@ const ProductAttributes:Module<any, any> = {
       }
 
     },
+    OVERRIDE_GROUP_PATTERNS(state:Record<any, any>, payload){
+      if(isEmpty(payload)){
+        state.groupPatterns = {};
+      }else{
+        state.groupPatterns = payload;
+      }
+
+    },
     REMOVE_ROSTER(state:Record<any, any>, payload:number){
       state.rosterDetails[state.selectedPrdId].splice(payload, 1);
     },
@@ -877,6 +903,7 @@ const ProductAttributes:Module<any, any> = {
       //state.customTexts.map((item:Record<any, any>) => item.text = '' );
       state.defaultColors = [{color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}, {color: null, pantone: null, name: null}];
       state.groupColors = {};
+      state.groupPatterns = {};
       state.using_logo_colors = false;
       state.logoEditor = {
         id:0,
@@ -902,6 +929,7 @@ const ProductAttributes:Module<any, any> = {
 
       state.products_rosters = {}
       state.locked_designs = {}
+      state.group_patterns = {}
 
       // state.selectedIndex = 0;
       // state.styleIndex = 0 ;
@@ -1542,6 +1570,15 @@ const ProductAttributes:Module<any, any> = {
       }
       return state.groupColors
     },
+    getGroupPatterns: state => {
+      return state.groupPatterns;
+    },
+    getGroupPatternsById: state => (group_id = '') => {
+      if(group_id) {
+        return state.groupPatterns[group_id]
+      }
+      return state.groupPatterns
+    },
     getSvgGroups: state => {
       return state.svgGroups
     },
@@ -1824,8 +1861,14 @@ const ProductAttributes:Module<any, any> = {
     setGroupColors ({commit}, payload) {
       commit('SET_GROUP_COLORS', payload)
     },
+    setGroupPatterns ({commit}, payload) {
+      commit('SET_GROUP_PATTERNS', payload)
+    },
     updateGroupColors ({commit}, payload){
       commit('UPDATE_GROUP_COLORS', payload)
+    },
+    updateGroupPatterns ({commit}, payload){
+      commit('UPDATE_GROUP_PATTERNS', payload)
     },
     setSvgGroups ({commit}, payload) {
       commit('SET_SVG_GROUPS', payload)
@@ -1881,6 +1924,9 @@ const ProductAttributes:Module<any, any> = {
     },
     overRideGroupColors({commit}, payload:Record<any, any>){
       commit('OVERRIDE_GROUP_COLORS', payload);
+    },
+    overRideGroupPatterns({commit}, payload:Record<any, any>){
+      commit('OVERRIDE_GROUP_PATTERNS', payload);
     },
     removeRoster({commit}, payload:number){
       commit('REMOVE_ROSTER', payload);

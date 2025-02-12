@@ -639,7 +639,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         reorder_data,
         is_custom_product: false,
         grouped_addons: selected_grouped_addons,
-        ungrouped_addons: selected_ungrouped_addons
+        ungrouped_addons: selected_ungrouped_addons,
+        group_patterns: Store.getters.getGroupPatterns,
       }
       let grouped_selected_addons = []
       if(selected_product.group_addons && selected_product.group_addons.length > 0) {
@@ -1541,7 +1542,7 @@ const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   const default_obj = {
     fixed_logo_index: 0, category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: {}, default_colors: [], group_colors: {}, logo_colors: [],
-    roster_detail: [], products_rosters: {}, shuffle_color_number: 1, addons_info: {}
+    roster_detail: [], products_rosters: {}, shuffle_color_number: 1, addons_info: {}, group_patterns: {}
   }
   return {...default_obj, ...keys_default_values}
 }
@@ -1589,6 +1590,7 @@ const getDataToSetLastActiveProduct = () => {
       logo_colors: Store.getters.getLogosColors,
       roster_detail: Store.getters.getProductRosters(),
       products_rosters: Store.getters.getProductRosters('all'),
+      group_patterns: Store.getters.getGroupPatterns,
     })
   }
   return last_active_product_default_object;
@@ -1973,6 +1975,11 @@ const setUndoRedoItems = async (items_type: string, action_on_items: string, use
           meta: {
             logo_colors_info: santaClone(await Store.getters.getLogoColorsInfo())
           }
+        }})
+      break;
+    case 'groupPatterns':
+      Store.commit('SET_UNDO_REDO_ITEMS', {action: user_action, data: {
+          key: items_type, action_on_items: action_on_items, [items_type]: santaClone(await Store.getters.getGroupPatterns)
         }})
       break;
     default:

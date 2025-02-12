@@ -599,7 +599,6 @@ import Store from "@/store";
 import AddToCartButton from "@/components/AddToCartButton.vue";
 import ShareDesignModal from "@/components/ShareDesignModal.vue";
 import ThreeDScene from "@/components/ThreeDScene.vue";
-import Scene3d from "@/components/3d/scene-3d.vue";
 import EditRosterAreaTab from "@/components/EditRosterAreaTab.vue";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import {deleteStateById, loadState, saveState} from "@/indexedDBPersistence";
@@ -618,7 +617,6 @@ Vue.filter('formatDate', function(value:string) {
     LockerRoom,
     EditRosterAreaTab,
     ShareDesignModal,
-    Scene3d,
     ThreeDScene,
     AddToCartButton,
     Popper,
@@ -1595,7 +1593,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       fixed_logo_index: fixed_logo_index,
       svgcolors: distinct,
       grouped_addons: selected_grouped_addons,
-      ungrouped_addons: selected_ungrouped_addons
+      ungrouped_addons: selected_ungrouped_addons,
+      group_patterns: Store.getters.getGroupPatterns
     }
 
     if (self.getProductEditInfoObject.editing) {
@@ -1955,6 +1954,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_LOGO_COLORS_INFO', {reset: true})
     await self.$eventBus.$emit('resetTextsCanvas')
     await self.$eventBus.$emit('resetLogosCanvas')
+    await self.$eventBus.$emit("applyAllPatterns")
     await this.$store.dispatch('setTabMain', {value: 0});
     if(this.$refs['ItemToCustomize']) {
       (this.$refs['ItemToCustomize'] as Record<any, any>).setSliderIndex();

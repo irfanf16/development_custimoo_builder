@@ -254,7 +254,6 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     await setUndoRedoItems('customTexts', 'font_updated')
     const style_to_apply = self.product_custom_texts[current_custom_text_index].items[this.active_jersey_part[current_custom_text_index]];
 
-    console.log('style_to_apply', style_to_apply)
     self.product_custom_texts.forEach((custom_text:Record<any, any>, custom_text_index:any)=>{
       custom_text.font_family = self.product_custom_texts[current_custom_text_index].font_family;
       custom_text.items.forEach((current_item:Record<any, any>)=>{

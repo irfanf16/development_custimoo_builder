@@ -339,7 +339,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             product_custom_texts = active_factory_product.product_custom_texts
           }
 
-          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail, shuffle_color_number } = active_factory_product
+          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail, shuffle_color_number, group_patterns } = active_factory_product
           fixed_logo_index = active_factory_product.fixed_logo_index
          if(product_edit_info_object.type == "cart_product" && active_product_detail.factory_products[0].reorder_data) {
            this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', { cart_product_info : {...product_edit_info_object.cart_product_info, reorder_data : active_product_detail.factory_products[0].reorder_data} })
@@ -360,6 +360,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
                 active_style_id = order_update_active_product.style_id
                 active_design_id = order_update_active_product.design_id
                 const active_product_styles = active_product.productstyles
+                group_patterns = order_update_active_product.group_patterns
                 active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
                   return style.id == active_style_id
                 })
@@ -375,7 +376,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           let customizer_data: Record<any, any> = {
             active_product_id: active_product_id, custom_logos:custom_logos, product_custom_texts:product_custom_texts,
             default_colors:default_colors, group_colors:group_colors, product_roster_detail: product_roster_detail,
-            shuffle_color_number: shuffle_color_number
+            shuffle_color_number: shuffle_color_number, group_patterns: group_patterns
           }
           await this.setCustomizerData(customizer_data)
           this.$store.commit('RESET_UNDO');
@@ -412,7 +413,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             * */
             await this.setCustomizerData({product_id: active_product_id, group_colors: last_active_prod_data.group_colors,
               default_colors: last_active_prod_data.default_colors, product_roster_detail: product_roster_detail,
-              shuffle_color_number: last_active_prod_data.shuffle_color_number })
+              shuffle_color_number: last_active_prod_data.shuffle_color_number, group_patterns: last_active_prod_data.group_patterns })
             if(last_active_prod_data.addons_info && !checkIsEmpty(last_active_prod_data.addons_info)) {
               addons_info = last_active_prod_data.addons_info
               handleExistingAddonsSelection(addons_info)
@@ -430,7 +431,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             search_products: self.search_products, customized: this.$store.getters.getCustomized,
             personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
             products_rosters: this.$store.getters.getProductRosters('all'), default_colors: last_active_prod_data.default_colors,
-            group_colors: last_active_prod_data.group_colors, addons_info: addons_info
+            group_colors: last_active_prod_data.group_colors, addons_info: addons_info, group_patterns: last_active_prod_data.group_patterns
           })
 
 
@@ -497,70 +498,85 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
 
   public async setCustomizerData(customizer_data) {
     let self: Record<any, any> = this;
-    let {active_product_id, custom_logos, product_custom_texts, default_colors, group_colors, product_roster_detail, shuffle_color_number} = customizer_data
-    if(custom_logos) {
+    let {
+      active_product_id,
+      custom_logos,
+      product_custom_texts,
+      default_colors,
+      group_colors,
+      product_roster_detail,
+      shuffle_color_number,
+      group_patterns
+    } = customizer_data
+    if (custom_logos) {
       const custom_logos_type = custom_logos.constructor.name
-      if(custom_logos_type == "Array" && custom_logos.length > 0) {
-        await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', {product_id: active_product_id, custom_logos: custom_logos});
+      if (custom_logos_type == "Array" && custom_logos.length > 0) {
+        await this.$store.dispatch('OVERRIDE_CUSTOM_LOGOS', {
+          product_id: active_product_id,
+          custom_logos: custom_logos
+        });
         await this.setProductTeamLogoColors(custom_logos)
       }
-      if(custom_logos_type == "Object" && custom_logos.length > 0) {
+      if (custom_logos_type == "Object" && custom_logos.length > 0) {
         await this.$store.commit("SET_CUSTOM_LOGOS", {set_all: true, custom_logos: custom_logos})
-        if(custom_logos[active_product_id]) {
+        if (custom_logos[active_product_id]) {
           await this.setProductTeamLogoColors(custom_logos[active_product_id])
         }
       }
       self.$eventBus.$emit("customLogoResetAndAdd")
     }
-    if(product_custom_texts) {
+    if (product_custom_texts) {
       await self.$eventBus.$emit('resetTextsCanvas');
       let active_product_custom_texts = [];
-      if(product_custom_texts.constructor.name == "Array" && product_custom_texts.length > 0) {
+      if (product_custom_texts.constructor.name == "Array" && product_custom_texts.length > 0) {
         this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {product_id: active_product_id, value: product_custom_texts});
         active_product_custom_texts = product_custom_texts
       }
 
-      if(product_custom_texts.constructor.name == "Object" && Object.keys(product_custom_texts).length > 0) {
-        this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', { set_all: true, value: product_custom_texts });
-        if(product_custom_texts[active_product_id]) {
+      if (product_custom_texts.constructor.name == "Object" && Object.keys(product_custom_texts).length > 0) {
+        this.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', {set_all: true, value: product_custom_texts});
+        if (product_custom_texts[active_product_id]) {
           active_product_custom_texts = product_custom_texts[active_product_id]
         }
       }
 
       active_product_custom_texts.forEach((custom_text: Record<any, any>, customTextIndex: number) => {
         self.$eventBus.$emit("customTextUpdated", {
-          emitter: "input", custom_text_index:customTextIndex, custom_text_item_index: null, value: custom_text
+          emitter: "input", custom_text_index: customTextIndex, custom_text_item_index: null, value: custom_text
         });
       })
 
     }
     let emit_color_change_event = false;
-    if(shuffle_color_number) {
+    if (shuffle_color_number) {
       this.$store.commit('SET_SHUFFLE_COLOR_NUMBER', shuffle_color_number)
     }
-    if(default_colors && default_colors.length > 0) {
+    if (default_colors && default_colors.length > 0) {
       emit_color_change_event = true
       await this.$store.dispatch('overRideDefaultColors', default_colors);
     }
-    if(group_colors) {
-      if(group_colors.constructor.name == "Array" && group_colors.length == 0) {
+    if (group_colors) {
+      if (group_colors.constructor.name == "Array" && group_colors.length == 0) {
         group_colors = {}
       }
       emit_color_change_event = true
       await this.$store.dispatch('overRideGroupColors', group_colors);
     }
-     if(emit_color_change_event) {
-       self.$eventBus.$emit("changeColors")
-     }
+    if (emit_color_change_event) {
+      self.$eventBus.$emit("changeColors")
+    }
 
-     if(product_roster_detail) {
-       if(product_roster_detail.constructor.name == "Array" && product_roster_detail.length > 0) {
-         this.$store.dispatch("setProductsRosters", {product_id: active_product_id, roster_data: product_roster_detail});
-       }
-       if(product_roster_detail.constructor.name == "Object" && Object.keys(product_roster_detail).length > 0) {
-         this.$store.dispatch("setProductsRosters", {set_all: true, roster_data: product_roster_detail});
-       }
-     }
+    this.$store.dispatch('overRideGroupPatterns', group_patterns)
+    self.$eventBus.$emit("applyAllPatterns")
+
+    if (product_roster_detail) {
+      if (product_roster_detail.constructor.name == "Array" && product_roster_detail.length > 0) {
+        this.$store.dispatch("setProductsRosters", {product_id: active_product_id, roster_data: product_roster_detail});
+      }
+      if (product_roster_detail.constructor.name == "Object" && Object.keys(product_roster_detail).length > 0) {
+        this.$store.dispatch("setProductsRosters", {set_all: true, roster_data: product_roster_detail});
+      }
+    }
   }
 
   public async setLastActiveProductData(response_products_obj: Record<any, any>) {
