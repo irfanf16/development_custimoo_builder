@@ -617,6 +617,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         product_id: selected_product.product_id,
         ecommerce_post_id: (selected_product.ecommerceproduct.length > 0) ? selected_product.ecommerceproduct[0].ecommerce_product_id : '',
         ecommerce_variant_id: (selected_product.ecommerceproduct.length > 0) ? selected_product.ecommerceproduct[0].ecommerce_variant_id : '',
+        ecommerce_modifier_id: (selected_product.ecommerceproduct.length > 0) ? selected_product.ecommerceproduct[0].ecommerce_modifier_id : '',
         sync_id: (selected_product.ecommerceproduct.length > 0) ? selected_product.ecommerceproduct[0].sync_id : '',
         size_variants_mapping: (selected_product.ecommerceproduct.length > 0) ? selected_product.ecommerceproduct[0].size_variants : null,
         product_type: selected_product.product_type,
@@ -2550,9 +2551,9 @@ const updateOrderProducts = (order_item: Record<any, any>, order_item_status_act
     item_id: order_item.id, activity_id: order_item_status_activity, style_id :first_factory_product.style_id,
     design_id : first_factory_product.design_id, factory_product_active_index : 0, paginate: false
   }
-  if(company.platform == "wordpress" || company.platfrom == "shopify") {
+  if(isEcommercePlatform()) {
     const query_string = new URLSearchParams(query_param_obj).toString();
-    window.location.href = `${company.company_domain}/customizer/#/?${query_string}`;
+    window.location.href = `${company.company_domain}/${company.customizer_page_url}/#/?${query_string}`;
   } else {
     Router.push({ path: "/", query: query_param_obj });
   }
@@ -2651,7 +2652,7 @@ const getDateTimeFormatted = () => {
 
 const isEcommercePlatform = () => {
   const company = Store.getters.getCompany
-  return ['shopify', 'wordpress'].includes(company?.platform)
+  return ['shopify', 'wordpress', 'bigcommerce'].includes(company?.platform)
 }
 
 const isAbandonedSize = (sizes, size_code) => {
@@ -2876,6 +2877,12 @@ const createFormData = (locker) => {
   return formData;
 }
 
+const  decodeHtmlEntities = (encodedStr) => {
+  const textArea = document.createElement('textarea');
+  textArea.innerHTML = encodedStr;
+  return textArea.value;
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -2896,5 +2903,5 @@ export {
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
-  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData
+  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities
 };

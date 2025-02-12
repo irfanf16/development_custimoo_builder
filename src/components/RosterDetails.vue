@@ -210,7 +210,7 @@ import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 import RosterTabMixin from "@/mixins/RosterTabMixin";
-import {handleProductPriceUpdate, downloadTemplate} from "@/helpers/Helpers";
+import {handleProductPriceUpdate, downloadTemplate, isEcommercePlatform} from "@/helpers/Helpers";
 import AddToCartButton from "@/components/AddToCartButton.vue";
 import AdminSalesRepresentativeModal from '@/components/AdminSalesRepresentativeModal.vue'
 
@@ -384,7 +384,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
   public cancelCart(){
     const self = this as Record<any, any>;
     self.hideVModal('rostermodal');
-    if(self.company.platform != 'wordpress' && self.company.platform != 'shopify' ) {
+    if(!isEcommercePlatform() ) {
       self.showVModal('cart-modal');
     }
     self.$eventBus.$emit('cancelCart');
@@ -483,8 +483,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
           this.$root.$emit('closeCollectionView');
         }
 
-        let no_cart_modal_platforms = ['wordpress','shopify'];
-        if(!no_cart_modal_platforms.includes(this.company.platform))
+        if(!isEcommercePlatform())
           this.showVModal('cart-modal')
 
 

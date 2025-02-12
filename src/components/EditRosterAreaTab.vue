@@ -42,7 +42,7 @@ import OrderDetailsTab from '@/components/OrderDetailsTab.vue'
 import RosterDetails from '@/components/RosterDetails.vue'
 import {http} from "@/httpCommon";
 import Scene from "@/components/Scene.vue"
-import {getRosterDetailDefaultObject, handleResponseException, getCustomLockers} from '@/helpers/Helpers'
+import {getRosterDetailDefaultObject, handleResponseException, getCustomLockers, isEcommercePlatform} from '@/helpers/Helpers'
 import { findIndex } from 'lodash'
 import ModalAction from "@/mixins/ModalAction";
 import {AxiosError, AxiosResponse} from "axios";
@@ -221,7 +221,7 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
   public cancelCart(){
     const self = this as Record<any, any>;
     self.close()
-    if(self.company.platform != 'wordpress' && self.company.platform != 'shopify' ) {
+    if(!isEcommercePlatform()) {
       self.$modal.show('cart-modal')
     }
     self.$eventBus.$emit('cancelCart');

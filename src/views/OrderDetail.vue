@@ -80,7 +80,7 @@
                           <template>
                             <div class="actions nested-actions" :key="`details-btn-${activity_item_index}`">
                               <button class="order-detail-btn btn btn-secondary btn-sm" title="Buy again"
-                                      v-if="order.order_no && order_item.factory_products[activity_item_index].can_reorder && (company.platform == 'wordpress' || company.platform == 'shopify')"
+                                      v-if="order.order_no && order_item.factory_products[activity_item_index].can_reorder && (isEcommerceCompany())"
                                       @click.stop="reorder(order,order_item.id, order_item.factory_products[activity_item_index])"
                                       style="padding: 3px 5px !important;" :key="`reorder-btn-${activity_item_index}`">
                                 Reorder
@@ -524,7 +524,8 @@ import {
   findActivity,
   mergeActivityArray,
   base64ToFile,
-  isBase64File
+  isBase64File,
+  isEcommercePlatform
 } from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
@@ -554,14 +555,14 @@ import QuoteModal from "@/components/QuoteModal.vue";
        } else {
          this.order_id = this.$route.query.order_id;
        }
-     } else if(this.company.platform == "shopify") {
+     } else if(this.company.platform == "shopify" || this.company.platform == "bigcommerce") {
        this.order_id = this.ecommerce_order_id;
      }
      else {
       this.order_id = this.$route.params.order_id;
     }
      //check if order_id still not set and is ecommerce platform then it means it's manual order
-    if(!this.order_id && ["wordpress", "shopify"].includes(this.company.platform)) {
+    if(!this.order_id && isEcommercePlatform()) {
       this.order_id = this.$route.params.order_id;
     }
 
@@ -759,7 +760,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
           }
 
         } else {
-          if(this.company.platform != "wordpress" && this.company.platform != "shopify") {
+          if(!isEcommercePlatform()) {
             self.showToast(response_data.message, "error")
             self.$router.push({name: "CustomerOrders"})
           } else {
@@ -768,12 +769,16 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
         }
       }).catch((errorResponse: any) => {
-      if(this.company.platform != "wordpress" && this.company.platform != "shopify") {
+      if(!isEcommercePlatform()) {
         handleResponseException(errorResponse)
       } else {
         console.log('Custimoo Order : ', errorResponse)
       }
     });
+  }
+
+  public isEcommerceCompany(): boolean {
+    return isEcommercePlatform()
   }
 
   public async cancelOrder(order:Record<any, any>) {

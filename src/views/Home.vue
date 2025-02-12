@@ -587,7 +587,7 @@ import {
   createOrUpdateOrderUpdateDataState,
   updateOrder,
   hasCompanyPermission,
-  getStyleSelectedAddons, base64ToFile, createFormData
+  getStyleSelectedAddons, base64ToFile, createFormData, isEcommercePlatform
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1428,9 +1428,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private async addToCart(resolve:any=null, get_quote = {quote:false, 'admin_salesrep_id': null}) {
     await this.addToCartMixin(this.products_fonts, resolve, get_quote);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
-      let no_cart_modal_platforms = ['wordpress','shopify'];
 
-      if(!no_cart_modal_platforms.includes(this.company.platform))
+      if(!isEcommercePlatform())
         this.showVModal('cart-modal')
     }
   }
@@ -2008,8 +2007,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     categories_promise.then(async (cat_response) => {
       let query_params = await self.setQueryParams()
       await this.retrieveProductsNew(query_params)
-      if(['wordpress', 'shopify'].includes(this.company.platform)) {
-        window.location.href = this.company.company_domain + '/cart'
+      if(isEcommercePlatform()) {
+        let cart_sub_url = (this.company.platform == 'bigcommerce') ? 'cart.php' : 'cart';
+        window.location.href = this.company.company_domain + '/' + cart_sub_url;
       } else {
         await this.showVModal('cart-modal')
       }

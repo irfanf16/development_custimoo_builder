@@ -18,7 +18,7 @@
 
         <template v-if="show_cart_button && (company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')))">
           <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`"
-                v-if="canvasImage.scene == null || (is_admin_token && (company.platform == 'wordpress' || company.platform == 'shopify'))">
+                v-if="canvasImage.scene == null || (is_admin_token && isEcommerceCompany())">
            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"
                       class="mx-2 px-5" variant="secondary" @click="addToCart" disabled>
               Add to Cart
@@ -76,7 +76,7 @@
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import {cartModalData} from "@/mixins/LockerProduct";
 import {filter} from "lodash";
-import { hasCompanyPermission} from "@/helpers/Helpers";
+import { hasCompanyPermission, isEcommercePlatform} from "@/helpers/Helpers";
 
 @Component<AddToCartButton>({
   computed:{
@@ -91,7 +91,7 @@ import { hasCompanyPermission} from "@/helpers/Helpers";
       }
     },
     show_quote_button : function () {
-      if(this.company.platform == 'wordpress' || this.company.platform == 'shopify') {
+      if(this.isEcommerceCompany()) {
         return false
       }
 
@@ -165,6 +165,9 @@ export default class AddToCartButton extends Mixins(cartModalData) {
 
   }
 
+  public isEcommerceCompany(): boolean {
+    return isEcommercePlatform()
+  }
 
 
   public async setActionBeforeLogin(type: string) {
@@ -183,9 +186,8 @@ export default class AddToCartButton extends Mixins(cartModalData) {
 
     await this.addToCartMixin(this.products_fonts, resolve, get_quote);
     if (this.getProductEditInfoObject.type == "cart_product" && this.company.platform != 'wordpress' && !resolve) {
-      let no_cart_modal_platforms = ['wordpress','shopify'];
 
-      if(no_cart_modal_platforms.includes(this.company.platform)) {
+      if(isEcommercePlatform()) {
         this.hideVModal('cart-modal')
       }else{
         this.showVModal('cart-modal')

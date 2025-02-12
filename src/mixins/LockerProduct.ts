@@ -28,7 +28,9 @@ import {
   getDateTimeFormatted,
   handleExistingAddonsSelection,
   getProductAddonInfoDefaultObject,
-  base64ToFile
+  base64ToFile,
+  decodeHtmlEntities,
+  isEcommercePlatform
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -38,6 +40,7 @@ import {eventBus} from "@/event/eventBus";
 import {getClosestColor} from "@/pantoneColor";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import {loadState, saveState} from "@/indexedDBPersistence";
+import Store from "@/store";
 
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
@@ -1321,8 +1324,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         cart_edit_mode = true;
         (post_data as Record<any,any>).factory_product.id = product_edit_info_object.cart_product_info.cart_item_product.id
         url = `carts/cart-items/${product_edit_info_object.cart_product_info.cart_item_id}/update`
-        let no_cart_modal_platforms = ['wordpress','shopify'];
-        if(!no_cart_modal_platforms.includes(platform)){
+        if(!isEcommercePlatform()){
           this.showVModal('cart-modal')
         }
       }
@@ -1336,7 +1338,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let ecom_url  = '';
       let total_quantity = 0;
 
-      if (platform === 'wordpress' || platform === 'shopify') {
+      if (isEcommercePlatform()) {
         if ((cart_product as Record<any, any>).sync_id === '' || (cart_product as Record<any, any>).ecommerce_post_id === '') {
           self.showToast('This product cannot be added into the cart','Error');
           if(resolve){
@@ -1495,9 +1497,10 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
                 });
 
               }
-
-              else if(platform === 'shopify') {
+             else if(platform === 'shopify') {
                 await this.processShopifyCart(cart_product, api_res);
+              } else if(platform === 'bigcommerce') {
+                await this.processBigCommerceCart(cart_product, api_res);
               }
               else {
                 if(cart_edit_mode) {
@@ -1669,6 +1672,308 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     }
   }
 
+
+  public async processBigCommerceCart(cart_product, custimoo_cart_item) {
+    let company = this.$store.getters.getCompany;
+    let product_edit_info_object = this.$store.getters.getProductEditInfoObject;
+    let collection_view = this.$store.getters.getCollectionView;
+    let merchant_moq = this.$store.getters.getSetting("moq");
+    const selected_product = Store.getters.getSelectedProduct;
+    let total_quantity = 0;
+    let company_domain = company.company_domain;
+    let is_custimoo_moq = ((cart_product as Record<any, any>).minimum_order_quantity_type == 'by_cart' && (cart_product as Record<any, any>).minimum_order_quantity > 0 ) ? true : false ;
+    let delete_cart_item_url = `${process.env.VUE_APP_API_BASE_URL}/api/carts/cart-items/${custimoo_cart_item.new_created_id}/factory_product/${custimoo_cart_item.cart_item_key}`;
+     let ecommerce_update_id = (product_edit_info_object.cart_product_info)?product_edit_info_object.cart_product_info.ecommerce_cart_id:null;
+
+    let ecom_addon_ids : number[] = [];
+    let addon_modifiers:Record<any, any> = {};
+    for (const addon of (cart_product as Record<any, any>).addons) {
+      ecom_addon_ids.push(parseInt(addon.addon_ecommerce_product_id));
+    }
+    for (const addon of selected_product.company_addons) {
+      addon_modifiers[addon.addon_ecommerce_product_id] = addon.addon_ecommerce_modifier_id;
+    }
+
+
+    let ecom_item_properties = {  // items with underscore are private properties of shopify cart object
+      '_custimoo_cart_id': custimoo_cart_item.new_created_id,
+      '_custimoo_cart_item_key': custimoo_cart_item.cart_item_key,
+      '_custimoo_front_image': custimoo_cart_item.front_image_url,
+      '_custimoo_back_image': custimoo_cart_item.back_image_url,
+      '_custimoo_cart_url': `${company_domain}/${company.customizer_page_url}/#/?sync_id=${(cart_product as Record<any, any>).sync_id}&update_item=${custimoo_cart_item.cart_item_key}&update_cart=${custimoo_cart_item.new_created_id}`,
+      '_custimoo_delete_cart_url': delete_cart_item_url,
+      '_custimoo_product_name': (cart_product as Record<any, any>).product_name,
+      '_custimoo_product_id': (cart_product as Record<any, any>).product_id,
+      '_custimoo_minimum_order_quantity': 0,
+      '_custimoo_merchant_moq': merchant_moq,
+      'DESIGN NAME': (cart_product as Record<any, any>).product_name,
+      'child_addons' : ecom_addon_ids,
+    };
+
+    if(is_custimoo_moq ) {
+      ecom_item_properties['_custimoo_minimum_order_quantity'] = (cart_product as Record<any, any>).minimum_order_quantity;
+    }
+
+
+    const ecom_sizes = {};
+    let ecom_cart_items_data :  Record<any, any>[] = [];
+    (cart_product as Record<any, any>).product_roster_detail.forEach(item => {
+      ecom_sizes[item.size] = (ecom_sizes[item.size] || 0) + parseInt(item.quantity);
+      total_quantity += parseInt(item.quantity);
+    });
+
+    if (Object.keys(ecom_sizes).length > 0) {
+      for (const ecom_size in ecom_sizes) {
+        ecom_item_properties['_Size ' + ecom_size ] = ecom_sizes[ecom_size];
+      }
+    }
+
+    let ecom_cart_item:Record<any, any> = {};
+    ecom_cart_item['productId'] =  parseInt((cart_product as Record<any, any>).ecommerce_post_id);
+    ecom_cart_item['quantity'] = total_quantity;
+    ecom_cart_item['option_selections'] = [
+      {
+        "option_id" : parseInt((cart_product as Record<any, any>).ecommerce_modifier_id),
+        "option_value" :  JSON.stringify(ecom_item_properties)
+      }
+    ];
+
+    ecom_cart_items_data.push(ecom_cart_item);
+
+    if(ecommerce_update_id) {
+      let cart_item_index = product_edit_info_object.cart_product_info.shopify_line_item;
+      this.updateBigCommerceAddons(cart_item_index, ecom_addon_ids, total_quantity, ecommerce_update_id, addon_modifiers).then( (res : Record<any, any>) => {
+        let {add_cart_addons, ecom_cart_id} = res;
+        let add_ecom_items = [...add_cart_addons, ...ecom_cart_items_data];
+
+
+        let ecom_url = company_domain + '/api/storefront/carts';
+        if(ecom_cart_id) {
+          ecom_url =  company_domain + '/api/storefront/carts/' + ecom_cart_id + '/items/' + ecom_cart_id;
+        }
+
+        this.makeBigCommerceCartCall(ecom_url,add_ecom_items, collection_view, delete_cart_item_url);
+      })
+    } else {
+      this.addBigCommerceAddons(ecom_addon_ids, total_quantity, addon_modifiers).then( (res : Record<any, any>) => {
+        let {add_cart_addons, ecom_cart_id } = res;
+        let add_ecom_items = [...add_cart_addons, ...ecom_cart_items_data];
+        let ecom_url = company_domain + '/api/storefront/carts';
+        if(ecom_cart_id) {
+          ecom_url =  company_domain + '/api/storefront/carts/' + ecom_cart_id + '/items';
+        }
+
+        this.makeBigCommerceCartCall(ecom_url, add_ecom_items, collection_view, delete_cart_item_url);
+      })
+
+    }
+
+  }
+
+  public async addBigCommerceAddons(ecom_addon_ids, total_quantity, addon_modifiers) {
+
+    return new Promise(async (resolve) => {
+      let company = this.$store.getters.getCompany;
+      let remove_addons:Record<any, any> = {};
+      let addon_quantities:Record<any, any> = {};
+      let add_cart_addons:Record<any, any>[] = [];
+      let ecom_cart_url = company.company_domain + '/api/storefront/carts';
+      let res = await http.get(ecom_cart_url);
+      let ecom_cart_id = null;
+      if(res){
+
+        let remove_addons_cart:Record<any, any>[] = [];
+        if(res.data.length > 0) {
+          let ecom_cart_items = res.data[0].lineItems.physicalItems;
+          ecom_cart_id = res.data[0].id;
+          remove_addons_cart =  ecom_cart_items.filter((obj) => {
+            return ecom_addon_ids.includes(obj.productId)
+          }) ;
+        }
+
+        if(remove_addons_cart.length > 0) {
+          remove_addons_cart.forEach((remove_addon) => {
+            addon_quantities[remove_addon.productId] = remove_addon.quantity;
+            remove_addons[remove_addon.id] = 0;
+          })
+
+          await this.removeBigCommerceCartItems(remove_addons, ecom_cart_id);
+        }
+        ecom_addon_ids.forEach((addon_ecommerce_post_id) => {
+
+          if(addon_quantities[addon_ecommerce_post_id]) {
+            add_cart_addons.push({
+              productId: addon_ecommerce_post_id ,
+              quantity: parseInt(addon_quantities[addon_ecommerce_post_id].toString()) + parseInt(total_quantity.toString()),
+              option_selections: [
+                {
+                  "option_id" : parseInt(addon_modifiers[addon_ecommerce_post_id]),
+                  "option_value" :  JSON.stringify({'_is_custimoo_addon' : true})
+                }
+              ]
+            });
+          } else {
+            add_cart_addons.push(
+              {productId: addon_ecommerce_post_id, quantity: total_quantity,  option_selections: [
+                {
+                  "option_id" : parseInt(addon_modifiers[addon_ecommerce_post_id]),
+                  "option_value" :  JSON.stringify({'_is_custimoo_addon' : true})
+                }
+              ]}
+            );
+          }
+        });
+      }
+      resolve( {add_cart_addons, ecom_cart_id });
+    });
+
+  }
+  public async updateBigCommerceAddons(cart_item_index, updated_addon_ids, total_quantity, ecommerce_update_id, addon_modifiers) {
+    return new Promise( async (resolve) => {
+      let remaining_addons =  [...updated_addon_ids];
+      let company = this.$store.getters.getCompany;
+      let remove_addons:Record<any, any> = {};
+      let add_cart_addons:Record<any, any>[] = [];
+      let remove_items_length = 0;
+
+
+
+      let ecom_cart_url = company.company_domain + '/api/storefront/carts?include=lineItems.physicalItems.options';
+      let res = await http.get(ecom_cart_url);
+      let ecom_cart_id = null;
+      if(res){
+        let ecom_cart_items = res.data[0].lineItems.physicalItems;
+        ecom_cart_id = res.data[0].id;
+
+        let ecom_cart_item = ecom_cart_items.find((item) => item.id == cart_item_index );
+        let custimoo_data_obj = ecom_cart_item.options.find(item => item.name === "custimoo_cart_data");
+        let custimoo_data = custimoo_data_obj.value;
+        const decodedJson = decodeHtmlEntities(custimoo_data);
+        let product_cart_item = JSON.parse(decodedJson);
+
+
+        let product_cart_item_quantity = 0;
+        let child_addon_ids = product_cart_item.child_addons;
+
+        let previous_addons_cart_items: Record<any, any>[]=[];
+        let cart_items_with_same_key: Record<any, any> = {};
+
+        ecom_cart_items.forEach((obj) => {
+          if (child_addon_ids.includes(obj.productId)) {
+            previous_addons_cart_items.push(obj);
+          }
+
+          let custimoo_cart_data = obj.options.find(item => item.name === "custimoo_cart_data");
+          if(custimoo_cart_data) {
+            let properties_json = custimoo_cart_data.value;
+            const decodedJson = decodeHtmlEntities(properties_json);
+            let properties = JSON.parse(decodedJson);
+            if (properties._custimoo_cart_item_key && properties._custimoo_cart_item_key == ecommerce_update_id) {
+              cart_items_with_same_key[obj.id] = 0;
+              remove_items_length++;
+              product_cart_item_quantity += parseInt(obj.quantity);
+            }
+          }
+
+        });
+
+        previous_addons_cart_items.forEach((prevCartItem) => {
+          remove_addons[prevCartItem.id] = 0;
+          remove_items_length++;
+          if(!updated_addon_ids.includes(prevCartItem.productId)) { // if any new addon is added on update
+            if(( parseInt(prevCartItem.quantity) - product_cart_item_quantity) > 0 ) {
+              add_cart_addons.push(
+                {
+                  productId: prevCartItem.productId, quantity: parseInt(prevCartItem.quantity) - product_cart_item_quantity
+                  ,option_selections: [
+                    {
+                      "option_id" : parseInt(addon_modifiers[prevCartItem.productId]),
+                      "option_value" :  JSON.stringify({'_is_custimoo_addon' : true})
+                    }
+                  ]
+                }
+              )
+            }
+          } else {
+            add_cart_addons.push({
+              productId: prevCartItem.productId,
+              quantity: (parseInt(prevCartItem.quantity) - product_cart_item_quantity) + parseInt(total_quantity),
+              option_selections: [
+              {
+                "option_id" : parseInt(addon_modifiers[prevCartItem.productId]),
+                "option_value" :  JSON.stringify({'_is_custimoo_addon' : true})
+              }
+            ]
+            });
+            remaining_addons = remaining_addons.filter(addon_id => addon_id !== prevCartItem.productId);
+          }
+
+        })
+
+
+        let remove_cart_items = { ...remove_addons, ...cart_items_with_same_key }
+        await this.removeBigCommerceCartItems(remove_cart_items, ecom_cart_id);
+        if(remove_items_length == ecom_cart_items.length) {
+          ecom_cart_id = null;
+        }
+
+        if(remaining_addons.length > 0) {
+          remaining_addons.forEach((remaining_id) => {
+            add_cart_addons.push({productId: remaining_id, quantity: total_quantity,
+              option_selections: [
+                {
+                  "option_id" : parseInt(addon_modifiers[remaining_id]),
+                  "option_value" :  JSON.stringify({'_is_custimoo_addon' : true})
+                }
+              ]});
+          });
+        }
+
+      }
+
+      resolve( {add_cart_addons, ecom_cart_id });
+    });
+
+  }
+  public async makeBigCommerceCartCall(ecom_url, ecom_cart_data, collection_view ,delete_cart_item_url  ) {
+    let self  = this;
+
+    setTimeout(()=> {
+      http.post(ecom_url, {lineItems : ecom_cart_data}).then(async (res: any) => {
+        let company = this.$store.getters.getCompany;
+        self.$store.dispatch('setCartLoading',false);
+        self.$store.commit('SET_INDEX_DB_STORE_TIME',0);
+        await self.exitFromEditMode()
+        if(!collection_view) {
+          self.$store.commit("SET_NAVIGATE_TO_CART", true);
+          window.location.replace(company.company_domain + '/cart.php');
+        }
+      }).catch(err => {
+        console.log('error cart', err)
+        http.delete(delete_cart_item_url);
+        self.showToast(err, 'ERROR');
+        self.$store.dispatch('setCartLoading',false);
+      })
+    },200)
+
+  }
+
+  public async removeBigCommerceCartItems(remove_addons_obj, cart_id) {
+    if (Object.keys(remove_addons_obj).length > 0) {
+      const company = this.$store.getters.getCompany;
+      for (const addonId of Object.keys(remove_addons_obj)) {
+        try {
+          await http.delete(`${company.company_domain}/api/storefront/carts/${cart_id}/items/${addonId}`);
+        } catch (error) {
+          console.error(`Failed to delete item ${addonId}:`, error);
+        }
+      }
+    }
+  }
+
+
+
+
 }
 
 
@@ -1775,6 +2080,8 @@ export class CollectionMixin extends Mixins(ErrorMessages) {
       console.log(error)
     }
   }
+
+
 
 
 }

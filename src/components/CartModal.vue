@@ -340,7 +340,7 @@ import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
   checkIsEmpty,
-  getEditModeDefaultObj, handleResponseException, logData, navigateToCustomProduct, santaClone
+  getEditModeDefaultObj, handleResponseException, logData, navigateToCustomProduct, santaClone, isEcommercePlatform
 } from "@/helpers/Helpers";
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
@@ -362,7 +362,7 @@ import { hasCompanyPermission} from "@/helpers/Helpers";
   },
   computed:{
     show_quote_button : function () {
-      if(this.company.platform == 'wordpress' || this.company.platform == 'shopify') {
+      if(isEcommercePlatform()) {
         return false
       }
 
@@ -385,10 +385,14 @@ import { hasCompanyPermission} from "@/helpers/Helpers";
         if(cart_items[cart_item_index]){
 
           let factory_item_index = cart_items[cart_item_index].factory_products.findIndex((factory_item)=>{
-            if(this.company.platform === 'wordpress'){
-              return factory_item.ecommerce_cart_id == ecommerce_update_id
-            }else if(this.company.platform === 'shopify'){
-              return factory_item.id == ecommerce_update_id
+
+            if(isEcommercePlatform()) {
+              if(this.company.platform === 'wordpress') {
+                return factory_item.ecommerce_cart_id == ecommerce_update_id
+              } else {
+                return factory_item.id == ecommerce_update_id
+              }
+
             }
 
           } );
