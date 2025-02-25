@@ -131,14 +131,22 @@ source ~/.nvm/nvm.sh # Source the NVM script to load it into the current shell
 # If nvm is installed
 if command -v nvm >/dev/null 2>&1; then
   echo "********** NVM is already installed the version is: $(nvm --version) **********"
+  if nvm ls 14 | grep -q "v18\."; then
+    printMessage "Node 18 is already installed"
+    nvm use 14
+  else
+    printMessage "Installing Node 18..."
+    nvm install 14
+    nvm use 14
+  fi
 else # nvm is not installed. Then install it
   echo "**********  NVM installation started  **********"
   sudo apt-get install curl
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
   command -v nvm
   source ~/.nvm/nvm.sh # Source the NVM script to load it into the current shell
-  nvm install v14.16
-  nvm use 14.16 ## using node v14.16.1 (npm v6.14.12)
+  nvm install v14
+  nvm use 14 ## using node v14.16.1 (npm v6.14.12)
   echo "**********   NVM installation completed  **********"
 fi
 
