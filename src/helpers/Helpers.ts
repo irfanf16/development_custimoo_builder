@@ -2174,7 +2174,7 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
         }
       })
       // grouped addons prices calculate
-      const grouped_addons = selected_product.productstyles[active_style_index].customized_addons.grouped_addons;
+      const grouped_addons = selected_product.productstyles[active_style_index]?.customized_addons.grouped_addons;
       for(let group_name in grouped_addons) {
         grouped_addons[group_name].forEach(grouped_addon => {
           if(grouped_addon.selected) {
@@ -2187,7 +2187,7 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
 
 
       // ungrouped addons prices calculate
-      selected_product.productstyles[active_style_index].customized_addons.ungrouped_addons.forEach(ungrouped_addon => {
+      selected_product.productstyles[active_style_index]?.customized_addons.ungrouped_addons.forEach(ungrouped_addon => {
         if(ungrouped_addon.selected) {
           if(ungrouped_addon.currencies.length > 0) {
             addons_price =  addons_price + parseFloat(ungrouped_addon.currencies[0].price)
