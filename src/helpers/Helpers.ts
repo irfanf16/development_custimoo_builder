@@ -623,7 +623,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         product_type: selected_product.product_type,
         product_name: product_name,
         pdf_file: null,
-        production_url: selected_design.production_design?.file_url ? (`${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` ?? null) : null,
+        production_url: selected_design.production_design?.file_url ? `${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` : null,
         // front_design:front_design,
         product_roster_detail: Store.getters.getProductRosters(),
         style_id: product_style.id,

@@ -53,6 +53,8 @@ import SceneMixin from "@/mixins/SceneMixin";
     self.$eventBus.$off("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$off("changeColors", this.changeColors)
     self.$eventBus.$off("sceneMountedAction", this.sceneMountedAction)
+    self.$eventBus.$off("applyPattern", this.applyPattern)
+    self.$eventBus.$off("applyAllPatterns", this.applyAllPatterns)
 
     //restore fabricjs function after remove
     this.removeGetPointerFromFabricPrototype()
@@ -164,6 +166,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private initialSvgGroups: any[] = []
   private storage_url = process.env.VUE_APP_STORAGE_URL
   private safe_zone: fabric.Group
+  private patterns: Record<any, any> = {}
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -677,9 +680,11 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       if (this.mainPreview) {
         self.$eventBus.$emit('setTotalTabs')
       }
-      this.getSvgGroups()
+      await this.getSvgGroups()
 
-      this.addFixedLogos()
+      await this.addFixedLogos()
+
+      await this.applyAllPatterns()
 
       let logos: Record<any, any>[] = []
       if (this.custom_logos && this.logoAllowed) {
@@ -785,6 +790,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     self.$eventBus.$on("changeGroupColors", this.changeGroupColors)
     self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$on("changeColors", this.changeColors)
+    self.$eventBus.$on("applyPattern", this.applyPattern)
+    self.$eventBus.$on("applyAllPatterns", this.applyAllPatterns)
   }
 
   public fitCameraToCenteredObject(camera: THREE.PerspectiveCamera | THREE.OrthographicCamera, object: THREE.Object3D, offset: number, orbitControls: OrbitControls, renderer?: THREE.WebGLRenderer) {
@@ -844,7 +851,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       const frustumHeight = maxDim; // Frustum height is based on the largest dimension
       const frustumWidth = frustumHeight * aspect; // Adjust frustum width based on aspect ratio
 
-      // Update the orthographic camera’s frustum with correct aspect ratio
+      // Update the orthographic camera's frustum with correct aspect ratio
       camera.left = -frustumWidth / 2;
       camera.right = frustumWidth / 2;
       camera.top = frustumHeight / 2;
@@ -854,7 +861,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       camera.near = -maxDim * 2; // Ensure near plane covers object depth
       camera.far = maxDim * 2; // Ensure far plane covers object depth
 
-      // Update the camera’s position and orientation
+      // Update the camera's position and orientation
       camera.position.set(center.x, center.y, maxDim); // Position the orthographic camera
       camera.lookAt(center); // Ensure the camera looks at the object center
       camera.updateProjectionMatrix(); // Update the projection matrix
@@ -1992,6 +1999,203 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       // }
     }
     return {vector: vector, side_changed: side_changed}
+  }
+
+  public async applyAllPatterns() {
+    if (this.svgGroups) {
+      await Promise.all(
+        this.svgGroups.map((svgGroup: Record<any, any>) =>
+          this.applyPattern(svgGroup.id, false)
+        )
+      )
+    }
+  }
+
+  public removePattern(design: any, pattern_objects: any, svg_part) {
+    const patternId = `pattern_${svg_part}`;
+    design._objects = design._objects.filter(obj => obj.id !== patternId);
+    this.regroupDesign(design._objects);
+
+    delete pattern_objects[svg_part];
+    if (!this.groupPatterns[svg_part]) {
+      this.canvas.requestRenderAll();
+    }
+  }
+  
+  public async applyPattern(svg_part: string, re_stack = true): Promise<void> {
+    if (this.patterns[svg_part]) {
+      this.removePattern(this.design, this.patterns, svg_part)
+    }
+
+    if (this.groupPatterns[svg_part] && this.groupPatterns[svg_part].name && this.product.patterns && Object.entries(this.product.patterns).length) {
+      const pattern_data = this.product.patterns[0].json_data.find(
+        (obj) => obj.name === this.groupPatterns[svg_part].name
+      );
+
+      if (pattern_data) {
+        const pattern_url = pattern_data.path;
+        return new Promise((resolve) => {
+          fabric.loadSVGFromURL(`${this.storageUrl}${pattern_url}?q=${pattern_data.random_string}`, (objects: any, options: any) => {
+            if(objects.length) {
+              options.crossOrigin = 'Anonymous';
+              const img = fabric.util.groupSVGElements(objects) as fabric.Group;
+
+              if (this.groupPatterns[svg_part].color?.value) {
+                img.fill = this.groupPatterns[svg_part].color.value;
+              }
+
+              const patternSourceCanvas = new fabric.StaticCanvas(null);
+              patternSourceCanvas.setDimensions({
+                width: img.getScaledWidth(),
+                height: img.getScaledHeight(),
+              });
+
+              patternSourceCanvas.add(img);
+              patternSourceCanvas.renderAll();
+
+              const pattern = new fabric.Pattern({
+                // @ts-ignore
+                source: patternSourceCanvas.getElement(),
+                repeat: 'repeat'
+              });
+
+              const designObjects = this.design._objects ? this.design._objects : [this.design];
+              const canvas = this.canvas
+              const design = this.design
+              
+              const scale_min_received = 10, scale_max_received = 100;
+              const scale_min = -100, scale_max = 400;
+
+              const scale_value_received = parseInt(this.groupPatterns[svg_part].scale);
+
+              const scale_value = ((scale_value_received - scale_min_received) / (scale_max_received - scale_min_received)) * (scale_max - scale_min) + scale_min;
+
+              const scale = (scale_value + 400) / img.getScaledWidth()
+              const rotationAngle = this.groupPatterns[svg_part]?.angle || 0;
+              const angleInRadians = (rotationAngle * Math.PI) / 180;
+              const cos = Math.cos(angleInRadians);
+              const sin = Math.sin(angleInRadians);
+              const patternWidth = img.getScaledWidth();
+              const patternHeight = img.getScaledHeight();
+              const tx = (patternWidth / 2) * (1 - cos) * scale + (patternHeight / 2) * sin * scale;
+              const ty = (patternHeight / 2) * (1 - cos) * scale - (patternWidth / 2) * sin * scale;
+
+              pattern.patternTransform = [
+                scale * cos,
+                scale * sin,
+                -scale * sin,
+                scale * cos,
+                -tx,
+                -ty,
+              ];
+
+              designObjects.flat().forEach((designObject, index: number) => {
+                if (designObject.id?.toLowerCase() === svg_part) {
+                  const patternRect = new fabric.Rect({
+                    left: designObject.left,
+                    top: designObject.top,
+                    width: designObject.width,
+                    height: designObject.height,
+                    hasControls: false,
+                    selectable: false,
+                    evented: false,
+                    originX: designObject.originX || 'left',
+                    originY: designObject.originY || 'top',
+                    lockMovementX: true,
+                    lockMovementY: true,
+                    absolutePositioned: true,
+                    // globalCompositeOperation: 'source-atop',
+                    fill: pattern,
+                  });
+
+                  const latest_design_objects = this.design._objects
+
+                  const clipGroup = new fabric.Group(
+                    this.cloneFabricObjects(latest_design_objects),
+                    {
+                      hasControls: false,
+                      selectable: false,
+                      evented: false,
+                      lockMovementX: true,
+                      lockMovementY: true,
+                      absolutePositioned: true,
+                      flipY: true
+                    }
+                  );
+
+                  const pattern_id = 'pattern_' + svg_part
+                  const occurrence_count = latest_design_objects.filter(obj => obj.id === pattern_id).length;
+                  const object_number = index + occurrence_count
+
+                  const objectToClip = clipGroup._objects.filter((obj, clip_id) => clip_id !== object_number);
+
+                  objectToClip.forEach((obj) => clipGroup.remove(obj));
+                  
+                  clipGroup.scaleToHeight(this.canvasResolution as number).set({
+                    left: 0x0,
+                    top: 0x0
+                  }).setCoords()
+                  
+                  patternRect.clipPath = clipGroup;
+
+                  Object.assign(patternRect, {
+                    id: pattern_id,
+                  })
+
+                  let design_with_rect = this.cloneFabricObjects(latest_design_objects)
+
+                  // @ts-ignore
+                  design_with_rect.splice(object_number + 1, 0, patternRect);
+
+                  this.regroupDesign(design_with_rect)
+
+                  this.patterns[svg_part] = patternRect;
+                }
+              });
+
+              if (re_stack) {
+                const all_fabric_object = [
+                  ...this.fixed_logo_objects,
+                  ...this.custom_logo_objects,
+                  ...this.product_custom_text_objects.flat(),
+                ].filter((obj) => obj !== null && obj !== undefined)
+
+                this.reStackObjectsInCanvas(all_fabric_object);
+              }
+
+              canvas.requestRenderAll();
+
+              resolve(); // Resolve after all processing is complete
+            }
+          })
+        })
+      }
+    }
+
+    return Promise.resolve(); // Return an already resolved Promise if no pattern is found
+  }
+
+  public regroupDesign(design_objects: fabric.Object[]) {
+    let design = this.design
+    let canvas = this.canvas
+    const final_design = new fabric.Group(design_objects, {
+      hasControls: false,
+      selectable: false,
+      evented: false,
+      lockMovementX: true,
+      lockMovementY: true,
+      flipY: true
+    })
+    final_design.scaleToHeight(this.canvasResolution as number).set({
+      left: 0x0,
+      top: 0x0
+    }).setCoords()
+
+    canvas.remove(design)
+    canvas.add(final_design)
+    final_design.sendToBack()
+
+    this.design = final_design
   }
 }
 </script>

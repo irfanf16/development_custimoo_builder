@@ -733,7 +733,7 @@ const ProductAttributes:Module<any, any> = {
     },
     UPDATE_GROUP_PATTERNS (state: Record<any, any>, pattern: Record<any, any>) {
       if (pattern.name) {
-        Vue.set(state.groupPatterns, pattern.index, { name: pattern.name, scale: pattern.scale, angle: pattern.angle, color: pattern.color })
+        Vue.set(state.groupPatterns, pattern.index, {...state.groupPatterns[pattern.index], ...pattern})
       } else {
         Vue.delete(state.groupPatterns, pattern.index)
       }

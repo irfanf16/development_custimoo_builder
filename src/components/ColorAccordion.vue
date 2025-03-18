@@ -151,17 +151,17 @@
               <template v-if="selectTypeIndex == (productColors.length + 3)">
                 <template v-for="(pattern, pattern_index) in selectedProduct.patterns[0].json_data">
                   <div class="pattern-designs" :key="'pattern_' + pattern_index">
-                    <b-button :class="{'active': isPatternActive(svgElement.id, pattern)}" variant="outline-light" class="p-0 btn" @click="setSelectedPattern(svgElement.id, pattern)">
+                    <b-button :class="{'active': isPatternActive(svgElement.id, pattern)}" variant="outline-light" class="p-0 btn" @click="setPattern(svgElement.id, pattern)">
                       <img @mouseenter="showTooltip" @mouseleave="hideTooltip" :data-title="pattern.name" :src="storageUrl+pattern.path" alt="Pattern" :key="'pattern_image' + pattern_index"/>
                     </b-button>
                   </div>
                 </template>
                 <div class="d-flex justify-content-between align-items-center w-100 gap-x-5" v-if="groupPatterns[svgElement.id]">
                   <div class="w-100 w-md-50">
-                    <label>Scale: {{ getPatternScale(svgElement.id) }}%</label>
+                    <label>Scale: {{ groupPatterns[svgElement.id].scale }}%</label>
                     <b-form-input
-                      v-model="patternScales[svgElement.id]"
-                      @change="setPatternScale(svgElement.id, patternScales[svgElement.id])"
+                      v-model="groupPatterns[svgElement.id].scale"
+                      @change="applyPattern(svgElement.id)"
                       type="range"
                       min="10"
                       max="100"
@@ -169,10 +169,10 @@
                     />
                   </div>
                   <div class="w-100 w-md-50">
-                    <label>Angle: {{ getPatternAngle(svgElement.id) }}°</label>
+                    <label>Angle: {{ groupPatterns[svgElement.id].angle }}°</label>
                     <b-form-input
-                      v-model="patternAngles[svgElement.id]"
-                      @change="setPatternAngle(svgElement.id, patternAngles[svgElement.id])"
+                      v-model="groupPatterns[svgElement.id].angle"
+                      @change="applyPattern(svgElement.id)"
                       type="range"
                       min="0"
                       max="360"
@@ -225,9 +225,9 @@
                 <div v-if="groupPatterns[svgElement.id]" class="color-holder" style="padding-top: 5px" ref="ColorAccordion">
                   <div class="color-container">
                     <template v-if="getSvgGroupColors(svgElement.id) && patternTypeIndex !== (productColors.length + 3)">
-                      <div v-for="(color, c_index) in getSvgGroupColors(svgElement.id).json_data" v-if="color.value" class="color-box"  @click="color.value == svgElement.color ? null : setPattern(false, selectedPattern, color)"
+                      <div v-for="(color, c_index) in getSvgGroupColors(svgElement.id).json_data" v-if="color.value" class="color-box"  @click="setPatternColor(svgElement.id, color)"
                           :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
-                        <span v-if="isPatternColorSelected(color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                        <span v-if="isPatternColorSelected(color, groupPatterns[svgElement.id].color)" class="selected" style="z-index: 100; opacity: 1">
                           <BIconCheck />
                         </span>
                       </div>
@@ -254,27 +254,27 @@
                   </div>
                     <!-- logo colors -->
                     <template v-else-if="patternTypeIndex == productColors.length && !showOtherColors" v-for="(ext_color, ext_index) in logoColorsInfo">
-                      <div v-if="ext_color.hex"  class="color-box" @click="ext_color.hex == svgElement.color ? null : setPattern(false, selectedPattern, ext_color)"
+                      <div v-if="ext_color.hex"  class="color-box" @click="setPatternColor(svgElement.id, ext_color)"
                           :title="ext_color.pantone ? ext_color.pantone : ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
-                        <span v-if="isPatternColorSelected(ext_color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                        <span v-if="isPatternColorSelected(ext_color, groupPatterns[svgElement.id].color)" class="selected" style="z-index: 100; opacity: 1">
                           <BIconCheck />
                         </span>
                       </div>
                     </template>
                     <!-- locker colors -->
                     <template v-else-if="patternTypeIndex == (productColors.length + 1) && !showOtherColors" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
-                      <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setPattern(false, selectedPattern, color)"
+                      <div v-if="color.value"  class="color-box"  @click="setPatternColor(svgElement.id, color)"
                           :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
-                        <span v-if="isPatternColorSelected(color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                        <span v-if="isPatternColorSelected(color, groupPatterns[svgElement.id].color)" class="selected" style="z-index: 100; opacity: 1">
                           <BIconCheck />
                         </span>
                       </div>
                     </template>
                     <!-- product colors -->
                     <template v-else-if="!showOtherColors" v-for="(color, c_index) in productColors[patternTypeIndex]?.color_text">
-                      <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setPattern(false, selectedPattern, color)"
+                      <div v-if="color.value"  class="color-box"  @click="setPatternColor(svgElement.id, color)"
                           :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
-                        <span v-if="isPatternColorSelected(color, getPatternColor(svgElement.id))" class="selected" style="z-index: 100; opacity: 1">
+                        <span v-if="isPatternColorSelected(color, groupPatterns[svgElement.id].color)" class="selected" style="z-index: 100; opacity: 1">
                           <BIconCheck />
                         </span>
                       </div>
@@ -368,7 +368,7 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
   }
 
   public isPatternColorSelected(color, patternColor) {
-    return color.value === patternColor.value
+    return color.value === patternColor?.value
   }
 
   public getColorTypeBySvgGroup(svg_group: string, color_type) {
@@ -452,6 +452,7 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
           &.active,
           &:hover {
               border-color: #219f84;
+              border-width: 2px;
           }
 
           img {

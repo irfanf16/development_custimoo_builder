@@ -386,26 +386,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                 repeat: 'repeat'
               });
 
-              // Scaling and transformation logic
-              const scale = this.groupPatterns[svg_part].scale / 100;
-              const rotationAngle = this.groupPatterns[svg_part]?.angle || 0;
-              const angleInRadians = (rotationAngle * Math.PI) / 180;
-              const cos = Math.cos(angleInRadians);
-              const sin = Math.sin(angleInRadians);
-              const patternWidth = img.getScaledWidth();
-              const patternHeight = img.getScaledHeight();
-              const tx = (patternWidth / 2) * (1 - cos) * scale + (patternHeight / 2) * sin * scale;
-              const ty = (patternHeight / 2) * (1 - cos) * scale - (patternWidth / 2) * sin * scale;
-
-              pattern.patternTransform = [
-                scale * cos,
-                scale * sin,
-                -scale * sin,
-                scale * cos,
-                -tx,
-                -ty,
-              ];
-
               const designSides = ['front'];
               if (this.back) {
                 designSides.push('back');
@@ -414,12 +394,39 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               designSides.forEach((side) => {
                 let designObjects = this.frontDesign._objects ? this.frontDesign._objects : [this.frontDesign];
                 let canvas = this.frontCanvas
+                let design = this.frontDesign
                 let zoom_point = this.front_zoom_point
                 if (side == 'back') {
                   designObjects = this.backDesign._objects ? this.backDesign._objects : [this.backDesign];
                   canvas = this.backCanvas;
+                  design = this.backDesign
                   zoom_point = this.back_zoom_point
                 }
+                const scale_min_received = 10, scale_max_received = 100;
+                const scale_min = -100, scale_max = 400;
+
+                const scale_value_received = parseInt(this.groupPatterns[svg_part].scale);
+
+                const scale_value = ((scale_value_received - scale_min_received) / (scale_max_received - scale_min_received)) * (scale_max - scale_min) + scale_min;
+
+                const scale = (scale_value + 400) / img.getScaledWidth()
+                const rotationAngle = this.groupPatterns[svg_part]?.angle || 0;
+                const angleInRadians = (rotationAngle * Math.PI) / 180;
+                const cos = Math.cos(angleInRadians);
+                const sin = Math.sin(angleInRadians);
+                const patternWidth = img.getScaledWidth();
+                const patternHeight = img.getScaledHeight();
+                const tx = (patternWidth / 2) * (1 - cos) * scale + (patternHeight / 2) * sin * scale;
+                const ty = (patternHeight / 2) * (1 - cos) * scale - (patternWidth / 2) * sin * scale;
+
+                pattern.patternTransform = [
+                  scale * cos,
+                  scale * sin,
+                  -scale * sin,
+                  scale * cos,
+                  -tx,
+                  -ty,
+                ];
 
                 let zoom = canvas.getZoom();
                 if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
