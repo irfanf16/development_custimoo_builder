@@ -112,6 +112,19 @@
                       </div>
                     </template>
                   </template>
+                  <template v-if="factory_product.custom_logos && Object.keys(factory_product.custom_logos).length > 0">
+                    <template v-for="(custom_logo, custom_logo_index) in factory_product.custom_logos">
+                      <div :key="`cart-logo-tech-addon-${custom_logo_index}`" class="d-flex w-100" :class="{'border-top mt-1': ((factory_product.addons.length ?? 0) + custom_logo_index) > 0}">
+                        <template v-if="custom_logo.logo_technology">
+                            {{ custom_logo.logo_technology.label }}
+                            <template v-if="product_price_object.show_price">
+                              {{ custom_logo.logo_technology.price }}
+                              :<strong class="font-weight-bold ml-auto">{{ custom_logo.logo_technology.currency_symbol }} {{Number(custom_logo.logo_technology.price).toFixed(2) }}</strong>
+                            </template>
+                        </template>
+                      </div>
+                    </template>
+                  </template>
                 </td>
                 <td>
                   <template v-if="editingCartProductInfo.cart_product_info.cart_item_product && editingCartProductInfo.type == 'cart_product' && editingCartProductInfo.cart_product_info.cart_item_product.id == factory_product.id">
@@ -275,6 +288,30 @@
                         </tr>
                       </template>
                     </template>
+
+                    <template v-if="factory_product.custom_logos && Object.keys(factory_product.custom_logos).length > 0">
+                      <template v-for="(custom_logo, custom_logo_index) in factory_product.custom_logos">
+                        <template v-if="custom_logo.logo_technology">
+                          <tr class="bg-light" :key="`cart-item-${index}-${factory_product.id}-${custom_logo_index}-logo-tech-${custom_logo_index}`">
+                          <td :style="{'border-bottom-color':'#ccc'}">
+                            {{ custom_logo.logo_technology.label }}
+                          </td>
+                          <td :style="{'border-bottom-color':'#ccc'}">
+                            {{factory_product.product_price_object.quantity}}
+                          </td>
+                          <template v-if="product_price_object.show_price">
+                            <td :style="{'border-bottom-color': '#ccc'}">
+                              {{ custom_logo.logo_technology.currency_symbol }}{{ Number(custom_logo.logo_technology.price).toFixed(2) }}
+                            </td>
+                            <td :style="{'border-bottom-color': '#ccc'}">
+                              {{ custom_logo.logo_technology.currency_symbol }}{{ Number(parseInt(factory_product.product_price_object.quantity) * Number(custom_logo.logo_technology.price ).toFixed(2)).toFixed(2) }}
+                            </td>
+                          </template>
+                        </tr>
+                        </template>
+                      </template>
+                    </template>
+
                   </template>
                 </template>
 
@@ -447,6 +484,13 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
             cart_item_factory_product.ungrouped_addons.forEach(ungrouped_addon => {
               if(ungrouped_addon.currencies.length > 0 && ungrouped_addon.currencies[0].price) {
                 total_price += parseInt(cart_item_factory_product.product_price_object.quantity) * parseFloat(ungrouped_addon.currencies[0].price)
+              }
+            })
+          }
+          if(!checkIsEmpty(cart_item_factory_product.custom_logos)) {
+            cart_item_factory_product.custom_logos.forEach(custom_logo => {
+              if(custom_logo.logo_technology && custom_logo.logo_technology.price) {
+                total_price += parseInt(cart_item_factory_product.product_price_object.quantity) * parseFloat(custom_logo.logo_technology.price)
               }
             })
           }

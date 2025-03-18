@@ -1,5 +1,5 @@
 import {Component, Mixins, Prop} from "vue-property-decorator";
-import {setUndoRedoItems, getLogoSettingsObject, updateLastActiveProductData} from '@/helpers/Helpers';
+import {setUndoRedoItems, getLogoSettingsObject, updateLastActiveProductData, handleProductPriceUpdate} from '@/helpers/Helpers';
 import CustomLogosMixin from "@/mixins/CustomLogosMixin"
 import { processColorsCustom } from "@/helpers/Helpers";
 
@@ -160,6 +160,16 @@ export class LogoPlacementTabMixin extends Mixins(CustomLogosMixin) {
     this.customLogos[custom_logo_index].y_axis_3d = 0
     this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: custom_logo_index, custom_logos:  this.customLogos[custom_logo_index]})
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
+  }
+
+  public async handleLogoTechnologyChange(updated_value: string, custom_logo_index: number) {
+    const self: Record<any, any> = this;
+    await setUndoRedoItems('customLogos', 'placement_updated')
+    this.customLogos[custom_logo_index].logo_technology = updated_value;
+    this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: custom_logo_index, custom_logos:  this.customLogos[custom_logo_index]})
+    self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
+    
+    await handleProductPriceUpdate();
   }
 
   /*

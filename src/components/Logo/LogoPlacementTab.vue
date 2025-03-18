@@ -40,6 +40,10 @@
           <template v-if="custom_logo.url && customLogoIndex == 0">
             <logo-extracted-colors :custom-logo="custom_logo" v-if="logoColors.length > 0 && customLogoIndex == 0" />
           </template>
+          
+          <template v-if="custom_logo.url">
+            <logo-technologies :key="`custom_logo_${customLogoIndex}_${custom_logo_tab_index}_${getLastActiveProductData.product_id}`" :custom-logo-index="custom_logo_tab_index" :custom-logo="customLogos[custom_logo_tab_index]" @update-logo-tech="handleLogoTechnologyChange($event,custom_logo_tab_index)"/>
+          </template>
         </div>
       </b-tab>
       <template v-if="customLogos && customLogos.length > 0">
@@ -60,6 +64,7 @@ import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import LogoUploader from "@/components/Logo/LogoUploader.vue"
 import RecentLogos from "@/components/Logo/RecentLogos.vue";
 import LogoExtractedColors from "@/components/Logo/LogoExtractedColors.vue";
+import LogoTechnologies from "@/components/Logo/LogoTechnologies.vue";
 import {getLogoSettingsObject, setUndoRedoItems} from "@/helpers/Helpers"
 import {LogoPlacementTabMixin} from "@/mixins/LogoPlacementTabMixin";
 
@@ -68,11 +73,14 @@ import {LogoPlacementTabMixin} from "@/mixins/LogoPlacementTabMixin";
   components: {
     RecentLogos,
     LogoUploader,
-    LogoExtractedColors
+    LogoExtractedColors,
+    LogoTechnologies,
   },
 })
 export default class LogoPlacementTab extends Mixins(LogoPlacementTabMixin) {
-
+  get getLastActiveProductData() {
+        return this.$store.getters.getLastActiveProductData
+  }
 }
 </script>
 

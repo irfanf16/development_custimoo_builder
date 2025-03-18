@@ -1357,7 +1357,7 @@ const ProductAttributes:Module<any, any> = {
         state.collectionMode[key] = false;
       });
       state.collectionMode[mode] = true;
-    }
+    },
   },
   getters: {
     getLockedDesigns: state => (design_id) => {
@@ -1708,7 +1708,7 @@ const ProductAttributes:Module<any, any> = {
     },
     getProductSelectionDesignInfo(state: Record<any, any>) {
       return state.product_designs_selection_info;
-    }
+    },
   },
   actions: {
     setLockerroomColors({commit}, payload){

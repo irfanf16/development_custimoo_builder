@@ -1662,6 +1662,23 @@ const getProductColors = (product_id = null, append_locker_colors = true ) => {
   return product_colors
 }
 
+
+const getProductLogoTechnologies = (customLogoIndex,customLogo) => {
+  let product_logo_technologies:  Record<any, any>[] = []
+  const product_id = Store.getters.getSelectedProductId
+  const product_obj = Store.getters.getProduct(product_id)
+
+  if(product_obj) {
+    const current_logo_settings = getLogoSettings(customLogoIndex,false,product_id);
+    for (const logo_setting_id in product_obj.logo_technologies) {      
+      if(logo_setting_id == current_logo_settings.id){
+        product_logo_technologies = product_obj.logo_technologies[logo_setting_id];
+      }
+    }
+  }
+  return product_logo_technologies
+}
+
 const logoColorInfoDefaultObject = () => {
   return { using_logo_colors: false,  is_shuffled: false,  extracted_colors: [],  colors: [] }
 }
@@ -2138,7 +2155,7 @@ const getProductById = async (product_id: number, products: Record<any, any>[]) 
 
 const getProductPriceDefaultObject = (update_values={}) => {
   return { ...{
-    show_price: false, product_price: 0, product_price_with_quantity: 0, addons_price:0, addons_price_with_quantity:0,
+    show_price: false, product_price: 0, product_price_with_quantity: 0, addons_price:0, addons_price_with_quantity:0, logo_tech_price: 0, logo_tech_price_with_quantity:0,
       total_price:0 , total_quantity: 0, currency_code: null, active_currency: null, is_multi_prices: false, product_multi_prices : {}
     }, ...update_values }
 }
@@ -2166,6 +2183,7 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
     if(!checkIsEmpty(product_sku) && product_sku.prices.length > 0) {
       const product_price = product_sku.prices[0].price ? product_sku.prices[0].price : 0;
       let addons_price = 0;
+      let logo_tech_price = 0;
       selected_product.active_addons.forEach(addon => {
         if(addon.selected) {
           if(addon.currencies.length > 0) {
@@ -2194,8 +2212,22 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
           }
         }
       })
+      let customLogos = Store.getters.getCustomLogos();
+      if(customLogos && customLogos.length > 0){
+        customLogos.forEach((customlogo:any) => {
+          // delete customlogo.logo_technologies;
+          if(customlogo.logo_technology){
+              if(customlogo.logo_technology.price) {
+                logo_tech_price =  logo_tech_price + parseFloat(customlogo.logo_technology.price)
+              }
+          }
+        })
+      }
+      
+      // manage logo technology prices. 
       let product_price_with_quantity = product_price * roster_quantity_total;
       const addons_price_with_quantity =  addons_price * roster_quantity_total;
+      const logo_tech_price_with_quantity =  logo_tech_price * roster_quantity_total;
 
 
       let is_multi_prices = false;
@@ -2223,10 +2255,10 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
         }
       }
 
-      const total_price = product_price_with_quantity + addons_price_with_quantity;
+      const total_price = product_price_with_quantity + addons_price_with_quantity + logo_tech_price_with_quantity;
       product_price_object = {
         product_price: product_price, product_price_with_quantity: product_price_with_quantity, addons_price: addons_price,
-        addons_price_with_quantity: addons_price_with_quantity, total_price: total_price, total_quantity: roster_quantity_total,
+        addons_price_with_quantity: addons_price_with_quantity,logo_tech_price: logo_tech_price, logo_tech_price_with_quantity: logo_tech_price_with_quantity,  total_price: total_price, total_quantity: roster_quantity_total,
         currency_code: product_sku.prices[0].code, active_currency: product_sku.prices[0], show_price: true, is_multi_prices, product_multi_prices
       }
     } else {
@@ -2910,5 +2942,5 @@ export {
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
-  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities
+  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies
 };

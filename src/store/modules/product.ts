@@ -83,7 +83,7 @@ const Product:Module<any, any> = {
     },
     getLastSyncId(state: Record<any, any>) {
       return state.last_sync_id;
-    }
+    },
   },
   mutations:{
     SET_SKU_INFORMATION(state: Record<any, any>, paylod: Record<any, any>){

@@ -53,6 +53,15 @@
               </div>
               </div>
             </template>
+            <template v-if="productPriceObject.logo_tech_price">
+              <div class="order-row total">
+              <div class="total">Logo Technology Price</div>
+              <div class="total-qty">
+                {{productPriceObject.logo_tech_price}} X {{productPriceObject.total_quantity}} =
+                {{ Number(productPriceObject.logo_tech_price_with_quantity).toFixed(2)}}{{productPriceObject.active_currency.symbol}}
+              </div>
+              </div>
+            </template>
             <template>
               <div class="order-row total" v-if="productPriceObject.total_price > 0">
               <div class="total">Total Price</div>
