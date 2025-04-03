@@ -18,15 +18,22 @@
             <font-awesome-icon :icon="['fas', 'trash-alt']"/>
           </a>
         </div>
-        <input  :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}"
-                type="file"
-                name="logos" ref="logoUploadInput"
-                @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
-                @click="handleInputOnClick($event, replaceLogo, customLogo, customLogoIndex)"
-                @drop="handleInputOnDrag($event, replaceLogo, customLogo, customLogoIndex)"
-                class="fileLoader"
-                :accept="replaceLogo ? 'application/postscript,application/pdf,application/eps,image/eps,image/tiff' : 'image/*,application/postscript,application/pdf'"
+        <label
+          :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}" 
+          @drop="handleInputOnDrag($event, replaceLogo, customLogo, customLogoIndex)"
+          @dragover="preventDragDefaults"
+          for="fileLoader" class="fileLoader"
         >
+          <input
+            id="fileLoader"
+            type="file"
+            name="logos" 
+            ref="logoUploadInput"
+            @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
+            class="d-none"
+            :accept="replaceLogo ? 'application/postscript,application/pdf,application/eps,image/eps,image/tiff' : 'image/*,application/    postscript,application/pdf'"
+          >
+        </label>
       </div>
     </div>
     <LogoDisclaimerModal @disclaimer-accepted="handleDisclaimerAction" @hide-disclaimer-modal="handleDisclaimerModalHideEvent"/>
@@ -36,14 +43,14 @@
 
 <script lang="ts">
 
-import {Component, Prop, Mixins} from 'vue-property-decorator'
-import ErrorMessages from "@/mixins/ErrorMessages";
-import {LogoUploaderMixin} from "@/mixins/LogoUploaderMixin";
-import LogoEditor from "@/components/Logo/LogoEditor.vue";
-import ModalAction from "@/mixins/ModalAction";
 import LogoDisclaimerModal from "@/components/Logo/LogoDisclaimerModal.vue";
+import LogoEditor from "@/components/Logo/LogoEditor.vue";
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
+import ErrorMessages from "@/mixins/ErrorMessages";
+import { LogoUploaderMixin } from "@/mixins/LogoUploaderMixin";
+import ModalAction from "@/mixins/ModalAction";
 import Vue from "vue";
+import { Component, Mixins, Prop } from 'vue-property-decorator';
 
 
 @Component<LogoUploader>({
@@ -286,8 +293,8 @@ export default class LogoUploader extends Mixins(ErrorMessages, ModalAction, Cus
   display: block;
   position: absolute;
   appearance: none;
-  width: 1000px;
-  height: 1000px;
+  width: 100%;
+  height: 100%;
   left: 0;
   top: 0;
   z-index: 50;

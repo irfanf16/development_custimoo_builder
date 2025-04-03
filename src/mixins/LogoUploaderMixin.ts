@@ -1,14 +1,16 @@
-import {Component, Mixins, Prop} from "vue-property-decorator";
 import {
-  setUndoRedoItems,
   getExtensionsFor,
-  processColorsCustom,
   getLogoUpdatedProps,
-  recentLogoDefaultObject, hideLockerProductUpdateButton, santaClone
+  hideLockerProductUpdateButton,
+  processColorsCustom,
+  recentLogoDefaultObject,
+  santaClone,
+  setUndoRedoItems
 } from '@/helpers/Helpers';
-import {http} from "@/httpCommon"
-import CustomLogosMixin from "@/mixins/CustomLogosMixin"
+import { http } from "@/httpCommon";
+import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 import Vue from "vue";
+import { Component, Mixins, Prop } from "vue-property-decorator";
 
 @Component
 export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
@@ -86,6 +88,7 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
 
   public async handleInputOnDrag(e: any, replaceLogo: boolean, customLogo?:Record<any, any>, customLogoIndex?:number) {
     // this.logo_file have file then it means user have accepted logo disclaimer so now simply upload file to server
+    this.preventDragDefaults(e);
     if(this.logo_file) {
       this.uploadLogo(this.logo_file, replaceLogo, customLogo, customLogoIndex)
       return false
@@ -106,6 +109,10 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
     }
   }
 
+  public preventDragDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
   public handleDisclaimerModalHideEvent() {
     const self: Record<any, any> = this;
     self.$modal.hide('logo-disclaimer-modal')
