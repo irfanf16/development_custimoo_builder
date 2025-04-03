@@ -162,6 +162,71 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
       }
     }, 300)
   }
+  async handleTextEnterEvent(event, custom_text, custom_text_index) {
+    let self = this;
+    if (custom_text.manually_added) {
+      const selected_product = this.$store.getters.getSelectedProduct
+      const is_3d_product = selected_product.is_3d_product
+      const custom_text_names_count = filter(self.product_custom_texts, [ "type","name"]).length;
+      const next_fixed_item_text_index = custom_text_index + 1;
+      const new_fixed_text = santaClone(custom_text);
+      new_fixed_text.value = "";
+      new_fixed_text.label = `Fixed Text ${custom_text_names_count + 1}`;
+      new_fixed_text.items[0].label = `Fixed Text ${custom_text_names_count + 1}`;
+      const fixed_text_height = parseFloat(custom_text.items[0].height);
+      if(is_3d_product) {
+        const fixed_text_3d_y_axis = parseFloat(custom_text.items[0].y_axis_3d);
+        console.log("shah", fixed_text_3d_y_axis, fixed_text_height, fixed_text_3d_y_axis + 10 + fixed_text_height)
+        if ((fixed_text_3d_y_axis - 10 - fixed_text_height) <= 950) {
+          new_fixed_text.items[0].y_axis_3d = custom_text.items[0].y_axis_3d;
+        } else {
+          new_fixed_text.items[0].y_axis_3d =
+          parseInt(custom_text.items[0].y_axis_3d) - fixed_text_height - 11;
+        }
+      } else {
+        const fixed_text_y_axis = parseFloat(custom_text.items[0].y_axis);
+        if ((fixed_text_y_axis + 10 + fixed_text_height) >= 600) {
+          new_fixed_text.items[0].y_axis = custom_text.items[0].y_axis;
+        } else {
+          new_fixed_text.items[0].y_axis =
+            fixed_text_height + parseInt(custom_text.items[0].y_axis) + 10;
+        }
+      }
+     
+      this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {
+        index: self.product_custom_texts.length,
+        value: new_fixed_text,
+      });
+      await this.$nextTick();
+      (
+        this.$refs[`text-accordion-${next_fixed_item_text_index}`] as Record<
+          any,
+          any
+        >
+      )[0].show = true;
+      const next_fixed_text_refs = this.$refs[
+        `text-customize-${next_fixed_item_text_index}`
+      ] as Vue[] | undefined;
+      if (next_fixed_text_refs && next_fixed_text_refs.length > 0) {
+        let next_fixed_text_vue_component = next_fixed_text_refs[0];
+        let next_fixed_text_input =
+          next_fixed_text_vue_component.$el as HTMLElement;
+        next_fixed_text_input.focus();
+        setTimeout(() => {
+          next_fixed_text_input.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
+        }, 500);
+      }
+      this.handleCustomTextInputChange(
+        new_fixed_text.value,
+        next_fixed_item_text_index
+      );
+      await this.$nextTick();
+      console.log("fixed_texts", this.product_custom_texts[custom_text_index].items[0], this.product_custom_texts[next_fixed_item_text_index].items[0]);
+    }
+  }
 
   async handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number, custom_text_item_index: number) {
     const self:Record<any, any> = this;

@@ -114,6 +114,14 @@ Vue.filter("TitleCase", (value:Record<any,any>) => {
 import SantaModal from "@/plugins/santaModal/SantaModal.js";
 Vue.use(SantaModal)
 
+// Extend Vue's type definition
+declare module 'vue/types/vue' {
+  interface Vue {
+    $eventBus: Vue;
+    $logData: (data: any) => void;
+  }
+}
+
 import {eventBus} from "@/event/eventBus"
 Vue.prototype.$eventBus = eventBus
 
