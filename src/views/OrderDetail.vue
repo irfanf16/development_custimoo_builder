@@ -233,7 +233,7 @@
                           </blockquote>
                           <div class="d-flex gap-1 align-items-start comment-images">
                           <template v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
-                              <template v-if="['png', 'jpg', 'jpeg'].includes(activity_comment_file.extension)">
+                              <template v-if="['png', 'jpg', 'jpeg'].includes(activity_comment_file.extension?.toLowerCase())">
                                 <a :key="`activity_comment_file_${activity_comment_file_index}`"
                                    :href="`${storage_url}${activity_comment_file.url}`" target="_blank">
                                   <img :key="`activity_comment_file_${activity_comment_file_index}`"
@@ -241,7 +241,7 @@
                                 </a>
                               </template>
 
-                            <template v-if="['pdf', 'ai', 'eps', 'svg', 'xlsx'].includes(activity_comment_file.extension.toLowerCase())">
+                            <template v-if="['pdf', 'ai', 'eps', 'svg', 'xlsx'].includes(activity_comment_file.extension?.toLowerCase())">
                               <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="`${storage_url}${activity_comment_file.url}`" :download="activity_comment_file.name" target="_blank">
                                 <b-icon-file-earmark-text width="50" height="50" />
                                 <span>{{activity_comment_file.name}}.{{activity_comment_file.extension}}</span>
