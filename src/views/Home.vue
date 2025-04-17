@@ -1605,7 +1605,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         hideLockerProductUpdateButton(true);
-        await this.getLockerRoomProducts(null)
+        if (this.roomWithProducts.length !== 0) { // only fetch products if the locker products already featched 
+          await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+        }
         if(back_to_locker){
           await self.hideVModal('rostermodal')
           await self.showVModal('locker-modal')
