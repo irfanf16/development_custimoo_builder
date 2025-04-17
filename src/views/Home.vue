@@ -1571,7 +1571,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         unique[svgGroups[i].color] = 1;
       }
     }
-    {}
+    
     const fixed_logo_index = Store.getters.getFixedLogoIndex;
     const product_style = this.selectedProduct.productstyles[this.styleIndex]
     let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
@@ -1605,8 +1605,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         hideLockerProductUpdateButton(true);
+        await this.getLockerRoomProducts(null)
         if(back_to_locker){
-          await this.getLockerRoomProducts(null)
           await self.hideVModal('rostermodal')
           await self.showVModal('locker-modal')
         }
