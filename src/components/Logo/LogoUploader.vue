@@ -22,19 +22,21 @@
           :style="{display: customLogo.url && !replaceLogo ? 'none':  'block'}" 
           @drop="handleInputOnDrag($event, replaceLogo, customLogo, customLogoIndex)"
           @dragover="preventDragDefaults"
-          for="fileLoader" class="fileLoader"
-        >
+          :for="`${'fileLoader_'+customLogoIndex}`" class="fileLoader"
+        > 
           <input
-            id="fileLoader"
-            type="file"
-            name="logos" 
-            ref="logoUploadInput"
-            @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
-            class="d-none"
-            :accept="replaceLogo ? 'application/postscript,application/pdf,application/eps,image/eps,image/tiff' : 'image/*,application/    postscript,application/pdf'"
+          :key="customLogoIndex"
+          :id="`${'fileLoader_'+customLogoIndex}`"
+          type="file"
+          name="logos" 
+          ref="logoUploadInput"
+          @change="handleInputChange($event, replaceLogo, customLogo, customLogoIndex)"
+          :accept="replaceLogo ? 'application/postscript,application/pdf,application/eps,image/eps,image/tiff' : 'image/*,application/   postscript,application/pdf'"
+          class="d-none"
           >
-        </label>
-      </div>
+      </label>
+    </div>
+     
     </div>
     <LogoDisclaimerModal @disclaimer-accepted="handleDisclaimerAction" @hide-disclaimer-modal="handleDisclaimerModalHideEvent"/>
 
