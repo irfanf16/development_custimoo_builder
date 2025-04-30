@@ -1,5 +1,6 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
+    <Navbar v-if="onlyCompanyOrderTab()" />
     <router-view />
   </div>
 </template>
@@ -8,13 +9,18 @@ import router from './router'
 import store from '../store'
 import {dom} from '@fortawesome/fontawesome-svg-core'
 import CommonImportMixin from '../mixins/CommonImportMixin.vue'
-import { getDomDocument } from '../helpers/Helpers'
+import { getDomDocument, onlyCompanyOrderTab } from '../helpers/Helpers'
+import Navbar from '@/components/Navbar.vue';
 
 export default {
   store, router,
   name: "Customizer",
   mixins: [CommonImportMixin],
+  components: {
+    Navbar
+  },
   mounted: async function() {
+    
     // This will only work on your root Vue component since it's using $parent
     const { shadowRoot } = this.$parent.$options
 
@@ -41,6 +47,9 @@ export default {
     doc.head.appendChild(style1);
     const customizer = doc.querySelector('v-customizer')
     customizer?.shadowRoot.appendChild(style2)
+  },
+  methods:{
+    onlyCompanyOrderTab
   }
 }
 </script>

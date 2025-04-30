@@ -2781,6 +2781,19 @@ const hasCompanyPermission = (permission) => {
 
 }
 
+const onlyCompanyOrderTab = () => {
+
+  const company = Store.getters.getCompany
+  const allowed_companies = [169,170];
+
+  if(company) {
+    return allowed_companies.includes(company.id);
+  }
+
+  return false;
+
+}
+
 const findActivityWithPosition = (activity_items, status, position) => {
   const submittedItems = activity_items.filter(item => item.status === status);
   // Return the second item if it exists, otherwise return the first
@@ -2942,5 +2955,6 @@ export {
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
-  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies
+  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, 
+  getProductLogoTechnologies, onlyCompanyOrderTab
 };

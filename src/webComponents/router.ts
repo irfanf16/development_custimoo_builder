@@ -8,6 +8,9 @@ const ShareRoster = ()=> import('../views/ShareRoster.vue')
 const CollectionViewPDF = ()=> import('@/views/CollectionViewPDF.vue')
 const Deactive = ()=> import("@/views/Deactive.vue")
 const Payment = ()=> import("@/views/Payment.vue")
+const OrderListing = ()=> import("@/views/OrderListing.vue")
+const OrderDetail = ()=> import('../views/OrderDetail.vue')
+
 Vue.use(VueRouter)
 
 const routes: Array<RouteConfig> = [
@@ -45,7 +48,18 @@ const routes: Array<RouteConfig> = [
     path:'/payment',
     name:'Payment',
     component: Payment,
-  }
+  },
+  {
+    path: '/customer-orders',
+    name: 'CustomerOrders',
+    component: OrderListing,
+    props: { page_type: 'order' },
+  },
+  {
+    path: '/order/:order_id/detail',
+    name: 'OrderDetail',
+    component: OrderDetail
+  },
 ]
 
 const router = new VueRouter({
