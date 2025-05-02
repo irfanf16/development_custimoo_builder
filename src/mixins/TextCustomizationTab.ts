@@ -12,7 +12,7 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
   public activeFolderIndex = 0
   public product_fonts: Record<any, any>[] = []
   public handle_text_change_timer:any = 0 // this will hold the id returned by the setTimeout()
-  public active_jersey_part: number[] = [];
+    public active_jersey_part: number[] = [];
   public text_accordion:boolean[] = [];
   public selected_font = '';
   public is_font_auto_changed = false;
@@ -173,24 +173,19 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
       new_fixed_text.value = "";
       new_fixed_text.label = `Fixed Text ${custom_text_names_count + 1}`;
       new_fixed_text.items[0].label = `Fixed Text ${custom_text_names_count + 1}`;
-      const fixed_text_height = parseFloat(custom_text.items[0].height);
+      const fixed_text_height = parseFloat(custom_text.items[0].height) ;
+      const fixed_text_y_axis = parseFloat(custom_text.items[0].y_axis);
+      const max_y_axis = is_3d_product ? 505 : 550;
+      const new_line_y_axis = fixed_text_y_axis + fixed_text_height + 10;
       if(is_3d_product) {
-        const fixed_text_3d_y_axis = parseFloat(custom_text.items[0].y_axis_3d);
-        console.log("shah", fixed_text_3d_y_axis, fixed_text_height, fixed_text_3d_y_axis + 10 + fixed_text_height)
-        if ((fixed_text_3d_y_axis - 10 - fixed_text_height) <= 950) {
-          new_fixed_text.items[0].y_axis_3d = custom_text.items[0].y_axis_3d;
+        if (new_line_y_axis <= max_y_axis) {
+          new_fixed_text.items[0].y_axis_3d =  parseInt(custom_text.items[0].y_axis_3d) - fixed_text_height - 11;
+          new_fixed_text.items[0].y_axis =  new_line_y_axis;
         } else {
-          new_fixed_text.items[0].y_axis_3d =
-          parseInt(custom_text.items[0].y_axis_3d) - fixed_text_height - 11;
+          new_fixed_text.items[0].y_axis_3d = custom_text.items[0].y_axis_3d;
         }
       } else {
-        const fixed_text_y_axis = parseFloat(custom_text.items[0].y_axis);
-        if ((fixed_text_y_axis + 10 + fixed_text_height) >= 600) {
-          new_fixed_text.items[0].y_axis = custom_text.items[0].y_axis;
-        } else {
-          new_fixed_text.items[0].y_axis =
-            fixed_text_height + parseInt(custom_text.items[0].y_axis) + 10;
-        }
+        new_fixed_text.items[0].y_axis = (new_line_y_axis <= max_y_axis) ? new_line_y_axis : custom_text.items[0].y_axis;  
       }
      
       this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {
@@ -219,15 +214,9 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
           });
         }, 500);
       }
-      this.handleCustomTextInputChange(
-        new_fixed_text.value,
-        next_fixed_item_text_index
-      );
       await this.$nextTick();
-      console.log("fixed_texts", this.product_custom_texts[custom_text_index].items[0], this.product_custom_texts[next_fixed_item_text_index].items[0]);
     }
   }
-
   async handleCustomTextCheckboxChange(updatedVal: string, custom_text_index: number, custom_text_item_index: number) {
     const self:Record<any, any> = this;
     await this.hideLockerProductUpdateButton()
@@ -382,7 +371,8 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     custom_text.items[0] = Object.assign(custom_text.items[0], {
       color: productColors[0]?.color_text[0]?.value, color_pantone: productColors[0]?.color_text[0]?.name, font_family: self.default_font_obj ? self.default_font_obj.name : '', height: 50,
       is_locked: false, label: 'Fixed Text ' + (custom_text_names_count + 1), outline_color: productColors[0]?.color_text[1]?.value, outline_color_pantone: productColors[0]?.color_text[1]?.name,
-      outline_enabled: 1, outline_width: 0, outline_width_converted: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300, scaleX: 0, scaleY: 0
+      outline_enabled: 1, outline_width: 0, outline_width_converted: 0, placement: 'Front', rotation: 0, width: 50, x_axis: 300, y_axis: 300, scaleX: 0, scaleY: 0,
+      x_axis_3d:0, y_axis_3d: 0
     })
     return custom_text;
   }
