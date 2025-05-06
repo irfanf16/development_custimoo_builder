@@ -5201,6 +5201,35 @@ $fontSize: 0.5;
     }
 }
 
+
+.fade-right-categories {
+    position: relative;
+
+    .fadedoverlay {
+        position: sticky;
+        z-index: 10;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        height: 39px;
+        min-width: 30px;
+        margin-left: -36px !important;
+        background: -moz-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+        background: -webkit-linear-gradient(left, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00ffffff', endColorstr='#ffffff', GradientType=1);
+    }
+
+    &.fade-gray {
+        &:after {
+            background: -moz-linear-gradient(left, rgba(239, 239, 239, 0) 0%, rgba(239, 239, 239, 1) 100%);
+            background: -webkit-linear-gradient(left, rgba(239, 239, 239, 0) 0%, rgba(239, 239, 239, 1) 100%);
+            background: linear-gradient(to right, rgba(239, 239, 239, 0) 0%, rgba(239, 239, 239, 1) 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00efefef', endColorstr='#ffffff', GradientType=1);
+        }
+    }
+}
+
 .edit-logo-modal {
     overflow: visible !important;
 

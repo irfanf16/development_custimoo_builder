@@ -99,7 +99,7 @@
       </div>
       <span class="hover_tooltip" ref="hoover_tooltip"></span>
       <div class="d-flex align-items-center" v-if="getProductEditInfoObject.editing==false || (getProductEditInfoObject.editing===true && getProductEditInfoObject.locker_product_info !== null) ">
-        <div class="fade-right w-100 py-2 overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList" >
+        <div class="fade-right-categories w-100 py-2 overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList" >
           <template v-for="(category, categoryIndex) in categories">
             <div @mouseenter="showTooltip" @mouseleave="hideTooltip" :data-title="category.category_name" :key="`category_${categoryIndex}`" style="white-space: nowrap"
                   :style="{color: (selectedCategory.index == categoryIndex) ? '#000 !important': '#999 !important'}"
@@ -108,11 +108,12 @@
                 <img :src="`${storage_url}${category.image_url}`"  height="30">
               </div>
           </template>
+          <div class="fadedoverlay"></div>
         </div>
       </div>
       <template v-if="categories[selectedCategory.index] && categories[selectedCategory.index].subcategories && categories[selectedCategory.index].subcategories.length">
         <div class="d-flex align-items-center">
-          <div class="fade-right w-100 py-2 overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList">
+          <div class="fade-right-categories w-100 py-2 overflow-auto d-flex align-items-center theme-scroll-h pb-2 pointer gap-2 brandsList">
               <template v-for="(subCategory, subCategoryIndex) in categories[selectedCategory.index].subcategories">
                 <div @mouseenter="showTooltip" @mouseleave="hideTooltip" :data-title="subCategory.category_name" :key="`subCategory_${subCategoryIndex}`" style="white-space: nowrap"
                      :style="{color: (selectedSubCategory.index == subCategoryIndex) ? '#000 !important': '#999 !important'}"
@@ -613,7 +614,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
       transition: 0.2s all ease-in-out;
     }
 
-    &>div{
+    &>div:not(:last-of-type){
       position: relative;
       padding-bottom: 5px;
       &:after{
