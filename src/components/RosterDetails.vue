@@ -163,7 +163,7 @@
                             @input="handleRosterUpdate($event, 'quantity', productRosterItemIndex)"
               />
             </div>
-            <div class="remove" v-if="productRosterItemIndex > 0 && active_roster_index != productRosterItemIndex">
+            <div class="remove" v-if="productRoster.length > 1 && active_roster_index != productRosterItemIndex">
               <a @click="removeRosterItem(productRosterItemIndex)">
                 <font-awesome-icon :icon="['fas', 'trash-alt']" />
               </a>
