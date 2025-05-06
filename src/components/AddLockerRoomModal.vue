@@ -93,7 +93,8 @@
       getEditModeDefaultObj,
       getImageFromCanvas,
       getLockerColors, getStyleSelectedAddons,
-      createFormData
+      createFormData,
+      generateRandomString
       // syncGroupColorsWithSvgGroups
     } from '@/helpers/Helpers'
     import { Canvas, log } from 'fabric/fabric-impl'
@@ -441,7 +442,7 @@
         }
         this.$store.commit('setIsShareDesign', false);
       }
-      public async shareDesignUrl(product:Record<any,any>) {
+      public async shareDesignUrl(product:Record<any,any>, random_string) {
         if(!checkIsEmpty(this.locker_room_product)) {
           await  this.shareOrderProductDesignUrl()
           return false
@@ -467,6 +468,7 @@
         const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
         let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
         const scene_ref = Store.getters.getCanvasImage.scene
+        const rand_string = typeof random_string !== 'string' ? generateRandomString() : random_string
         let locker = {
           roster_url: this.rosterUrl,
           room_id: null,
@@ -488,14 +490,17 @@
           svgcolors: distinct,
           grouped_addons: selected_grouped_addons,
           ungrouped_addons: selected_ungrouped_addons,
-          group_patterns: Store.getters.getGroupPatterns
+          group_patterns: Store.getters.getGroupPatterns,
+          rand_string: rand_string
         }
 
         let res = await this.$store.dispatch("SHARE_DESIGN_URL", createFormData(locker));
 
         if (res.status == 201){
           Vue.set(product, 'shared_url', res.data.url);
-          this.$emit('showPopper','shareDesign');
+          if (typeof random_string !== 'string') {
+            this.$emit('showPopper','shareDesign');
+          }
         }else{
           this.showLoader = false
           this.showError(res);

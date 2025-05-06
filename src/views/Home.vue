@@ -120,7 +120,7 @@
                     </template>
 
                     <template v-if="isCustomerAuthenticated">
-                      <b-button v-if="!pdf_generation_loading" @click="generatePdf"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
+                      <b-button v-if="!pdf_generation_loading" @click="generatePdfWithUrl()"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
                       <b-button v-else  variant="outline-secondary" :disabled="true" style="min-width:115px;max-height: 35px"><img width="20" height="20" src="@assets/images/loading.gif" /></b-button>
                     </template>
                     <b-button v-else @click="setActionBeforeLogin('generatePdf')"  variant="outline-secondary" style="min-width:115px;max-height: 35px">Generate PDF</b-button>
@@ -324,7 +324,7 @@
                         </li>
                        <template>
                          <li v-if="isCustomerAuthenticated">
-                           <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{generatePdf()})">Generate PDf</a>
+                           <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{generatePdfWithUrl()})">Generate PDf</a>
                          </li>
                          <li v-else>
                            <a class="dropdown-item" @click.stop="callDropdownMenu(toggleDD, ()=>{setActionBeforeLogin('generatePdf')})">Generate PDf</a>
@@ -582,7 +582,8 @@ import {
   createOrUpdateOrderUpdateDataState,
   updateOrder,
   hasCompanyPermission,
-  getStyleSelectedAddons, base64ToFile, createFormData, isEcommercePlatform
+  getStyleSelectedAddons, base64ToFile, createFormData, isEcommercePlatform,
+  generateRandomString
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -2187,7 +2188,13 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
   }
 
-  private async shareDesign() {
+  public generatePdfWithUrl() {
+    const random_string = generateRandomString();
+    this.generatePdf(random_string);
+    this.shareDesign(random_string);
+  }
+
+  private async shareDesign(random_string = '') {
     if(this.mobileScreen){
       this.showVModal('shareDesign')
     }
@@ -2204,19 +2211,24 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       // (this.ref['lockerModal'].$refs['lockerRoom'] as Record<any, any>).shareProduct(product, this.lockerProductIndex, this.lockerIndex)
 
     } else {
-      this.shareDesignLoader = true;
-      await (this.$refs['saveToLockerModal'] as Record<any, any>).shareDesignUrl(this.product);
+      if (typeof random_string !== 'string') {
+        this.shareDesignLoader = true;
+      }
+      const rand_string = random_string ? random_string : generateRandomString()
+      await (this.$refs['saveToLockerModal'] as Record<any, any>).shareDesignUrl(this.product, rand_string);
       this.shareDesignLoader = false;
     }
   }
 
-  public async generatePdf() {
+  public async generatePdf(random_string = '') {
     this.pdf_generation_loading = true;
     this.showToast('Please wait your pdf is being generated', 'success');
-    let cart_product = await getActiveProductData(this.products_fonts);
+    let cart_product: any = await getActiveProductData(this.products_fonts);
+    const shared_url = this.company.company_domain + '/#/share/' + cart_product.product_display_name.replace(/ /g, '+').replace(/\//g, '%2F') + '/' + random_string;
     let post_data = {
       factory_product: [cart_product],
-      measurement_unit: this.settings.unit
+      measurement_unit: this.settings.unit,
+      shared_url: shared_url
     };
 
     http.post('generate-pdf', post_data).then(async (res: any) => {

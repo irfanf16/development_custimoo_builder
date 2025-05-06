@@ -192,7 +192,7 @@ const processColorsCustom = (colors: any, logos_count= 4, color_type = 'color_ty
   return imageColors;
 }
 
-const getSelectedProductPantones = (product_id: null|number = null, svg_group: string = '') => {
+const getSelectedProductPantones = (product_id: null|number = null, svg_group = '') => {
   const product_pantones: Record<any, any>[] = []
   const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
   if(product) {
@@ -543,9 +543,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
 
       const style_index = Store.getters.getCurrentStyleIndex;
       const product_style = selected_product.productstyles[style_index];
-      let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
+      const {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
       const productEditInfo = Store.getters.getProductEditInfoObject;
-      let product_name = selected_product.display_name
+      let product_name = selected_product.display_name;
+      const product_display_name = product_name;
       //selected_design will always return array having single object
       const selected_design = product_style.productdesigns.filter((design: Record<any, any>) => design.design_show == 1)[0];
 
@@ -622,6 +623,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         size_variants_mapping: (selected_product.ecommerceproduct.length > 0) ? selected_product.ecommerceproduct[0].size_variants : null,
         product_type: selected_product.product_type,
         product_name: product_name,
+        product_display_name,
         pdf_file: null,
         production_url: selected_design.production_design?.file_url ? `${process.env.VUE_APP_STORAGE_URL}${selected_design.production_design.file_url}.svg` : null,
         // front_design:front_design,
@@ -2193,7 +2195,7 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
       })
       // grouped addons prices calculate
       const grouped_addons = selected_product.productstyles[active_style_index]?.customized_addons.grouped_addons;
-      for(let group_name in grouped_addons) {
+      for(const group_name in grouped_addons) {
         grouped_addons[group_name].forEach(grouped_addon => {
           if(grouped_addon.selected) {
             if(grouped_addon.currencies.length > 0) {
@@ -2212,7 +2214,7 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
           }
         }
       })
-      let customLogos = Store.getters.getCustomLogos();
+      const customLogos = Store.getters.getCustomLogos();
       if(customLogos && customLogos.length > 0){
         customLogos.forEach((customlogo:any) => {
           // delete customlogo.logo_technologies;
@@ -2325,21 +2327,21 @@ const factorial = (n: number) => {
 }
 
 const getPermutation = (n: number, number_of_parts: number) => {
-  let result: number[] = [];
-  let sequences: number[] = [];
-  let nums = [1, 2, 3, 4]
+  const result: number[] = [];
+  const sequences: number[] = [];
+  const nums = [1, 2, 3, 4]
   let k = n - 1; // Convert to 0-based index
 
   while (nums.length > 0) {
-    let fact = factorial(nums.length - 1);
-    let index = Math.floor(k / fact);
+    const fact = factorial(nums.length - 1);
+    const index = Math.floor(k / fact);
     sequences.push(nums.splice(index, 1)[0]);
     k %= fact;
   }
 
   for (let i = 0; i < Math.ceil(number_of_parts / 4); i++) {
     sequences.forEach((sequence: number) => {
-      let value = sequence + i * 4 - 1; // Scale and adjust the sequence value
+      const value = sequence + i * 4 - 1; // Scale and adjust the sequence value
       if (value < number_of_parts) {
         result.push(value);
       }
@@ -2389,7 +2391,7 @@ const getCustomLockers = () => {
 }
 
 const getCustomProductData = async (custom_product_data: Record<any, any>={}) => {
-  let selected_product: Record<any, any> = Store.getters.getSelectedProduct
+  const selected_product: Record<any, any> = Store.getters.getSelectedProduct
   //mode = {cart_edit, order_edit, reorder}
   let edit_mode_info_obj:{ mode: string|null, item_id: number|null, factory_product_id: number|null, factory_product_index: number|null} =
     { mode: null, item_id: null, factory_product_id: null, factory_product_index: null }
@@ -2401,18 +2403,18 @@ const getCustomProductData = async (custom_product_data: Record<any, any>={}) =>
   let fixed_logo_index = Store.getters.getFixedLogoIndex;
   let sku = Store.getters.getSkuInformation;
   let product_roster = Store.getters.getProductRosters()
-  let price_info = Store.getters.getProductPriceObject
-  let selected_style_index = Store.getters.getCurrentStyleIndex
+  const price_info = Store.getters.getProductPriceObject
+  const selected_style_index = Store.getters.getCurrentStyleIndex
   let selected_style_id = selected_style_index >= 0 ? product_styles[selected_style_index]?.id : product_styles[0]?.id;
   let existing_assets: Record<any, any> = []
   //if custom_product_data is not empty then get custom product initial data
   if(!checkIsEmpty(custom_product_data)) {
     const storage_url = process.env.VUE_APP_STORAGE_URL
     product_id = custom_product_data.product_id
-    let custom_product_initial_data_response: any = await getCustomProductInitialData(product_id).catch((errorResponse: any) => {
+    const custom_product_initial_data_response: any = await getCustomProductInitialData(product_id).catch((errorResponse: any) => {
       throw errorResponse;
     });
-    let custom_product_initial_data: Record<any, any> = custom_product_initial_data_response.custom_product_initial_data;
+    const custom_product_initial_data: Record<any, any> = custom_product_initial_data_response.custom_product_initial_data;
     if('existing_assets' in custom_product_data && custom_product_data.existing_assets.length > 0) {
       existing_assets = custom_product_data.existing_assets
       not_uploaded_assets = custom_product_data.assets
@@ -2439,7 +2441,7 @@ const getCustomProductData = async (custom_product_data: Record<any, any>={}) =>
     product_addons = custom_product_initial_data.product_addons
     sku = custom_product_initial_data.sku
     product_roster = custom_product_data.product_roster_detail
-    let existing_addons = custom_product_data.addons
+    const existing_addons = custom_product_data.addons
     company_addons = custom_product_initial_data.company_addons
     product_addons = custom_product_initial_data.product_addons
     active_addons = custom_product_initial_data.active_addons
@@ -2474,7 +2476,7 @@ const getCustomProductInitialData = (product_id): Promise<Record<any, any>> => {
 }
 
 const navigateToCustomProduct = async (factory_custom_product={}) => {
-  let custom_product_data = await getCustomProductData(factory_custom_product).catch(errorResponse => {
+  const custom_product_data = await getCustomProductData(factory_custom_product).catch(errorResponse => {
     throw errorResponse
   })
   if(custom_product_data) {
@@ -2496,7 +2498,7 @@ const getReorderDataDefaultObject = (update_values={}): Record<any, any> => {
 }
 
 const getOrderUpdateIdentifier = (save_to_store=false) => {
-  let date = new Date();
+  const date = new Date();
   const update_order_item_identifier =
     `${getRandom(5)}_${date.getDay()}${date.getMonth()}${date.getFullYear()}${date.getMinutes()}${date.getHours()}${date.getMilliseconds()}`;
   if(save_to_store) {
@@ -2541,8 +2543,8 @@ const updateOrder = async () => {
   const company = Store.getters.getCompany
   const order_existing_updated_data = await loadState("order_updated_data")
   const order_products_info_obj = Store.getters.getProductEditInfoObject;
-  let order_item_id = order_products_info_obj.order_product_info.item_id;
-  let url = `order_item/${order_item_id}/update/products`;
+  const order_item_id = order_products_info_obj.order_product_info.item_id;
+  const url = `order_item/${order_item_id}/update/products`;
   return http.post(url, {factory_products: order_existing_updated_data}).then(async (res: any) => {
     await exitFromEditMode()
     if (res.data.success == true) {
@@ -2654,7 +2656,7 @@ const getExtensionFromMimeType = (mimetype: string) => {
   }
 }
 
-const getBase64FileInfo = (base64_string: string, base_path: string='') => {
+const getBase64FileInfo = (base64_string: string, base_path='') => {
   const mime_type_matched = base64_string.match(/^data:(.*);base64,/);
   const response_obj = {
     file_name: '', file_path: '', file_extension: '', file_content: base64_string, is_base64_string: true
@@ -2748,7 +2750,7 @@ const getStyleSelectedAddons = async (style) => {
     grouped_addons: {}, ungrouped_addons: []
   }
   if(style.customized_addons) {
-    let {grouped_addons, ungrouped_addons} = style.customized_addons
+    const {grouped_addons, ungrouped_addons} = style.customized_addons
     if(ungrouped_addons && ungrouped_addons.length > 0) {
       selected_customized_addons.ungrouped_addons = ungrouped_addons.filter(ungrouped_addons => {
         return ungrouped_addons.selected
@@ -2807,8 +2809,8 @@ const findActivityWithPosition = (activity_items, status, position) => {
 
 
 const findActivity = (status_activities, status, length) => {
-  let activities = status_activities.filter( (activity_item) => activity_item.status === status);
-  let activity = activities.find((activity_item) => {
+  const activities = status_activities.filter( (activity_item) => activity_item.status === status);
+  const activity = activities.find((activity_item) => {
     return activity_item.activity_items.length === length
   });
   if(activity){
@@ -2820,22 +2822,22 @@ const findActivity = (status_activities, status, length) => {
 }
 const mergeActivityArray = (requested_array, activity_array, status, status_activities, submitted_customer_activity_review = null) => {
   const existingFactoryIds = requested_array.activity_item_data.map(item => item.factory_product_id);
-  let activity_items_data = JSON.parse(JSON.stringify(requested_array.activity_item_data));
-  let approved_activities = status_activities.filter((status_activity) => status_activity.status === status);
+  const activity_items_data = JSON.parse(JSON.stringify(requested_array.activity_item_data));
+  const approved_activities = status_activities.filter((status_activity) => status_activity.status === status);
   activity_array.forEach(item => {
     if (!existingFactoryIds.includes(item.factory_product_id)) {
       // Adding the oldone item to activity_item_data in original array
       let skip_customer_approval = null
       if(submitted_customer_activity_review){
         // @ts-ignore
-        let submitted_activity = submitted_customer_activity_review?.activity_items?.find((activity) => activity.factory_product_id === item.factory_product_id);
+        const submitted_activity = submitted_customer_activity_review?.activity_items?.find((activity) => activity.factory_product_id === item.factory_product_id);
         // @ts-ignore
         skip_customer_approval = submitted_activity?.skip_customer_approval;
       }
-      let approved_activity = approved_activities.find((approved_activity) => {
+      const approved_activity = approved_activities.find((approved_activity) => {
         return approved_activity.activity_items.find((activity_item) =>  activity_item.factory_product_id === item.factory_product_id)
       });
-      let activity_item_data = {
+      const activity_item_data = {
         action: (approved_activity.status === status && approved_activity.activity_items.length > 0)? "accept": null,  // default values, you can adjust as needed
         status: status,
         message: null,
@@ -2935,6 +2937,17 @@ const  decodeHtmlEntities = (encodedStr) => {
   return textArea.value;
 }
 
+const generateRandomString = () => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const length = 10;
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    result += chars[randomIndex];
+  }
+  return result;
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -2955,6 +2968,5 @@ export {
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
-  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, 
-  getProductLogoTechnologies, onlyCompanyOrderTab
+  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, onlyCompanyOrderTab
 };
