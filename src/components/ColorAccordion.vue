@@ -156,6 +156,11 @@
                     </b-button>
                   </div>
                 </template>
+                <div class="clear-pattern">
+                  <b-button @mouseenter="showTooltip" @mouseleave="hideTooltip" data-title="Clear selection" variant="outline-light" class="p-0 btn" @click="unsetPattern()">
+                    <BIconXCircle width="50px" height="50px" style="color: gray; opacity: 0.6;" />
+                  </b-button>
+                </div>
                 <div class="d-flex justify-content-between align-items-center w-100 gap-x-5" v-if="groupPatterns[svgElement.id]">
                   <div class="w-100 w-md-50">
                     <label>Scale: {{ groupPatterns[svgElement.id].scale }}%</label>
@@ -462,5 +467,28 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
               height: auto;
           }
       }
+
+    }
+    .clear-pattern {
+      display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 15px;
+
+    .btn {
+      width: 40px;
+      height:30px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid #ccc;
+      background: none;
+
+      @media only screen and (min-width: 992px) {
+          width: 75px;
+          height: 75px;
+      }
+    }
   }
 </style>
