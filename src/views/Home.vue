@@ -72,7 +72,7 @@
               <div class="customization-preview-process w-100">
                 <header v-if="!mobileScreen" class="preview-area-header py-2 py-lg-4">
                   <div class="buttons-preview text-left">
-                    <template v-if="getProductEditInfoObject.editing == false || ['locker_product', 'reorder_product'].includes(getProductEditInfoObject.type)">
+                    <template>
                       <template v-if="isCustomerAuthenticated">
                         <b-button :key="'lockerRoom'" v-if="lockers.length" @click="getLockerRoomProducts(null)" variant="outline-secondary">Locker room</b-button>
                         <template v-if="getProductEditInfoObject.type == 'locker_product'">
@@ -81,14 +81,9 @@
                             Save
                           </b-button>
                         </template>
-                        <template v-if="['locker_product', 'reorder_product'].includes(getProductEditInfoObject.type)">
                           <b-button :key="'savetolocker'" variant="outline-secondary" @click="getLockers(false, true)">
                             Save As
                           </b-button>
-                        </template>
-                        <template v-else>
-                          <b-button @click="getLockers(false, true)" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save As</b-button>
-                        </template>
                       </template>
                       <template v-else>
                         <b-button @click="setActionBeforeLogin('saveToLockerRoom')" :key="'loginmodalsavelockerroom'" variant="outline-secondary">Save As</b-button>
