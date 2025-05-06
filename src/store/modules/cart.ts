@@ -104,6 +104,19 @@ const Cart:Module<any, any> = {
 
       return address
     },
+    async getRecentUsedAddress({commit}) {
+      let address = null
+      const response = await http.get(`/addresses/recent-used`);
+      address = response.data.result
+      if (address){
+        commit('ADD_SHIPPING_ADDRESS',address)
+      }
+
+      return address
+    },
+    setAddressToNull({commit}){
+      commit('ADD_SHIPPING_ADDRESS',null);
+    },
     setCartLoading({commit},payload){
       commit('SET_CART_LOADING',payload);
     },

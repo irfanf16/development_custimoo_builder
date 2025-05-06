@@ -458,6 +458,8 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public total_product_count = 0;
   public product_names: Record<any, any>[] = [];
   public get_quote = this.$store.getters.getSetting('get_quote');
+  private isReorder = false;
+  private addressesLoaded = false; 
 
   get cartTotalPrice() {
     const {show_price} = this.$store.getters.getProductPriceObject
@@ -505,11 +507,17 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     this.can_finalize_order = true;
     this.total_product_count = 0;
     this.product_names = [];
+    const initialReorderState = this.isReorder;
+    this.isReorder = false;
+
     cItems.forEach((item:Record<any, any>) => {
       let uniqueProductContainer:Record<any, any> = [];
       let total_products_count = 0;
       item.factory_products.forEach((product:Record<any, any>) => {
         let product_count = 0;
+        if (product?.reorder_data?.order_id) {
+          this.isReorder = true;  
+        }
         item.factory_products.forEach((nestProduct:Record<any, any>) => {
           if(product.product_id == nestProduct.product_id){
             if(typeof nestProduct.product_roster_detail != 'undefined' && nestProduct.product_roster_detail != null){
@@ -541,6 +549,22 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       item.total_product_count = total_products_count;
       this.total_product_count += total_products_count;
     });
+
+    if(this.isReorder){
+      localStorage.setItem('is_reorder', String(this.isReorder));
+    }
+
+    if(!this.isReorder && localStorage.getItem('is_reorder')){
+      localStorage.removeItem('is_reorder');
+    }
+
+
+
+    if(initialReorderState === true && !this.isReorder && this.addressesLoaded){
+      // no reorder product left in the factory products array now reload the addresses.
+      this.$store.dispatch('setAddressToNull');
+      this.getAddresses();
+    }
 
     return cItems;
   }
@@ -645,8 +669,22 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
 
   public async getAddresses() {
+    this.addressesLoaded = true;
     this.$store.commit('SHOW_CART_MODAL', false);
-    let address = this.$store.getters.getShippingAddress
+    const isReorder = localStorage.getItem('is_reorder');
+    let address =null;
+    if (isReorder) {
+      
+      // Your logic here, e.g., pre-fill form, show alert, etc.
+      // get Last used address as for the case of reorder.
+      address = await this.$store.dispatch('getRecentUsedAddress');
+      this.shipping_address = address
+      // // Clear it after use
+      localStorage.removeItem('is_reorder');
+
+      return ;
+    }
+    address = this.$store.getters.getShippingAddress
     if (this.shipOnlyToStore) {
       this.shipping_address = this.$store.getters.getSetting('store_address');
     } else {
@@ -657,7 +695,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         this.shipping_address = address
       }
     }
-
   }
   public hide(){
     this.hideVModal('cart-modal');
@@ -728,7 +765,6 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     }
 
   }
-
 }
 </script>
 
