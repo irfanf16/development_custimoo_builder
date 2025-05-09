@@ -2224,7 +2224,11 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.pdf_generation_loading = true;
     this.showToast('Please wait your pdf is being generated', 'success');
     let cart_product: any = await getActiveProductData(this.products_fonts);
-    const shared_url = this.company.company_domain + '/#/share/' + cart_product.product_display_name.replace(/ /g, '+').replace(/\//g, '%2F') + '/' + random_string;
+    let company_domain = this.company.company_domain;
+    if(this.company.customizer_page_url){
+      company_domain = this.company.company_domain + (this.company.customizer_page_url.startsWith('/') ? this.company.customizer_page_url : '/' + this.company.customizer_page_url);
+    }
+    const shared_url = company_domain + '/#/share/' + cart_product.product_display_name.replace(/ /g, '+').replace(/\//g, '%2F') + '/' + random_string;
     let post_data = {
       factory_product: [cart_product],
       measurement_unit: this.settings.unit,
