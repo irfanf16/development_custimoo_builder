@@ -229,7 +229,7 @@
         this.tabIndex = index
         if (this.lockers[index]){
           this.room_id = this.lockers[index].id
-          this.productData = this.roomWithProducts[index].product;
+            this.productData = this.roomWithProducts[index]?.product || [];
         }
       }
 
