@@ -254,7 +254,7 @@
                   </div>
                 </div>
                 <template v-for="(product_roster_item, productRosterItemIndex) in product.product_roster">
-                  <div class="roster-row mb-2">
+                  <div class="roster-row mb-2" :key="`product-roster-item-${productRosterItemIndex}`">
                     <div class="align-left">
                       <template v-if="product.allow_name_number === 1">
                         <div class="roster-name">
@@ -267,11 +267,11 @@
                         </div>
                       </template>
                       <div class="shirt-size">
-                        <b-form-select :value="product_roster_item.size_index"
-                                       @change="handleRosterUpdate($event, product_roster_item, 'size')">
+                        <b-form-select v-model="product_roster_item.size"
+                                       @change="handleRosterUpdate($event)">
                           <template v-for="(product_size, productSizeIndex) in product.product_sizes">
                             <b-form-select-option :key="`product-roster-size-${productSizeIndex}`"
-                                                  :value="productSizeIndex">
+                                                  :value="product_size.label">
                               {{ product_size.label }}
                             </b-form-select-option>
                           </template>
@@ -631,15 +631,8 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
   * this method is used to handle size update and to set the boolean whether to show roster update warning or not.
   * Rest the two-way binding is being handled by v-model
   * */
-  public handleRosterUpdate(event, product_roster_item={}, type=null) {
+  public handleRosterUpdate(event) {
     this.show_roster_warning = true
-    if(type === "size") {
-      //in case of size the event will be the size index
-      const selected_size = this.product.product_sizes[event];
-      product_roster_item['size_index'] = event
-      product_roster_item['size'] = selected_size.label
-      product_roster_item['code'] = selected_size.label
-    }
     this.handleAddonSelectionUpdate()
   }
 
@@ -652,12 +645,11 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
   }
 
   public async handleLockerProductChange(event) {
-    const self = this as Record<any, any>;
     const locker_selected_product_id = event.target.value;
     let selected_product_roster: any = null
     if(locker_selected_product_id) {
       selected_product_roster = find(this.selected_locker_room_products, ['id', parseInt(locker_selected_product_id)])?.product_roster_detail
-      this.formatLockerProductRoster(selected_product_roster)
+      selected_product_roster
     }
     // if(selected_product_roster) {
     if(this.show_roster_warning) {
@@ -684,14 +676,6 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
       await this.handleAddonSelectionUpdate()
     }
 
-  }
-
-  public formatLockerProductRoster(locker_product_roster) {
-    locker_product_roster.forEach(selected_product_roster_item => {
-      selected_product_roster_item.code = selected_product_roster_item.size
-      let size_index = findIndex(this.product.product_sizes, ["label", selected_product_roster_item.size])
-      selected_product_roster_item.size_index = size_index < 0 ? 0 : size_index
-    })
   }
 
   public async handleAddonSelectionUpdate() {
@@ -1195,8 +1179,6 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
           if (files) {
             ext = files.name.split('.').pop();
           }
-          const updated_roster:Record<any, any>[] = []
-          let derived_size_index = -1
           if (ext != 'xlsx'){
             alert("please upload a valid excel file");
             this.showLoader = false;
@@ -1218,11 +1200,6 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
                 this.product.product_roster = []
                 rows.forEach((row: any[], index:number)=>{
                   if(index){
-                    this.product.product_sizes.forEach((size_item:Record<any, any>, size_index:number)=>{
-                      if(size_item.label ==row[2]){
-                        derived_size_index = size_index
-                      }
-                    })
                     const typeof_number = typeof row[1];
                     if(typeof_number === "number") {
                       row[1] = row[1].toString();
@@ -1237,9 +1214,7 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
                     const roster:any = {
                       "text": row[0],
                       "number": row[1],
-                      "size_index": derived_size_index,
                       "size": row[2],
-                      "code": row[2],
                       "quantity": row[3],
                       "information": ""
                     }

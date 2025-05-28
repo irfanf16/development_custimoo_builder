@@ -148,9 +148,9 @@
             <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1)}">
               <b-form-select @focus="handleRosterItemFocus(productRosterItemIndex)"
                              @change="handleRosterUpdate($event, 'size', productRosterItemIndex)"
-                             :value="product_roster_item.size_index" ref="size-select"
+                             :value="product_roster_item.size" ref="size-select"
               >
-                <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
+                <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="productSize.text">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
               <div v-if="false" class="tooltip guide">Press enter to view the options</div>
@@ -252,9 +252,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
   public obj = {
     text: '',
     number: '',
-    size_index: '',
     size: '',
-    code: '',
     quantity: 5,
     information: ''
   };
@@ -447,7 +445,7 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
         size_index = 0
         roster_size = this.productSizes[0].text
       }
-      return Object.assign(roster_item, {code: roster_size, size: roster_size, size_index: size_index})
+      return Object.assign(roster_item, { size: roster_size })
     })
     self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
     let first_roster_item = roster_items[0]

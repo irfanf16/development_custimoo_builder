@@ -1130,7 +1130,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       this.showToast('Quantity cannot be 0 or empty', 'error');
       return false;
     }
-    if (roster.some(el => (parseInt(el.quantity) > 0 &&  (el.size=="" || el.size == null || parseInt(el.size_index) < 0)  ))) {
+    if (roster.some(el => (parseInt(el.quantity) > 0 &&  (el.size=="" || el.size == null)  ))) {
       this.showToast(`Please provide size for all roster items`, "error");
       const is_mobile_screen = this.$store.getters.getMobileScreen
       if(!is_mobile_screen){

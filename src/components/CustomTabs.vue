@@ -243,7 +243,6 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
     let payload = getRosterDetailDefaultObject()
     if(this.sizeOptions.length > 0) {
       payload.size = this.sizeOptions[0].text;
-      payload.code = this.sizeOptions[0].value;
     }
     let product_id = this.selectedProduct.id
     if (p_id){

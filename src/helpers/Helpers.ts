@@ -803,9 +803,7 @@ const getRosterDetailDefaultObject = (product = Store.getters.getSelectedProduct
     return {
       text: '',
       number: '',
-      size_index: 0,
       size: productSizes[0].name,
-      code: productSizes[0].name,
       quantity: 1,
       information: ''
     }
@@ -1501,7 +1499,7 @@ const transformUnit = (dimension_px:number,unit_value:string) => {
 
 const rosterDefaultItem = () => {
   return {
-    text: '',  number: '',  size_index: 0,  size: '',  code: '', quantity: 1, information: ''
+    text: '', number: '', size: '', quantity: 1, information: ''
   }
 }
 

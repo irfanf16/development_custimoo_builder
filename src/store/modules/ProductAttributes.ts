@@ -1210,10 +1210,8 @@ const ProductAttributes:Module<any, any> = {
             const product_sizes = get_product_from_id ?  get_product_from_id?.sizes[0]?.json_data : []
             //@ts-ignore
             payload_product_roster.forEach(payload_product_roster_item => {
-              if(isAbandonedSize(product_sizes, payload_product_roster_item.code)) {
-                payload_product_roster_item.size_index = 0
+              if(isAbandonedSize(product_sizes, payload_product_roster_item.size)) {
                 payload_product_roster_item.size = product_sizes[0].name
-                payload_product_roster_item.code = product_sizes[0].name
               }
             })
           }
@@ -1225,19 +1223,15 @@ const ProductAttributes:Module<any, any> = {
           const product_sizes = get_product_from_id ?  get_product_from_id?.sizes[0]?.json_data : []
           if('roster_index' in payload) {
             let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
-            if(payload.roster_data.code && isAbandonedSize(product_sizes, payload.roster_data.code)) {
-              product_roster_item.size_index = 0
+            if (payload.roster_data.size && isAbandonedSize(product_sizes, payload.roster_data.size)) {
               product_roster_item.size = product_sizes[0].name
-              product_roster_item.code = product_sizes[0].name
             }
             product_roster_item = Object.assign(product_roster_item, payload.roster_data)
             Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
           } else {
             payload.roster_data.forEach( payload_product_roster_item => {
-              if( isAbandonedSize(product_sizes, payload_product_roster_item.code)) {
-                payload_product_roster_item.size_index = 0
+              if(isAbandonedSize(product_sizes, payload_product_roster_item.size)) {
                 payload_product_roster_item.size = product_sizes[0].name
-                payload_product_roster_item.code = product_sizes[0].name
               }
             })
             Vue.set(state.products_rosters, payload.product_id, payload.roster_data)
@@ -1253,7 +1247,7 @@ const ProductAttributes:Module<any, any> = {
               } else {
                 const default_roster_item = rosterDefaultItem()
                 const product_first_size_name = product.sizes.length > 0 ? product.sizes[0].json_data[0].name : '';
-                const roster_item = Object.assign(default_roster_item, {size: product_first_size_name,  code: product_first_size_name})
+                const roster_item = Object.assign(default_roster_item, {size: product_first_size_name})
                 products_rosters[product.id] = [roster_item]
               }
             })

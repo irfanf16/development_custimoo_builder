@@ -48,14 +48,11 @@
           <td style="width: 10%; text-align: center">
             <b-form-select @focus="handleRosterItemFocus(index)"
                            @change="handleRosterUpdate($event, 'size', index)"
-                           :value="roster.size_index" ref="myInputs"
+                           :value="roster.size" ref="myInputs"
             >
-              <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
+              <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="productSize.text">
                 {{ productSize.text }}</b-form-select-option>
             </b-form-select>
-<!--            <b-form-select ref="myInputs" @input="updateRosterSize($event, roster)" v-model="roster.size_index">-->
-<!--              <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx" >{{productSize.name}}</b-form-select-option>-->
-<!--            </b-form-select>-->
           </td>
           <td style="width: 10%; text-align: center">
             <div class="qty">
@@ -191,13 +188,6 @@ export default class RosterTableMobile extends Mixins(RosterTabMixin) {
   public getOccurence(val: string) {
     let count = (val.match(/\*/g) || []).length;
     return count
-  }
-  public updateRosterSize(selected_size_index: number, roster: Record<any, any>) {
-    let selected_size = this.productSizes[selected_size_index];
-    if(selected_size){
-      roster.size = selected_size.name
-      roster.code = selected_size.code
-    }
   }
   public onChange(event: Record<any, any>){
     let status = true;

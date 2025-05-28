@@ -201,7 +201,6 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     let payload = getRosterDetailDefaultObject(product)
     if(this.sizeOptions.length > 0) {
       payload.size = this.sizeOptions[0].text;
-      payload.code = this.sizeOptions[0].value;
     }
     this.$store.dispatch('setRosterDetails', { pid : product.id, index: index, roster: payload })
   }

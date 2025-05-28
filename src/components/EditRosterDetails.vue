@@ -155,8 +155,8 @@
                       </div>
                     </template>
                     <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_exists || custom_number_exists)}">
-                      <b-form-select :value="product_roster_item.size_index" @input="handleRosterItemUpdate($event, 'size', productRosterItemIndex)">
-                        <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="psIdx">
+                      <b-form-select :value="product_roster_item.size" @input="handleRosterItemUpdate($event, 'size', productRosterItemIndex)">
+                        <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="productSize.text">
                           {{ productSize.text }}</b-form-select-option>
                       </b-form-select>
                       <div v-if="false" class="tooltip guide">Press enter to view the options</div>
@@ -248,9 +248,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   public default_obj = {
     text: '',
     number: '',
-    size_index: 0,
     size: '',
-    code: '',
     quantity: 1,
     information: ''
   };
@@ -266,7 +264,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   public product_back_url = null;
   public product_front_url = null
   public productSizes: Array<Record<any, any>> = [];
-  public product_id:number = 0
+  public product_id = 0
   public size_image_url = null
   public allow_name_number = true;
   public show_roster_change_warning = false;
@@ -400,7 +398,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
           roster_size = this.productSizes[0].text
         }
       }
-      return Object.assign(roster_item, {code: roster_size, size: roster_size, size_index: size_index})
+      return Object.assign(roster_item, { size: roster_size })
     })
     this.product_locker_roster = roster_items;
   }
@@ -416,21 +414,9 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
           roster_size = this.productSizes[0].text
         }
       }
-      return Object.assign(roster_item, {code: roster_size, size: roster_size, size_index: size_index})
+      return Object.assign(roster_item, {size: roster_size})
     })
     this.product_locker_roster = roster_items;
-  }
-
-  public resetRosterItem(roster_item: Record<any, any>) {
-    roster_item = JSON.parse(JSON.stringify(roster_item))
-    const lastRosterIndex = this.product_locker_roster.length - 1;
-    const lastRosterSize = this.product_locker_roster[lastRosterIndex].size;
-    const lastItemSizeIndex = this.productSizes.findIndex((size) => {
-      return size.value === lastRosterSize;
-    })
-    return Object.assign(roster_item, {
-      text: '',  number: '',  size_index: lastItemSizeIndex,  size: lastRosterSize,  code: lastRosterSize, quantity: 1, information: ''
-    })
   }
 
   public async removeRosterItem(roster_item_index) {
@@ -446,15 +432,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   }
 
   public handleRosterItemUpdate( newValue, property, roster_index){
-    if(property === 'size'){
-      let size = this.productSizes[newValue]
-      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], [property]: size?.value });
-      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], ['code']: size?.value });
-      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], ['size_index']: newValue });
-    }
-    else {
-      this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], [property]: newValue });
-    }
+    this.product_locker_roster.splice(roster_index, 1, { ...this.product_locker_roster[roster_index], [property]: newValue });
   }
 
   public updateRoster(){
@@ -514,9 +492,7 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
           }
           else{
             const InitialMidSizeIndex = Math.ceil((this.productSizes.length - 1)/2);
-            this.default_obj.code = this.productSizes[InitialMidSizeIndex].value;
             this.default_obj.size = this.productSizes[InitialMidSizeIndex].value;
-            this.default_obj.size_index = InitialMidSizeIndex;
           }
           this.show()
 

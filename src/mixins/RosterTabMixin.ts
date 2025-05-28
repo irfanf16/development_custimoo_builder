@@ -50,11 +50,10 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
   public async addRosterItem(productSizes:Record<any, any>[]) {
     const self: Record<any, any> = this;
     this.show_roster_change_warning = true
-    let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0], productSizes)));
-    let size_index = roster_items.size_index;
+    let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.productRoster[0])));
     roster_items = [...this.productRoster, roster_items];
-    self.$store.dispatch('setProductsRosters', {product_id: self.selectedProduct.id, roster_data: roster_items})
-    await this.handleRosterUpdate(size_index, 'size', roster_items.length - 1)
+    self.$store.dispatch('setProductsRosters', {product_id: this.selectedProduct.id, roster_data: roster_items})
+    await this.handleRosterUpdate(roster_items[roster_items.length - 1].size, 'size', roster_items.length - 1)
     await handleProductPriceUpdate()
   }
 
@@ -64,20 +63,16 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     await handleProductPriceUpdate()
   }
 
-
-  public resetRosterItem(roster_item: Record<any, any>, productSizes:Record<any, any>[]) {
+  public resetRosterItem(roster_item: Record<any, any>) {
     roster_item = JSON.parse(JSON.stringify(roster_item))
     const lastRosterIndex = this.productRoster.length - 1;
     const lastRosterSize = this.productRoster[lastRosterIndex].size;
-    const lastItemSizeIndex = productSizes.findIndex((size) => {
-      return size.value === lastRosterSize;
-    })
     return Object.assign(roster_item, {
-      text: '',  number: '',  size_index: lastItemSizeIndex,  size: lastRosterSize,  code: lastRosterSize, quantity: 1, information: ''
+      text: '',  number: '', size: lastRosterSize, quantity: 1, information: ''
     })
   }
 
-  public async handleRosterUpdate(updated_val:string, type: string, roster_index: number) {
+  public async handleRosterUpdate(updated_val: number, type: string, roster_index: number) {
     if(this.getProductEditInfoObject.editing && this.getProductEditInfoObject.type == 'locker_product'){
       this.$store.commit('SET_HIDE_SAVE_LOCKER_BUTTON', false)
     }else{
@@ -90,13 +85,6 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     const product_id = self.selectedProduct.id;
     const roster_data = {
       [roster_updated_key] : updated_val
-    }
-    if(type == 'size') {
-      // in case of type size the updated value will have selected size index
-      const selected_size = self.productSizes[updated_val]
-      roster_data['size_index'] = updated_val
-      roster_data['size'] = selected_size.value
-      roster_data['code'] = selected_size.value
     }
     self.$store.dispatch('setProductsRosters', {product_id: product_id, roster_index: roster_index, roster_data: roster_data})
     if(type == "quantity" || (type == 'size' && isEcommercePlatform() && this.selectedProduct.ecommerceproduct[0].size_variants)) {
@@ -121,7 +109,6 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     const files = $event.target.files ? $event.target.files[0] : null;
     const ext = files.name.split('.').pop();
     const updated_roster:Record<any, any>[] = []
-    let derived_size_index = -1
     if (ext != 'xlsx'){
       alert("The Excel file that was uploaded cannot be read, or it does not adhere to the template format. Please download the Excel template located next to the upload field, input your data there, and then attempt the upload again.");
       this.showLoader = false;
@@ -142,11 +129,6 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
       }else if(check_cols){
         rows.forEach((row: any[], index:number)=>{
           if(index){
-            this.selectedProduct.sizes[0].json_data.forEach((size_item:Record<any, any>, size_index:number)=>{
-              if(size_item.name ==row[2]){
-                derived_size_index = size_index
-              }
-            })
             const typeof_number = typeof row[1];
             if(typeof_number === "number") {
               row[1] = row[1].toString();
@@ -161,9 +143,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
             const roster:any = {
               "text": row[0],
               "number": row[1],
-              "size_index": derived_size_index,
               "size": row[2],
-              "code": row[2],
               "quantity": row[3],
               "information": ""
             }
