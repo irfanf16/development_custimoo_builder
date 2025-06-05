@@ -16,7 +16,7 @@
             <div class="fs-4 font-weight-bolder order-title p-2">Order pending confirmation</div>
           </template>
         </template>
-        <div class="font-weight-bolder d-flex order-title p-2" v-if="!onlyCompanyOrderTab()">
+        <div class="font-weight-bolder d-flex order-title p-2" v-if="!isEcomCompanyWithOrderTab()">
           <template v-if="is_quote_order && show_quote_buttons">
             <button class="btn btn-secondary mx-2 cursor-pointer fs-2" @click.stop="acceptQuote()">Accept Quote</button>
             <button class="btn btn-danger mx-2 cursor-pointer fs-2" @click.stop="rejectQuote(false)" >Reject Quote</button>
@@ -526,7 +526,7 @@ import {
   base64ToFile,
   isBase64File,
   isEcommercePlatform,
-  onlyCompanyOrderTab
+  isEcomCompanyWithOrderTab
 } from "@/helpers/Helpers";
 import AddUpdateComment from "@/components/AddUpdateComment.vue";
 import ActivityStatusIcons from "@/components/ActivityStatusIcons.vue";
@@ -557,7 +557,7 @@ import QuoteModal from "@/components/QuoteModal.vue";
          this.order_id = this.$route.query.order_id;
        }
      } else if(this.company.platform == "shopify" || this.company.platform == "bigcommerce") {
-      if(onlyCompanyOrderTab()){
+      if(isEcomCompanyWithOrderTab()){
         this.order_id = this.$route.query.order_id;
       }else {
         this.order_id = this.ecommerce_order_id;
@@ -695,8 +695,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   /*
   * data props starts
   * */
-  public onlyCompanyOrderTab() {
-    return onlyCompanyOrderTab()
+  public isEcomCompanyWithOrderTab() {
+    return isEcomCompanyWithOrderTab()
   }
 
   public activity_navigation_index = 0
@@ -773,7 +773,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
             self.showToast(response_data.message, "error")
             self.$router.push({name: "CustomerOrders"})
           } else {
-            if(onlyCompanyOrderTab()) {
+            if(isEcomCompanyWithOrderTab()) {
               self.showToast(response_data.message, "error")
             }
             console.log('Custimoo Order : ', response_data.message)

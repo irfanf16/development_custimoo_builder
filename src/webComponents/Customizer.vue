@@ -1,6 +1,6 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
-    <Navbar v-if="onlyCompanyOrderTab()" />
+    <Navbar v-if="isEcomCompanyWithOrderTab()" />
     <router-view />
   </div>
 </template>
@@ -9,7 +9,7 @@ import router from './router'
 import store from '../store'
 import {dom} from '@fortawesome/fontawesome-svg-core'
 import CommonImportMixin from '../mixins/CommonImportMixin.vue'
-import { getDomDocument, onlyCompanyOrderTab } from '../helpers/Helpers'
+import { getDomDocument, isEcomCompanyWithOrderTab } from '../helpers/Helpers'
 import Navbar from '@/components/Navbar.vue';
 
 export default {
@@ -49,7 +49,7 @@ export default {
     customizer?.shadowRoot.appendChild(style2)
   },
   methods:{
-    onlyCompanyOrderTab
+    isEcomCompanyWithOrderTab
   }
 }
 </script>
