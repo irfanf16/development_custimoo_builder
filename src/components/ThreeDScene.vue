@@ -532,7 +532,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       if (item.id) {
         item.set('id', item.id.split('_')[0])
         item.id = item.id.toLowerCase()
-        if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
+        if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !item.id.includes('anchor') && !this.containsObject({id: item.id})) {
           let count = 1
           if (item.id == 'base') {
             count = 100000 // to make base always at first color position
@@ -992,6 +992,84 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     })
   }
 
+  public findMostLeftAndTopElements(design: fabric.Group) {
+    if (!design || !design._objects) {
+      return { maxLeft: 0, maxTop: 0 };
+    }
+
+    let maxLeft = Infinity;
+    let maxTop = Infinity;
+
+    design._objects.forEach((obj: any) => {
+      const left = obj.left ?? 0;
+      const top = obj.top ?? 0;
+
+      if (left < maxLeft) {
+        maxLeft = left;
+      }
+      if (top < maxTop) {
+        maxTop = top;
+      }
+    })
+
+    return {
+      maxLeft: maxLeft === Infinity ? 0 : maxLeft,
+      maxTop: maxTop === Infinity ? 0 : maxTop,
+    };
+  }
+
+  public applyAnchorDifferences(design: fabric.Group) {
+    // Find all objects with ID containing 'anchor' and group them
+    const anchorObjects = design._objects?.filter(obj => (obj as any).id?.toLowerCase().includes('anchor')) as fabric.Image[];
+    if (anchorObjects && anchorObjects.length > 0) {
+      const anchorGroup = new fabric.Group(this.cloneFabricObjects(anchorObjects), {
+        hasControls: false,
+        selectable: false,
+        evented: false,
+        lockMovementX: true,
+        lockMovementY: true,
+        flipY: true
+      });
+
+      // Scale the anchor group to match the canvas resolution
+      anchorGroup.scaleToHeight(this.canvasResolution).set({
+        left: 0x0,
+        top: 0x0
+      }).setCoords();
+
+      design.set({
+        scaleX: anchorGroup.scaleX,
+        scaleY: anchorGroup.scaleY
+      }).setCoords()
+
+      const { maxLeft, maxTop } = this.findMostLeftAndTopElements(design);
+      let diffX = 0;
+      let diffY = 0;
+      const anchorLeft = anchorObjects[0]?.left ?? 0;
+      const anchorTop = anchorObjects[0]?.top ?? 0;
+      // Calculate difference ensuring maxLeft/maxTop is treated as the smaller number
+      if(maxLeft < 0 && anchorLeft < 0) {
+        diffX = Math.abs(maxLeft - anchorLeft) * (anchorGroup.scaleX ?? 1);
+      } else {
+        diffX = Math.abs(anchorLeft - maxLeft) * (anchorGroup.scaleX ?? 1);
+      }
+      if(maxTop < 0 && anchorTop < 0) {
+        diffY = Math.abs(maxTop - anchorTop) * (anchorGroup.scaleY ?? 1);
+      } else {
+        diffY = Math.abs(anchorTop - maxTop) * (anchorGroup.scaleY ?? 1);
+      }
+      
+      // Adjust the design position to center it relative to the anchor
+      const currentLeft = design.left ?? 0;
+      const currentTop = design.top ?? 0;
+      const designAndCanvasHeightDiff = design.getScaledHeight() - this.canvasResolution
+      design.set({
+        left: currentLeft - diffX,
+        top: currentTop - (designAndCanvasHeightDiff - diffY)
+      }).setCoords();
+    }
+  }
+
   public addDesign(designUrl: string) {
     return new Promise((resolve, reject) => {
       fabric.loadSVGFromURL(this.storage_url + designUrl, (objects: any, options: any) => {
@@ -1016,6 +1094,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         this.canvas.add(img).renderAll()
         img.sendBackwards()
 
+        this.applyAnchorDifferences(img)
         this.design = img
 
         resolve('done')

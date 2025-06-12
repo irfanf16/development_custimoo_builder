@@ -1102,7 +1102,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     design.forEach((item: Record<any, any>) => {
       if(item.id) {
         item.id = item.id?.toLowerCase()
-        if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !this.containsObject({id: item.id})) {
+        if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !item.id.includes('anchor') && !this.containsObject({id: item.id})) {
           let count = 1
           if (item.id == 'base') {
             count = 100000 // to make base always at first color position
