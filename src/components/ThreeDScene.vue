@@ -682,6 +682,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       }
       await this.getSvgGroups()
 
+      await this.renderScene() // render scene must be call before calling any function that find position on 3d
+      this.controls.update()
+      this.animate()
+
       await this.addFixedLogos()
 
       await this.applyAllPatterns()
