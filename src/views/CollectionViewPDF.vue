@@ -138,7 +138,7 @@
     <div>
       <CollectionPDF ref="collection" :collection="collection"/>
     </div>
-    <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()"/>
+    <LoginForm ref="loginModal" :is_absolute="false" @actionAfterLogin="actionAfterLogin()"/>
     <template>
       <modal id="modal-scrollable" :width="screenWidth"
              :resizable="true"
@@ -169,7 +169,9 @@
       <AddLockerRoomModal :locker_room_product="locker_room_product"
                           :locker_room_product_type="'collection_product'"
                           :frontPreview="`${storageUrl}${locker_room_product.front_image}`"
-                          :backPreview="`${storageUrl}${locker_room_product.back_image}`" ref="saveToLockerModal"/>
+                          :backPreview="`${storageUrl}${locker_room_product.back_image}`"
+                          :is_absolute="false"
+                          ref="saveToLockerModal"/>
     </template>
     <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer"/>
     <confirm-modal message="Do you really want to delete?" cancel_text="Cancel" confirm_text="Yes" name="delete-cart-item" ref="delete-cart-item"></confirm-modal>

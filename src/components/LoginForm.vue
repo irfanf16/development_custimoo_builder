@@ -5,7 +5,7 @@
            :scrollable="true"
            height="auto"
            :reset="true"
-           :shiftY="0" name="loginModal" ref="loginModal" id="modal-login" class="login-modal absolute-modals" size="lg" hide-title hide-footer>
+           :shiftY="0" name="loginModal" ref="loginModal" id="modal-login" class="login-modal" :class="{'absolute-modals': is_absolute}" size="lg" hide-title hide-footer>
       <div class="modal-header d-flex justify-content-between">
         <span class="fs-5 font-weight-bold d-inline-flex p-2">Login</span>
         <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hide"><BIconX /></span>
@@ -232,7 +232,7 @@
 </template>
 
 <script lang="ts">
-  import {Vue, Component, Mixins } from 'vue-property-decorator'
+  import {Vue, Component, Mixins, Prop } from 'vue-property-decorator'
   import ErrorMessages from "@/mixins/ErrorMessages";
   import {getPermissions, hasCompanyPermission} from "@/helpers/Helpers";
   import {http} from "@/httpCommon";
@@ -254,7 +254,7 @@
     }
   })
   export default class LoginForm extends Mixins(ErrorMessages, ModalAction) {
-
+    @Prop({required: false, default: true}) readonly is_absolute !: boolean;
     public ref = this.$refs as Record<any, any>
     private screenWidth = (window.screen.availWidth - 100)
     public countries:Record<any,any> = [];
