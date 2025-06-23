@@ -128,9 +128,9 @@
       </b-collapse>
     </b-card>
 
-    <b-card no-body v-if="customLogos && customLogos.length > 0">
+    <b-card no-body v-if="customTexts && customTexts.length > 0">
       <b-card-header header-tag="header" class="p-1" role="tab">
-        <b-button block v-b-toggle.accordion-5 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Text & Number Sizes</span> <span
+        <b-button block v-b-toggle.accordion-5 class="p-3 d-flex align-items-center justify-content-between"><span class="d-block">Text & Number</span> <span
           class="accordion-icon"></span></b-button>
       </b-card-header>
       <b-collapse id="accordion-5" accordion="my-accordion" role="tabpanel">
@@ -139,14 +139,13 @@
             <div v-if="customTexts && maintabindex > 2" class="overflow-hidden roster-details-table">
               <div class="roster-row head d-flex flex-wrap align-items-center justify-content-between">
                 <span class="name">Field</span>
-                <span>Height</span>
+                <span>Value</span>
 <!--                <span>Width</span>-->
               </div>
               <template v-for="(text, index) in customTexts">
-                <div :key="index" v-if="text.text" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
-                  <span class="name">FAISAL</span>
-                  <span class="name">{{ text.name_of_placement }}</span>
-                  <span>{{ unit_conversion(text.originalWidth)  + ' x ' + unit_conversion(text.originalHeight) }}</span>
+                <div :key="index" v-if="text.value" class="roster-row d-flex flex-wrap align-items-center justify-content-between">
+                  <span class="name">{{ text.label }}</span>
+                  <span>{{ text.value }}</span>
                 </div>
               </template>
             </div>
@@ -160,7 +159,6 @@
 <script lang="ts">
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import {filter, findIndex} from 'lodash'
-import { unitConversion } from '@/helpers/Helpers'
 import {RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 
@@ -232,11 +230,6 @@ export default class OrderAccordionTab extends Mixins(RosterDetailsGlobal, Modal
 
   public checkIndex(text_type: string) {
     return findIndex(this.customTexts, { type: text_type })
-  }
-
-  public unit_conversion(value: number): string {
-    const converted = unitConversion(value)
-    return converted!.value + converted!.unit
   }
 
   public notVectorLogosCount(){

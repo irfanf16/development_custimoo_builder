@@ -90,7 +90,6 @@ import {
   getSelectedProductPantones,
   hideLockerProductUpdateButton, santaClone,
   setUndoRedoItems,
-  unitConversion,
   selectedDesign, getPermutation
 } from '@/helpers/Helpers'
 import {find, unset} from "lodash";
@@ -175,7 +174,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   private front_boundary: fabric.Image[] = []
   private back_boundary: fabric.Image[] = []
   private addon_objects: fabric.Group[][] = []
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
   private custom_logo_objects: any[] = []
   private mounted = false
   private front_models: fabric.Image[]= []
@@ -214,7 +212,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public is_back_dragging = false
   public product_custom_texts: Record<any, any>[] = []
   public product_custom_text_objects: Record<any, any>[][] = []
-  private storage_url = process.env.VUE_APP_STORAGE_URL
   private front_time
   private back_time
   private mounted_time
@@ -321,18 +318,22 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     this.frontCanvasRender()
   }
 
-  public async applyAllPatterns() {
+  public async applyAllPatterns(from_load = false) {
     if (this.svgGroups) {
+      let render_time = 300
+      if(this.mainPreview && !from_load) {
+        render_time = 0
+      }
       await Promise.all(
         this.svgGroups.map((svgGroup: Record<any, any>) =>
-          this.applyPattern(svgGroup.id, 300, false)
+          this.applyPattern(svgGroup.id, render_time, false)
         )
       )
     }
   }
 
   public removePattern(design: any, pattern_objects: any, svg_part, side = 'front', render_time) {
-    const patternId = `pattern_${svg_part}`;
+    const patternId = `pattern_group_${svg_part}`;
     design._objects = design._objects.filter(obj => obj.id !== patternId);
     this.regroupDesign(design._objects, side);
 
@@ -346,7 +347,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     }
   }
 
-  public async applyPattern(svg_part: string, render_time = 0, re_stack = true): Promise<void> {
+  public async applyPattern(svg_part: string, render_time = 300, re_stack = true): Promise<void> {
     if (this.front_patterns[svg_part]) {
       this.removePattern(this.frontDesign, this.front_patterns, svg_part, 'front', render_time)
     }
@@ -360,196 +361,154 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       );
 
       if (pattern_data) {
-        const pattern_url = pattern_data.path;
-        return new Promise((resolve) => {
-          fabric.loadSVGFromURL(`${this.storageUrl}${pattern_url}?q=${pattern_data.random_string}`, (objects: any, options: any) => {
-            if(objects.length) {
-              options.crossOrigin = 'Anonymous';
-              const img = fabric.util.groupSVGElements(objects) as fabric.Group;
+        const designSides = ['front'];
+        if (this.back) {
+          designSides.push('back');
+        }
 
-              if (this.groupPatterns[svg_part].color?.value) {
-                img.fill = this.groupPatterns[svg_part].color.value;
-              }
+        for (const side of designSides) {
+          let design = this.frontDesign;
+          let canvas = this.frontCanvas;
+          let zoom_point = this.front_zoom_point;
+          let patterns = this.front_patterns;
+          
+          if (side === 'back') {
+            design = this.backDesign;
+            canvas = this.backCanvas;
+            zoom_point = this.back_zoom_point;
+            patterns = this.back_patterns;
+          }
 
-              const patternSourceCanvas = new fabric.StaticCanvas(null);
-              patternSourceCanvas.setDimensions({
-                width: img.getScaledWidth(),
-                height: img.getScaledHeight(),
-              });
-
-              patternSourceCanvas.add(img);
-              patternSourceCanvas.renderAll();
-
-              const pattern = new fabric.Pattern({
-                // @ts-ignore
-                source: patternSourceCanvas.getElement(),
-                repeat: 'repeat'
-              });
-
-              const designSides = ['front'];
-              if (this.back) {
-                designSides.push('back');
-              }
-
-              designSides.forEach((side) => {
-                let designObjects = this.frontDesign._objects ? this.frontDesign._objects : [this.frontDesign];
-                let canvas = this.frontCanvas
-                let design = this.frontDesign
-                let zoom_point = this.front_zoom_point
-                if (side == 'back') {
-                  designObjects = this.backDesign._objects ? this.backDesign._objects : [this.backDesign];
-                  canvas = this.backCanvas;
-                  design = this.backDesign
-                  zoom_point = this.back_zoom_point
-                }
-                const scale_min_received = 10, scale_max_received = 100;
-                const scale_min = -100, scale_max = 400;
-
-                const scale_value_received = parseInt(this.groupPatterns[svg_part].scale);
-
-                const scale_value = ((scale_value_received - scale_min_received) / (scale_max_received - scale_min_received)) * (scale_max - scale_min) + scale_min;
-
-                const scale = (scale_value + 400) / img.getScaledWidth()
-                const rotationAngle = this.groupPatterns[svg_part]?.angle || 0;
-                const angleInRadians = (rotationAngle * Math.PI) / 180;
-                const cos = Math.cos(angleInRadians);
-                const sin = Math.sin(angleInRadians);
-                const patternWidth = img.getScaledWidth();
-                const patternHeight = img.getScaledHeight();
-                const tx = (patternWidth / 2) * (1 - cos) * scale + (patternHeight / 2) * sin * scale;
-                const ty = (patternHeight / 2) * (1 - cos) * scale - (patternWidth / 2) * sin * scale;
-
-                pattern.patternTransform = [
-                  scale * cos,
-                  scale * sin,
-                  -scale * sin,
-                  scale * cos,
-                  -tx,
-                  -ty,
-                ];
-
-                let zoom = canvas.getZoom();
-                if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
-                  canvas.zoomToPoint({
-                    x: zoom_point.x,
-                    y: zoom_point.y
-                  }, 1);
-                }
-
-                designObjects.flat().forEach((designObject, index: number) => {
-                  if (designObject.id?.toLowerCase() === svg_part) {
-                    const patternRect = new fabric.Rect({
-                      left: designObject.left,
-                      top: designObject.top,
-                      width: designObject.width,
-                      height: designObject.height,
-                      hasControls: false,
-                      selectable: false,
-                      evented: false,
-                      originX: designObject.originX || 'left',
-                      originY: designObject.originY || 'top',
-                      lockMovementX: true,
-                      lockMovementY: true,
-                      absolutePositioned: true,
-                      // globalCompositeOperation: 'source-atop',
-                      fill: pattern,
-                    });
-
-                    let latest_design_objects = this.frontDesign._objects
-                    if(side == 'back') {
-                      latest_design_objects = this.backDesign._objects
-                    }
-
-                    const clipGroup = new fabric.Group(
-                      this.cloneFabricObjects(latest_design_objects),
-                      {
-                        hasControls: false,
-                        selectable: false,
-                        evented: false,
-                        originX: 'center',
-                        originY: 'center',
-                        lockMovementX: true,
-                        lockMovementY: true,
-                        absolutePositioned: true,
-                      }
-                    );
-
-                    const pattern_id = 'pattern_' + svg_part
-                    const occurrence_count = latest_design_objects.filter(obj => obj.id === pattern_id).length;
-                    const object_number = index + occurrence_count
-
-                    const objectToClip = clipGroup._objects.filter((obj, clip_id) => clip_id !== object_number);
-
-                    objectToClip.forEach((obj) => clipGroup.remove(obj));
-
-                    const groupWidth = clipGroup.width!;
-                    const groupHeight = clipGroup.height!;
-
-                    if(groupWidth > groupHeight) {
-                      clipGroup.scaleToWidth(this.canvasWidth - 10)
-                    } else {
-                      clipGroup.scaleToHeight(this.canvasHeight - 10)
-                    }
-                    clipGroup.center().setCoords()
-                    canvas.viewportCenterObject(clipGroup)
-
-                    patternRect.clipPath = clipGroup;
-
-                    Object.assign(patternRect, {
-                      id: pattern_id,
-                      side: side
-                    })
-
-                    let design_with_rect = this.cloneFabricObjects(latest_design_objects)
-
-                    // @ts-ignore
-                    design_with_rect.splice(object_number + 1, 0, patternRect);
-
-                    this.regroupDesign(design_with_rect, side)
-
-                    if(side == 'front') {
-                      this.front_patterns[svg_part] = patternRect;
-                    } else {
-                      this.back_patterns[svg_part] = patternRect;
-                    }
-                  }
-                });
-
-                if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
-                  canvas.zoomToPoint({
-                    x: zoom_point.x,
-                    y: zoom_point.y
-                  }, zoom);
-                }
-
-                if (re_stack) {
-                  const all_fabric_object = [
-                    ...this.fixed_logo_objects,
-                    ...this.other_side_fixed_logos,
-                    ...this.custom_logo_objects,
-                    ...this.other_side_logos,
-                    ...this.product_custom_text_objects.flat(),
-                    ...this.otherSideTexts
-                  ].filter((obj) => obj !== null && obj !== undefined)
-
-                  this.reStackObjectsInCanvas(all_fabric_object);
-                }
-
-                if (side == 'front') {
-                  this.frontCanvasRender(render_time);
-                } else {
-                  this.backCanvasRender(render_time);
-                }
-              });
-
-              resolve(); // Resolve after all processing is complete
+          // Check if pattern already exists for this side
+          let pattern = patterns[svg_part]?.fill;
+          if (!pattern) {
+            pattern = await this.setupPattern(svg_part, pattern_data, design, 1300);
+            if (!pattern) {
+              continue;
             }
-          })
-        })
+          }
+
+          let zoom = canvas.getZoom();
+          if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
+            canvas.zoomToPoint({
+              x: zoom_point.x,
+              y: zoom_point.y
+            }, 1);
+          }
+
+          const designObjects = design._objects ? design._objects : [design];
+          designObjects.flat().forEach((designObject, index: number) => {
+            if (designObject.id?.toLowerCase() === svg_part) {
+              let latest_design_objects = this.frontDesign._objects;
+              if(side === 'back') {
+                latest_design_objects = this.backDesign._objects;
+              }
+
+              const clipGroup = new fabric.Group(
+                this.cloneFabricObjects(latest_design_objects),
+                {
+                  hasControls: false,
+                  selectable: false,
+                  evented: false,
+                  originX: 'center',
+                  originY: 'center',
+                  lockMovementX: true,
+                  lockMovementY: true,
+                  absolutePositioned: true,
+                }
+              );
+
+              const pattern_id = `pattern_group_${svg_part}`
+              const occurrence_count = latest_design_objects.filter(obj => obj.id === pattern_id).length;
+              const object_number = index + occurrence_count;
+
+              const objectToClip = clipGroup._objects.filter((obj, clip_id) => clip_id !== object_number);
+              objectToClip.forEach((obj) => clipGroup.remove(obj));
+
+              const groupWidth = clipGroup.width!;
+              const groupHeight = clipGroup.height!;
+
+              if(groupWidth > groupHeight) {
+                clipGroup.scaleToWidth(this.canvasWidth - 10);
+              } else {
+                clipGroup.scaleToHeight(this.canvasHeight - 10);
+              }
+              clipGroup.center().setCoords();
+              canvas.viewportCenterObject(clipGroup);
+
+              const patternRect = new fabric.Rect({
+                left: designObject.left,
+                top: designObject.top,
+                width: designObject.width,
+                height: designObject.height,
+                hasControls: false,
+                selectable: false,
+                evented: false,
+                originX: designObject.originX || 'left',
+                originY: designObject.originY || 'top',
+                lockMovementX: true,
+                lockMovementY: true,
+                absolutePositioned: true,
+                fill: pattern,
+              });
+
+              Object.assign(patternRect, {
+                id: pattern_id
+              })
+
+              patternRect.clipPath = clipGroup;
+
+              if (occurrence_count > 0) {
+                pattern = fabric.util.object.clone(pattern)
+              }
+              Object.assign(pattern, {
+                id: `pattern_${svg_part}_${occurrence_count}`
+              })
+
+              let design_with_rect = this.cloneFabricObjects(latest_design_objects);
+              // @ts-ignore
+              design_with_rect.splice(object_number + 1, 0, patternRect);
+
+              this.regroupDesign(design_with_rect, side);
+
+              if(side === 'front') {
+                this.front_patterns[svg_part] = patternRect;
+              } else {
+                this.back_patterns[svg_part] = patternRect;
+              }
+            }
+          });
+
+          if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
+            canvas.zoomToPoint({
+              x: zoom_point.x,
+              y: zoom_point.y
+            }, zoom);
+          }
+
+          if (re_stack) {
+            const all_fabric_object = [
+              ...this.fixed_logo_objects,
+              ...this.other_side_fixed_logos,
+              ...this.custom_logo_objects,
+              ...this.other_side_logos,
+              ...this.product_custom_text_objects.flat(),
+              ...this.otherSideTexts
+            ].filter((obj) => obj !== null && obj !== undefined);
+
+            this.reStackObjectsInCanvas(all_fabric_object);
+          }
+
+          if (side === 'front') {
+            this.frontCanvasRender(render_time);
+          } else {
+            this.backCanvasRender(render_time);
+          }
+        }
       }
     }
 
-    return Promise.resolve(); // Return an already resolved Promise if no pattern is found
+    return Promise.resolve();
   }
 
   public regroupDesign(design_objects: fabric.Object[], side = 'front') {
@@ -1261,7 +1220,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       promises.push(this.addDesign(ImageData.textureUrl, side, ImageData.file_extension) as never)
 
       if (this.backTextureUrl && side == 'front') {
-        promises.push(this.addDesign(this.storageUrl + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
+        promises.push(this.addDesign(this.storage_url + this.backTextureUrl, 'back', this.backTextrueExtension) as never)
       }
 
       const self: Record<any, any> = this
@@ -1307,7 +1266,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
           await this.addFixedLogos()
 
-          await this.applyAllPatterns()
+          await this.applyAllPatterns(true)
 
           await this.addAddons(300)
 
@@ -2208,7 +2167,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public async addModel(modelUrl: string, composition: string, side: string) {
     return new Promise((resolve, reject) => {
-      fabric.Image.fromURL(this.storageUrl + modelUrl + '?nocache=2', async (img: any) => {
+      fabric.Image.fromURL(this.storage_url + modelUrl + '?nocache=2', async (img: any) => {
         if(img.width > img.height) {
           img.scaleToWidth(this.canvasWidth - 10)
         } else {
@@ -2245,7 +2204,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             addon.customized_sku_info.forEach((addon_file: Record<any, any>) => {
               addon_file.placement = addon_file.placement.toLowerCase()
               if(addon_file.placement == "front" || addon_file.placement == 'back') {
-                promises.push(this.addAddon(this.storageUrl + addon_file.file_url, addon_file.placement, addon.addon_id))
+                promises.push(this.addAddon(this.storage_url + addon_file.file_url, addon_file.placement, addon.addon_id))
               }
             })
           }
@@ -2260,7 +2219,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           if(!this.addon_objects[addon.addon_id]?.length) {
             addon_file.placement = addon_file.placement.toLowerCase()
             if (addon_file.placement == "front" || addon_file.placement == 'back') {
-              promises.push(this.addAddon(this.storageUrl + addon_file.file_url, addon_file.placement, addon.addon_id))
+              promises.push(this.addAddon(this.storage_url + addon_file.file_url, addon_file.placement, addon.addon_id))
             }
           }
         } else {
@@ -2646,7 +2605,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public addSvgLogos(logo: Record<any, any>, index: string): Promise<boolean> {
     return new Promise((resolve) => {
       if (logo.side == 'front' || (logo.side == 'back' && this.back)) {
-        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
+        let logoUrl = encodeURI((this.storage_url + logo.url).trim()) + '?nocache=11'
         fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
           options.crossOrigin = 'Anonymous'
           const img = fabric.util.groupSVGElements(objects) as fabric.Group
@@ -2834,7 +2793,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           this.custom_logo_objects[logo.logo_index as number] = true
         }
         logo.haveControls = Boolean(logo.haveControls)
-        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
+        let logoUrl = encodeURI((this.storage_url + logo.url).trim()) + '?nocache=11'
         fabric.Image.fromURL(logoUrl, async (img: any) => {
           const aspect_ratio = img.width / img.height
           if(aspect_ratio > 1) {
@@ -2902,8 +2861,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           }
 
           if (this.mainPreview && this.selectedProductId == this.product_id) {
-            const converted_width = unitConversion(img.width * img.scaleX * this.measurementRatio)
-            const converted_height = unitConversion(img.height * img.scaleY * this.measurementRatio)
+            const converted_width = this.getRealSize(img.width * img.scaleX * this.measurementRatio)
+            const converted_height = this.getRealSize(img.height * img.scaleY * this.measurementRatio)
             this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
               custom_logo_index: logo.logo_index,
               data: {
@@ -2992,20 +2951,40 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     const width = (object.width as number * object.scaleX * this.measurementRatio)
     const height = (object.height as number * object.scaleY * this.measurementRatio)
     if (width != 0 || height != 0) {
-      const converted_width = unitConversion(width)
-      const converted_height = unitConversion(height)
+      const converted_width = this.getRealSize(width)
+      const converted_height = this.getRealSize(height)
       if(object.type == 'text') {
         const stroke_width = object.strokeWidth * object.scaleX * this.measurementRatio
-        converted_width.value = (parseFloat(converted_width.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
-        converted_height.value = (parseFloat(converted_height.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
+        converted_width.value = (parseFloat(converted_width.value) + parseFloat(this.getRealSize(stroke_width).value)).toFixed(1)
+        converted_height.value = (parseFloat(converted_height.value) + parseFloat(this.getRealSize(stroke_width).value)).toFixed(1)
       }
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-        text: 'Size (W)' + converted_width!.value + converted_width!.unit + ' x (H)' + converted_height!.value + converted_height!.unit,
+        text: 'Size (W)' + converted_width!.value + this.$store.getters.getSetting('measurement_unit')?.unit + 
+        ' x (H)' + converted_height!.value + this.$store.getters.getSetting('measurement_unit')?.unit,
         visible: true
       }).bringToFront()
     }
+  }
+
+  public getRealSize(value: number) {
+    const setting = this.$store.getters.getSetting('measurement_unit')
+    if (setting) {
+      switch (setting.conversion_operator) {
+        case 'multiply':
+          return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1) }
+          break;
+        case 'divide':
+          return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1) }
+          break;
+        default: {
+          const value_string = value ? value.toString() : '';
+          return { value: parseFloat(value_string).toFixed(1) }
+        }
+      }
+    }
+    return { value: '0' };
   }
 
   public async resetTextsFromCanvas() {
@@ -3171,9 +3150,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                         custom_text_item.width = fabric_text.width
                         custom_text_item.height = fabric_text.height
                       }
-                      const converted_width = unitConversion(fabric_text.width * fabric_text.scaleX * this.measurementRatio)
-                      const converted_height = unitConversion(fabric_text.height * fabric_text.scaleY * this.measurementRatio)
-                      const outline_width_converted = unitConversion(fabric_text.strokeWidth * fabric_text.scaleX * this.measurementRatio)
+                      const converted_width = this.getRealSize(fabric_text.width * fabric_text.scaleX * this.measurementRatio)
+                      const converted_height = this.getRealSize(fabric_text.height * fabric_text.scaleY * this.measurementRatio)
+                      const outline_width_converted = this.getRealSize(fabric_text.strokeWidth * fabric_text.scaleX * this.measurementRatio)
                       custom_text_item.actualWidth = fabric_text.width
                       custom_text_item.actualHeight = fabric_text.height
                       custom_text_item.originalWidth = converted_width!.value
@@ -3325,9 +3304,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
     const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
     const outline_width = (fabric_object.get('strokeWidth') as number * fabric_object.get('scaleX') * this.measurementRatio)
-    const converted_width = unitConversion(width)
-    const converted_height = unitConversion(height)
-    const outline_width_converted = unitConversion(outline_width)
+    const converted_width = this.getRealSize(width)
+    const converted_height = this.getRealSize(height)
+    const outline_width_converted = this.getRealSize(outline_width)
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width!.value;
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height!.value;
     self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width_converted = outline_width_converted!.value;
@@ -3341,8 +3320,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if(this.custom_logos[logo_index]) {
       const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio)
       const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio)
-      const converted_width = unitConversion(width)
-      const converted_height = unitConversion(height)
+      const converted_width = this.getRealSize(width)
+      const converted_height = this.getRealSize(height)
 
       this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
         custom_logo_index: fabric_object.get("logo_index"),

@@ -24,7 +24,7 @@ import rgbHex from 'rgb-hex'
 import {
   checkIsEmpty, getColorType, getDefaultColorsObject, getDeviceInfo, getPermutation,
   getSelectedProductPantones, hideLockerProductUpdateButton, setUndoRedoItems,
-  unitConversion
+  roundOff
 } from '@/helpers/Helpers'
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
@@ -34,9 +34,9 @@ import SceneMixin from "@/mixins/SceneMixin";
 @Component<ThreeDScene>({
   beforeDestroy() {
     const self: Record<any, any> = this;
-    self.$eventBus.$off("customTextUpdated", this.addTextsNew)
+    self.$eventBus.$off("customTextUpdated", this.addTexts)
     if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
-      self.$eventBus.$off("rosterTextUpdated", this.addTextsNew)
+      self.$eventBus.$off("rosterTextUpdated", this.addTexts)
     }
     if (this.mainPreview) {
       self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
@@ -158,13 +158,11 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private last_known_image_pos = {left: 0, top: 0}
   private canvas !: fabric.Canvas
   private design !: any
-  private storageUrl = process.env.VUE_APP_STORAGE_URL
   private custom_logo_objects: any[] = []
   private mounted = false
   private model!: Object3D
   private texture!: Texture
   private initialSvgGroups: any[] = []
-  private storage_url = process.env.VUE_APP_STORAGE_URL
   private safe_zone: fabric.Group
   private patterns: Record<any, any> = {}
 
@@ -583,7 +581,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     if (this.mainPreview) {
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
     }
-
+ 
     if (!this.logos.length) {
       this.callChangeColors()
     }
@@ -705,19 +703,15 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           }
         })
       }
-
+       
       if (this.productCustomTexts) {
         this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
           if (custom_text.value) {
             const text = {value: custom_text, custom_text_index: index}
-            this.addTextsNew(text, true)
+            this.addTexts(text, true)
           }
         })
       }
-
-      this.renderScene()
-      this.controls.update()
-      this.animate()
 
       this.canvas.add(this.dimText)
       this.canvas.on('selection:cleared', () => {
@@ -776,9 +770,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   public listenEvents() {
     const self: Record<any, any> = this;
-    self.$eventBus.$on("customTextUpdated", this.addTextsNew)
+    self.$eventBus.$on("customTextUpdated", this.addTexts)
     if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
-      self.$eventBus.$on("rosterTextUpdated", this.addTextsNew)
+      self.$eventBus.$on("rosterTextUpdated", this.addTexts)
     }
     if (this.mainPreview) {
       self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
@@ -1093,12 +1087,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           top: 0x0
         }).setCoords()
 
-        this.design = img
-
-        this.canvas.add(img).renderAll()
-        img.sendBackwards()
-
         this.applyAnchorDifferences(img)
+        this.canvas.add(img).requestRenderAll()
+        img.sendBackwards()
         this.design = img
 
         resolve('done')
@@ -1131,80 +1122,82 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.renderScene(this.backCamera)
   }
 
-  public addSvgLogos(logo: Record<any, any>, index: string): Promise<boolean> {
+  public async addSvgLogos(logo: Record<any, any>, index: string): Promise<boolean> {
+    const threeDXPosition = this.canvasWidthRatio * logo.x_axis
+    const threeDYPosition = this.canvasHeightRatio * logo.y_axis
+    const fabricJSPoint = await this.findPositionOn3D(threeDXPosition, threeDYPosition, logo.side)
     return new Promise((resolve) => {
-      let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
+      let logoUrl = encodeURI((this.storage_url + logo.url).trim()) + '?nocache=11'
       fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
         options.crossOrigin = 'Anonymous'
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
         img.scaleToHeight(logo.height as number / this.canvasHeightRatio)
-        const threeDXPosition = this.canvasWidthRatio * logo.x_axis
-        const threeDYPosition = this.canvasHeightRatio * logo.y_axis
-        const fabricJSPointPromis = this.findPositionOn3D(threeDXPosition, threeDYPosition, logo.side)
-        fabricJSPointPromis.then((fabricJSPoint) => {
-          img.set({
-            left: fabricJSPoint.x,
-            top: fabricJSPoint.y,
-            angle: logo.rotation < 0 ? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation) as number,
-            hasControls: false,
-            selectable: false,
-            evented: false,
-            lockMovementX: true,
-            lockMovementY: true,
-            globalCompositeOperation: 'source-atop',
-            originX: 'center',
-            originY: 'center',
-            flipX: true,
-          })
+        
+        img.set({
+          left: fabricJSPoint.x,
+          top: fabricJSPoint.y,
+          angle: logo.rotation < 0 ? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation) as number,
+          hasControls: false,
+          selectable: false,
+          evented: false,
+          lockMovementX: true,
+          lockMovementY: true,
+          globalCompositeOperation: 'source-atop',
+          originX: 'center',
+          originY: 'center',
+          flipX: true,
+        })
 
-          if (logo.is_customizable) {
-            const id = `${logo.placement_title}`
-            if (!this.containsObject({id: id})) {
-              let fill_color = ''
-              const logo_objects = img._objects? img._objects : [img]
-              logo_objects.forEach((item: any) => {
-                if (item.fill && typeof item.fill === 'string') {
-                  if (item.fill.includes('rgb')) {
-                    item.fill = rgbHex(item.fill as string).includes('#') ? rgbHex(item.fill as string) : '#' + rgbHex(item.fill as string)
+        if (logo.is_customizable) {
+          const id = `${logo.placement_title}`
+          if (!this.containsObject({id: id})) {
+            let fill_color = ''
+            const logo_objects = img._objects? img._objects : [img]
+            logo_objects.forEach((item: any) => {
+              if (item.fill && typeof item.fill === 'string') {
+                if (item.fill.includes('rgb')) {
+                  item.fill = rgbHex(item.fill as string).includes('#') ? rgbHex(item.fill as string) : '#' + rgbHex(item.fill as string)
+                }
+                if (!fill_color) { // get the first fill color from fixed logo
+                  fill_color = item.fill
+                  const selectProductPantonesList = getSelectedProductPantones(this.product_id)
+                  const pantoneColor = getClosestColor(item.fill as string, selectProductPantonesList, getColorType('', this.product_id))
+
+                  this.svgGroups.push({
+                    id: id,
+                    color: item.fill,
+                    count: 0,
+                    pantone: pantoneColor.pantone,
+                    name: pantoneColor.name,
+                    logo_index: index
+                  })
+                  this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
+
+                  if (this.mainPreview) {
+                    this.$store.dispatch('setSvgGroups', this.svgGroups)
                   }
-                  if (!fill_color) { // get the first fill color from fixed logo
-                    fill_color = item.fill
-                    const selectProductPantonesList = getSelectedProductPantones(this.product_id)
-                    const pantoneColor = getClosestColor(item.fill as string, selectProductPantonesList, getColorType('', this.product_id))
 
-                    this.svgGroups.push({
-                      id: id,
-                      color: item.fill,
-                      count: 0,
-                      pantone: pantoneColor.pantone,
-                      name: pantoneColor.name,
-                      logo_index: index
-                    })
-                    this.svgGroups = this.svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1)
-
-                    if (this.mainPreview) {
-                      this.$store.dispatch('setSvgGroups', this.svgGroups)
-                    }
-
-                    if (!this.parts.filter((part) => part == id)) {
-                      this.parts.push(id)
-                    }
+                  if (!this.parts.filter((part) => part == id)) {
+                    this.parts.push(id)
                   }
                 }
-              })
-            }
+              }
+            })
           }
+        }
 
-          this.canvas.add(img)
-          Object.assign(img, {
-            fixed_logo_index: logo.fixed_logo_index,
-            side: logo.side,
-            type: 'fixed_logo'
-          })
-          this.fixed_logo_objects[logo.fixed_logo_index] = img
-          this.canvas.requestRenderAll()
-          resolve(true)
+        this.canvas.add(img)
+        Object.assign(img, {
+          fixed_logo_index: logo.fixed_logo_index,
+          side: logo.side,
+          type: 'fixed_logo',
+          url: logo.url,
+          is_customizable: logo.is_customizable,
+          placement_title: logo.placement_title
         })
+        this.fixed_logo_objects[logo.fixed_logo_index] = img
+        this.canvas.requestRenderAll()
+        resolve(true)
       })
     })
   }
@@ -1278,7 +1271,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           this.custom_logo_objects[logo.logo_index as number] = true
         }
         logo.haveControls = Boolean(logo.haveControls)
-        let logoUrl = encodeURI((this.storageUrl + logo.url).trim()) + '?nocache=11'
+        let logoUrl = encodeURI((this.storage_url + logo.url).trim()) + '?nocache=11'
         const base64_logo = await this.convertImageURLToBase64(logoUrl) as string
         fabric.Image.fromURL(base64_logo, async (img: any) => {
           const aspect_ratio = img.width / img.height
@@ -1305,6 +1298,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           }
 
           img.set({
+            id: `logo_${logo.logo_index}`,
             left: fabricJSPoint.x,
             top: fabricJSPoint.y,
             angle: logo.rotation < 0 ? this.oppositeAngle(360 - logo.rotation) : this.oppositeAngle(logo.rotation) as number,
@@ -1328,15 +1322,15 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           }
 
           if (this.mainPreview && this.selectedProductId == this.product_id) {
-            const converted_width = unitConversion((img.width * img.scaleX * this.measurementRatio) / this.canvasWidthRatio)
-            const converted_height = unitConversion((img.height * img.scaleY * this.measurementRatio) / this.canvasHeightRatio)
+            const converted_width = this.getRealSize(img.width * img.scaleX)
+            const converted_height = this.getRealSize(img.height * img.scaleY)
             this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
               custom_logo_index: logo.logo_index,
               data: {
                 x_axis_3d: img.left,
                 y_axis_3d: img.top,
-                originalWidth: converted_width!.value,
-                originalHeight: converted_height!.value
+                originalWidth: converted_width,
+                originalHeight: converted_height
               }
             })
           }
@@ -1408,24 +1402,25 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
   public showDimensions(e: any) {
     let object = e.target;
-    const width = (object.width as number * object.scaleX * this.measurementRatio) / this.canvasWidthRatio
-    const height = (object.height as number * object.scaleY * this.measurementRatio) / this.canvasHeightRatio
-    if (width != 0 || height != 0) {
-      const converted_width = unitConversion(width)
-      const converted_height = unitConversion(height)
+    const width = this.getRealSize(object.width * object.scaleX)
+    const height = this.getRealSize(object.height * object.scaleY)
+    if (width !== 0 || height !== 0) {
+      let displayWidth = width;
+      let displayHeight = height;
+      const unit = this.$store.getters.getSetting('measurement_unit')?.unit;
       if (object.type == 'text') {
-        const stroke_width = (object.strokeWidth * object.scaleX * this.measurementRatio) / this.canvasWidthRatio
-        converted_width.value = (parseFloat(converted_width.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
-        converted_height.value = (parseFloat(converted_height.value) + parseFloat(unitConversion(stroke_width).value)).toFixed(1)
+        const stroke_width = this.getRealSize(object.strokeWidth * object.scaleX)
+        displayWidth = (parseFloat(width.toString()) + parseFloat(stroke_width.toString()));
+        displayHeight = (parseFloat(height.toString()) + parseFloat(stroke_width.toString()));
       }
       this.dimText.set({
         left: object.left,
         top: object.top - (((object.height * object.scaleY) / 2) + (this.dimText.height as number) * (this.dimText.scaleY as number) + 20),
-        text: 'Size (W)' + converted_width!.value + converted_width!.unit + ' x (H)' + converted_height!.value + converted_height!.unit,
+        text: 'Size (W)' + displayWidth.toFixed(1) + unit + ' x (H)' + displayHeight.toFixed(1) + unit,
         visible: true
-      }).bringToFront()
-      this.canvas.requestRenderAll()
-      this.renderScene()
+      }).bringToFront();
+      this.canvas.requestRenderAll();
+      this.renderScene();
     }
   }
 
@@ -1476,7 +1471,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     return is_custom_text_allowed;
   }
 
-  public async addTextsNew(custom_text_info: Record<any, any>, from_load = false) {
+  public async addTexts(custom_text_info: Record<any, any>, from_load = false) {
     if (!this.selectedProduct.preview_custom_texts) {
       return false
     }
@@ -1577,12 +1572,12 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
                     fabric_text.scaleY = custom_text_item.scaleY * this.canvasHeightRatio
                   }
 
-                  const converted_width = unitConversion((fabric_text.width * fabric_text.scaleX * this.measurementRatio) / this.canvasWidthRatio)
-                  const converted_height = unitConversion((fabric_text.height * fabric_text.scaleY * this.measurementRatio) / this.canvasWidthRatio)
-                  const outline_converted_width = unitConversion((fabric_text.strokeWidth * fabric_text.scaleX * this.measurementRatio) / this.canvasWidthRatio)
-                  custom_text_item.originalWidth = converted_width!.value
-                  custom_text_item.originalHeight = converted_height!.value
-                  custom_text_item.outlineConvertedWidth = outline_converted_width!.value
+                  const converted_width = this.getRealSize(fabric_text.width * fabric_text.scaleX)
+                  const converted_height = this.getRealSize(fabric_text.height * fabric_text.scaleY)
+                  const outline_converted_width = this.getRealSize(fabric_text.strokeWidth * fabric_text.scaleX)
+                  custom_text_item.originalWidth = converted_width
+                  custom_text_item.originalHeight = converted_height
+                  custom_text_item.outlineConvertedWidth = outline_converted_width
                   custom_text_item.x_axis_3d = fabric_text.left
                   custom_text_item.y_axis_3d = fabric_text.top
 
@@ -1624,10 +1619,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.isObjectMoving = 0
     const logo_index = fabric_object.get("logo_index");
     if (this.custom_logos[logo_index]) {
-      const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio) / this.canvasWidthRatio
-      const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio) / this.canvasWidthRatio
-      const converted_width = unitConversion(width)
-      const converted_height = unitConversion(height)
+      const width = this.getRealSize(fabric_object.get('width') * fabric_object.get('scaleX'))
+      const height = this.getRealSize(fabric_object.get('height') * fabric_object.get('scaleY'))
       const angle = fabric_object.get("angle") < 0 ? this.oppositeAngle(360 - fabric_object.get("angle")) : this.oppositeAngle(fabric_object.get("angle")) as number
       this.$store.commit('SET_PRODUCT_CUSTOM_LOGOS', {
         custom_logo_index: logo_index,
@@ -1639,8 +1632,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           rotation: angle,
           scaleX: fabric_object.get("scaleX") / this.canvasWidthRatio,
           scaleY: fabric_object.get("scaleY") / this.canvasHeightRatio,
-          originalWidth: converted_width!.value,
-          originalHeight: converted_height!.value,
+          originalWidth: width,
+          originalHeight: height,
           side: fabric_object.side,
         }
       })
@@ -1668,15 +1661,12 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleX = fabric_object.get("scaleX") / this.canvasWidthRatio
     this.product_custom_texts[custom_text_index].items[custom_text_item_index].scaleY = fabric_object.get("scaleY") / this.canvasHeightRatio
     this.canvas.requestRenderAll()
-    const width = (fabric_object.get('width') as number * fabric_object.get('scaleX') * this.measurementRatio) / this.canvasWidthRatio
-    const height = (fabric_object.get('height') as number * fabric_object.get('scaleY') * this.measurementRatio) / this.canvasWidthRatio
-    const outline_width = (fabric_object.get('strokeWidth') as number * fabric_object.get('scaleX') * this.measurementRatio) / this.canvasWidthRatio
-    const converted_width = unitConversion(width)
-    const converted_height = unitConversion(height)
-    const converted_outline_width = unitConversion(outline_width)
-    this.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width!.value;
-    this.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height!.value;
-    this.product_custom_texts[custom_text_index].items[custom_text_item_index].outlineConvertedWidth = converted_outline_width!.value;
+    const width = this.getRealSize(fabric_object.get('width') * fabric_object.get('scaleX'))
+    const height = this.getRealSize(fabric_object.get('height') * fabric_object.get('scaleY'))
+    const outline_width = this.getRealSize(fabric_object.get('strokeWidth') * fabric_object.get('scaleX'))
+    this.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = width;
+    this.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = height;
+    this.product_custom_texts[custom_text_index].items[custom_text_item_index].outlineConvertedWidth = outline_width;
     this.product_custom_texts[custom_text_index].items[custom_text_item_index].side = fabric_object.side;
     this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {
       index: custom_text_index,
@@ -2095,7 +2085,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   public removePattern(design: any, pattern_objects: any, svg_part) {
-    const patternId = `pattern_${svg_part}`;
+    const patternId = `pattern_group_${svg_part}`;
     design._objects = design._objects.filter(obj => obj.id !== patternId);
     this.regroupDesign(design._objects);
 
@@ -2104,7 +2094,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       this.canvas.requestRenderAll();
     }
   }
-  
+
   public async applyPattern(svg_part: string, re_stack = true): Promise<void> {
     if (this.patterns[svg_part]) {
       this.removePattern(this.design, this.patterns, svg_part)
@@ -2116,146 +2106,106 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       );
 
       if (pattern_data) {
-        const pattern_url = pattern_data.path;
-        return new Promise((resolve) => {
-          fabric.loadSVGFromURL(`${this.storageUrl}${pattern_url}?q=${pattern_data.random_string}`, (objects: any, options: any) => {
-            if(objects.length) {
-              options.crossOrigin = 'Anonymous';
-              const img = fabric.util.groupSVGElements(objects) as fabric.Group;
+        // Check if pattern already exists in patterns object
+        let pattern = this.patterns[svg_part];
+        if (!pattern) {
+          pattern = await this.setupPattern(svg_part, pattern_data, this.design);
+          if (!pattern) {
+            return Promise.resolve();
+          }
+        }
 
-              if (this.groupPatterns[svg_part].color?.value) {
-                img.fill = this.groupPatterns[svg_part].color.value;
+        const designObjects = this.design._objects ? this.design._objects : [this.design];
+        designObjects.flat().forEach((designObject, index: number) => {
+          if (designObject.id?.toLowerCase() === svg_part) {
+            const latest_design_objects = this.design._objects
+            const clipGroup = new fabric.Group(
+              this.cloneFabricObjects(latest_design_objects),
+              {
+                hasControls: false,
+                selectable: false,
+                evented: false,
+                lockMovementX: true,
+                lockMovementY: true,
+                absolutePositioned: true,
+                flipY: true
               }
+            );
 
-              const patternSourceCanvas = new fabric.StaticCanvas(null);
-              patternSourceCanvas.setDimensions({
-                width: img.getScaledWidth(),
-                height: img.getScaledHeight(),
-              });
+            const pattern_id = `pattern_group_${svg_part}`
+            const occurrence_count = latest_design_objects.filter(obj => obj.id === pattern_id).length;
+            const object_number = index + occurrence_count
+            const objectToClip = clipGroup._objects.filter((obj, clip_id) => clip_id !== object_number);
 
-              patternSourceCanvas.add(img);
-              patternSourceCanvas.renderAll();
+            objectToClip.forEach((obj) => clipGroup.remove(obj));
+            
+            clipGroup._objects[0].clipPath = undefined
+            // @ts-ignore
+            const originalMatrix = clipGroup._objects[0].calcTransformMatrix(true)
+            Object.assign(clipGroup._objects[0], {
+              originalMatrix: originalMatrix
+            })
 
-              const pattern = new fabric.Pattern({
-                // @ts-ignore
-                source: patternSourceCanvas.getElement(),
-                repeat: 'repeat'
-              });
+            clipGroup.scaleToHeight(this.canvasResolution as number).set({
+              left: 0x0,
+              top: 0x0
+            }).setCoords()
 
-              const designObjects = this.design._objects ? this.design._objects : [this.design];
-              const canvas = this.canvas
-              const design = this.design
-              
-              const scale_min_received = 10, scale_max_received = 100;
-              const scale_min = -100, scale_max = 400;
-
-              const scale_value_received = parseInt(this.groupPatterns[svg_part].scale);
-
-              const scale_value = ((scale_value_received - scale_min_received) / (scale_max_received - scale_min_received)) * (scale_max - scale_min) + scale_min;
-
-              const scale = (scale_value + 400) / img.getScaledWidth()
-              const rotationAngle = this.groupPatterns[svg_part]?.angle || 0;
-              const angleInRadians = (rotationAngle * Math.PI) / 180;
-              const cos = Math.cos(angleInRadians);
-              const sin = Math.sin(angleInRadians);
-              const patternWidth = img.getScaledWidth();
-              const patternHeight = img.getScaledHeight();
-              const tx = (patternWidth / 2) * (1 - cos) * scale + (patternHeight / 2) * sin * scale;
-              const ty = (patternHeight / 2) * (1 - cos) * scale - (patternWidth / 2) * sin * scale;
-
-              pattern.patternTransform = [
-                scale * cos,
-                scale * sin,
-                -scale * sin,
-                scale * cos,
-                -tx,
-                -ty,
-              ];
-
-              designObjects.flat().forEach((designObject, index: number) => {
-                if (designObject.id?.toLowerCase() === svg_part) {
-                  const patternRect = new fabric.Rect({
-                    left: designObject.left,
-                    top: designObject.top,
-                    width: designObject.width,
-                    height: designObject.height,
-                    hasControls: false,
-                    selectable: false,
-                    evented: false,
-                    originX: designObject.originX || 'left',
-                    originY: designObject.originY || 'top',
-                    lockMovementX: true,
-                    lockMovementY: true,
-                    absolutePositioned: true,
-                    // globalCompositeOperation: 'source-atop',
-                    fill: pattern,
-                  });
-
-                  const latest_design_objects = this.design._objects
-
-                  const clipGroup = new fabric.Group(
-                    this.cloneFabricObjects(latest_design_objects),
-                    {
-                      hasControls: false,
-                      selectable: false,
-                      evented: false,
-                      lockMovementX: true,
-                      lockMovementY: true,
-                      absolutePositioned: true,
-                      flipY: true
-                    }
-                  );
-
-                  const pattern_id = 'pattern_' + svg_part
-                  const occurrence_count = latest_design_objects.filter(obj => obj.id === pattern_id).length;
-                  const object_number = index + occurrence_count
-
-                  const objectToClip = clipGroup._objects.filter((obj, clip_id) => clip_id !== object_number);
-
-                  objectToClip.forEach((obj) => clipGroup.remove(obj));
-                  
-                  clipGroup.scaleToHeight(this.canvasResolution as number).set({
-                    left: 0x0,
-                    top: 0x0
-                  }).setCoords()
-                  
-                  patternRect.clipPath = clipGroup;
-
-                  Object.assign(patternRect, {
-                    id: pattern_id,
-                  })
-
-                  let design_with_rect = this.cloneFabricObjects(latest_design_objects)
-
-                  // @ts-ignore
-                  design_with_rect.splice(object_number + 1, 0, patternRect);
-
-                  this.regroupDesign(design_with_rect)
-
-                  this.patterns[svg_part] = patternRect;
-                }
-              });
-
-              if (re_stack) {
-                const all_fabric_object = [
-                  ...this.fixed_logo_objects,
-                  ...this.custom_logo_objects,
-                  ...this.product_custom_text_objects.flat(),
-                ].filter((obj) => obj !== null && obj !== undefined)
-
-                this.reStackObjectsInCanvas(all_fabric_object);
-              }
-
-              canvas.requestRenderAll();
-
-              resolve(); // Resolve after all processing is complete
+            if(occurrence_count > 0) {
+              pattern = fabric.util.object.clone(pattern)
             }
-          })
-        })
+            Object.assign(pattern, {
+              id: `pattern_${svg_part}_${occurrence_count}`
+            })
+            
+            const patternRect = new fabric.Rect({
+              left: designObject.left,
+              top: designObject.top,
+              width: designObject.width,
+              height: designObject.height,
+              hasControls: false,
+              selectable: false,
+              evented: false,
+              originX: designObject.originX || 'left',
+              originY: designObject.originY || 'top',
+              lockMovementX: true,
+              lockMovementY: true,
+              absolutePositioned: true,
+              fill: pattern,
+            });
+
+            patternRect.clipPath = clipGroup;
+
+            Object.assign(patternRect, {
+              id: pattern_id,
+            })
+
+            let design_with_rect = this.cloneFabricObjects(latest_design_objects)
+
+            // @ts-ignore
+            design_with_rect.splice(object_number + 1, 0, patternRect);
+
+            this.regroupDesign(design_with_rect)
+
+            this.patterns[svg_part] = patternRect;
+          }
+        });
+
+        if (re_stack) {
+          const all_fabric_object = [
+            ...this.fixed_logo_objects,
+            ...this.custom_logo_objects,
+            ...this.product_custom_text_objects.flat(),
+          ].filter((obj) => obj !== null && obj !== undefined)
+
+          this.reStackObjectsInCanvas(all_fabric_object);
+        }
+
+        this.canvas.requestRenderAll();
       }
     }
 
-    return Promise.resolve(); // Return an already resolved Promise if no pattern is found
+    return Promise.resolve();
   }
 
   public regroupDesign(design_objects: fabric.Object[]) {
@@ -2275,10 +2225,80 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     }).setCoords()
 
     canvas.remove(design)
+
+    this.applyAnchorDifferences(final_design)
     canvas.add(final_design)
     final_design.sendToBack()
 
     this.design = final_design
+  }
+
+  generateProductionSVG() {
+    const matrixReplacements = new Map<string, string>();
+
+    this.design.getObjects().flat().forEach(designObject => {
+      if (designObject.id?.includes('pattern_') && designObject.clipPath) {
+        const clipObject = designObject.clipPath._objects[0];
+
+        // Format both current and original matrices consistently
+        const currentMatrix = clipObject.calcTransformMatrix()
+          .map(n => roundOff(n)).join(' ');
+        const originalMatrix = clipObject.originalMatrix
+          .map(n => roundOff(n)).join(' ');
+
+        matrixReplacements.set(currentMatrix, originalMatrix);
+      }
+    });
+
+    let svg = this.canvas.toSVG()
+
+    // Strip the DOCTYPE manually
+    svg = svg.replace(/^\s*(<\?xml[^>]*>\s*)?(<!DOCTYPE[^>]*>\s*)?/i, '');
+
+    matrixReplacements.forEach((original, current) => {
+      const safePattern = current.replace(/\./g, '\\.').replace(/\-/g, '\\-');
+      const regex = new RegExp(`matrix\\(${safePattern}\\)`, 'g');
+      svg = svg.replace(regex, `matrix(${original})`);
+    });
+
+    svg = svg.replace(
+      /(<svg[^>]*>)/i,
+      `$1<g transform="scale(1,-1) translate(0, -${this.canvasResolution})">`
+    ).replace(/<\/svg>/i, '</g></svg>');
+    
+    
+    Object.keys(this.patterns).forEach((svg_part) => {
+      const angle = this.groupPatterns[svg_part]?.angle;
+      if (angle) {
+        // Match pattern ID: SVGID_pattern_base_0, SVGID_pattern_sleeve_1, etc.
+        const patternIdRegex = new RegExp(
+          `<pattern([^>]+id="SVGID_pattern_${svg_part}_\\d+"[^>]*)>`,
+          'g'
+        );
+
+        svg = svg.replace(patternIdRegex, (match, attrs) => {
+          // If patternTransform already exists, replace it
+          if (/patternTransform\s*=/.test(attrs)) {
+            return `<pattern ${attrs.replace(/patternTransform="[^"]*"/, `patternTransform="rotate(${angle})"`)}>`;
+          } else {
+            // Otherwise add patternTransform attribute
+            return `<pattern ${attrs} patternTransform="rotate(${angle})">`;
+          }
+        });
+      }
+    });
+    return svg;
+  }
+  
+  public getRealSize(px: number) {
+    const unit = this.$store.getters.getSetting('measurement_unit')?.unit
+    const pxScaled = px / this.design.scaleX;
+    if (unit === 'cm') {
+      return parseFloat((pxScaled / 28.3464567).toFixed(1));
+    } else if (unit === 'inch') {
+      return parseFloat((pxScaled / 72).toFixed(1));
+    }
+    return parseFloat((pxScaled).toFixed(1));
   }
 }
 </script>

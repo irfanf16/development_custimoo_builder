@@ -412,8 +412,8 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                     const text_item_object = {
                       label: custom_text_item.label,
                       placement: custom_text_item.placement,
-                      width: '',
-                      height: '',
+                      width: 0,
+                      height: 0,
                       unit: '',
                       svg: '',
                       color: [] as Record<any, any>[],
@@ -422,7 +422,7 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                       outline_color_pantone: '',
                       original_height: 0,
                       original_width: 0,
-                      outline_width: '',
+                      outline_width: 0,
                       rotation: 0,
                       scaleX: 0,
                       scaleY: 0,
@@ -490,17 +490,27 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
                         '<svg stroke-location="outside" paint-order="outside" style="width:100%; height: auto;" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" ' +
                         'viewBox="0 0 ' + totalWidth + ' ' + totalHeight + '"> \n' + dom_svg.outerHTML + '\n</svg>'
 
-                      const converted_width = unitConversion((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
-                      const converted_height = unitConversion((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
-                      const outline_width = unitConversion((custom_text_item.outline_width * custom_text_item.scaleX ) * selected_product.measurement_ratio)
-                      text_item_object.width = converted_width!.value;
-                      text_item_object.height = converted_height!.value;
-                      text_item_object.unit = converted_height!.unit;
+                      const scene = Store.getters.getCanvasImage.scene
+                      let converted_width = 0
+                      let converted_height = 0
+                      let outline_width = 0
+                      if(selected_product.is_3d_product) {
+                        converted_width = scene.getRealSize(width * custom_text_item.scaleX)
+                        converted_height = scene.getRealSize(height * custom_text_item.scaleY)
+                        outline_width = scene.getRealSize(custom_text_item.outline_width * custom_text_item.scaleX)
+                      } else {
+                        converted_width = scene.getRealSize((width * custom_text_item.scaleX) * selected_product.measurement_ratio)
+                        converted_height = scene.getRealSize((height * custom_text_item.scaleY ) * selected_product.measurement_ratio)
+                        outline_width = scene.getRealSize((custom_text_item.outline_width * custom_text_item.scaleX ) * selected_product.measurement_ratio)
+                      }
+                      text_item_object.width = converted_width;
+                      text_item_object.height = converted_height;
+                      text_item_object.unit = Store.getters.getSetting('measurement_unit')?.unit;
                       text_item_object.svg = svg_with_tag
                       text_item_object.color.push(text_color_info);
                       text_item_object.outline_color = custom_text_item.outline_color;
                       text_item_object.outline_color_pantone = custom_text_item.outline_color_pantone;
-                      text_item_object.outline_width = outline_width!.value;
+                      text_item_object.outline_width = outline_width;
                       text_item_object.original_height = (height * custom_text_item.scaleY) / selected_product.measurement_ratio;
                       text_item_object.original_width = (width * custom_text_item.scaleX) / selected_product.measurement_ratio;
                       text_item_object.rotation = custom_text_item.rotation;
@@ -667,12 +677,36 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         tempCanvas.add(group);
         tempCanvas.requestRenderAll()
 
-        post_data.svg_content = tempCanvas.toSVG()
+        post_data.svg_content = three_d_scene.generateProductionSVG()
         tempCanvas.dispose()
+
+        const fixed_logos: Array<{
+          scaleX: number | undefined;
+          scaleY: number | undefined;
+          left: number | undefined;
+          top: number | undefined;
+          angle: number | undefined;
+          url: string;
+          side: string;
+          is_customizable: boolean;
+          placement_title: string;
+        }> = [] 
+        Object.entries(three_d_scene.fixed_logo_objects).forEach(([key, fixed_logo_object]: [string, fabric.Object]) => {
+          fixed_logos.push({ 
+            scaleX: fixed_logo_object.scaleX, scaleY: fixed_logo_object.scaleY, 
+            left: fixed_logo_object.left, top: fixed_logo_object.top,
+            angle: fixed_logo_object.angle,
+            url: fixed_logo_object['url'], side: fixed_logo_object['side'],
+            is_customizable: fixed_logo_object['is_customizable'],
+            placement_title: fixed_logo_object['placement_title']
+          })
+        })
+        post_data.fixed_logos = fixed_logos
       } else {
         const svg_content = await fetchUrlContent(post_data.production_url);
         const production_file = await parseSvgStringFile(svg_content, post_data);
         post_data.svg_content = production_file
+        post_data.fixed_logos = []
       }
 
       resolve(post_data)
@@ -887,6 +921,10 @@ const activityStatus = {
     title: "Order Completed",
     message: "You order has completed successfully.",
   },
+}
+
+const getfixedLogos = (logos: Record<any, any>[]) => {
+  return logos.filter((logo: Record<any, any>) => logo.is_fixed)
 }
 
 
@@ -1451,25 +1489,6 @@ const getLogoSVG = (custom_logos:Record<any,any>, measurement_ratio:string, prod
   return {svg_string:svg_string,width:width};
 }
 
-const unitConversion = (value:number) => {
-  const setting = Store.getters.getSetting('measurement_unit')
-  if(setting){
-    switch( setting.conversion_operator ) {
-      case 'multiply':
-        return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
-        break;
-      case 'divide':
-        return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
-        break;
-      default: {
-        const value_string = value ? value.toString() : '';
-        return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
-      }
-    }
-  }
-  return {value: '0', unit: ''};
-}
-
 const transformUnit = (dimension_px:number,unit_value:string) => {
     const setting = Store.getters.getSetting('measurement_unit');
     const PIXEL_IN_INCH = 72;
@@ -1631,6 +1650,17 @@ const persistToken =  (to:Record<any,any>, from:Record<any,any>) => {
   }
   return jwtToken;
 }
+const roundOff = (num: number, digits = 2) : number => {
+  const factor = Math.pow(10, digits);
+  const rounded = Math.round(num * factor) / factor;
+
+  // If the number is an integer, return it without decimal part
+  if (Number.isInteger(rounded)) {
+    return rounded;
+  }
+
+  return Number(rounded.toFixed(digits).replace(/(\.\d*?[1-9])0+$/, '$1').replace(/\.$/, ''));
+};
 
 const fetchCustomer = async (jwtToken:string) => {
   if (!Store.getters.getCustomer && jwtToken){
@@ -2192,7 +2222,7 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
         }
       })
       // grouped addons prices calculate
-      const grouped_addons = selected_product.productstyles[active_style_index]?.customized_addons.grouped_addons;
+      const grouped_addons = selected_product?.productstyles[active_style_index]?.customized_addons.grouped_addons;
       for(const group_name in grouped_addons) {
         grouped_addons[group_name].forEach(grouped_addon => {
           if(grouped_addon.selected) {
@@ -2941,11 +2971,11 @@ const generateRandomString = () => {
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
-  sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo,
+  sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo, roundOff,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
   getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
   getSelectedProductPantones, getColorType, setRetrievedProductsCustomTexts, getEditModeDefaultObj, fetchUrlContent,
-  unitConversion, rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
+  rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
   getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
   persistToken, fetchCustomer, getTeamLogo, getDataToSetLastActiveProduct, getImageFromCanvas, getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getPermutation,

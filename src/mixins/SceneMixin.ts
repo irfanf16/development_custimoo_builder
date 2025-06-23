@@ -31,6 +31,7 @@ export default class SceneMixin extends Vue {
   public parts: string[] = []
   public fixed_logo_objects: any[] = []
   public svgGroups: any[] = []
+  public storage_url = process.env.VUE_APP_STORAGE_URL
 
   get product(): Record<any, any> {
     return this.$store.getters.getProductByIndex(this.product_index)
@@ -352,5 +353,88 @@ export default class SceneMixin extends Vue {
         }
       })
     }
+  }
+  public svgToDataURL(svgElement) {
+    const svgString = new XMLSerializer().serializeToString(svgElement);
+    const encodedData = btoa(unescape(encodeURIComponent(svgString)));
+    return `data:image/svg+xml;base64,${encodedData}`;
+  }
+  public async setupPattern(svg_part: string, pattern_data: any, design: fabric.Group, BASE_DESIGN_WIDTH = 6000): Promise<fabric.Pattern | null> {
+    const pattern_url = pattern_data.path;
+    return new Promise((resolve) => {
+      fabric.loadSVGFromURL(`${this.storage_url}${pattern_url}?q=${pattern_data.random_string}`, (objects: any, options: any) => {
+        if (!objects.length) {
+          resolve(null);
+          return;
+        }
+
+        options.crossOrigin = 'Anonymous';
+        const img = fabric.util.groupSVGElements(objects) as fabric.Group;
+
+        if (this.groupPatterns[svg_part].color?.value) {
+          if (img._objects) {
+            img.getObjects().forEach((obj) => {
+              obj.set('fill', this.groupPatterns[svg_part].color.value)
+            });
+          } else {
+            img.set('fill', this.groupPatterns[svg_part].color.value)
+          }
+        }
+
+        const scale_value_received = parseInt(this.groupPatterns[svg_part].scale);
+        const baseScaleRatio = design.width as number / BASE_DESIGN_WIDTH;
+        const userScaleNormalized = scale_value_received / 100;
+        const scaleFactor = baseScaleRatio * userScaleNormalized;
+
+        img.scale(scaleFactor);
+
+        const scaledWidth = img.getScaledWidth();
+        const scaledHeight = img.getScaledHeight();
+
+        const svgString = `<svg xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 ${scaledWidth} ${scaledHeight}"
+          width="${scaledWidth}" 
+          height="${scaledHeight}">
+          ${img.toSVG()}
+         </svg>`;
+
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgString, "image/svg+xml");
+        const svgElement = svgDoc.documentElement;
+
+        const dataUrl = this.svgToDataURL(svgElement);
+
+        const svg_image = new Image();
+        svg_image.crossOrigin = "Anonymous";
+        svg_image.src = dataUrl;
+
+        const pattern = new fabric.Pattern({
+          // @ts-ignore
+          source: svg_image,
+          repeat: 'repeat'
+        });
+
+        const rotationAngle = this.groupPatterns[svg_part]?.angle || 0;
+        const angleInRadians = (rotationAngle * Math.PI) / 180;
+        const cos = Math.cos(angleInRadians);
+        const sin = Math.sin(angleInRadians);
+
+        const patternWidth = img.getScaledWidth();
+        const patternHeight = img.getScaledHeight();
+        const tx = (patternWidth / 2) * (1 - cos) + (patternHeight / 2) * sin;
+        const ty = (patternHeight / 2) * (1 - cos) - (patternWidth / 2) * sin;
+
+        pattern.patternTransform = [
+          cos,      // x-axis scale (1 for no scaling)
+          sin,      // y-axis skew
+          -sin,     // x-axis skew
+          cos,      // y-axis scale (1 for no scaling)
+          -tx,      // x translation
+          -ty       // y translation
+        ];
+
+        resolve(pattern);
+      });
+    });
   }
 }
