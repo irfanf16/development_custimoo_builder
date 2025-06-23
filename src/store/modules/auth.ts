@@ -42,6 +42,9 @@ const Auth:Module<any, any> = {
     },
     SET_COMPANY(state:Record<any, any>, payload){
       state.company = payload
+    },
+    RESET_CUSTOMER_PASSWORD(state:Record<any, any>, payload){
+      //
     }
   },
   actions:{
@@ -64,6 +67,11 @@ const Auth:Module<any, any> = {
     },
     async setCustomToken({commit}){
       commit('SET_CUSTOMER_TOKEN')
+    },
+    async resetCustomerPassword({commit}, payload){
+      const res = await http.post('customer/reset-customer-password', payload)
+      commit('RESET_CUSTOMER_PASSWORD', res.data?.result)
+      return res
     },
     async getCustomerFromToken({commit}, token:string){
       let customer = null
