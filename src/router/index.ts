@@ -8,6 +8,7 @@ const Addresses = ()=> import('../views/Addresses.vue')
 const Cart = ()=> import('../views/Cart.vue')
 const Order = ()=> import('../views/Order.vue')
 const OrderDetail = ()=> import('../views/OrderDetail.vue')
+const ThirdParty = ()=> import('../views/ThirdPartyFeedback.vue')
 const Orders = ()=> import('../views/Orders.vue')
 // const ThreeD = ()=> import('../views/ThreeD.vue')
 const ShareRoster = ()=> import('../views/ShareRoster.vue')
@@ -19,6 +20,8 @@ const Thankyou = ()=> import("@/views/Thankyou.vue")
 const Deactive = ()=> import("@/views/Deactive.vue")
 const UploadCustomDesign = () => import("@/views/UploadCustomDesign.vue")
 const Payment = ()=> import("@/views/Payment.vue")
+const PrivacyPolicy = ()=> import('@/views/PrivacyPolicy.vue')
+
 
 
 Vue.use(VueRouter)
@@ -66,6 +69,12 @@ const routes: Array<RouteConfig> = [
     name: 'OrderDetail',
     component: OrderDetail
   },
+   {
+    path: '/third-party-feedback/:order_item_id',
+    name: 'ThirdParty',
+    component: ThirdParty,
+    meta: { layout: 'minimal' }
+  },
   {
     path: '/orders',
     name: 'Orders',
@@ -79,7 +88,8 @@ const routes: Array<RouteConfig> = [
   {
     path:'/share/:product/:name',
     name: 'ShareUrl',
-    component: Home
+    component: Home,
+    
   },
   {
     path:'/thank-you',
@@ -122,7 +132,13 @@ const routes: Array<RouteConfig> = [
     path:'/reset-password',
     name:'Resetpassword',
     component: Resetpassword,
-  }
+  },
+   {
+      path: '/privacy-policy',
+      name: 'privacyPolicy',
+      component: PrivacyPolicy,
+      meta: { layout: 'minimal' }
+    },
 ]
 
 const router = new VueRouter({
@@ -137,15 +153,12 @@ router.beforeEach(async (to, from, next) => {
   let lastUrl = location.href;
   new MutationObserver(() => {
     const url = location.href;
-    console.log('observer', location.href)
-    console.log('observer1', location)
     if (url !== lastUrl) {
       lastUrl = url;
       history.pushState(null, 'customizer', window.location.href.replace('!', ''));
     }
   }).observe(document, {subtree: false, childList: true});
   window.onhashchange = () => {
-    console.log('hash updated')
     if (window.location.hash.startsWith('#/share')) {
       // Extract the current URL and query string
       const currentUrl = new URL(window.location.href);
@@ -153,10 +166,8 @@ router.beforeEach(async (to, from, next) => {
       // Parse query parameters
       const hashWithoutParams = window.location.hash.split('?')[0]; // The hash route without query params
       const queryParams = new URLSearchParams(window.location.hash.split('?')[1]);
-      console.log('queryParams', queryParams)
       // Check if 'reloaded' is already present in the query parameters
       if (!queryParams.has('reloaded')) {
-        console.log('Appending reloaded=true and reloading');
 
         // Add 'reloaded=true' to the query parameters
         queryParams.set('reloaded', 'true');

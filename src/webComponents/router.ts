@@ -10,6 +10,7 @@ const Deactive = ()=> import("@/views/Deactive.vue")
 const Payment = ()=> import("@/views/Payment.vue")
 const OrderListing = ()=> import("@/views/OrderListing.vue")
 const OrderDetail = ()=> import('../views/OrderDetail.vue')
+const PrivacyPolicy = ()=> import('@/views/PrivacyPolicy.vue')
 
 Vue.use(VueRouter)
 
@@ -60,6 +61,12 @@ const routes: Array<RouteConfig> = [
     name: 'OrderDetail',
     component: OrderDetail
   },
+     {
+      path: '/privacy-policy',
+      name: 'privacyPolicy',
+      component: PrivacyPolicy,
+      meta: { layout: 'minimal' }
+    },
 ]
 
 const router = new VueRouter({

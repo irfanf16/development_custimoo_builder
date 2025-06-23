@@ -1,24 +1,28 @@
 <template>
-  <div id="santa" v-cloak>
-    <Header />
-    <Navbar v-if="company.status" />
-    <router-view />
+  <div  id="full-layout" v-cloak>
+  <component :is="layoutComponent" />
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
-import Header from '@/components/Header.vue';
-import Navbar from '@/components/Navbar.vue';
+import { Component, Vue } from 'vue-property-decorator'
+import HeaderNavbarLayout from '@/layouts/HeaderNavbarLayout.vue'
+import MinimalLayout from '@/layouts/MinimalLayout.vue'
 
-import CommonImportMixin from '@/mixins/CommonImportMixin.vue'
-
-@Component<App>({
+@Component({
   components: {
-    Header,
-    Navbar
-  },
-  mixins: [CommonImportMixin],
+    HeaderNavbarLayout,
+    MinimalLayout
+  }
 })
-export default class App extends Vue {}
+export default class App extends Vue {
+
+  get layoutComponent() {
+  const layout = (this.$route.meta && this.$route.meta.layout) || 'default'
+  return {
+    default: 'HeaderNavbarLayout',
+    minimal: 'MinimalLayout'
+  }[layout]
+}
+}
 </script>

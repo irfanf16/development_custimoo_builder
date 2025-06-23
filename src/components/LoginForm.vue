@@ -158,9 +158,22 @@
 
             <div class="pb-3" v-if="false">By creating an account, I acknowledge that I have read and agreed with the <a href="/" class="login-remember" style="color: #219F84;">Terms of Use.</a></div>
 
-            <b-button @click="signUp" variant="primary" class="mb-5">Create Account and Login</b-button>
-
+            <b-button @click="signUp" variant="primary" class="mb-3">Create Account and Login</b-button>
+            <template>
+              <div class="text-center mt-2 text-muted mb-5">
+                By signing up, you agree to our
+                <router-link
+                  to="/privacy-policy"
+                  class="text-primary font-weight-bold"
+                  style="text-decoration: underline"
+                >
+                  Privacy Policy
+                </router-link>.
+              </div>
+            </template>
+           
           </b-form>
+          
         </div>
         <div class="signup-section p-4 pt-lg-5">
           <div>

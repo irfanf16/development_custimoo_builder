@@ -83,7 +83,20 @@
           <AddToCartButton :products_fonts="products_fonts"></AddToCartButton>
         </div>
       </div>
+     
     </div>
+    <template>
+      <div class="text-center mt-2 text-muted">
+        By using this software, you agree to our
+        <router-link
+          to="/privacy-policy"
+          class="text-primary font-weight-bold"
+          style="text-decoration: underline"
+        >
+          Privacy Policy
+        </router-link>.
+      </div>
+    </template>
     <div class="d-none">
       <ProductionScene ref="production-scene" v-bind:production_file_obj.sync="production_file_obj"/>
     </div>
