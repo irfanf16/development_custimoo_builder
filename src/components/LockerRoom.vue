@@ -443,7 +443,6 @@ import {
   classObserver,
   handleResponseException,
   getDomDocument,
-  unitConversion,
   getEditModeDefaultObj, exitFromEditMode, urlToBase64, downloadNodeCollectionPDF, startExportStatusChecker
   ,getSelectedProductPantones,getColorType,base64ToFile, fetchUrlContent, parseSvgStringFileFromSource,
   getAllSvgGroups, containsObject, getAllSvgGroupsFor3D
@@ -618,6 +617,7 @@ private async formatProductForCart(product: any): Promise<any> {
 
   const groupColors = JSON.parse(product.groupcolors) || {};
   const customLogos = JSON.parse(product.custom_logos) || [];
+  const defaultColors = JSON.parse(product.defaultcolors) || [];
   const productCustomTexts = product?.text || [];
   const productAttribute = JSON.parse(product?.product_attribute) || {};
   const productCustomTextsObjects = await this.formatRosterTextObjects(product);
@@ -659,7 +659,7 @@ private async formatProductForCart(product: any): Promise<any> {
       pdf_file: null,
 
       // Complete Color Info
-      defaultcolors: product.defaultcolors || [],
+      defaultcolors: defaultColors,
       groupcolors: groupColors,
       colors: product.colors || [],
       color_groups: product.color_groups || {},
@@ -817,9 +817,9 @@ private async formatRosterTextObjects(
         const svg_with_tag = `<?xml version="1.0" encoding="utf-8"?>\n` +
           `<svg stroke-location="outside" paint-order="outside" style="width:100%; height: auto;" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" viewBox="0 0 ${totalWidth} ${totalHeight}">\n${svgElement.outerHTML}\n</svg>`;
 
-        const converted_width = unitConversion((width * item.scaleX) * product.measurement_ratio);
-        const converted_height = unitConversion((height * item.scaleY) * product.measurement_ratio);
-        const outline_width = unitConversion((item.outline_width * item.scaleX) * product.measurement_ratio);
+        const converted_width = this.unitConversion((width * item.scaleX) * product.measurement_ratio);
+        const converted_height = this.unitConversion((height * item.scaleY) * product.measurement_ratio);
+        const outline_width = this.unitConversion((item.outline_width * item.scaleX) * product.measurement_ratio);
 
         const text_color_info = {
           hex: item.color,
@@ -1123,6 +1123,25 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
       }
     }
   }
+
+  private unitConversion (value:number) {
+    const setting = this.$store.getters.getSetting('measurement_unit')
+    if(setting){
+      switch( setting.conversion_operator ) {
+        case 'multiply':
+          return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
+          break;
+        case 'divide':
+          return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1), unit: setting.unit }
+          break;
+        default: {
+          const value_string = value ? value.toString() : '';
+          return {value: parseFloat(value_string).toFixed(1), unit: setting.unit}
+        }
+      }
+    }
+    return {value: '0', unit: ''};
+}
 
   private designMoved = (evt) =>{
     let design_name = evt.item.getAttribute('data-design-title');
