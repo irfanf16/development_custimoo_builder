@@ -23,7 +23,8 @@
       </div>
       <div class="modal-content lockerroom-modal">
         <div id="modal-center-lockerroom" class="modal-body" ref="locker-modal-body">
-          <LockerRoom ref="lockerRoom" @hideLockerRoomModal="hideVModal('locker-modal')"
+          <LockerRoom ref="lockerRoom" :products_fonts="products_fonts"
+                      @hideLockerRoomModal="hideVModal('locker-modal')"
                       @showCollectionModal="showCollectionModal" @lockerModalOpened="lockerModalOpened"
                       @editCollectionModal="editCollectionModal" :opacityset="opacityset"
                       @setOpacity="setOpacity"
@@ -33,10 +34,34 @@
       </div>
 
       <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
-        <b-button v-if="selectedCollectionProducts.length>0 && totalCollections > 0" @click="addExistingDesignCollection"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
-        <b-button v-if="selectedCollectionProducts.length>0" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
+        <b-button
+        v-if="((company.platform == 'self' && customerPermissions.includes('place-order')) || company.platform == 'cdnExceptLogin') && (selectedCollectionProducts.length > 0)"
+          variant="secondary"
+          @click="handleAddToCart"
+          :disabled="$store.getters.getCartLoading">
+          {{ $store.getters.getCartLoading ? 'Adding to Cart...' : 'Add to Cart' }}
+          <span v-if="selectedCollectionProducts.length > 0 && !$store.getters.getCartLoading" class="badge badge-light ml-2">
+            {{ selectedCollectionProducts.length }}
+          </span>
+
+            <img v-if="$store.getters.getCartLoading" width="20" height="20" src="@assets/images/loading.gif"/>
+
+        </b-button>
+        <b-button v-if="selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading"  @click="addExistingDesignCollection"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
+        <b-button v-if="selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
+
       </div>
       <div v-else class="text-right modal-footer">
+         <b-button
+          v-if="selectedCollectionProducts.length > 0"
+          variant="primary"
+          @click="handleAddToCart"
+          :disabled="$store.getters.getCartLoading">
+          {{ $store.getters.getCartLoading ? 'Adding to Cart...' : 'Add to Cart' }}
+          <span v-if="selectedCollectionProducts.length > 0" class="badge badge-light ml-2">
+            {{ selectedCollectionProducts.length }}
+          </span>
+        </b-button>
         <b-button v-if="selectedCollectionProducts.length > 0 && ($store.getters.getSelectionMode.readonly && $store.getters.getSelectionMode.collectionAddmoreMode)" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
       </div>
     </modal>
@@ -53,11 +78,12 @@ import ModalAction from '@/mixins/ModalAction'
   }
 })
 export default class LockerRoomModal extends Mixins(ModalAction){
+  @Prop() products_fonts!: Record<string, any>;
   public ref = this.$refs as Record<any, any>
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-
   private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
 
+  public company = this.$store.getters.getCompany;
   private opacityset = false;
   public setOpacity (toSet){
     this.opacityset = toSet
@@ -136,6 +162,52 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   get totalCollections(){
     let collections: Record<any, any> =  this.$store.getters.getCollections;
     return collections.length;
+  }
+  get isCustomerAuthenticated(): boolean {
+    return this.$store.getters.isCustomerAuthenticated
+  }
+  get customerPermissions() {
+    return this.$store.getters.getCustomerPermissions
+  }
+
+  // Add after other methods in the LockerRoomModal class
+  public async handleAddToCart() {
+    try {
+      const lockerRoom = this.$refs.lockerRoom as any;
+
+      if (!lockerRoom || this.selectedCollectionProducts.length === 0) {
+
+        return;
+      }
+
+      // Get selected products from LockerRoom component
+      const selectedProducts = lockerRoom.getLockerProducts
+        .flatMap(locker => locker.product)
+        .filter(product => this.selectedCollectionProducts.includes(product.id));
+
+      // Call addBulkToCart on LockerRoom component
+      const result = await lockerRoom.addBulkToCart(selectedProducts);
+
+      // Clear selections after successful add
+      if (result.success.length > 0) {
+        this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {
+          attribute: "locker_products",
+          value: []
+        });
+
+        // Optionally close the modal after adding to cart
+        this.hideVModal('locker-modal');
+      }
+
+    } catch (error) {
+
+      console.error('Add to cart error:', error);
+    }
+  }
+
+  // Add computed property for cart loading state
+  get isCartLoading(): boolean {
+    return this.$store.getters.getCartLoading;
   }
 }
 </script>

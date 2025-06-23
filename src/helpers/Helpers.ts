@@ -218,9 +218,9 @@ const getColorType = (svg_group = '', product_id: number|null = null, color_type
   const product = product_id ? Store.getters.getProduct(product_id) : Store.getters.getProduct()
   if(svg_group && product && product.svg_group_color_container && product.svg_group_color_container[svg_group]) {
     return 'product_color'
-  } else if(product && !product.is_custom_color_allowed && color_type == 'color_type') {
+  } else if(product && !product?.is_custom_color_allowed && color_type == 'color_type') {
     return 'product_color'
-  } else if(product.is_custom_color_allowed && Store.getters.getSetting(color_type) == 'product_color') { // if other colors allowed on product and color_type is 'product_color' then use logo_color_type
+  } else if(product?.is_custom_color_allowed && Store.getters.getSetting(color_type) == 'product_color') { // if other colors allowed on product and color_type is 'product_color' then use logo_color_type
     return Store.getters.getSetting('logo_color_type')
   }
   return Store.getters.getSetting(color_type);
@@ -704,11 +704,11 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
         post_data.fixed_logos = fixed_logos
       } else {
         const svg_content = await fetchUrlContent(post_data.production_url);
+
         const production_file = await parseSvgStringFile(svg_content, post_data);
         post_data.svg_content = production_file
         post_data.fixed_logos = []
       }
-
       resolve(post_data)
     }, 500)
   })
@@ -1146,7 +1146,7 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
 
     let logo_max_width = 0;
     const scene_ref = Store.getters.getCanvasImage.scene
-    if((factory_product.custom_logos.length >= 1)) {
+    if((factory_product.custom_logos && factory_product.custom_logos.length >= 1)) {
       const custom_logos_without_base64 = santaClone(factory_product.custom_logos.filter((custom_logo:Record<any,any>) => {
         return (Object.prototype.hasOwnProperty.call(custom_logo,'url') && custom_logo.url !== "" && custom_logo.url !== null)
       }))
@@ -1222,6 +1222,105 @@ const parseSvgStringFile = async (svg_string:string, factory_product: Record<any
     return null;
   }
 }
+
+const parseSvgStringFileFromSource = async (svg_string: string, factory_product: Record<any, any>) => {
+  if(svg_string.substring(0, svg_string.lastIndexOf("</g>")) !== '') {
+    try {
+      let production_content = "";
+      svg_string = svg_string.substring(0, svg_string.lastIndexOf("</g>"));
+      const svg_doc_initial = await getDocFromString(svg_string);
+      const production_file_initial_dimension: Record<any, any> = {
+        width: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("width"),
+        height: $(svg_doc_initial as SVGTextElement|Document).find("svg").eq(0).attr("height")
+      };
+
+      let logo_max_width = 0;
+
+      // Handle custom logos
+      if(factory_product.custom_logos && factory_product.custom_logos.length >= 1) {
+        const custom_logos_without_base64 = factory_product.custom_logos.filter((custom_logo: Record<any, any>) => {
+          return custom_logo.url && custom_logo.url !== ""
+        });
+
+        if(custom_logos_without_base64.length > 0) {
+          // Convert URLs to base64 if needed
+          const logo_urls = custom_logos_without_base64.map(logo => logo.url);
+          const base64Logos = await urlToBase64(logo_urls);
+
+          custom_logos_without_base64.forEach((logo, index) => {
+            logo.base_64 = base64Logos[index];
+          });
+
+          const payload = getLogoSVG(custom_logos_without_base64, factory_product.measurement_ratio, production_file_initial_dimension);
+          logo_max_width = payload.width;
+          svg_string += payload.svg_string;
+        }
+      }
+
+      // Handle product front/back images
+      const numbers_array = getSVGNumberArraysFromRoster(factory_product);
+      const svg_numbers_payload = getSVGNumbers(numbers_array, logo_max_width, production_file_initial_dimension);
+      svg_string += svg_numbers_payload.svg_string;
+
+      const numbers_width = svg_numbers_payload.width ? svg_numbers_payload.width + 500 : 0;
+      const logo_max_width_and_number_max_width = logo_max_width + numbers_width;
+
+      const names_array = getSVGNameArraysFromRoster(factory_product);
+      const svg_names_payload = getSVGNames(names_array, production_file_initial_dimension, logo_max_width_and_number_max_width);
+      svg_string += svg_names_payload.svg_string;
+
+      const names_height = svg_names_payload.height;
+      const names_width = svg_names_payload.width;
+      const name_logo_number_max_width = logo_max_width + numbers_width + names_width;
+
+      const common_array:any = getSVGCommonArraysFromRoster(factory_product);
+      const svg_common_payload = getSVGCommonItems(common_array, production_file_initial_dimension, name_logo_number_max_width);
+      svg_string += svg_common_payload.svg_string;
+
+      svg_string += `\n</g>\n</svg>`;
+
+      const svg_doc = await getDocFromString(svg_string);
+      const production_file_info = {
+        width: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("width"),
+        height: $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr("height")
+      };
+
+      // Apply colors to SVG
+      applyColorToSVG(factory_product, svg_doc as SVGTextElement|Document);
+
+      // Add front image
+      if (factory_product.front_image) {
+        const group_front_image_tag = getGroupImageTag(factory_product, production_file_info, 'front_image');
+        $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_front_image_tag);
+      }
+
+      // Add back image
+      if (factory_product.back_image) {
+        const group_back_image_tag = getGroupImageTag(factory_product, production_file_info, 'back_image');
+        $(svg_doc as SVGTextElement|Document).find("g").eq(0).prepend(group_back_image_tag);
+      }
+
+      const production_height = parseFloat(production_file_info.height?.replace('px', '') || '6000');
+      const production_width = parseFloat(production_file_info.width?.replace('px', '') || '8000');
+      const svg_height = calculateSVGHeight(production_height, logo_max_width, svg_numbers_payload.height, names_height, common_array.height);
+      const svg_width = calculateSVGWidth(production_width, logo_max_width, numbers_width, names_width, common_array.width);
+
+      $(svg_doc as SVGTextElement|Document).find("svg").eq(0).attr({
+        "width": svg_width + 'px',
+        "height": svg_height + 'px',
+        "viewBox": `0 0 ${svg_width} ${svg_height}`
+      });
+
+      production_content = await serializer(svg_doc as SVGTextElement|Document);
+      return production_content;
+
+    } catch (error) {
+      console.error('Error processing SVG:', error);
+      return null;
+    }
+  }
+  return null;
+};
 
 const calculateSVGHeight = (production_file_height:number, logo_max_height:number, number_max_height:number, name_max_height:number, common_height:number) => {
   if(production_file_height && logo_max_height && number_max_height && name_max_height){
@@ -1700,7 +1799,7 @@ const getProductLogoTechnologies = (customLogoIndex,customLogo) => {
 
   if(product_obj) {
     const current_logo_settings = getLogoSettings(customLogoIndex,false,product_id);
-    for (const logo_setting_id in product_obj.logo_technologies) {      
+    for (const logo_setting_id in product_obj.logo_technologies) {
       if(logo_setting_id == current_logo_settings.id){
         product_logo_technologies = product_obj.logo_technologies[logo_setting_id];
       }
@@ -2253,8 +2352,8 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
           }
         })
       }
-      
-      // manage logo technology prices. 
+
+      // manage logo technology prices.
       let product_price_with_quantity = product_price * roster_quantity_total;
       const addons_price_with_quantity =  addons_price * roster_quantity_total;
       const logo_tech_price_with_quantity =  logo_tech_price * roster_quantity_total;
@@ -2968,6 +3067,252 @@ const generateRandomString = () => {
   return result;
 }
 
+ const getAllSvgGroups = async (product: any): Promise<any[]> => {
+  const fixedWidth = 600;
+  const fixedHeight = 600;
+  const padding = 10;
+  const allSvgGroups: any[] = [];
+
+  try {
+    // Get design URLs
+    const frontDesignUrl = `${process.env.VUE_APP_STORAGE_URL}`+product.design?.front_design?.file_base_url;
+    const backDesignUrl = `${process.env.VUE_APP_STORAGE_URL}`+product.design?.back_design?.file_base_url;
+
+    // Process front design
+    if (frontDesignUrl && frontDesignUrl.toLowerCase().endsWith('.svg')) {
+      await new Promise<void>((resolveFront) => {
+        fabric.loadSVGFromURL(frontDesignUrl, (objects: any, options: any) => {
+          const frontDesign = fabric.util.groupSVGElements(objects) as fabric.Group;
+
+          // Set common properties and scale
+          frontDesign.set({
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true,
+            originX: 'center',
+            originY: 'center'
+          });
+
+          if(frontDesign.width! > frontDesign.height!) {
+            frontDesign.scaleToWidth(fixedWidth - padding);
+          } else {
+            frontDesign.scaleToHeight(fixedHeight - padding);
+          }
+
+          frontDesign.center().setCoords();
+          // Extract SVG groups from front design
+          const designObjects = frontDesign._objects ? frontDesign._objects : [frontDesign];
+          extractSvgGroups(designObjects, allSvgGroups, product.product_id);
+          resolveFront();
+        });
+      });
+    }
+    // Process back design
+    if (backDesignUrl && backDesignUrl.toLowerCase().endsWith('.svg')) {
+      await new Promise<void>((resolveBack) => {
+        fabric.loadSVGFromURL(backDesignUrl, (objects: any, options: any) => {
+          const backDesign = fabric.util.groupSVGElements(objects) as fabric.Group;
+
+          // Set common properties and scale
+          backDesign.set({
+            hasControls: false,
+            selectable: false,
+            evented: false,
+            lockMovementX: true,
+            lockMovementY: true,
+            originX: 'center',
+            originY: 'center'
+          });
+
+          if(backDesign.width! > backDesign.height!) {
+            backDesign.scaleToWidth(fixedWidth - padding);
+          } else {
+            backDesign.scaleToHeight(fixedHeight - padding);
+          }
+
+          backDesign.center().setCoords();
+          // Extract SVG groups from back design
+          const designObjects = backDesign._objects ? backDesign._objects : [backDesign];
+          extractSvgGroups(designObjects, allSvgGroups, product.product_id);
+          resolveBack();
+        });
+      });
+    }
+    // Sort all groups by count (base first)
+    return allSvgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1);
+  } catch (error) {
+    console.error('Error processing designs:', error);
+    return [];
+  }
+}
+
+const getAllSvgGroupsFor3D = async (product: any): Promise<any[]> => {
+  const svgGroups: any[] = [];
+  const initialSvgGroups: any[] = [];
+
+  try {
+    const frontDesignUrl = product.design?.front_design?.file_base_url;
+
+    if (frontDesignUrl && frontDesignUrl.toLowerCase().endsWith('.svg')) {
+      await new Promise<void>((resolve) => {
+        fabric.loadSVGFromURL(`${process.env.VUE_APP_STORAGE_URL}${frontDesignUrl}`, (objects: any, options: any) => {
+          const design:any = fabric.util.groupSVGElements(objects);
+          const designObjects = design._objects ? design._objects : [design];
+
+          designObjects.forEach((item: Record<any, any>) => {
+            if (item.id) {
+              // Match ThreeDScene ID processing
+              item.set('id', item.id.split('_')[0]);
+              item.id = item.id.toLowerCase();
+
+              if (!item.id.includes('noncustomizable') &&
+                  !item.id.includes('inside') &&
+                  containsObject(svgGroups, item.id)) {
+
+                let count = 1;
+                if (item.id === 'base') {
+                  count = 100000;
+                }
+
+                const selectProductPantonesList = getSelectedProductPantones(product.product_id, item.id);
+
+                // Handle gradient fills
+                if (item.fill && item.fill.gradientUnits) {
+                  const gradient_colors: Record<any, any>[] = [];
+
+                  item.fill.colorStops.forEach((color_stop: Record<any, any>) => {
+                    if (color_stop.color.includes('rgb')) {
+                      color_stop.color = rgbHex(color_stop.color).includes('#') ?
+                        rgbHex(color_stop.color) :
+                        '#' + rgbHex(color_stop.color);
+                    }
+
+                    // Match ThreeDScene pantone handling
+                    let pantoneColor: Record<any, any> = {pantone: '', name: ''};
+                    pantoneColor = getClosestColor(
+                      color_stop.color,
+                      selectProductPantonesList,
+                      getColorType(item.id, product.product_id)
+                    );
+
+                    gradient_colors.push({
+                      color: color_stop.color,
+                      pantone: pantoneColor.pantone,
+                      name: pantoneColor.name
+                    });
+                  });
+
+                  svgGroups.push({
+                    id: item.id,
+                    count: count,
+                    gradient_colors: gradient_colors
+                  });
+                }
+                // Handle solid fills
+                else if (item.fill) {
+                  if (item.fill.includes('rgb')) {
+                    item.fill = rgbHex(item.fill).includes('#') ?
+                      rgbHex(item.fill) :
+                      '#' + rgbHex(item.fill);
+                  }
+
+                  const pantoneColor = getClosestColor(
+                    item.fill,
+                    selectProductPantonesList,
+                    getColorType(item.id, product.product_id)
+                  );
+
+                  svgGroups.push({
+                    id: item.id,
+                    color: item.fill,
+                    count: count,
+                    pantone: pantoneColor.pantone,
+                    name: pantoneColor.name
+                  });
+                }
+              }
+            }
+          });
+
+          // Match ThreeDScene sorting and initialization
+          const sortedGroups = svgGroups.sort((a, b) => (a.count < b.count) ? 1 : -1);
+          Object.assign(initialSvgGroups, JSON.parse(JSON.stringify(sortedGroups)));
+
+          resolve();
+        });
+      });
+    }
+    return svgGroups;
+  } catch (error) {
+    console.error('Error getting SVG groups for 3D:', error);
+    return [];
+  }
+}
+
+// Helper method to extract SVG groups
+const extractSvgGroups = (designObjects: any[], svgGroups: any[], productId: number): void => {
+  designObjects.forEach((item: Record<any, any>) => {
+    if(item.id) {
+      item.id = item.id?.toLowerCase();
+      // Skip non-customizable parts
+      if (!item.id.includes('noncustomizable') &&
+          !item.id.includes('inside') &&
+          containsObject(svgGroups, item.id)) {
+
+        // Set count - base is always first
+        let count = 1;
+        if (item.id === 'base') {
+          count = 100000;
+        }
+        // Get pantone colors for this product part
+        const selectProductPantonesList = getSelectedProductPantones(productId, item.id);
+
+        // Handle gradient fills
+        if (item.fill && item.fill.gradientUnits) {
+          const gradientColors: Record<any, any>[] = [];
+
+          item.fill.colorStops.forEach((colorStop: Record<any, any>) => {
+            if (colorStop.color.includes('rgb')) {
+              colorStop.color = rgbHex(colorStop.color).includes('#') ?
+                rgbHex(colorStop.color) :
+                '#' + rgbHex(colorStop.color);
+            }
+            gradientColors.push({
+              color: colorStop.color,
+            });
+          });
+
+          svgGroups.push({
+            id: item.id,
+            count: count,
+            gradient_colors: gradientColors
+          });
+        }
+        // Handle solid fills
+        else if (item.fill) {
+          if (item.fill.includes('rgb')) {
+            item.fill = rgbHex(item.fill).includes('#') ?
+              rgbHex(item.fill) :
+              '#' + rgbHex(item.fill);
+          }
+
+          svgGroups.push({
+            id: item.id,
+            color: item.fill,
+            count: count,
+          });
+        }
+      }
+    }
+  });
+}
+
+const containsObject = (array: any[], id: string): boolean => {
+    return array.some(item => item.id === id);
+}
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -2976,7 +3321,8 @@ export {
   getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
   getSelectedProductPantones, getColorType, setRetrievedProductsCustomTexts, getEditModeDefaultObj, fetchUrlContent,
   rosterDefaultItem, authenticateUser, lastActiveProductDefaultObject, resetLastActiveProductData,
-  getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile,
+  getSVGNumberArraysFromRoster, getSVGNumbers, getSVGNames, getSVGNameArraysFromRoster, getLogoSVG, parseSvgStringFile, parseSvgStringFileFromSource,
+
   persistToken, fetchCustomer, getTeamLogo, getDataToSetLastActiveProduct, getImageFromCanvas, getUrlParameter,
   rosterDetailsInit, initCustomLogosNew, getProductColors, logoColorInfoDefaultObject, recentLogoDefaultObject, getPermutation,
   getDefaultColorsObject, setDefaultColors, getExtensionFromString, exitFromEditMode, getExtensionsFor, validateLogoType, getLogoUpdatedProps,
@@ -2988,5 +3334,7 @@ export {
   getReorderDataDefaultObject, getOrderUpdateIdentifier, createOrUpdateOrderUpdateDataState, updateOrder, downloadNodeCollectionPDF,
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
-  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab
+  findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,
+  containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups
+
 };

@@ -1336,6 +1336,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       let url = "carts"
       let cart_edit_mode = false;
       let product_edit_info_object = self.$store.getters.getProductEditInfoObject
+
       if(product_edit_info_object.editing && product_edit_info_object.type == "cart_product") {
         cart_edit_mode = true;
         (post_data as Record<any,any>).factory_product.id = product_edit_info_object.cart_product_info.cart_item_product.id
@@ -1431,7 +1432,9 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           base_path = `${base_path}/shareable`;
         }
         self.$store.dispatch('setCartLoading',true);
+
         const cart_data = santaClone(post_data)
+
         const front_image_info = base64ToFile(cart_data.factory_product.front_image, true)
         const is_back_image = cart_data.factory_product.back_image
         let back_image_info: File | null = null
@@ -1475,6 +1478,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
               post_data.factory_product.svg_url = all_promises_response[1].data.result.file_path
             }
           }
+
           await http.post(url, post_data).then(async (res: any) => {
             if (res.data.success == true){
               let product_edit_info_obj = self.$store.getters.getProductEditInfoObject;
@@ -1582,6 +1586,144 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
         })
       }
 
+  }
+
+ public async addCustomProductToCartMixin(
+  productFonts: Record<any, any>[],
+  cartData: any,
+  getQuote = { quote: false, admin_salesrep_id: null }
+) {
+  try {
+    this.$store.dispatch('setCartLoading', true);
+
+    // Add MOQ validation
+    const customerPermissions = this.$store.getters.getCustomerPermissions;
+    if (!customerPermissions.includes('skip-moq')) {
+      if (!this.checkMinimumOrderQtyBYDesign(
+        this.$store.getters.getProductRosters(cartData.factory_product.product_id),
+        this.$store.getters.getSkuInformation,
+        this.$store.getters.getProductEditInfoObject,
+        cartData.factory_product.product_name
+      )) {
+        return;
+      }
+    }
+
+    const company = this.$store.getters.getCompany;
+    const customer = this.$store.getters.getCustomer;
+
+    // Generate unique ID for factory product
+    const factory_product_id = getRandom(4, 'alpha_numeric') + getDateTimeFormatted() + getRandom(4, 'alpha_numeric');
+    cartData.factory_product.id = factory_product_id;
+
+    // Handle image uploads with proper paths
+    const base_path = `company_${company.id}/${company.id}/cart/${customer.id}`;
+    const cartAssetsPromises: Promise<any>[] = []; // Define proper type for promises array
+
+    if (cartData.factory_product.front_image) {
+      const frontFile = base64ToFile(cartData.factory_product.front_image, true);
+      if (frontFile) { // Check if file exists
+        const frontFormData = new FormData();
+        frontFormData.append('file', frontFile);
+        frontFormData.append('base_path', base_path);
+        cartAssetsPromises.push(http.post('upload_cart_assets', frontFormData));
+      }
+    }
+
+    if (cartData.factory_product.back_image) {
+      const backFile = base64ToFile(cartData.factory_product.back_image, true);
+      if (backFile) { // Check if file exists
+        const backFormData = new FormData();
+        backFormData.append('file', backFile);
+        backFormData.append('base_path', base_path);
+        cartAssetsPromises.push(http.post('upload_cart_assets', backFormData));
+      }
+    }
+
+    // Type the uploads response
+    interface UploadResponse {
+      data: {
+        result: {
+          file_path: string;
+        };
+      };
+    }
+
+    const uploads = await Promise.all<UploadResponse>(cartAssetsPromises);
+
+    // Update cart data with uploaded image paths
+    if (uploads[0]) {
+      cartData.factory_product.front_image = uploads[0].data.result.file_path;
+    }
+    if (uploads[1]) {
+      cartData.factory_product.back_image = uploads[1].data.result.file_path;
+    }
+
+    // Make cart API call
+    const response = await http.post('carts', cartData);
+
+    if (response.data.success) {
+      this.$store.dispatch('addToCart', response.data.result.items);
+      this.showToast(response.data.message, 'success');
+
+      // Handle platform-specific cart updates if needed
+      const platform = company.platform;
+      if (platform === 'shopify') {
+        await this.processShopifyCart(cartData.factory_product, response.data.result);
+      } else if (platform === 'bigcommerce') {
+        await this.processBigCommerceCart(cartData.factory_product, response.data.result);
+      }
+    }
+
+    return response;
+
+  } catch (error) {
+    this.showToast('Failed to add product to cart', 'error');
+    throw error;
+  } finally {
+    this.$store.dispatch('setCartLoading', false);
+  }
+}
+
+
+  // Add this new method to cartModalData class
+  public async addLockerProductToCart(cartData: {
+    quote: boolean;
+    admin_salesrep_id: null;
+    factory_product: {
+      id: string;
+      product_id: number;
+      style_id: number;
+      design_id: number;
+      factory_id?: number;
+      factory_products: any[];
+      factory_product_active_index: number;
+      product_custom_texts: any[];
+      custom_logos: any[];
+      defaultcolors: any[];
+      groupcolors: Record<string, any>;
+      product_roster_detail: any[];
+      shuffle_color_number: number;
+      group_patterns: Record<string, any>;
+    }
+  }) {
+    try {
+      const customerPermissions = this.$store.getters.getCustomerPermissions;
+      if (!customerPermissions.includes('skip-moq')) {
+        // Your existing MOQ validation logic
+      }
+
+      // Add to cart using the passed data directly
+      const response = await this.$store.dispatch('ADD_TO_CART', cartData);
+
+      // Hide modals if needed
+      this.hideVModal('rostermodal');
+
+      return response;
+    } catch (error) {
+      console.error('Add to cart error:', error);
+      throw error;
+    }
   }
 
   public async processShopifyCart(cart_product, custimoo_cart_item) {

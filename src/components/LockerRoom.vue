@@ -443,7 +443,10 @@ import {
   classObserver,
   handleResponseException,
   getDomDocument,
+  unitConversion,
   getEditModeDefaultObj, exitFromEditMode, urlToBase64, downloadNodeCollectionPDF, startExportStatusChecker
+  ,getSelectedProductPantones,getColorType,base64ToFile, fetchUrlContent, parseSvgStringFileFromSource,
+  getAllSvgGroups, containsObject, getAllSvgGroupsFor3D
 } from "@/helpers/Helpers";
 import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
 import {
@@ -451,7 +454,8 @@ import {
   handleMainProducts,
   exitEditMode,
   ProductsQueryParamsMixin,
-  CollectionMixin
+  CollectionMixin,
+  cartModalData
 } from "@/mixins/LockerProduct";
 import ContactModal from "@/components/ContactModal.vue";
 import { Popper } from 'popper-vue'
@@ -461,6 +465,36 @@ import {AxiosError} from "axios";
 import EditRosterDetails from "@/components/EditRosterDetails.vue";
 import CollectionPDF from "@/components/CollectionPDF.vue";
 import lazyImage from '@/directives/lazyImage.js';
+import {fabric} from 'fabric';
+import {getClosestColor} from '@/pantoneColor'
+import rgbHex from 'rgb-hex'
+
+
+interface FactoryProduct {
+  id: string;
+  product_id: number;
+  style_id: number;
+  design_id: number;
+  product_custom_texts: any[];
+  custom_logos: any[];
+  defaultcolors: any[];
+  groupcolors: Record<string, any>;
+  product_roster_detail: any[];
+  shuffle_color_number: number;
+  group_patterns: Record<string, any>;
+  factory_id?: number;
+  factory_products?: FactoryProduct[];
+  factory_product_active_index?: number;
+  addons?: {
+    addon_id: number;
+    addon_ecommerce_product_id?: number;
+    addon_ecommerce_variant_id?: number;
+  }[];
+  grouped_addons?: Record<string, {id: number}>;
+  ungrouped_addons?: {addon_id: number}[];
+  is_custom_product?: boolean;
+}
+
 
 @Component<LockerRoom>({
   components: {
@@ -542,8 +576,9 @@ import lazyImage from '@/directives/lazyImage.js';
     }
   }
 })
-export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin, CollectionMixin) {
+export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin, CollectionMixin, cartModalData) {
   @Prop({required: true}) opacityset:boolean
+  @Prop() products_fonts!: Record<string, any>[];
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
@@ -576,6 +611,504 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public showLoader = false
   public filtered_locker_products = [];
   public localLockers: Record<any, any> = [];
+
+
+
+private async formatProductForCart(product: any): Promise<any> {
+
+  const groupColors = JSON.parse(product.groupcolors) || {};
+  const customLogos = JSON.parse(product.custom_logos) || [];
+  const productCustomTexts = product?.text || [];
+  const productAttribute = JSON.parse(product?.product_attribute) || {};
+  const productCustomTextsObjects = await this.formatRosterTextObjects(product);
+  const productRosterDetail = product.product_roster_detail || [];
+  const svgGroups = product.is_3d_product ?  await getAllSvgGroupsFor3D(product): await getAllSvgGroups(product);
+  const svgParts = product.svg_parts || [];
+  // Generate factory product ID
+  const factory_product_id = `F18J${Date.now()}${getRandom(4, 'alpha_numeric')}`;
+
+  // Upload assets first
+  const post_data = {
+    quote: false,
+    admin_salesrep_id: null,
+    factory_product: {
+      // Basic product info
+      //id: `F18J${Date.now()}${getRandom(4, 'alpha_numeric')}`,
+      product_id: product.product_id,
+      style_id: product.style_id,
+      design_id: product.design_id,
+      product_type: product.product_type,
+      product_name: product.product_name,
+      measurement_ratio: product.measurement_ratio || 0.132,
+
+      // SVG Production Data - Missing in our current implementation
+      // SVG data
+      svg_groups: svgGroups,
+      svg_parts: svgParts,
+      svg_content: product.svg_content || '',
+
+      // Images with proper URLs
+     // Use uploaded asset URLs
+       front_image: null,
+        back_image: null,
+      svg_url: null,
+
+      production_url: product.design.production_design?.file_url
+        ? `${process.env.VUE_APP_STORAGE_URL}${product.design.production_design.file_url}.svg`
+        : null,
+      pdf_file: null,
+
+      // Complete Color Info
+      defaultcolors: product.defaultcolors || [],
+      groupcolors: groupColors,
+      colors: product.colors || [],
+      color_groups: product.color_groups || {},
+      color_info: product.color_info || {},
+      color_patterns: product.color_patterns || {},
+
+      // Logo data - use actual saved data
+      custom_logos: customLogos,
+      fixed_logo_index: product.fixed_logo_index || 0,
+      custom_logo_svgs: product.custom_logo_svgs || [],
+      logo_colors: product.logo_colors || [],
+
+      // Text Data
+      product_custom_texts: productCustomTexts,
+      product_custom_text_objects: {
+        roster: Object.values(productCustomTextsObjects).filter(obj => typeof obj === 'object' && !Array.isArray(obj)),
+        common: productCustomTextsObjects.common || []
+      },
+
+      // Model and SKU Info - Missing in our implementation
+      model_description: product?.product?.sku?.description,
+      sku_number: product?.product?.sku?.sku_number,
+      sizechart_reference: product?.product?.sku?.sizechart_reference,
+      minimum_order_quantity: product?.product?.sku?.minimum_order_quantity,
+      minimum_order_quantity_type: product?.product?.sku?.minimum_order_quantity_type,
+
+      // Complete Product Info
+      product_roster_detail: productRosterDetail ,
+      style_name: product.style.name,
+      product_display_name: product.product_display_name,
+
+      // Price Info
+      product_price_object: {
+        product_price: product?.sku?.skucurrency[0]?.pivot?.price || 0,
+        currency_code: product?.sku?.skucurrency[0]?.code,
+        currency_symbol: product?.sku?.skucurrency[0]?.symbol,
+        quantity: productRosterDetail.reduce((acc: number, detail: any) => acc + (detail.quantity || 0), 0),
+      },
+
+      // Ecommerce Data
+      ecommerce_post_id: product?.ecommerceproduct?.ecommerce_post_id || '',
+      ecommerce_variant_id: product?.ecommerceproduct?.ecommerce_variant_id || '',
+      ecommerce_modifier_id: product?.ecommerceproduct?.ecommerce_modifier_id || '',
+      ecommerce_cart_id: product?.ecommerceproduct?.ecommerce_cart_id || null,
+      sync_id: product?.ecommerceproduct?.sync_id || '',
+      size_variants_mapping: product?.ecommerceproduct?.size_variants_mapping || null,
+
+      // Addons and Patterns
+      addons: productAttribute?.addons || [],
+      grouped_addons: productAttribute?.grouped_addons || {},
+      ungrouped_addons: productAttribute?.ungrouped_addons || [],
+      group_patterns: productAttribute?.group_patterns || {},
+      shuffle_color_number: productAttribute?.shuffle_color_number || 1,
+
+      factory_product_active_index: 0,
+
+      // Flags and metadata
+      is_custom_product: false,
+      reorder_data: null
+    }
+  };
+  let pUrl: string = product.design.production_design?.file_url
+        ? `${process.env.VUE_APP_STORAGE_URL}${product.design.production_design.file_url}.svg`
+        : '';
+  const svg_content = await fetchUrlContent(pUrl);
+  const production_file = await parseSvgStringFileFromSource(svg_content, post_data.factory_product);
+  product.svg_content = production_file;
+
+  const uploadedAssets = await this.uploadCartAssets(product, factory_product_id);
+  post_data.factory_product.front_image = uploadedAssets.front_image;
+  post_data.factory_product.back_image = uploadedAssets.back_image;
+  post_data.factory_product.svg_url = uploadedAssets.svg_url;
+  return post_data;
+}
+
+private async formatRosterTextObjects(
+  product: any
+): Promise<any> {
+  const rosterObjects: any = {};
+  const productCustomTexts = product?.text || [];
+  if (!product.product_roster_detail || !productCustomTexts) return {};
+
+  product.product_roster_detail.forEach((detail: any, rosterIndex: number) => {
+    const text_object: any = {
+      name: {
+        label: '',
+        placement: '',
+        font_family: '',
+        items: []
+      },
+      number: {
+        label: '',
+        placement: '',
+        font_family: '',
+        items: []
+      }
+    };
+
+    const common: any[] = [];
+
+    productCustomTexts.forEach((custom_text: any) => {
+      let font = this.products_fonts[custom_text.font_family] || this.products_fonts[Object.keys(this.products_fonts)[0]];
+      if (!font || !font.opentype_font) return;
+
+      let path: any = {};
+      let text_for_test_char = '';
+
+      if (custom_text.is_first_name) {
+        text_for_test_char = detail.text;
+        path = detail.text ? font.opentype_font.getPath(detail.text) : {};
+      } else if (custom_text.is_first_number) {
+        text_for_test_char = detail.number;
+        path = detail.number ? font.opentype_font.getPath(detail.number) : {};
+      } else if (rosterIndex === 0) {
+        text_for_test_char = custom_text.value;
+        path = custom_text.value ? font.opentype_font.getPath(custom_text.value) : {};
+      }
+
+      if (!path || !Object.keys(path).length || !Array.isArray(custom_text.items)) return;
+
+      custom_text.items.forEach((item: any) => {
+        if (!item.selected) return;
+
+        path.fill = item.color;
+        if (parseInt(item.outline_width) > 0) {
+          path.stroke = item.outline_color;
+        }
+        path.strokeWidth = parseInt(item.outline_width);
+
+        const bbox = path.getBoundingBox();
+        const ascender = Math.abs(bbox.y1);
+        const descender = Math.abs(bbox.y2);
+
+        const width = bbox.x2 - bbox.x1 + parseInt(item.outline_width);
+        const height = ascender + descender + parseInt(item.outline_width);
+
+        const svgString = path.toSVG();
+        const parser = new DOMParser();
+        const svgElement = parser.parseFromString(svgString, "text/html").body.firstChild as SVGElement;
+
+        // Padding
+        const paddingTop = 5, paddingLeft = 5, paddingRight = 5, paddingBottom = 5;
+        const totalHeight = height + paddingTop + paddingBottom;
+        const totalWidth = bbox.x2 - bbox.x1 + paddingLeft + paddingRight;
+
+        const translateX = -bbox.x1 + paddingLeft;
+        const translateY = ascender + parseInt(item.outline_width) / 2 + paddingTop;
+
+        svgElement.setAttribute('transform', `translate(${translateX} ${translateY})`);
+        svgElement.setAttribute('width', totalWidth.toString());
+        svgElement.setAttribute('height', totalHeight.toString());
+        svgElement.setAttribute('paint-order', 'stroke');
+        svgElement.setAttribute('stroke-location', 'outside');
+
+        const svg_with_tag = `<?xml version="1.0" encoding="utf-8"?>\n` +
+          `<svg stroke-location="outside" paint-order="outside" style="width:100%; height: auto;" fill="#FFFFFF" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" xml:space="preserve" viewBox="0 0 ${totalWidth} ${totalHeight}">\n${svgElement.outerHTML}\n</svg>`;
+
+        const converted_width = unitConversion((width * item.scaleX) * product.measurement_ratio);
+        const converted_height = unitConversion((height * item.scaleY) * product.measurement_ratio);
+        const outline_width = unitConversion((item.outline_width * item.scaleX) * product.measurement_ratio);
+
+        const text_color_info = {
+          hex: item.color,
+          name: item.color_pantone,
+          pantone: item.color_pantone
+        };
+
+        const text_item_object = {
+          label: item.label,
+          placement: item.placement,
+          width: converted_width.value,
+          height: converted_height.value,
+          unit: converted_height.unit,
+          svg: svg_with_tag,
+          color: [text_color_info],
+          svg_height: height.toString(),
+          outline_color: item.outline_color,
+          outline_color_pantone: item.outline_color_pantone,
+          outline_width: outline_width.value,
+          original_height: (height * item.scaleY) / product.measurement_ratio,
+          original_width: (width * item.scaleX) / product.measurement_ratio,
+          rotation: item.rotation,
+          scaleX: item.scaleX / product.measurement_ratio,
+          scaleY: item.scaleY / product.measurement_ratio,
+          width_px: width,
+          height_px: height
+        };
+
+        if (custom_text.is_first_name) {
+          text_object.name.label = custom_text.label;
+          text_object.name.placement = custom_text.placement;
+          text_object.name.font_family = custom_text.font_family;
+          text_object.name.items.push(text_item_object);
+        } else if (custom_text.is_first_number) {
+          text_object.number.label = custom_text.label;
+          text_object.number.placement = custom_text.placement;
+          text_object.number.font_family = custom_text.font_family;
+          text_object.number.items.push(text_item_object);
+        } else if (rosterIndex === 0 && custom_text.value) {
+          common.push({
+            label: custom_text.label,
+            placement: custom_text.placement,
+            value: custom_text.value,
+            font_family: custom_text.font_family,
+            items: [text_item_object]
+          });
+        }
+      });
+    });
+
+    rosterObjects[rosterIndex] = {
+      size: detail.size,
+      quantity: detail.quantity,
+      name: text_object.name,
+      number: text_object.number
+    };
+
+    if (rosterIndex === 0) {
+      rosterObjects.common = common;
+    }
+  });
+  return rosterObjects;
+}
+
+
+public async addBulkToCart(selectedProducts: any[]) {
+  const successProducts: any[] = [];
+  const failedProducts: any[] = [];
+
+  try {
+    this.$store.commit('SET_CART_LOADING', true);
+
+    // Get selected products
+    const productsToAdd = this.getSelectedProducts();
+
+    let totalProducts = productsToAdd.length;
+    let i = 0;
+    for (const product of productsToAdd) {
+      try {
+        this.showToast(`Adding ${product.product_name} to cart (${++i}/${totalProducts})`, 'info', 5000);
+
+        // Format product for cart with all required data
+        const cartData = await this.formatProductForCart(product);
+        if(!cartData) {
+          setTimeout(() => {
+            this.showToast(`Could not add ${product.product_name} to the cart. ${response.data.message}.`, 'error');
+          }, 3000);
+        }
+        // Make direct API call to add to cart
+        const response = await http.post('carts', cartData);
+
+        if (response?.data?.success) {
+          this.$store.dispatch('addToCart', response.data.result.items);
+          this.showToast(`Successfully added ${product.product_name} to the cart.`, 'success');
+          //Show animation for adding to cart //Disabled for now
+          //this.addToCartAnimation(cartData.factory_product.front_image, cartData.factory_product.back_image);
+          successProducts.push(product);
+        } else {
+          setTimeout(() => {
+            this.showToast(`Could not add ${product.product_name} to the cart. ${response.data.message}.`, 'error');
+          }, 3000);
+          failedProducts.push({
+          product,
+            error: response.data.message
+          });
+        }
+      } catch (error) {
+        setTimeout(() => {
+            this.showToast(`Error cocurred.Could not add ${product.product_name} to the cart.`, 'error');
+          }, 3000);
+        failedProducts.push({
+          product,
+          error: error.message
+        });
+      }
+    }
+
+    if (successProducts.length > 0) {
+      this.viewLoader = false;
+      this.showToast(`Added ${successProducts.length} products to cart.`, 'success');
+      // Clear selections after successful add
+      this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {
+        attribute: "locker_products",
+        value: []
+      });
+    }
+
+  } finally {
+    this.$store.commit('SET_CART_LOADING', false);
+  }
+
+  return { success: successProducts, failed: failedProducts };
+}
+
+// Get selected products helper
+private getSelectedProducts(): any[] {
+  const selectedProducts = this.getLockerProducts
+    .flatMap(locker => locker.product)
+    .filter(product => this.selectedCollectionProducts.includes(product.id));
+  return selectedProducts;
+}
+
+
+private async uploadCartAssets(product: any, factory_product_id: string): Promise<any> {
+  try {
+    let companyId = product.company_id;
+    let factoryId = product.product.factory_id;
+    let customerId = product.customer_id;
+    let frontBase64 = '';
+    let backBase64 = '';
+    let base_path = `company_${companyId}/${companyId}/cart/${customerId}`;
+    if(factoryId) {
+      base_path = `${base_path}/${factoryId}`;
+    } else {
+      base_path = `${base_path}/shareable`;
+    }
+    const cart_assets_promises: Promise<any>[] = [];
+    // Handle front image
+    if (product.product_front_url) {
+      const frontImageBase64 = await urlToBase64(product.product_front_url);
+      frontBase64 = frontImageBase64[0];
+      const front_image_info: any = base64ToFile(frontImageBase64[0], true);
+
+      const formDataFrontImage: FormData = new FormData();
+      formDataFrontImage.append('file', front_image_info);
+      formDataFrontImage.append('base_path', `${base_path}`);
+      cart_assets_promises.push(
+        http.post('upload_cart_assets', formDataFrontImage)
+      );
+    }
+
+    // Handle back image
+    if (product.product_back_url) {
+      const backImageBase64 = await urlToBase64(product.product_back_url);
+      backBase64 = backImageBase64[0];
+      const back_image_info:any = base64ToFile(backImageBase64[0], true);
+
+      const formDataBackImage: FormData = new FormData();
+      formDataBackImage.append('file', back_image_info);
+      formDataBackImage.append('base_path', `${base_path}`);
+      cart_assets_promises.push(
+        http.post('upload_cart_assets', formDataBackImage)
+      );
+    }
+
+    // Handle SVG content
+    if (product.svg_content) {
+      const svg_content_info: any = base64ToFile(
+        product.svg_content,
+        false,
+        `${factory_product_id}.svg`
+      );
+      const formDataSVG:FormData = new FormData();
+      formDataSVG.append('file', svg_content_info);
+      formDataSVG.append('base_path', base_path);
+      cart_assets_promises.push(
+        http.post('upload_cart_assets', formDataSVG)
+      );
+    }
+
+    // Upload all assets in parallel
+    const uploads: any = await Promise.all(cart_assets_promises);
+
+    // Return uploaded file paths
+    return {
+      front_image: uploads[0]?.data.result.file_path,
+      back_image: uploads[1]?.data.result.file_path,
+      svg_url: uploads[2]?.data.result.file_path,
+      front_base64: frontBase64,
+      back_base64: backBase64
+    };
+
+  } catch (error) {
+    console.error('Error uploading cart assets:', error);
+    throw new Error('Failed to upload cart assets');
+  }
+}
+
+private addToCartAnimation(frontImage: string, backImage: string | null) {
+  // Create animation container
+  const cartAnimContainer = document.createElement('div');
+  cartAnimContainer.className = 'cart-animation';
+  const storageUrl = process.env.VUE_APP_STORAGE_URL;
+
+  // Add front image
+  if (frontImage) {
+    const frontImg = document.createElement('img');
+    frontImg.src = `${storageUrl}${frontImage}`;
+    frontImg.onload = () => { // Wait for image to load
+      cartAnimContainer.appendChild(frontImg);
+      startAnimation();
+    };
+  }
+
+  // Add back image if exists
+  if (backImage) {
+    const backImg = document.createElement('img');
+    backImg.src = `${storageUrl}${backImage}`;
+    backImg.onload = () => { // Wait for image to load
+      cartAnimContainer.appendChild(backImg);
+    };
+  }
+
+  const startAnimation = () => {
+    // Get cart icon position
+    const cartPosition = this.getCartIconPosition();
+
+    // Set animation endpoint
+    cartAnimContainer.style.setProperty('--cart-top', `${cartPosition.top}px`);
+    cartAnimContainer.style.setProperty('--cart-right', `${cartPosition.right}px`);
+
+    // Initial positioning
+    cartAnimContainer.style.position = 'fixed';
+    cartAnimContainer.style.top = '50%';
+    cartAnimContainer.style.left = '50%';
+    cartAnimContainer.style.transform = 'translate(-50%, -50%)';
+    cartAnimContainer.style.opacity = '1';
+
+    // Add to DOM
+    document.body.appendChild(cartAnimContainer);
+
+    // Start animation after a brief delay
+    setTimeout(() => {
+      cartAnimContainer.classList.add('animate');
+    }, 100);
+
+    // Remove element after animation completes
+    cartAnimContainer.addEventListener('animationend', () => {
+      setTimeout(() => {
+        cartAnimContainer.style.opacity = '0';
+        setTimeout(() => {
+          cartAnimContainer.remove();
+        }, 300);
+      }, 200);
+    });
+  };
+}
+
+  private getCartIconPosition(): { top: number; right: number } {
+  const cartIcon = document.querySelector('.cart-icon') as HTMLElement;
+  if (cartIcon) {
+    const rect = cartIcon.getBoundingClientRect();
+    return {
+      top: rect.top + (rect.height / 2),
+      right: window.innerWidth - (rect.left + rect.width/2)
+    };
+  }
+  return { top: 20, right: 20 };
+}
 
   private observerCallback = (mutationsList:any, observer:any) => {
     // Use traditional 'for loops' for IE 11
@@ -1859,6 +2392,51 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
     &::after, &::before{
       display: block;
     }
+  }
+}
+
+
+</style>
+<style lang="scss">
+.cart-animation {
+  position: fixed;
+  z-index: 99999;
+  display: flex;
+  gap: 10px;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+
+  img {
+    height: 100px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  &.animate {
+    animation: moveToCart 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+}
+
+@keyframes moveToCart {
+  0% {
+    opacity: 1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  70% {
+    opacity: 1;
+    top: var(--cart-top);
+    right: var(--cart-right);
+    transform: scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    top: var(--cart-top);
+    right: var(--cart-right);
+    transform: scale(0.1);
   }
 }
 </style>

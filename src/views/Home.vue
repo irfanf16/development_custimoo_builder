@@ -23,7 +23,7 @@
     <!-- this component is being used in itemToCustomize component   -->
     <AddProductWithDesignsToLockerRoom ref="add-product-designs-to-locker-room-modal" :products_fonts="products_fonts" :roster-url="generate_share_url" v-if="designs_to_save_in_locker_room.selection_mode"/>
     <CartModal ref="cartModal" @deleteCartItem="deleteCartItem" v-if="customer && $store.getters.getCartItems.length > 0"/>
-    <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal"  />
+    <LockerRoomModal @showCollectionModal="this.showCollectionModal" @editCollectionModal="this.editCollectionModal" ref="lockerModal" :products_fonts="products_fonts" />
     <EditRosterAreaTab @open-add-to-locker="getLockers(true)"
                        ref="edit-roster-area-tab" :products_fonts="products_fonts" @addToCartAnimation="()=>this.$emit('addToCartAnimation')" />
     <LoginForm ref="loginModal" @actionAfterLogin="actionAfterLogin()" />
@@ -531,6 +531,7 @@
     <confirm-modal message="This will reset everything. All design changes will be lost. Continue?"
                    cancel_text="Cancel" confirm_text="Reset all" ref="reset-changes" name="reset-changes"></confirm-modal>
     <AdminSalesRepresentativeModal ref="cart-representative-modal" @submitOrderQuote="submitOrderQuote" @submitCartQuote="submitCartQuote" />
+    <ResetPasswordModal @notify="notifyPasswordSetting"/>
   </div>
 </template>
 
@@ -600,6 +601,7 @@ import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import {deleteStateById, loadState, saveState} from "@/indexedDBPersistence";
 import AddProductWithDesignsToLockerRoom from "@/components/AddProductWithDesignsToLockerRoom.vue";
 import LockerRoom from "@/components/LockerRoom.vue";
+import ResetPasswordModal from '@/components/ResetPasswordModal.vue'
 
 Vue.filter('formatDate', function(value:string) {
   if (value) {
@@ -631,7 +633,8 @@ Vue.filter('formatDate', function(value:string) {
     SaveColorModal,
     LoginForm,
     Scene,
-    AdminSalesRepresentativeModal
+    AdminSalesRepresentativeModal,
+    ResetPasswordModal
   },
 
   beforeDestroy() {
@@ -683,6 +686,9 @@ Vue.filter('formatDate', function(value:string) {
       await this.$store.dispatch("getLockers");
       await this.$store.dispatch('getLockerRoomColors')
       await this.$store.dispatch('getCartServer', {})
+      if(this.customer.password_updated) {
+        this.$modal.show('resetPasswordModal')
+      }
     }
     let { sync_id } = this.$route.query;
     if(sync_id) {
@@ -818,7 +824,12 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private order_update_data:Record<any, any>[]= []
   public is_admin_token = localStorage.getItem(Vue.prototype.$adminToken_localstorage_key);
 
-
+  public notifyPasswordSetting(e) {
+    if(e.type == 'success') {
+      this.$modal.hide('resetPasswordModal')
+    }
+    this.showToast(e.message, e.type)
+  }
   public setOpacity (toSet){
     this.opacityset = toSet
   }
@@ -1387,7 +1398,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public actionAfterLogin() {
-
+    const customer = this.customer
+    if(customer.password_updated) {
+      this.$modal.show('resetPasswordModal')
+    }
     if (this.prevRoute && this.prevRoute!.name == 'OrderDetail') {
       this.$router.push(this.prevRoute.fullPath)
     }
@@ -1567,7 +1581,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         unique[svgGroups[i].color] = 1;
       }
     }
-    
     const fixed_logo_index = Store.getters.getFixedLogoIndex;
     const product_style = this.selectedProduct.productstyles[this.styleIndex]
     let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
@@ -1601,7 +1614,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         self.showLoader = false
         this.showToast(response_data.message, toast_type);
         hideLockerProductUpdateButton(true);
-        if (this.roomWithProducts.length !== 0) { // only fetch products if the locker products already featched 
+        if (this.roomWithProducts.length !== 0) { // only fetch products if the locker products already featched
           await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
         }
         if(back_to_locker){
