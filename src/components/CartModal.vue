@@ -86,7 +86,7 @@
                     <template v-for="(addon, addonIndex) in factory_product.addons">
                       <div :key="`cart-addon-${addon.addon_id}`" class="d-flex w-100" :class="{'border-top mt-1': addonIndex > 0}">
                         {{ addon.title }}
-                        <template v-if="product_price_object.show_price">
+                        <template v-if="product_price_object.show_price && addon.currencies && addon.currencies[0]">
                           :<strong class="font-weight-bold ml-auto">{{ addon.currencies[0].symbol }} {{Number(addon.currencies[0].price).toFixed(2) }}</strong>
                         </template>
                       </div>
@@ -96,7 +96,7 @@
                     <template v-for="(ungrouped_addon, ungrouped_addon_index) in factory_product.ungrouped_addons">
                       <div :key="`cart-addon-${ungrouped_addon.addon_id}`" class="d-flex w-100" :class="{'border-top mt-1': ungrouped_addon_index > 0}">
                         {{ ungrouped_addon.sku_id }}
-                        <template v-if="product_price_object.show_price">
+                        <template v-if="product_price_object.show_price && ungrouped_addon.currencies && ungrouped_addon.currencies[0]">
                           :<strong class="font-weight-bold ml-auto">{{ ungrouped_addon.currencies[0].symbol }} {{Number(ungrouped_addon.currencies[0].price).toFixed(2) }}</strong>
                         </template>
                       </div>
@@ -106,7 +106,7 @@
                     <template v-for="(grouped_addon, group_name, group_index) in factory_product.grouped_addons">
                       <div :key="`cart-grouped-addon-${group_name}`" class="d-flex w-100" :class="{'border-top mt-1': group_index > 0}">
                         {{ group_name }} ({{grouped_addon.sku_id}})
-                        <template v-if="product_price_object.show_price">
+                        <template v-if="product_price_object.show_price && grouped_addon.currencies && grouped_addon.currencies[0]">
                           :<strong class="font-weight-bold ml-auto">{{ grouped_addon.currencies[0].symbol }} {{Number(grouped_addon.currencies[0].price).toFixed(2) }}</strong>
                         </template>
                       </div>
@@ -117,8 +117,7 @@
                       <div :key="`cart-logo-tech-addon-${custom_logo_index}`" class="d-flex w-100" :class="{'border-top mt-1': ((factory_product.addons.length ?? 0) + custom_logo_index) > 0}">
                         <template v-if="custom_logo.logo_technology">
                             {{ custom_logo.logo_technology.label }}
-                            <template v-if="product_price_object.show_price">
-                              {{ custom_logo.logo_technology.price }}
+                            <template v-if="product_price_object.show_price && custom_logo.logo_technology.currency_symbol && custom_logo.logo_technology.price">
                               :<strong class="font-weight-bold ml-auto">{{ custom_logo.logo_technology.currency_symbol }} {{Number(custom_logo.logo_technology.price).toFixed(2) }}</strong>
                             </template>
                         </template>
@@ -238,7 +237,7 @@
                         <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
                           {{factory_product.product_price_object.quantity}}
                         </td>
-                        <template v-if="product_price_object.show_price">
+                        <template v-if="product_price_object.show_price && addon.currencies && addon.currencies[0]">
                           <td :style="{'border-bottom-color': factory_product.addons.length-1 === addon_index && '#ccc'}">
                             {{ addon.currencies[0].symbol }}{{ Number(addon.currencies[0].price).toFixed(2) }}
                           </td>
@@ -257,7 +256,7 @@
                           <td :style="{'border-bottom-color': factory_product.ungrouped_addons.length-1 === ungrouped_addon_index && '#ccc'}">
                             {{factory_product.product_price_object.quantity}}
                           </td>
-                          <template v-if="product_price_object.show_price">
+                          <template v-if="product_price_object.show_price && ungrouped_addon.currencies && ungrouped_addon.currencies[0]">
                             <td :style="{'border-bottom-color': factory_product.ungrouped_addons.length-1 === ungrouped_addon_index && '#ccc'}">
                               {{ ungrouped_addon.currencies[0].symbol }}{{ Number(ungrouped_addon.currencies[0].price).toFixed(2) }}
                             </td>
@@ -277,7 +276,7 @@
                           <td :style="{'border-bottom-color':'#ccc'}">
                             {{factory_product.product_price_object.quantity}}
                           </td>
-                          <template v-if="product_price_object.show_price">
+                          <template v-if="product_price_object.show_price && grouped_addon.currencies && grouped_addon.currencies[0]">
                             <td :style="{'border-bottom-color': '#ccc'}">
                               {{ grouped_addon.currencies[0].symbol }}{{ Number(grouped_addon.currencies[0].price).toFixed(2) }}
                             </td>
@@ -315,7 +314,7 @@
                   </template>
                 </template>
 
-                <tr v-if="product_price_object.show_price">
+                <tr v-if="product_price_object.show_price && product_price_object.active_currency">
                   <td></td>
                   <td colspan="2" class="font-weight-bold">Total Price</td>
                   <td colspan="2" class="font-weight-bold">
@@ -459,7 +458,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public product_names: Record<any, any>[] = [];
   public get_quote = this.$store.getters.getSetting('get_quote');
   private isReorder = false;
-  private addressesLoaded = false; 
+  private addressesLoaded = false;
 
   get cartTotalPrice() {
     const {show_price} = this.$store.getters.getProductPriceObject
@@ -516,7 +515,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
       item.factory_products.forEach((product:Record<any, any>) => {
         let product_count = 0;
         if (product?.reorder_data?.order_id) {
-          this.isReorder = true;  
+          this.isReorder = true;
         }
         item.factory_products.forEach((nestProduct:Record<any, any>) => {
           if(product.product_id == nestProduct.product_id){
@@ -674,7 +673,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     const isReorder = localStorage.getItem('is_reorder');
     let address =null;
     if (isReorder) {
-      
+
       // Your logic here, e.g., pre-fill form, show alert, etc.
       // get Last used address as for the case of reorder.
       address = await this.$store.dispatch('getRecentUsedAddress');

@@ -43,7 +43,7 @@
                       <b-form-checkbox size="lg" v-model="group_addon.selected" :name="`group-${group_name}-addon`"
                                        @change="handleAddonSelectionUpdate($event, gaIdx, group_name)">
                         {{ group_addon.sku_id }}
-                        <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{group_addon.currencies[0].symbol}}{{group_addon.currencies[0].price}}</span>
+                        <span class="charges" v-if="productPriceObject && productPriceObject?.show_price && group_addon.currencies && group_addon.currencies[0]">+ {{group_addon.currencies[0].symbol}}{{group_addon.currencies[0].price}}</span>
                       </b-form-checkbox>
                     </div>
                   </template>
@@ -54,7 +54,7 @@
                       <b-form-checkbox size="lg" v-model="ungroup_addon.selected"
                                        @change="handleAddonSelectionUpdate($event, uaIdx)">
                         {{ ungroup_addon.sku_id }}
-                        <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{ungroup_addon.currencies[0].symbol}}{{ungroup_addon.currencies[0].price}}</span>
+                        <span class="charges" v-if="productPriceObject && productPriceObject.show_price && ungroup_addon.currencies && ungroup_addon.currencies[0]">+ {{ungroup_addon.currencies[0].symbol}}{{ungroup_addon.currencies[0].price}}</span>
                       </b-form-checkbox>
                     </div>
                   </template>
@@ -67,7 +67,7 @@
                      :key="addon.id">
                   <b-form-checkbox size="lg" v-model="addon.selected"   @change="handleAddonSelectionUpdate">
                     {{ addon.title }}
-                    <span class="charges" v-if="productPriceObject && productPriceObject.show_price">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
+                    <span class="charges" v-if="productPriceObject && productPriceObject.show_price && addon.currencies && addon.currencies[0]">+ {{addon.currencies[0].symbol}}{{addon.currencies[0].price}}</span>
                   </b-form-checkbox>
                 </div>
               </div>
