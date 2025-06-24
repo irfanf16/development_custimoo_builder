@@ -10,7 +10,7 @@
         </template>
         <template v-else>
           <template v-if="order.order_no">
-            <div class="fs-4 font-weight-bolder order-title p-2">Order # {{order.order_no}}</div>
+            <div class="fs-4 font-weight-bolder order-title p-2">Order # {{ order.order_no }}</div>
           </template>
           <template v-else>
             <div class="fs-4 font-weight-bolder order-title p-2">Order pending confirmation</div>
@@ -19,15 +19,18 @@
         <div class="font-weight-bolder d-flex order-title p-2" v-if="!isEcomCompanyWithOrderTab()">
           <template v-if="is_quote_order && show_quote_buttons">
             <button class="btn btn-secondary mx-2 cursor-pointer fs-2" @click.stop="acceptQuote()">Accept Quote</button>
-            <button class="btn btn-danger mx-2 cursor-pointer fs-2" @click.stop="rejectQuote(false)" >Reject Quote</button>
+            <button class="btn btn-danger mx-2 cursor-pointer fs-2" @click.stop="rejectQuote(false)">Reject
+              Quote</button>
           </template>
           <button class="btn btn-dark mx-2 cursor-pointer fs-2" @click.stop="cancelOrder(order)"
-                  v-if="order.items[order.items.length-1].status === FACTORYREVIEW">Cancel order</button>
+            v-if="order.items[order.items.length - 1].status === FACTORYREVIEW">Cancel order</button>
 
-          <button v-if="is_quote_order" class="btn p-0 fs-5 btn-dark" @click="$router.push({path: '/customer-quotes'})" title="Go Back" style="line-height: 0">
+          <button v-if="is_quote_order" class="btn p-0 fs-5 btn-dark"
+            @click="$router.push({ path: '/customer-quotes' })" title="Go Back" style="line-height: 0">
             <b-icon-arrow-left-short />
           </button>
-          <button v-else class="btn p-0 fs-5 btn-dark" @click="$router.push({path: '/customer-orders'})" title="Go Back" style="line-height: 0">
+          <button v-else class="btn p-0 fs-5 btn-dark" @click="$router.push({ path: '/customer-orders' })"
+            title="Go Back" style="line-height: 0">
             <b-icon-arrow-left-short />
           </button>
         </div>
@@ -46,243 +49,313 @@
           <div class="order-activities">
             <template v-for="(item_status_activity, item_status_activity_index) in order_item.status_activities">
               <div class="activity-status" :class="status_icons[item_status_activity.status]"
-                   :key="`item_status_activity_${item_status_activity_index}`">
-                <div  class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
-                <ActivityStatusIcons :activity_status="item_status_activity.status" />
+                :key="`item_status_activity_${item_status_activity_index}`">
+                <div class="activity-status" :key="`item_status_activity_${item_status_activity_index}`">
+                  <ActivityStatusIcons :activity_status="item_status_activity.status" />
 
-                <div class="activity-content">
-                  <div class="activity-title">
-                    {{
-                        item_status_activity.status === FACTORYREVIEW && (item_status_activity_index + 1) !== order_item.status_activities.length ?
-                        "Artwork Updated" :
-                        activityStatus[item_status_activity.status].title
-                    }}
-                    <span class="date-time">
-                      {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ')  }}
-                    </span>
-                  </div>
-                  <template v-if="item_status_activity.status === ORDERINPRODUCTION || item_status_activity.status === CUSTOMERREVIEW">
-                    <div class="activity-text p-2 fs-2 text-muted" v-html="activityStatus[item_status_activity.status].message">
-                    </div>
-                  </template>
-                  <template v-else>
-                    <div class="activity-text p-2 fs-2 text-muted">
-                      {{ activityStatus[item_status_activity.status].message }}
-                    </div>
-                  </template>
-                  <div class="images-grid p-2 d-flex gap-1 w-100">
-                    <div class="d-flex align-items-stretch flex-wrap gap-1">
-                      <div class="feedback-block" :key="activity_item_index" v-for="(activity_item, activity_item_index) in item_status_activity.activity_items">
-                        <div class="feedback-images skipped-block" v-if="activity_item.activity_files"
-                             @click="showPreview(activity_item)" style="cursor:pointer;" :class="evaluateClass(activity_item)">
-                          <img :key="activity_file_index" v-for="(activity_file, activity_file_index) in activity_item.activity_files"
-                               :src="`${storage_url}${activity_file.url}`" alt="">
-                          <template>
-                            <div class="actions nested-actions" :key="`details-btn-${activity_item_index}`">
-                              <button class="order-detail-btn btn btn-secondary btn-sm" title="Buy again"
-                                      v-if="order.order_no && order_item.factory_products[activity_item_index].can_reorder && (isEcommerceCompany())"
-                                      @click.stop="reorder(order,order_item.id, order_item.factory_products[activity_item_index])"
-                                      style="padding: 3px 5px !important;" :key="`reorder-btn-${activity_item_index}`">
-                                Reorder
-                              </button>
-                              <button class="order-detail-btn btn btn-secondary btn-sm" title="Download images"
-                                      @click.stop="downloadStatusActivityImages(activity_item.activity_files)" style="padding: 3px 5px !important;" :key="`preview-btn-${activity_item_index}`">
-                                <svg style="width:1em;height:1em" viewBox="0 0 24 24">
-                                  <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
-                                </svg>
-                              </button>
-                              <button class="btn btn-secondary btn-sm" title="View details" style="padding: 3px 5px !important;"
-                                      @click.stop="showActivityItemDetail(order_item_index, item_status_activity_index, activity_item_index)">
-                                <b-icon-list-ul />
-                              </button>
-                            </div>
-
-                          </template>
-                        </div>
-                        <div class="feedback-text align-items-start mt-1 gap-1 d-flex"
-                             v-if="order_item.factory_products[activity_item_index].addons && order_item.factory_products[activity_item_index].addons.length > 0" >
-                          <div><strong class="fs-1 font-weight-bold">Addons:</strong></div>
-                          <div>
-                            <ul class="list-unstyled d-flex flex-wrap mt-1 mb-0 gap-1" style="max-width: 350px">
-                              <template v-for="factory_product_addon in order_item.factory_products[activity_item_index].addons">
-                                <span class="badge badge-secondary fs-1"
-                                    :key="`factory_product_${order_item.factory_products[activity_item_index].id}_addon_${factory_product_addon.addon_id}`"
-                                >
-                                {{  factory_product_addon.title }}
-                              </span>
-                              </template>
-                            </ul>
-                          </div>
-                        </div>
-                        <div class="feedback-text align-items-start mt-2 d-flex"
-                             v-if="activity_item.skip_customer_approval && activity_item.skip_customer_approval.reason && !(activity_item.skip_customer_approval.reason === null || activity_item.skip_customer_approval.reason === 'null' || activity_item.skip_customer_approval.reason === '')">
-                          <div><strong>Skip Reason:</strong></div>
-                          <div>
-                                  <span class="badge badge-light fs-1"
-                                        :key="`skipped_reason_${activity_item_index}`">
-                                    {{ activity_item.skip_customer_approval.reason }}
-                                  </span>
-                          </div>
-                        </div>
-                        <div class="feedback-text" v-if="(item_status_activity.status == ORDERSHIPPED  && activity_item_index == 0 && order_item.tracking_no)" :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold"><a
-                          :href="order_item.tracking_link">{{order_item.tracking_no}}</a></strong>.</div>
-                        <template v-else>
-                          <div class="feedback-text" :key="`afd-${activity_item_index}`" v-if="activity_item.message && activity_item.message!='' ">{{activity_item.message}}</div>
-                        </template>
-                        <template v-if="item_status_activity.status == FACTORYREVIEW">
-                          <span>{{makeReorderMessage(activity_item.factory_product_id, order_item.factory_products)}}</span>
-                        </template>
-                      </div>
-                    </div>
-
-                    <template v-if="item_status_activity_index==0">
-                      <div class="actions" v-if="item_status_activity.status == FACTORYREJECTED">
-                        <button class="btn btn-secondary" @click="updateOrderProducts(order_item, item_status_activity.id)">Edit Products</button>
-                      </div>
-
-                      <div class="actions" v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
-                        <button class="btn btn-secondary" @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)">Take action</button>
-                      </div>
-                    </template>
-
-                  </div>
-
-                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
-                       v-if="order.general_comments && item_status_activity_index === 0">
-                    <strong class="font-weight-bold">General Comments:</strong>
-                    <span class="text-muted">{{ order.general_comments }}</span>
-                  </div>
-                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
-                       v-if="order.additional_fields && order.additional_fields.po_number && item_status_activity_index === 0">
-                    <strong class="font-weight-bold">PO Number:</strong>
-                    <span class="text-muted">{{ order.additional_fields.po_number }}</span>
-                  </div>
-                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
-                       v-if="order.additional_fields && order.additional_fields.is_manual_order && item_status_activity_index === 0">
-                    <strong class="font-weight-bold">Customer Reference No:</strong>
-                    <span class="text-muted">{{ order.customer_reference_no }}</span>
-                  </div>
-
-                  <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
-                       v-if="order.quote_text && item_status_activity.status == QUOTEPROVIDED">
-                    <strong class="font-weight-bold">Quote provided price:</strong>
-                    <span class="text-muted">{{ order.quote_text }}</span>
-                  </div>
-
-                  <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
-                    <a class="text-info" @click="item_status_activity.add_comment = !item_status_activity.add_comment">
-                      <BIconChatDots/>
-                      Add comment</a>
-                  </div>
-                  <!-- add comment starts -->
-                  <template v-if="item_status_activity.add_comment">
-                    <AddUpdateComment :url="`order_item/${item_status_activity.id}/comment`"
-                            v-on:hideCommentBox = "hideCommentBox(item_status_activity, 'add_comment')"
-                            v-on:commentActionCompleted = "item_status_activity.comments.unshift($event)"
-                    ></AddUpdateComment>
-
-                  </template>
-                  <!-- add comment ends -->
-
-                  <!-- Comment listing starts -->
-                  <template v-for="(activity_comment, activity_comment_index) in item_status_activity.comments">
-                    <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3" :key="`activity_comment_${activity_comment_index}`"
-                         v-if="!activity_comment.edit_comment && !activity_comment.reply_comment">
-                      <div class="d-flex gap-1">
-                      <span class="comment-avatar">
-                        {{ activity_comment.user ? `${activity_comment.user.first_name} ${activity_comment.user.last_name}` : "" | initials }}
+                  <div class="activity-content">
+                    <div class="activity-title">
+                      {{
+                        item_status_activity.status === FACTORYREVIEW && (item_status_activity_index + 1) !==
+                          order_item.status_activities.length ?
+                          "Artwork Updated" :
+                          activityStatus[item_status_activity.status].title
+                      }}
+                      <span class="date-time">
+                        {{ item_status_activity.created_at | formatDate('HH:mm Do MMM YY ') }}
                       </span>
-                        <div class="comment-msg" :id="`comment-${activity_comment.id}-box`">
-                        <!-- Comment action buttons starts -->
-                          <div class="comment-action" style="right: -165px">
-                            <ul class="fs-1 d-flex gap-2">
-                              <li>
-                                <a @click="activity_comment.reply_comment = !activity_comment.reply_comment">
-                                  <BIconReply/>
-                                  Reply
-                                </a>
-                              </li>
-                              <li>
-                                <a v-if="canPerformCommentAction(activity_comment)" @click="activity_comment.edit_comment = !activity_comment.edit_comment">
-                                  <BIconPencil/>
-                                  Edit
-                                </a>
-                              </li>
-                              <li>
-                                <a v-if="canPerformCommentAction(activity_comment)" @click="deleteComment(activity_comment,item_status_activity)">
-                                  <BIconTrash/>
-                                  Delete
-                                </a>
-                              </li>
-                            </ul>
+                    </div>
+                    <template
+                      v-if="item_status_activity.status === ORDERINPRODUCTION || item_status_activity.status === CUSTOMERREVIEW">
+
+                      <div class="activity-text p-2 fs-2 text-muted"
+                        v-html="activityStatus[item_status_activity.status].message">
+                      </div>
+                      <span v-if="item_status_activity.status"></span>
+
+                    </template>
+                    <template v-else>
+                      <div class="activity-text p-2 fs-2 text-muted">
+                        {{ activityStatus[item_status_activity.status].message }}
+                      </div>
+
+                    </template>
+                    <div class="images-grid p-2 d-flex gap-1 w-100">
+                      <div class="d-flex align-items-stretch flex-wrap gap-1">
+                        <div class="feedback-block" :key="activity_item_index"
+                          v-for="(activity_item, activity_item_index) in item_status_activity.activity_items">
+                          <div
+                            v-if="item_status_activity.status == CUSTOMERREVIEW && activity_item.third_party_approval_obj && activity_item.third_party_approval_obj.approval_status"
+                            class="mb-2">
+                            <span class="badge" :class="{
+                              'badge-warning': activity_item.third_party_approval_obj.approval_status === 'pending',
+                              'badge-success': activity_item.third_party_approval_obj.approval_status === 'accepted',
+                              'badge-danger': activity_item.third_party_approval_obj.approval_status === 'rejected'
+                            }">
+                              Third Party Status:
+                              {{
+                                activity_item.third_party_approval_obj.approval_status.charAt(0).toUpperCase() +
+                                activity_item.third_party_approval_obj.approval_status.slice(1)
+                              }}
+                            </span>
                           </div>
-                        <!-- Comment action buttons ends -->
+                      
+                          <div class="feedback-images skipped-block" v-if="activity_item.activity_files"
+                            @click="showPreview(activity_item)" style="cursor:pointer;"
+                            :class="evaluateClass(activity_item)">
+                            <img :key="activity_file_index"
+                              v-for="(activity_file, activity_file_index) in activity_item.activity_files"
+                              :src="`${storage_url}${activity_file.url}`" alt="">
+                            <template>
+                              <div class="actions nested-actions" :key="`details-btn-${activity_item_index}`">
+                                <button class="order-detail-btn btn btn-secondary btn-sm" title="Buy again"
+                                  v-if="order.order_no && order_item.factory_products[activity_item_index].can_reorder && (isEcommerceCompany())"
+                                  @click.stop="reorder(order, order_item.id, order_item.factory_products[activity_item_index])"
+                                  style="padding: 3px 5px !important;" :key="`reorder-btn-${activity_item_index}`">
+                                  Reorder
+                                </button>
+                                <button class="order-detail-btn btn btn-secondary btn-sm" title="Download images"
+                                  @click.stop="downloadStatusActivityImages(activity_item.activity_files)"
+                                  style="padding: 3px 5px !important;" :key="`preview-btn-${activity_item_index}`">
+                                  <svg style="width:1em;height:1em" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z" />
+                                  </svg>
+                                </button>
+                                <button class="btn btn-secondary btn-sm" title="View details"
+                                  style="padding: 3px 5px !important;"
+                                  @click.stop="showActivityItemDetail(order_item_index, item_status_activity_index, activity_item_index)">
+                                  <b-icon-list-ul />
+                                </button>
+                              </div>
 
-                          <blockquote class="blockquote mb-0">
-                            <footer class="blockquote-footer" v-if="activity_comment.parent_message_id" style="cursor: pointer"
-                                    @click="goToMessage(activity_comment.parent_message_id)">
-                              <cite class="fs-2 font-italic" title="Source Title">
-                                <template v-if="activity_comment.parent_message">
-                                  {{ activity_comment.parent_message }}
-                                </template>
-                                <template v-else>
-                                  Click me to go to parent
-                                </template>
-                              </cite>
-                            </footer>
-                          </blockquote>
-                          <div class="d-flex gap-1 align-items-start comment-images">
-                          <template v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
-                              <template v-if="['png', 'jpg', 'jpeg'].includes(activity_comment_file.extension?.toLowerCase())">
-                                <a :key="`activity_comment_file_${activity_comment_file_index}`"
-                                   :href="`${storage_url}${activity_comment_file.url}`" target="_blank">
-                                  <img :key="`activity_comment_file_${activity_comment_file_index}`"
-                                     :src="`${storage_url}${activity_comment_file.url}`" :alt="`${activity_comment_file.name}`" width="100">
-                                </a>
-                              </template>
-
-                            <template v-if="['pdf', 'ai', 'eps', 'svg', 'xlsx'].includes(activity_comment_file.extension?.toLowerCase())">
-                              <a :key="`activity_comment_file_${activity_comment_file_index}`" :href="`${storage_url}${activity_comment_file.url}`" :download="activity_comment_file.name" target="_blank">
-                                <b-icon-file-earmark-text width="50" height="50" />
-                                <span>{{activity_comment_file.name}}.{{activity_comment_file.extension}}</span>
-                              </a>
                             </template>
-                          </template>
                           </div>
-                          <template v-if="activity_comment.message">
-                            <p v-html="linkifyComment(activity_comment.message)"></p>
-                          </template>
-                          <div class="d-flex justify-content-end">
-                            <span> <small class="text-muted">{{ evaluateRole(activity_comment) }}</small> </span>
+                              <div
+  v-if="activity_item.third_party_approval_obj && activity_item.third_party_approval_obj.approval_status === 'rejected' && activity_item.third_party_approval_obj.feedback"
+  class="feedback-ui-enhanced mt-2">
+  <div class="feedback-title">
+    <span class="text-danger mr-2 font-weight-bold" > Rejection Feedback</span>
+
+  </div>
+  <div class="feedback-body">
+    {{ activity_item.third_party_approval_obj.feedback }}
+  </div>
+</div>
+                          <div class="feedback-text align-items-start mt-1 gap-1 d-flex"
+                            v-if="order_item.factory_products[activity_item_index].addons && order_item.factory_products[activity_item_index].addons.length > 0">
+                            <div><strong class="fs-1 font-weight-bold">Addons:</strong></div>
+                            <div>
+                              <ul class="list-unstyled d-flex flex-wrap mt-1 mb-0 gap-1" style="max-width: 350px">
+                                <template
+                                  v-for="factory_product_addon in order_item.factory_products[activity_item_index].addons">
+                                  <span class="badge badge-secondary fs-1"
+                                    :key="`factory_product_${order_item.factory_products[activity_item_index].id}_addon_${factory_product_addon.addon_id}`">
+                                    {{ factory_product_addon.title }}
+                                  </span>
+                                </template>
+                              </ul>
+                            </div>
                           </div>
+                          <div class="feedback-text align-items-start mt-2 d-flex"
+                            v-if="activity_item.skip_customer_approval && activity_item.skip_customer_approval.reason && !(activity_item.skip_customer_approval.reason === null || activity_item.skip_customer_approval.reason === 'null' || activity_item.skip_customer_approval.reason === '')">
+                            <div><strong>Skip Reason:</strong></div>
+                            <div>
+                              <span class="badge badge-light fs-1" :key="`skipped_reason_${activity_item_index}`">
+                                {{ activity_item.skip_customer_approval.reason }}
+                              </span>
+                            </div>
+                          </div>
+                          <div class="feedback-text"
+                            v-if="(item_status_activity.status == ORDERSHIPPED && activity_item_index == 0 && order_item.tracking_no)"
+                            :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold"><a
+                                :href="order_item.tracking_link">{{ order_item.tracking_no }}</a></strong>.</div>
+                          <template v-else>
+                            <div class="feedback-text" :key="`afd-${activity_item_index}`"
+                              v-if="activity_item.message && activity_item.message != ''">{{ activity_item.message }}
+                            </div>
+                          </template>
+                          <template v-if="item_status_activity.status == FACTORYREVIEW">
+                            <span>{{ makeReorderMessage(activity_item.factory_product_id,
+                              order_item.factory_products) }}</span>
+                          </template>
                         </div>
                       </div>
-                      <div class="comment-time">
-                        {{ activity_comment.created_at | formatDate('HH:mm Do MMM YY ') }}
-                      </div>
+
+                      <template v-if="item_status_activity_index == 0">
+                        <div class="actions" v-if="item_status_activity.status == FACTORYREJECTED">
+                          <button class="btn btn-secondary"
+                            @click="updateOrderProducts(order_item, item_status_activity.id)">Edit Products</button>
+                        </div>
+
+                        <div class="actions"
+                          v-if="order_item.status == CUSTOMERREVIEW && item_status_activity.status == CUSTOMERREVIEW">
+                          <button class="btn btn-secondary"
+                            @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)">Take
+                            action</button>
+                        </div>
+                      
+                   
+
+
+                        <div class="actions"
+                          v-if="item_status_activity.status == CUSTOMERREVIEW && item_status_activity.activity_items.length > 0 && !item_status_activity.activity_items.some(ai => ai.third_party_approval_obj && ai.third_party_approval_obj.approval_status !== '')">
+                          <button class="btn btn-secondary" @click="showThirdPartyApprovalModal(order_item)">Third Party
+                            Approval</button>
+                        </div>
+
+                      </template>
+
                     </div>
-                    <!--  edit comment starts -->
-                    <template v-if="activity_comment.edit_comment">
-                      <AddUpdateComment :key="`activity_comment-edit-${activity_comment_index}`" action="edit"
-                                        v-on:hideCommentBox = "hideCommentBox(activity_comment, 'edit_comment')"
-                                        v-on:commentActionCompleted="handleCommentActionCompleted($event, item_status_activity, activity_comment_index)"
-                                        :comment_obj="activity_comment" :url="`order_item/${item_status_activity.id}/comment/${activity_comment.id}`"
-                      ></AddUpdateComment>
+
+                    <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                      v-if="order.general_comments && item_status_activity_index === 0">
+                      <strong class="font-weight-bold">General Comments:</strong>
+                      <span class="text-muted">{{ order.general_comments }}</span>
+                    </div>
+                    <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                      v-if="order.additional_fields && order.additional_fields.po_number && item_status_activity_index === 0">
+                      <strong class="font-weight-bold">PO Number:</strong>
+                      <span class="text-muted">{{ order.additional_fields.po_number }}</span>
+                    </div>
+                    <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                      v-if="order.additional_fields && order.additional_fields.is_manual_order && item_status_activity_index === 0">
+                      <strong class="font-weight-bold">Customer Reference No:</strong>
+                      <span class="text-muted">{{ order.customer_reference_no }}</span>
+                    </div>
+
+                    <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
+                      v-if="order.quote_text && item_status_activity.status == QUOTEPROVIDED">
+                      <strong class="font-weight-bold">Quote provided price:</strong>
+                      <span class="text-muted">{{ order.quote_text }}</span>
+                    </div>
+
+                    <div class="comment-button text-left px-2" v-if="item_status_activity_index == 0">
+                      <a class="text-info"
+                        @click="item_status_activity.add_comment = !item_status_activity.add_comment">
+                        <BIconChatDots />
+                        Add comment
+                      </a>
+                    </div>
+                    <!-- add comment starts -->
+                    <template v-if="item_status_activity.add_comment">
+                      <AddUpdateComment :url="`order_item/${item_status_activity.id}/comment`"
+                        v-on:hideCommentBox="hideCommentBox(item_status_activity, 'add_comment')"
+                        v-on:commentActionCompleted="item_status_activity.comments.unshift($event)"></AddUpdateComment>
+
                     </template>
-                    <!--  edit comment ends -->
+                    <!-- add comment ends -->
 
-                    <!--  add reply starts -->
-                    <AddUpdateComment :key="`activity_comment-edit-${activity_comment_index}`" action="reply" v-if="activity_comment.reply_comment"
-                                      v-on:hideCommentBox = "hideCommentBox(activity_comment, 'reply_comment')"
-                                      v-on:commentActionCompleted = "item_status_activity.comments.unshift($event)"
-                                      :comment_obj="activity_comment" :url="`order_item/${item_status_activity.id}/comment`"
-                    ></AddUpdateComment>
-                    <!--  add reply ends -->
+                    <!-- Comment listing starts -->
+                    <template v-for="(activity_comment, activity_comment_index) in item_status_activity.comments">
+                      <div class="comment-row px-2 pb-2 d-flex gap-1 mt-3"
+                        :key="`activity_comment_${activity_comment_index}`"
+                        v-if="!activity_comment.edit_comment && !activity_comment.reply_comment">
+                        <div class="d-flex gap-1">
+                          <span class="comment-avatar">
+                            {{ activity_comment.user ? `${activity_comment.user.first_name}
+                            ${activity_comment.user.last_name}` : "" | initials }}
+                          </span>
+                          <div class="comment-msg" :id="`comment-${activity_comment.id}-box`">
+                            <!-- Comment action buttons starts -->
+                            <div class="comment-action" style="right: -165px">
+                              <ul class="fs-1 d-flex gap-2">
+                                <li>
+                                  <a @click="activity_comment.reply_comment = !activity_comment.reply_comment">
+                                    <BIconReply />
+                                    Reply
+                                  </a>
+                                </li>
+                                <li>
+                                  <a v-if="canPerformCommentAction(activity_comment)"
+                                    @click="activity_comment.edit_comment = !activity_comment.edit_comment">
+                                    <BIconPencil />
+                                    Edit
+                                  </a>
+                                </li>
+                                <li>
+                                  <a v-if="canPerformCommentAction(activity_comment)"
+                                    @click="deleteComment(activity_comment, item_status_activity)">
+                                    <BIconTrash />
+                                    Delete
+                                  </a>
+                                </li>
+                              </ul>
+                            </div>
+                            <!-- Comment action buttons ends -->
 
-                  </template>
-                  <!-- Comment listing ends -->
+                            <blockquote class="blockquote mb-0">
+                              <footer class="blockquote-footer" v-if="activity_comment.parent_message_id"
+                                style="cursor: pointer" @click="goToMessage(activity_comment.parent_message_id)">
+                                <cite class="fs-2 font-italic" title="Source Title">
+                                  <template v-if="activity_comment.parent_message">
+                                    {{ activity_comment.parent_message }}
+                                  </template>
+                                  <template v-else>
+                                    Click me to go to parent
+                                  </template>
+                                </cite>
+                              </footer>
+                            </blockquote>
+                            <div class="d-flex gap-1 align-items-start comment-images">
+                              <template
+                                v-for="(activity_comment_file, activity_comment_file_index) in activity_comment.files">
+                                <template
+                                  v-if="['png', 'jpg', 'jpeg'].includes(activity_comment_file.extension?.toLowerCase())">
+                                  <a :key="`activity_comment_file_${activity_comment_file_index}`"
+                                    :href="`${storage_url}${activity_comment_file.url}`" target="_blank">
+                                    <img :key="`activity_comment_file_${activity_comment_file_index}`"
+                                      :src="`${storage_url}${activity_comment_file.url}`"
+                                      :alt="`${activity_comment_file.name}`" width="100">
+                                  </a>
+                                </template>
+
+                                <template
+                                  v-if="['pdf', 'ai', 'eps', 'svg', 'xlsx'].includes(activity_comment_file.extension?.toLowerCase())">
+                                  <a :key="`activity_comment_file_${activity_comment_file_index}`"
+                                    :href="`${storage_url}${activity_comment_file.url}`"
+                                    :download="activity_comment_file.name" target="_blank">
+                                    <b-icon-file-earmark-text width="50" height="50" />
+                                    <span>{{ activity_comment_file.name }}.{{ activity_comment_file.extension }}</span>
+                                  </a>
+                                </template>
+                              </template>
+                            </div>
+                            <template v-if="activity_comment.message">
+                              <p v-html="linkifyComment(activity_comment.message)"></p>
+                            </template>
+                            <div class="d-flex justify-content-end">
+                              <span> <small class="text-muted">{{ evaluateRole(activity_comment) }}</small> </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="comment-time">
+                          {{ activity_comment.created_at | formatDate('HH:mm Do MMM YY ') }}
+                        </div>
+                      </div>
+                      <!--  edit comment starts -->
+                      <template v-if="activity_comment.edit_comment">
+                        <AddUpdateComment :key="`activity_comment-edit-${activity_comment_index}`" action="edit"
+                          v-on:hideCommentBox="hideCommentBox(activity_comment, 'edit_comment')"
+                          v-on:commentActionCompleted="handleCommentActionCompleted($event, item_status_activity, activity_comment_index)"
+                          :comment_obj="activity_comment"
+                          :url="`order_item/${item_status_activity.id}/comment/${activity_comment.id}`">
+                        </AddUpdateComment>
+                      </template>
+                      <!--  edit comment ends -->
+
+                      <!--  add reply starts -->
+                      <AddUpdateComment :key="`activity_comment-edit-${activity_comment_index}`" action="reply"
+                        v-if="activity_comment.reply_comment"
+                        v-on:hideCommentBox="hideCommentBox(activity_comment, 'reply_comment')"
+                        v-on:commentActionCompleted="item_status_activity.comments.unshift($event)"
+                        :comment_obj="activity_comment" :url="`order_item/${item_status_activity.id}/comment`">
+                      </AddUpdateComment>
+                      <!--  add reply ends -->
+
+                    </template>
+                    <!-- Comment listing ends -->
+                  </div>
                 </div>
-              </div>
               </div>
             </template>
           </div>
@@ -290,13 +363,9 @@
       </b-tabs>
     </div>
 
-    <modal :width="1000"
-           :resizable="true"
-           :scrollable="true"
-           height="auto"
-           :reset="true"
-           name="customer-review-modal" ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true"
-           @close="$store.commit('Change_Locker_Active_Tab', 0)"  @opened="showMarkerActionButtons">
+    <modal :width="1000" :resizable="true" :scrollable="true" height="auto" :reset="true" name="customer-review-modal"
+      ref="customer-review-modal" id="modal-center-lockerroom" size="xl" :hide-footer="true"
+      @close="$store.commit('Change_Locker_Active_Tab', 0)" @opened="showMarkerActionButtons">
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="d-flex align-items-center gap-2">
           <div class="font-weight-bold pl-1">
@@ -304,14 +373,17 @@
           </div>
 
           <span class="badge badge-dark font-weight-lighter" style="line-height: normal">
-            {{design_approval_activity_navigation_index+1}} / {{design_approval_activity_item_data.length}}
+            {{ design_approval_activity_navigation_index + 1 }} / {{ design_approval_activity_item_data.length }}
           </span>
         </div>
 
         <div class="d-flex justify-content-end" style="flex-grow: 8;">
           <button class="btn btn-secondary light mx-1" @click="$modal.hide('customer-review-modal')">Cancel</button>
-          <template v-if="design_approval_activity_item_data[design_approval_activity_navigation_index] && design_approval_activity_item_data[design_approval_activity_navigation_index].action">
-            <span v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action == 'accept'" class="mx-1">Accepted</span>
+          <template
+            v-if="design_approval_activity_item_data[design_approval_activity_navigation_index] && design_approval_activity_item_data[design_approval_activity_navigation_index].action">
+            <span
+              v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action == 'accept'"
+              class="mx-1">Accepted</span>
             <span v-else class="mx-1">Rejected</span>
           </template>
           <template v-else>
@@ -331,9 +403,15 @@
             <BIconChevronLeft @click="navigateActivitySlider('back')" />
           </div>
 
-          <div v-for="(actFile, fileInd) in design_approval_activity_item_data[design_approval_activity_navigation_index].files" :key="`actfile-${fileInd}`">
-            <div :id="`markerAreaDiv${fileInd}${design_approval_activity_navigation_index}`" :key="`markerAreaDiv${fileInd}${design_approval_activity_navigation_index}`"></div>
-            <img @click="showMarkerArea(fileInd)" :ref="`designImage${fileInd}${design_approval_activity_navigation_index}`" :key="`designImage${fileInd}${design_approval_activity_navigation_index}`" :src="`${actFile.file}`" alt="" class="w-100" style="max-height: 500px" crossorigin="anonymous">
+          <div
+            v-for="(actFile, fileInd) in design_approval_activity_item_data[design_approval_activity_navigation_index].files"
+            :key="`actfile-${fileInd}`">
+            <div :id="`markerAreaDiv${fileInd}${design_approval_activity_navigation_index}`"
+              :key="`markerAreaDiv${fileInd}${design_approval_activity_navigation_index}`"></div>
+            <img @click="showMarkerArea(fileInd)"
+              :ref="`designImage${fileInd}${design_approval_activity_navigation_index}`"
+              :key="`designImage${fileInd}${design_approval_activity_navigation_index}`" :src="`${actFile.file}`" alt=""
+              class="w-100" style="max-height: 500px" crossorigin="anonymous">
           </div>
 
 
@@ -345,7 +423,8 @@
         <div class="p-4 text-left">
           <div class="fs-4">Write your feedback</div>
           <div class="mt-2">
-            <b-textarea v-model="design_approval_activity_item_data[design_approval_activity_navigation_index].message" placeholder="Please write your feedback here..." rows="5"></b-textarea>
+            <b-textarea v-model="design_approval_activity_item_data[design_approval_activity_navigation_index].message"
+              placeholder="Please write your feedback here..." rows="5"></b-textarea>
           </div>
         </div>
 
@@ -353,7 +432,8 @@
           <button class="btn btn-secondary light" @click="$modal.hide('customer-review-modal')">Cancel</button>
 
           <template v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action">
-            <span v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action == 'accept'">Accepted</span>
+            <span
+              v-if="design_approval_activity_item_data[design_approval_activity_navigation_index].action == 'accept'">Accepted</span>
             <span v-else>Rejected</span>
           </template>
           <template v-else>
@@ -368,11 +448,8 @@
 
     </modal>
 
-    <modal :adaptive="true"
-           height="auto"
-           :minWidth="1300"
-           :scrollable="true"
-           name="product-preview" ref="product-preview" :hide-footer="true">
+    <modal :adaptive="true" height="auto" :minWidth="1300" :scrollable="true" name="product-preview"
+      ref="product-preview" :hide-footer="true">
 
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
@@ -380,25 +457,26 @@
         </div>
 
         <span class="modal-close cursor-pointer" @click="$modal.hide('product-preview')">
-              <BIconX />
-            </span>
+          <BIconX />
+        </span>
       </div>
 
       <div class="px-3 pt-3 d-flex justify-content-center">
-        <div class="badge badge-light fs-2 p-2 text-muted"> <b-icon-search class="text-info"></b-icon-search> Please hover over the images to zoom!</div>
+        <div class="badge badge-light fs-2 p-2 text-muted"> <b-icon-search class="text-info"></b-icon-search> Please
+          hover
+          over the images to zoom!</div>
       </div>
       <div class="d-flex w-100 justify-content-center gap-1 py-4 px-3">
-        <zoom-on-hover :img-normal="this.storage_url+this.front_preview" :img-zoom="this.storage_url+this.front_preview" :scale="2"></zoom-on-hover>
-        <zoom-on-hover :img-normal="this.storage_url+this.back_preview" :img-zoom="this.storage_url+this.back_preview" :scale="2"></zoom-on-hover>
+        <zoom-on-hover :img-normal="this.storage_url + this.front_preview"
+          :img-zoom="this.storage_url + this.front_preview" :scale="2"></zoom-on-hover>
+        <zoom-on-hover :img-normal="this.storage_url + this.back_preview"
+          :img-zoom="this.storage_url + this.back_preview" :scale="2"></zoom-on-hover>
       </div>
     </modal>
 
-    <modal :width="1300"
-           :resizable="true"
-           :scrollable="true"
-           height="auto"
-           :reset="true"
-           name="order-detail" ref="order-detail" id="order-detail" size="xl" :hide-footer="true" @closed="activity_item_info = getOrderItemStatusActivityInfoDefaultObject()">
+    <modal :width="1300" :resizable="true" :scrollable="true" height="auto" :reset="true" name="order-detail"
+      ref="order-detail" id="order-detail" size="xl" :hide-footer="true"
+      @closed="activity_item_info = getOrderItemStatusActivityInfoDefaultObject()">
 
       <div class="modal-header fs-4 d-flex justify-content-between p-3">
         <div class="font-weight-bold pl-1">
@@ -411,34 +489,33 @@
       <template v-if="order && activity_item_info.factory_product">
         <b-row class="mt-3 mx-2">
           <b-col class="col-2">
-            <strong>Company:</strong> {{order.hasOwnProperty('company_name')?order.company_name: ""}}
+            <strong>Company:</strong> {{ order.hasOwnProperty('company_name') ? order.company_name : "" }}
           </b-col>
           <b-col class="col-2">
-            <strong>Customer:</strong> {{order.customer.first_name + order.customer.last_name}}
+            <strong>Customer:</strong> {{ order.customer.first_name + order.customer.last_name }}
           </b-col>
           <b-col class="col-2">
-            <strong>Email:</strong> {{order.customer.email}}
+            <strong>Email:</strong> {{ order.customer.email }}
           </b-col>
           <b-col class="col-2">
-            <strong>Product:</strong> {{activity_item_info.factory_product.product_name}}
+            <strong>Product:</strong> {{ activity_item_info.factory_product.product_name }}
           </b-col>
           <b-col class="col-2">
-            <a :href="`${storage_url}${order.design_file}`"  class="btn btn-dark mx-1" v-if="order.design_file">Download Pdf</a>
+            <a :href="`${storage_url}${order.design_file}`" class="btn btn-dark mx-1" v-if="order.design_file">Download
+              Pdf</a>
           </b-col>
           <b-col class="col-2">
             <template v-if="order.order_no">
               <a :href="`${api_url}/order/${order_id}/product/${activity_item_info.factory_product.id}/export`"
-                 :download="`order_${order.order_no}_product_${activity_item_info.factory_product.product_name}.xlsx`"
-                 class="btn btn-dark mx-1"
-              >
+                :download="`order_${order.order_no}_product_${activity_item_info.factory_product.product_name}.xlsx`"
+                class="btn btn-dark mx-1">
                 Download Excel
               </a>
             </template>
             <template v-else>
               <a :href="`${api_url}/order/${order_id}/product/${activity_item_info.factory_product.id}/export`"
-                 :download="`order_${getCurrentDatetime()}_product_${activity_item_info.factory_product.product_name}.xlsx`"
-                 class="btn btn-dark mx-1"
-              >
+                :download="`order_${getCurrentDatetime()}_product_${activity_item_info.factory_product.product_name}.xlsx`"
+                class="btn btn-dark mx-1">
                 Download Excel
               </a>
             </template>
@@ -448,13 +525,8 @@
           <b-col class="col-6 order-detail-roster">
             <h4 class="py-3">Roster Detail</h4>
             <template v-if="order && activity_item_info.factory_product.product_roster_detail.length > 0">
-              <b-table
-                :items="activity_item_info.factory_product.product_roster_detail"
-                :fields="roster_headers"
-                hover
-                sorter
-                class="bg-gray-200"
-              >
+              <b-table :items="activity_item_info.factory_product.product_roster_detail" :fields="roster_headers" hover
+                sorter class="bg-gray-200">
               </b-table>
             </template>
             <template v-else>
@@ -472,21 +544,19 @@
 
             <div class="w-100 mt-3">
               <div class="d-flex align-items-center justify-content-center w-100 gap-1">
-                <img class="flex-shrink-1" style="max-width: calc(50% - 0.5rem);" alt=""
-                     :key="`item-${activity_item_info.item_index}-status-${activity_item_info.status_activity_index}-item-
-                        ${activity_item_info.status_activity_item_index}-file-0`"
-                     :src="`${storage_url}${order.items[activity_item_info.item_index].status_activities[activity_item_info.status_activity_index]
-                     .activity_items[activity_item_info.status_activity_item_index].activity_files[0].url}`">
-                <img class="flex-shrink-1" style="max-width: calc(50% - 0.5rem);" alt=""
-                     :key="`item-${activity_item_info.item_index}-status-${activity_item_info.status_activity_index}-item-
-                        ${activity_item_info.status_activity_item_index}-file-1`"
-                     :src="`${storage_url}${order.items[activity_item_info.item_index].status_activities[activity_item_info.status_activity_index]
-                        .activity_items[activity_item_info.status_activity_item_index].activity_files[1].url}`">
+                <img class="flex-shrink-1" style="max-width: calc(50% - 0.5rem);" alt="" :key="`item-${activity_item_info.item_index}-status-${activity_item_info.status_activity_index}-item-
+                        ${activity_item_info.status_activity_item_index}-file-0`" :src="`${storage_url}${order.items[activity_item_info.item_index].status_activities[activity_item_info.status_activity_index]
+                          .activity_items[activity_item_info.status_activity_item_index].activity_files[0].url}`">
+                <img class="flex-shrink-1" style="max-width: calc(50% - 0.5rem);" alt="" :key="`item-${activity_item_info.item_index}-status-${activity_item_info.status_activity_index}-item-
+                        ${activity_item_info.status_activity_item_index}-file-1`" :src="`${storage_url}${order.items[activity_item_info.item_index].status_activities[activity_item_info.status_activity_index]
+                          .activity_items[activity_item_info.status_activity_item_index].activity_files[1].url}`">
               </div>
 
               <div class="px-3 pb-3 d-flex mt-1 justify-content-center">
-                <button class="btn btn-dark text-white" v-if="!loadingPreviewImages" @click="downloadStatusActivityImages()">Download Preview Images</button>
-                <button class="btn btn-dark text-white" v-else disabled><b-icon-arrow-counterclockwise class="b-icon-animation-spin-reverse" /> Please wait...</button>
+                <button class="btn btn-dark text-white" v-if="!loadingPreviewImages"
+                  @click="downloadStatusActivityImages()">Download Preview Images</button>
+                <button class="btn btn-dark text-white" v-else disabled><b-icon-arrow-counterclockwise
+                    class="b-icon-animation-spin-reverse" /> Please wait...</button>
               </div>
             </div>
 
@@ -498,16 +568,45 @@
 
 
     </modal>
-    <QuoteModal ref="quoteModal" :order="order"/>
-    <confirm-modal v-if="is_quote_order" :message="cancel_quote_message" ref="confirm_order_cancel" name="confirm_order_cancel"></confirm-modal>
-    <confirm-modal v-else :message="cancel_confirm_message" ref="confirm_order_cancel" name="confirm_order_cancel"></confirm-modal>
+    <QuoteModal ref="quoteModal" :order="order" />
+    <confirm-modal v-if="is_quote_order" :message="cancel_quote_message" ref="confirm_order_cancel"
+      name="confirm_order_cancel"></confirm-modal>
+    <confirm-modal v-else :message="cancel_confirm_message" ref="confirm_order_cancel"
+      name="confirm_order_cancel"></confirm-modal>
+    <!-- Third Party Approval Modal -->
+    <modal name="third-party-approval-modal" height="auto" width="500" :scrollable="true">
+      <div class="modal-header">
+
+        <h5 class="modal-title">Third Party Approval</h5>
+        <button type="button" class="close" @click="$modal.hide('third-party-approval-modal')">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group d-flex flex-column">
+          <label for="approvalEmail" class="mr-auto">Enter Email for Approval</label>
+
+          <input
+            type="email"
+            id="approvalEmail"
+            v-model="approvalEmail"
+            class="form-control"
+            placeholder="Enter email address"
+          />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-dark" @click="$modal.hide('third-party-approval-modal')">Cancel</button>
+        <button class="btn btn-secondary" @click="sendForApproval">Send for Approval</button>
+      </div>
+    </modal>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import {Component, Mixins, Prop} from 'vue-property-decorator'
-import {http} from "@/httpCommon";
+import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { http } from "@/httpCommon";
 import $ from 'jquery'
 import ZoomOnHover from "vue-zoom-on-hover";
 Vue.use(ZoomOnHover);
@@ -534,10 +633,11 @@ import OrderFlowStatusLine from "@/components/OrderFlowStatusLine.vue";
 import moment from "moment";
 import * as markerjs2 from 'markerjs2';
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {findIndex, debounce, filter} from "lodash";
-import {getCompany} from "@/helpers/Helpers";
+import { findIndex, debounce, filter } from "lodash";
+import { getCompany } from "@/helpers/Helpers";
 import ConfirmModal from "@/components/ConfirmModal.vue";
 import QuoteModal from "@/components/QuoteModal.vue";
+import { isValidEmail } from "@/helpers/Helpers";
 
 
 @Component<OrderDetail>({
@@ -550,69 +650,70 @@ import QuoteModal from "@/components/QuoteModal.vue";
     let comment_id = null;
     this.isWebComponent = this.$root.$options.name == 'shadow-root'
 
-     if(this.company.platform == "wordpress") {
-       if(this.ecommerce_order_id) {
-         this.order_id = this.ecommerce_order_id;
-       } else {
-         this.order_id = this.$route.query.order_id;
-       }
+    if (this.company.platform == "wordpress") {
+      if (this.ecommerce_order_id) {
+        this.order_id = this.ecommerce_order_id;
+      } else {
+        this.order_id = this.$route.query.order_id;
+      }
      } else if(this.company.platform == "shopify" || this.company.platform == "bigcommerce") {
       if(isEcomCompanyWithOrderTab()){
+
         this.order_id = this.$route.query.order_id;
-      }else {
+      } else {
         this.order_id = this.ecommerce_order_id;
       }
-      
-     }
-     else {
+
+    }
+    else {
       this.order_id = this.$route.params.order_id;
     }
-     //check if order_id still not set and is ecommerce platform then it means it's manual order
-    if(!this.order_id && isEcommercePlatform()) {
+    //check if order_id still not set and is ecommerce platform then it means it's manual order
+    if (!this.order_id && isEcommercePlatform()) {
       this.order_id = this.$route.params.order_id;
     }
 
     comment_id = this.$route.query.comment_id;
 
-     let customer_authenticated = this.isCustomerAuthenticated;
-     if(!customer_authenticated) {
-       let jwttoken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
-       let customer:any = localStorage.getItem(Vue.prototype.$customer_localstorage_key);
-       if(jwttoken != null && jwttoken != '' ) {
-         if(customer == null || customer == '') {
-           await authenticateUser(jwttoken, true);
-           customer_authenticated = true;
-         }else {
-           let payload = { jwtToken: '', access_token : '',  customer : {}};
-           payload.jwtToken = jwttoken;
-           payload.access_token = jwttoken;
-           payload.customer = JSON.parse(customer);
-           this.$store.commit('SET_CUSTOMER', payload);
-           customer_authenticated = true;
-         }
-       }
-     }
+    let customer_authenticated = this.isCustomerAuthenticated;
+    if (!customer_authenticated) {
+      let jwttoken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key);
+      let customer: any = localStorage.getItem(Vue.prototype.$customer_localstorage_key);
+      if (jwttoken != null && jwttoken != '') {
+        if (customer == null || customer == '') {
+          await authenticateUser(jwttoken, true);
+          customer_authenticated = true;
+        } else {
+          let payload = { jwtToken: '', access_token: '', customer: {} };
+          payload.jwtToken = jwttoken;
+          payload.access_token = jwttoken;
+          payload.customer = JSON.parse(customer);
+          this.$store.commit('SET_CUSTOMER', payload);
+          customer_authenticated = true;
+        }
+      }
+    }
 
-     if(customer_authenticated) {
+    if (customer_authenticated) {
 
-        self.getOrderDetail().then(() => {
-         if(comment_id) {
-           let timer = setInterval(function() {
-             self.goToMessage(Number(comment_id))
-             if( document.getElementById(`comment-${comment_id}-box`)) {
-               clearInterval(timer)
-             }
-           }, 2000)
-         }
-         if(this.$route.query.accept_quote) {
-           this.acceptQuote();
-         }
-         if(this.$route.query.reject_quote) {
-           this.rejectQuote(true);
-         }
-       });
+      self.getOrderDetail().then(() => {
+        if (comment_id) {
+          let timer = setInterval(function () {
+            self.goToMessage(Number(comment_id))
+            if (document.getElementById(`comment-${comment_id}-box`)) {
+              clearInterval(timer)
+            }
+          }, 2000)
+        }
+        if (this.$route.query.accept_quote) {
+          this.acceptQuote();
+        }
+        if (this.$route.query.reject_quote) {
+          this.rejectQuote(true);
+        }
+      });
 
-     }
+    }
 
   },
   components: {
@@ -650,15 +751,15 @@ import QuoteModal from "@/components/QuoteModal.vue";
 })
 
 export default class OrderDetail extends Mixins(ErrorMessages) {
-  @Prop({required: false}) ecommerce_order_id!: number
+  @Prop({ required: false }) ecommerce_order_id!: number
   public storage_url = process.env.VUE_APP_STORAGE_URL
   private order_id = null;
-  private order:Record<any,any> = {};
+  private order: Record<any, any> = {};
   public logData = logData
   public activityStatus = activityStatus
   public showLoader = false
   public isWebComponent = false
-  public reorder_product:Record<any,any> = {};
+  public reorder_product: Record<any, any> = {};
   public selectedReorderImage = null;
   public is_quote_order = false;
   public show_quote_buttons = false;
@@ -679,7 +780,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public ORDERINPRODUCTION = "in_production"
   public ORDERSHIPPED = "shipped"
   public ORDERCOMPLETED = "completed"
-  public status_icons:Record<any, any> = {
+  public status_icons: Record<any, any> = {
     submitted_for_factory_review: 'submitted_for_factory_review',
     factory_approved: 'factory_approved',
     order_cancel: 'order_cancel',
@@ -700,9 +801,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   public activity_navigation_index = 0
-  public activity_items :Record<any, any> = {
-    order_item_id:null,
-    order_item_index:null,
+  public activity_items: Record<any, any> = {
+    order_item_id: null,
+    order_item_index: null,
     activity_item_data: []
   }
   public ref = this.$refs as Record<any, any>;
@@ -716,25 +817,27 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public product_texts: any = []
   public custom_logos: any = []
   public roster_headers = [
-    {key: 'size', label: 'Size'}, {key: 'quantity', label: 'Quantity'}, {key: 'number', label: 'Number'}, {key: 'text', label: 'Text'}
+    { key: 'size', label: 'Size' }, { key: 'quantity', label: 'Quantity' }, { key: 'number', label: 'Number' }, { key: 'text', label: 'Text' }
   ]
-  public api_url =  ''
-  public cancel_confirm_message =  `Are you sure that you want to cancel this order?`
-  public cancel_quote_message =  `Are you sure that you want to cancel this quote?`
+  public api_url = ''
+  public cancel_confirm_message = `Are you sure that you want to cancel this order?`
+  public cancel_quote_message = `Are you sure that you want to cancel this quote?`
   public design_approval_activity_item_data: Record<any, any>[] = []
   public design_approval_activity_navigation_index = 0
+  public approvalEmail = ""
+  public order_item_id = null;
   /*
   * data props ends
   * */
 
-  get company():Record<any, any>{
+  get company(): Record<any, any> {
     return this.$store.getters.getCompany
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
 
-  get customerPermissions(){
+  get customerPermissions() {
     return this.$store.getters.getCustomerPermissions
   }
 
@@ -743,10 +846,10 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   getOrderItemStatusActivityInfoDefaultObject(values = {}) {
-    const default_obj =  {
+    const default_obj = {
       item_index: null, status_activity_index: null, status_activity_item_index: null, factory_product: null
     }
-    return {...default_obj, ...values}
+    return { ...default_obj, ...values }
   }
 
 
@@ -756,24 +859,25 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     await http.get(url)
       .then((successResponse: Record<any, any>) => {
         let response_data = successResponse.data;
-        if(response_data.success == true) {
+        if (response_data.success == true) {
           self.order = response_data.result;
           self.is_quote_order = self.order.is_quote_order;
-          if(self.is_quote_order) {
+          if (self.is_quote_order) {
             const lastorderitem = self.order.items.at(-1);
-            if(lastorderitem.status == this.QUOTEPROVIDED) {
+            if (lastorderitem.status == this.QUOTEPROVIDED) {
               self.show_quote_buttons = true;
-            }else {
+            } else {
               self.show_quote_buttons = false;
             }
           }
 
         } else {
-          if(!isEcommercePlatform()) {
+          if (!isEcommercePlatform()) {
             self.showToast(response_data.message, "error")
-            self.$router.push({name: "CustomerOrders"})
+            self.$router.push({ name: "CustomerOrders" })
           } else {
             if(isEcomCompanyWithOrderTab()) {
+
               self.showToast(response_data.message, "error")
             }
             console.log('Custimoo Order : ', response_data.message)
@@ -781,34 +885,92 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
         }
       }).catch((errorResponse: any) => {
-      if(!isEcommercePlatform()) {
-        handleResponseException(errorResponse)
-      } else {
-        console.log('Custimoo Order : ', errorResponse)
-      }
-    });
+        if (!isEcommercePlatform()) {
+          handleResponseException(errorResponse)
+        } else {
+          console.log('Custimoo Order : ', errorResponse)
+        }
+      });
   }
 
   public isEcommerceCompany(): boolean {
     return isEcommercePlatform()
   }
+  public showThirdPartyApprovalModal(order_item: Record<any, any>) {
+    this.order_item_id = order_item.id;
+    this.$modal.show("third-party-approval-modal");
+  }
 
-  public async cancelOrder(order:Record<any, any>) {
+
+  public sendForApproval() {
+    if (!this.approvalEmail) {
+      this.showToast("Please enter a valid email address.", "error");
+      return;
+    }
+    if (!isValidEmail(this.approvalEmail)) {
+      this.showToast("Invalid email format. Please enter a valid email address.", "error");
+      return;
+    }
+
+    const payload = {
+      email: this.approvalEmail,
+      id: this.order_item_id,
+    };
+
+    this.showLoader = true;
+    http.post("admin/send-third-party-approval", payload)
+      .then((response: Record<any, any>) => {
+
+        this.showToast("Approval email sent successfully.", "success");
+        this.$modal.hide("third-party-approval-modal");
+        this.approvalEmail = ""
+        if (
+          response.data &&
+          response.data.result &&
+          Array.isArray(response.data.result.activity_items)
+        ) {
+          // Find the order item and update its activity_items
+          const orderItem = this.order.items.find((item: any) => item.id === this.order_item_id);
+
+          console.log(JSON.parse(JSON.stringify(orderItem)));
+          console.log("res", response.data)
+          if (orderItem) {
+            const customerReviewActivity = orderItem.status_activities.find(
+              (activity: any) => activity.status === this.CUSTOMERREVIEW
+            );
+            if (customerReviewActivity) {
+              customerReviewActivity.activity_items = response.data.result.activity_items;
+            }
+          }
+          console.log('after orderItem', orderItem)
+
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        this.showToast("An error occurred while sending the email.", "error");
+      })
+      .finally(() => {
+        this.showLoader = false;
+      });
+  }
+
+  public async cancelOrder(order: Record<any, any>) {
     let cancel_confirm_message = `<h3 class="text-primary">Order pending confirmation</h3> Are you sure that you want to cancel this order?`
-    if(order.order_no){
+    if (order.order_no) {
       cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
     }
     this.cancel_confirm_message = cancel_confirm_message;
     const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
     const confirm = await confirm_modal.showConfirm();
 
-    if(confirm){
+    if (confirm) {
       this.showLoader = true;
-      http.put(`customer-orders/cancel/${order.id}`).then(async (res:Record<any, any>) => {
-        if(res.data.success){
+      http.put(`customer-orders/cancel/${order.id}`).then(async (res: Record<any, any>) => {
+        if (res.data.success) {
           await this.getOrderDetail();
           this.showToast(res.data.message, 'success');
-        }else{
+        } else {
           this.showToast('ERROR! Could not cancel the order, please try again.', 'error')
         }
 
@@ -825,9 +987,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       .then((successResponse: Record<any, any>) => {
         let response = successResponse.data;
       }).catch((errorResponse: any) => {
-      item_status_activity.comments.push(activity_comment);
-      handleResponseException(errorResponse)
-    });
+        item_status_activity.comments.push(activity_comment);
+        handleResponseException(errorResponse)
+      });
   }
 
   hideCommentBox(hide_comment_box_for_obj: Record<any, any>, obj_key: string) {
@@ -840,8 +1002,8 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   reorder(order, order_item_id, reorder_product) {
-    if(reorder_product && reorder_product.product_id) {
-      let redirect_url = (this.company.customizer_page_url) ? `${this.company.company_domain}/${this.company.customizer_page_url}/#/?` :  `${this.company.company_domain}/#/?` ;
+    if (reorder_product && reorder_product.product_id) {
+      let redirect_url = (this.company.customizer_page_url) ? `${this.company.company_domain}/${this.company.customizer_page_url}/#/?` : `${this.company.company_domain}/#/?`;
       redirect_url += `is_reorder=true&order_id=${order.id}&order_number=${order.order_no}&order_item_id=${order_item_id}&`
       redirect_url += `factory_product_id=${reorder_product.id}&active_product_id=${reorder_product.product_id}&`
       redirect_url += `style_id=${reorder_product.style_id}&design_id=${reorder_product.design_id}`;
@@ -854,15 +1016,15 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   makeReorderMessage(factory_product_id, factory_products) {
     let factory_product = factory_products.find(item => item.id == factory_product_id);
     let message = '';
-    if(factory_product) {
-      if(factory_product.reorder_data) {
+    if (factory_product) {
+      if (factory_product.reorder_data) {
         const reorder_data = factory_product.reorder_data;
         message = `Note: Reorder of order #${reorder_data.order_number} `;
-        if(reorder_data.roster_change == true && reorder_data.design_change == true) {
+        if (reorder_data.roster_change == true && reorder_data.design_change == true) {
           message += 'with design and roster changes.';
-        } else if(reorder_data.roster_change == true && reorder_data.design_change == false) {
+        } else if (reorder_data.roster_change == true && reorder_data.design_change == false) {
           message += 'with roster changes.';
-        } else if(reorder_data.roster_change == false && reorder_data.design_change == true) {
+        } else if (reorder_data.roster_change == false && reorder_data.design_change == true) {
           message += 'with design changes.';
         } else {
           message += 'with no modifications';
@@ -876,7 +1038,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   ///////////////// Activity Methods
 
 
-  public showSampleDesigns(order_item: Record<any, any>, order_item_index :number, activity_item_index:number){
+  public showSampleDesigns(order_item: Record<any, any>, order_item_index: number, activity_item_index: number) {
     this.$modal.show('customer-review-modal');
     this.activity_items.order_item_id = order_item.id
     this.activity_items.order_item_index = order_item_index
@@ -886,34 +1048,34 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.activity_items.activity_item_data = [];
     this.design_approval_activity_item_data = [];
 
-    for(let actItem of activity_item.activity_items){
-      let actObj:Record<any,any> = {};
+    for (let actItem of activity_item.activity_items) {
+      let actObj: Record<any, any> = {};
       actObj.action = null;
       actObj.status = activity_item.status;
       actObj.message = '';
       actObj.files = [];
       actObj.factory_product_id = actItem.factory_product_id;
-      for(let actfile of actItem.activity_files){
-        let fileObj:Record<any,any> = {};
-         fileObj.file = `${this.storage_url}${actfile.url}?nocache=${Math.random()}`;
+      for (let actfile of actItem.activity_files) {
+        let fileObj: Record<any, any> = {};
+        fileObj.file = `${this.storage_url}${actfile.url}?nocache=${Math.random()}`;
         fileObj.file_type = null;
         actObj.files.push(fileObj);
       }
 
       let factory_product = order_item.factory_products.find(factory_product => factory_product.id === actItem.factory_product_id);
-      let skipCustomerApproval: Record<any, any> =  {
+      let skipCustomerApproval: Record<any, any> = {
         design_customer_approval: true,
         reason: null,
         show_reason_modal: false,
-        username: this.auth_customer?.first_name +  ' ' + this.auth_customer?.last_name,
+        username: this.auth_customer?.first_name + ' ' + this.auth_customer?.last_name,
         user_id: this.auth_customer?.id,
         role_name: "Customer"
       };
       if (factory_product?.sku?.design_customer_approval !== undefined) {
-        skipCustomerApproval.design_customer_approval = (actItem?.skip_customer_approval?.design_customer_approval === "true" || actItem?.skip_customer_approval?.design_customer_approval === true || actItem?.skip_customer_approval?.design_customer_approval === 1 ) ? true: false;
+        skipCustomerApproval.design_customer_approval = (actItem?.skip_customer_approval?.design_customer_approval === "true" || actItem?.skip_customer_approval?.design_customer_approval === true || actItem?.skip_customer_approval?.design_customer_approval === 1) ? true : false;
         skipCustomerApproval.reason = null;
         skipCustomerApproval.show_reason_modal = false;
-        skipCustomerApproval.username = this.auth_customer?.first_name +  ' ' + this.auth_customer?.last_name;
+        skipCustomerApproval.username = this.auth_customer?.first_name + ' ' + this.auth_customer?.last_name;
         skipCustomerApproval.user_id = this.auth_customer?.id;
         skipCustomerApproval.role_name = "Customer";
       }
@@ -928,60 +1090,59 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
     }
 
-    if(this.activity_items.activity_item_data.length > 0)
-    {
+    if (this.activity_items.activity_item_data.length > 0) {
       this.activity_navigation_index = 0;
       this.design_approval_activity_navigation_index = 0;
     }
   }
 
-  public submitActivity(submit_type:string) {
+  public submitActivity(submit_type: string) {
     this.showLoader = true;
     this.activity_items.activity_item_data.skip_customer_approval = JSON.stringify(this.activity_items.activity_item_data.skip_customer_approval);
     let status_to_check = this.FACTORYREVIEW;
-    if(this.order && this.ecommerce_order_id){
+    if (this.order && this.ecommerce_order_id) {
       status_to_check = this.ORDERAPPROVE;
     }
-    else if(this.customerPermissions.includes('order-approve-by-default')){
+    else if (this.customerPermissions.includes('order-approve-by-default')) {
       status_to_check = this.ORDERAPPROVE;
     }
 
     let artwork_created_activity = findActivityWithPosition(this.order.items[this.activity_items.order_item_index]?.status_activities, status_to_check, 0)
-    if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.status === this.CUSTOMERAPPROVED) && this.activity_items.activity_item_data.length < artwork_created_activity.activity_items.length){
-        if(this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.action === 'accept')){
-            let submitted_customer_review_activity = findActivity(this.order.items[this.activity_items.order_item_index]?.status_activities, this.CUSTOMERREVIEW, artwork_created_activity.activity_items.length)
-            if(submitted_customer_review_activity){
-              this.activity_items.activity_item_data = mergeActivityArray(this.activity_items,artwork_created_activity.activity_items,this.CUSTOMERAPPROVED, this.order.items[this.activity_items.order_item_index].status_activities, submitted_customer_review_activity);
-            }
+    if (this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.status === this.CUSTOMERAPPROVED) && this.activity_items.activity_item_data.length < artwork_created_activity.activity_items.length) {
+      if (this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.action === 'accept')) {
+        let submitted_customer_review_activity = findActivity(this.order.items[this.activity_items.order_item_index]?.status_activities, this.CUSTOMERREVIEW, artwork_created_activity.activity_items.length)
+        if (submitted_customer_review_activity) {
+          this.activity_items.activity_item_data = mergeActivityArray(this.activity_items, artwork_created_activity.activity_items, this.CUSTOMERAPPROVED, this.order.items[this.activity_items.order_item_index].status_activities, submitted_customer_review_activity);
         }
+      }
     }
     let form_data = this.activity_items;
-    if(submit_type == 'form_data'){
+    if (submit_type == 'form_data') {
       // form_data = null;
       form_data = new FormData();
 
       for (const key in this.activity_items) {
 
         if (key == 'activity_item_data') {
-          this.activity_items[key].forEach((activity_file_obj:Record<any,any> , actIndx:number) => {
+          this.activity_items[key].forEach((activity_file_obj: Record<any, any>, actIndx: number) => {
             for (const key2 in activity_file_obj) {
-              if(key2 == 'files'){
-                activity_file_obj[key2].forEach((activity_file:Record<any,any> , fileInd:number) => {
-                  for(const key3 in activity_file){
-                    if(key3 === "file"){
-                      if(this.activity_items[key][actIndx][key2][fileInd][key3] && isBase64File(this.activity_items[key][actIndx][key2][fileInd][key3])){
-                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', base64ToFile(this.activity_items[key][actIndx][key2][fileInd][key3], true));
+              if (key2 == 'files') {
+                activity_file_obj[key2].forEach((activity_file: Record<any, any>, fileInd: number) => {
+                  for (const key3 in activity_file) {
+                    if (key3 === "file") {
+                      if (this.activity_items[key][actIndx][key2][fileInd][key3] && isBase64File(this.activity_items[key][actIndx][key2][fileInd][key3])) {
+                        form_data.append(key + '[' + actIndx + '][' + key2 + '][' + fileInd + '][' + key3 + ']', base64ToFile(this.activity_items[key][actIndx][key2][fileInd][key3], true));
                       }
                       else {
-                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
+                        form_data.append(key + '[' + actIndx + '][' + key2 + '][' + fileInd + '][' + key3 + ']', this.activity_items[key][actIndx][key2][fileInd][key3]);
                       }
                     }
-                    if(key3 === "file_type"){
-                      if(this.activity_items[key][actIndx][key2][fileInd][key3] == "encode"){
-                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', "object");
+                    if (key3 === "file_type") {
+                      if (this.activity_items[key][actIndx][key2][fileInd][key3] == "encode") {
+                        form_data.append(key + '[' + actIndx + '][' + key2 + '][' + fileInd + '][' + key3 + ']', "object");
                       }
                       else {
-                        form_data.append(key+'['+actIndx+']['+key2+']['+fileInd+']['+key3+']', this.activity_items[key][actIndx][key2][fileInd][key3]);
+                        form_data.append(key + '[' + actIndx + '][' + key2 + '][' + fileInd + '][' + key3 + ']', this.activity_items[key][actIndx][key2][fileInd][key3]);
                       }
                     }
                   }
@@ -992,9 +1153,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
                   form_data.append(key + '[' + actIndx + '][' + key2 + '][' + skipkey + ']', this.activity_items[key][actIndx][key2][skipkey]);
                 })
               }
-              else{
+              else {
 
-                form_data.append(key+'['+actIndx+']['+key2+']', this.activity_items[key][actIndx][key2]);
+                form_data.append(key + '[' + actIndx + '][' + key2 + ']', this.activity_items[key][actIndx][key2]);
               }
             }
           });
@@ -1014,63 +1175,62 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         this.$modal.hide('customer-review-modal');
         this.showLoader = false;
       }).catch((errorResponse) => {
-      this.showLoader = false;
-      console.log(errorResponse);
-    });
+        this.showLoader = false;
+        console.log(errorResponse);
+      });
   }
-  public showMarkerArea(ref_index: number){
+  public showMarkerArea(ref_index: number) {
     this.markerActive = true
     let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
-    let image = (this.$refs as Record<any,any>)['designImage'+ref_index+this.design_approval_activity_navigation_index][0];
-    const markerArea:Record<any,any> = new markerjs2.MarkerArea(image)
+    let image = (this.$refs as Record<any, any>)['designImage' + ref_index + this.design_approval_activity_navigation_index][0];
+    const markerArea: Record<any, any> = new markerjs2.MarkerArea(image)
     activityObj.files[ref_index].marker_ref = markerArea
-    markerArea.addEventListener('render', (event:Record<any,any>) => {
+    markerArea.addEventListener('render', (event: Record<any, any>) => {
       activityObj.files[ref_index].file = event.dataUrl
       activityObj.files[ref_index].file_type = 'encode'
     });
-    if(this.isWebComponent) {
-      let shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
-      markerArea.targetRoot = shadow_dom.getElementById('markerAreaDiv'+ref_index+this.design_approval_activity_navigation_index);
+    if (this.isWebComponent) {
+      let shadow_dom = (this.$root as Record<any, any>).$options.shadowRoot;
+      markerArea.targetRoot = shadow_dom.getElementById('markerAreaDiv' + ref_index + this.design_approval_activity_navigation_index);
       markerjs2.Style.styleSheetRoot = shadow_dom;
     } else {
-      markerArea.targetRoot = document.getElementById('markerAreaDiv'+ref_index+this.design_approval_activity_navigation_index);
+      markerArea.targetRoot = document.getElementById('markerAreaDiv' + ref_index + this.design_approval_activity_navigation_index);
     }
     markerArea.renderAtNaturalSize = true;
     markerArea.show();
   }
-  public navigateActivitySlider(direction:string){
+  public navigateActivitySlider(direction: string) {
 
     let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
 
-    if(direction == 'next'){
-      if(activityObj.action == null){
+    if (direction == 'next') {
+      if (activityObj.action == null) {
         this.showToast('Please accept or reject designs before navigate', 'error');
-      }else{
+      } else {
         let limit = this.design_approval_activity_item_data.length;
-        if((this.design_approval_activity_navigation_index+1) < limit){
-          this.design_approval_activity_navigation_index ++
+        if ((this.design_approval_activity_navigation_index + 1) < limit) {
+          this.design_approval_activity_navigation_index++
         }
-        if(
+        if (
           (this.design_approval_activity_item_data.length - 1) == this.design_approval_activity_navigation_index
-          && this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].action )
-        {
+          && this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].action) {
           this.submitActivity('form_data')
         }
       }
-    }else{
-      if((this.design_approval_activity_navigation_index-1) >= 0) {
+    } else {
+      if ((this.design_approval_activity_navigation_index - 1) >= 0) {
         this.design_approval_activity_navigation_index--
       }
     }
 
     this.showMarkerActionButtons()
   }
-  public approveRejectDesigns(action:string){
+  public approveRejectDesigns(action: string) {
 
     let imageEdit = false
-    if (this.markerActive){
+    if (this.markerActive) {
       imageEdit = true
-      $(".modal-header").next(".d-flex").children("div:not(.fs-5)").each(function(){
+      $(".modal-header").next(".d-flex").children("div:not(.fs-5)").each(function () {
         $(this).find(".__markerjs2_toolbar-block:eq(2) .__markerjs2_toolbar_button_colors:eq(0)").trigger("click")
       })
     }
@@ -1079,21 +1239,21 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     setTimeout(() => {
       let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
       let show_message = false;
-      if(action == 'reject'){
-        if((activityObj.message == null || activityObj.message == '' )){
-          this.showToast('Please provide feedback before rejection','error');
+      if (action == 'reject') {
+        if ((activityObj.message == null || activityObj.message == '')) {
+          this.showToast('Please provide feedback before rejection', 'error');
           show_message = true;
         }
       }
 
-      if(!show_message) {
+      if (!show_message) {
         this.renderMarkerJsImages().then(marker_js_base64_images => {
           marker_js_base64_images.forEach((marker_js_base64_image_item, marker_js_base64_image_index) => {
             this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files[marker_js_base64_image_index].file = marker_js_base64_image_item
             this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files[marker_js_base64_image_index].file_type = 'encode'
           })
           this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].action = action;
-          if(action === "reject") {
+          if (action === "reject") {
             this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].status = this.CUSTOMERREJECTED;
           } else {
             this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].status = this.CUSTOMERAPPROVED;
@@ -1101,7 +1261,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
           this.navigateActivitySlider('next')
         })
       }
-    },1000)
+    }, 1000)
 
   }
 
@@ -1121,7 +1281,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 
   canPerformCommentAction(comment_obj: Record<any, any>) {
     let self = this;
-    if(self.auth_customer) {
+    if (self.auth_customer) {
       return comment_obj.comment_by_id == self.auth_customer.id && comment_obj.comment_by == "App\\Models\\Customer";
     } else {
       return false;
@@ -1140,15 +1300,15 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }, 2000)
   }
 
-  showPreview(activity_item){
+  showPreview(activity_item) {
     this.front_preview = `${activity_item.activity_files[0].url}`
     this.back_preview = `${activity_item.activity_files[1].url}`
     this.$modal.show('product-preview')
   }
 
   async downloadStatusActivityImages(activity_files: Record<any, any>[] = []) {
-    const {item_index, status_activity_index, status_activity_item_index} = this.activity_item_info
-    if(activity_files.length == 0) {
+    const { item_index, status_activity_index, status_activity_item_index } = this.activity_item_info
+    if (activity_files.length == 0) {
       activity_files = this.order.items[item_index].status_activities[status_activity_index].activity_items[status_activity_item_index].activity_files
     }
     const activity_files_paths = activity_files.map((activity_file: Record<any, any>) => {
@@ -1158,12 +1318,12 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     const base64_files = await urlToBase64(activity_files_paths)
     this.showLoader = false
     const dom_document = getDomDocument(true)
-      base64_files.forEach((base64_file, base64_file_index) => {
-        let activity_file = dom_document.createElement("a");
-        activity_file.href = base64_file;
-        activity_file.download = activity_files[base64_file_index].name
-        activity_file.click();
-      })
+    base64_files.forEach((base64_file, base64_file_index) => {
+      let activity_file = dom_document.createElement("a");
+      activity_file.href = base64_file;
+      activity_file.download = activity_files[base64_file_index].name
+      activity_file.click();
+    })
   }
 
   async showActivityItemDetail(item_index, status_activity_index, status_activity_item_index) {
@@ -1177,97 +1337,97 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.activity_item_info = await this.getOrderItemStatusActivityInfoDefaultObject(activity_item_info)
     this.$modal.show('order-detail');
   }
-  evaluateRole(activity_comment){
-      if(Object.prototype.hasOwnProperty.call(activity_comment, "user") && activity_comment.user){
-          if(Object.prototype.hasOwnProperty.call(activity_comment.user, "userroles")){
-            if(activity_comment.user.userroles.length > 0){
-              switch(activity_comment.user.userroles[0].name.toLowerCase()){
-                case "factory":
-                  return "Factory";
-                case "admin":
-                  return "Merchant";
-                case "superadmin":
-                  return "Custimoo Admin";
-                case "customer":
-                  return "Customer";
-              }
-            }
+  evaluateRole(activity_comment) {
+    if (Object.prototype.hasOwnProperty.call(activity_comment, "user") && activity_comment.user) {
+      if (Object.prototype.hasOwnProperty.call(activity_comment.user, "userroles")) {
+        if (activity_comment.user.userroles.length > 0) {
+          switch (activity_comment.user.userroles[0].name.toLowerCase()) {
+            case "factory":
+              return "Factory";
+            case "admin":
+              return "Merchant";
+            case "superadmin":
+              return "Custimoo Admin";
+            case "customer":
+              return "Customer";
           }
-          else{
-            return "Customer";
+        }
+      }
+      else {
+        return "Customer";
+      }
+
+    }
+    else {
+      return "Customer"
+    }
+  }
+  acceptQuote() {
+    if (this.is_quote_order && this.show_quote_buttons) {
+      const quote_modal = (this.$refs['quoteModal'] as Record<any, any>);
+      quote_modal.showVModal('quote-modal');
+    }
+  }
+
+  evaluateClass(activity_item) {
+    if (activity_item.skip_customer_approval && ((activity_item.skip_customer_approval?.design_customer_approval === "false") || (activity_item.skip_customer_approval?.design_customer_approval === false))) {
+      return 'skipped';
+    }
+    else {
+      return '';
+    }
+  }
+  async rejectQuote(via_link = false) {
+    if (this.is_quote_order && this.show_quote_buttons) {
+      const order = this.order;
+      let confirm = false;
+      if (via_link) {
+        confirm = true;
+      } else {
+        let cancel_confirm_message = `<h3 class="text-primary">Order pending confirmation</h3> Are you sure that you want to cancel this order?`
+        if (order.order_no) {
+          cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
+        }
+        this.cancel_confirm_message = cancel_confirm_message
+        const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
+        confirm = await confirm_modal.showConfirm();
+      }
+
+      if (confirm) {
+        this.showLoader = true;
+        let payload = {}
+        payload['order_id'] = order.id
+        http.post(`reject-quote-order`, payload).then(async (res: Record<any, any>) => {
+          if (res.data.success) {
+            await this.getOrderDetail();
+            this.showToast(res.data.message, 'success');
+          } else {
+            this.showToast('ERROR! Could not cancel the order, please try again.', 'error')
           }
 
-      }
-      else{
-        return "Customer"
-      }
-    }
-    acceptQuote() {
-     if(this.is_quote_order && this.show_quote_buttons) {
-        const quote_modal = (this.$refs['quoteModal'] as Record<any, any>);
-        quote_modal.showVModal('quote-modal');
+          this.showLoader = false;
+        })
       }
     }
 
-    evaluateClass(activity_item) {
-        if(activity_item.skip_customer_approval && ((activity_item.skip_customer_approval?.design_customer_approval === "false") || (activity_item.skip_customer_approval?.design_customer_approval === false))){
-          return 'skipped';
-        }
-        else {
-          return '';
-        }
-    }
-    async rejectQuote(via_link = false) {
-      if(this.is_quote_order && this.show_quote_buttons) {
-        const order  = this.order;
-        let confirm = false;
-        if(via_link) {
-          confirm = true;
-        } else {
-          let cancel_confirm_message = `<h3 class="text-primary">Order pending confirmation</h3> Are you sure that you want to cancel this order?`
-          if(order.order_no){
-            cancel_confirm_message = `<h3 class="text-primary">Order no: <strong class="font-weight-bold">${order.order_no}</strong></h3> Are you sure that you want to cancel this order?`
-          }
-          this.cancel_confirm_message = cancel_confirm_message
-          const confirm_modal = (this.$refs['confirm_order_cancel'] as Record<any, any>);
-          confirm = await confirm_modal.showConfirm();
-        }
+  }
 
-        if(confirm){
-          this.showLoader = true;
-          let payload = {}
-          payload['order_id'] = order.id
-          http.post(`reject-quote-order`, payload).then(async (res:Record<any, any>) => {
-            if(res.data.success){
-              await this.getOrderDetail();
-              this.showToast(res.data.message, 'success');
-            }else{
-              this.showToast('ERROR! Could not cancel the order, please try again.', 'error')
-            }
-
-            this.showLoader = false;
-          })
-        }
-      }
-
-    }
-
-    linkifyComment(text) {
-      const urlRegex = /(https?:\/\/[^\s]+)/g;
-      return text && text.replace(urlRegex, (url) => {
-        return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
-      });
-    }
-    getCurrentDatetime() {
-      const now = new Date();
-      return now.toISOString().replace(/:/g, '-').split('.')[0];
-      // Formats to "YYYY-MM-DDTHH-MM-SS" (compatible for filenames)
-    }
+  linkifyComment(text) {
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text && text.replace(urlRegex, (url) => {
+      return `<a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a>`;
+    });
+  }
+  getCurrentDatetime() {
+    const now = new Date();
+    return now.toISOString().replace(/:/g, '-').split('.')[0];
+    // Formats to "YYYY-MM-DDTHH-MM-SS" (compatible for filenames)
+  }
 }
 </script>
 
 <style lang="scss" scoped>
-.loader{
+.loader {
   position: absolute;
   left: 0;
   right: 0;
@@ -1279,14 +1439,16 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
   z-index: 1030;
-  img{
+
+  img {
     max-width: 7%;
     display: block;
     margin: 0 auto;
     height: auto;
   }
+
   [v-cloak] {
     display: none !important;
   }
@@ -1367,7 +1529,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
         bottom: -2rem;
       }
 
-      & + .activity-status {
+      &+.activity-status {
         margin-top: 2rem;
       }
 
@@ -1408,7 +1570,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
             align-items: flex-start;
             gap: 7px;
 
-            .btn{
+            .btn {
               white-space: nowrap;
             }
           }
@@ -1504,7 +1666,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       max-width: 100%;
       overflow-x: auto;
 
-      & > div {
+      &>div {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1590,7 +1752,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 }
 
-.feedback-block{
+.feedback-block {
   align-items: flex-start;
   display: flex;
   flex-direction: column;
@@ -1598,11 +1760,11 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   padding: 10px;
   border-radius: 7px;
 
-  &:empty{
+  &:empty {
     display: none;
   }
 
-  .feedback-images{
+  .feedback-images {
     display: flex;
     gap: 10px;
     padding: 7px;
@@ -1612,12 +1774,12 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     align-items: flex-start;
   }
 
-  .feedback-text{
+  .feedback-text {
     color: #555;
     font-size: 1rem;
     padding-top: 7px;
 
-    &+.feedback-text{
+    &+.feedback-text {
       border-top: 1px solid #ccc;
     }
   }
@@ -1627,38 +1789,52 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
 /* Reorder css */
 .product-item {
   display: inline-block;
-  margin-right: 20px; /* Adjust spacing between product items */
+  margin-right: 20px;
+  /* Adjust spacing between product items */
 }
+
 .product-item label {
   cursor: pointer;
 }
+
 .product-item img {
-  width: 100px; /* Adjust image width as needed */
-  height: 100px; /* Adjust image height as needed */
+  width: 100px;
+  /* Adjust image width as needed */
+  height: 100px;
+  /* Adjust image height as needed */
   border: 2px solid transparent;
 }
+
 .product-item img.selected {
-  border-color: blue; /* Adjust border color as needed */
+  border-color: blue;
+  /* Adjust border color as needed */
 }
+
 .product-item img.selected {
-  border-color: blue; /* Adjust border color as needed */
+  border-color: blue;
+  /* Adjust border color as needed */
 }
+
 .product-item img.disabled {
   cursor: not-allowed;
-  opacity: 0.5; /* Adjust the opacity for disabled images as needed */
+  opacity: 0.5;
+  /* Adjust the opacity for disabled images as needed */
 }
+
 .reorder-button {
   padding: 10px 20px;
   font-size: 16px;
   cursor: pointer;
 }
+
 .skipped {
   position: relative;
 }
 
 .skipped-block {
   position: relative;
-  overflow: hidden; /* Prevent overflow */
+  overflow: hidden;
+  /* Prevent overflow */
 }
 
 .skipped::before {
@@ -1668,18 +1844,24 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   left: 0;
   background-color: #219F84;
   color: white;
-  font-size: 14px; /* Adjust font size */
+  font-size: 14px;
+  /* Adjust font size */
   font-weight: bold;
   text-align: center;
   padding: 25px;
-  width: 135px; /* Increase width to ensure space for text */
-  height: 135px; /* Increase height for the triangle */
+  width: 135px;
+  /* Increase width to ensure space for text */
+  height: 135px;
+  /* Increase height for the triangle */
   clip-path: polygon(0 0, 100% 0, 0 100%);
   display: flex;
-  align-items: flex-end; /* Align text at the top of the triangle */
+  align-items: flex-end;
+  /* Align text at the top of the triangle */
   justify-content: flex-start;
-  transform: translate(-15%, -15%); /* Fine-tune positioning */
-  writing-mode: vertical-rl; /* Optional: Rotates text for better fit */
+  transform: translate(-15%, -15%);
+  /* Fine-tune positioning */
+  writing-mode: vertical-rl;
+  /* Optional: Rotates text for better fit */
   line-height: 1.2;
   opacity: 0.8;
   z-index: 1;

@@ -25,4 +25,6 @@ export default class App extends Vue {
   }[layout]
 }
 }
+
+
 </script>

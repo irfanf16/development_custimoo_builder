@@ -11,6 +11,7 @@ const Payment = ()=> import("@/views/Payment.vue")
 const OrderListing = ()=> import("@/views/OrderListing.vue")
 const OrderDetail = ()=> import('../views/OrderDetail.vue')
 const PrivacyPolicy = ()=> import('@/views/PrivacyPolicy.vue')
+const ThirdParty = ()=> import('../views/ThirdPartyFeedback.vue')
 
 Vue.use(VueRouter)
 
@@ -66,7 +67,15 @@ const routes: Array<RouteConfig> = [
       name: 'privacyPolicy',
       component: PrivacyPolicy,
       meta: { layout: 'minimal' }
+  },
+   {
+    path: '/third-party-feedback/:order_item_id',
+    name: 'ThirdParty',
+    component: ThirdParty,
+    meta: { layout: 'minimal' }
+
     },
+  
 ]
 
 const router = new VueRouter({
