@@ -1,9 +1,7 @@
 <script src="../mixins/LockerProduct.ts"></script>
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
-    <Header />
-    <Navbar v-if="company.status" />
-    <router-view />
+    <component :is="layoutComponent" />
   </div>
 </template>
 
@@ -14,6 +12,8 @@ import store from '../store'
 import {dom} from '@fortawesome/fontawesome-svg-core'
 import Navbar from '@/components/Navbar.vue';
 import Header from '@/components/Header.vue';
+import HeaderNavbarLayout from '@/layouts/HeaderNavbarLayout.vue'
+import MinimalLayout from '@/layouts/MinimalLayout.vue'
 
 import CommonImportMixin from '../mixins/CommonImportMixin.vue'
 
@@ -24,7 +24,17 @@ export default {
   name: "Customizer",
   mixins: [CommonImportMixin],
   components: {
-    Navbar, Header
+    Navbar, Header ,  HeaderNavbarLayout,
+    MinimalLayout
+  },
+  computed: {
+    layoutComponent() {
+      const layout = this.$route.meta.layout || 'default'
+      return {
+        default: 'HeaderNavbarLayout',
+        minimal: 'MinimalLayout'
+      }[layout]
+    }
   },
   mounted: async function() {
     // run time adding css for pringlessportsexcellence.com as it is not accept any direct css
