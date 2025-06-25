@@ -89,7 +89,7 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
       let url = `/list/products?customized=${is_customized}&private=${is_private}&personalized=${is_personalized}&page=${next_page_no}`;
       if(edit_info_object.editing) {
         if(["locker_product", 'share_product'].includes(edit_info_object.type)) {
-          url += `&active_product_id=${edit_info_object.locker_product_info.product_id}&offset=${this.$store.getters.getProducts.length}&active_product_type=locker_product`
+          url += `&active_product_id=${edit_info_object.locker_product_info.product_id}&locker_product_id=${edit_info_object.locker_product_info.locker_product_id}&&offset=${this.$store.getters.getProducts.length}&active_product_type=locker_product`
         }
         if(edit_info_object.type == "reorder_product") {
           url += "&is_reorder=true&active_product_type=reorder_product&paginate=false&get_product_detail=false";
