@@ -35,7 +35,7 @@
 
       <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
         <b-button
-        v-if="((company.platform == 'self' && customerPermissions.includes('place-order')) || company.platform == 'cdnExceptLogin') && (selectedCollectionProducts.length > 0)"
+        v-if="((company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform == 'self' && company.id !== 1)  || company.platform == 'cdnExceptLogin') && (selectedCollectionProducts.length > 0)"
           variant="secondary"
           @click="handleAddToCart"
           :disabled="$store.getters.getCartLoading">
