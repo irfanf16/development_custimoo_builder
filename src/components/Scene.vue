@@ -371,7 +371,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           let canvas = this.frontCanvas;
           let zoom_point = this.front_zoom_point;
           let patterns = this.front_patterns;
-          
+
           if (side === 'back') {
             design = this.backDesign;
             canvas = this.backCanvas;
@@ -2868,8 +2868,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
               data: {
                 actualWidth: img.width,
                 actualHeight: img.height,
-                originalWidth: converted_width!.value,
-                originalHeight: converted_height!.value
+                originalWidth: converted_width,
+                originalHeight: converted_height
               }
             })
           }
@@ -2951,18 +2951,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     const width = (object.width as number * object.scaleX * this.measurementRatio)
     const height = (object.height as number * object.scaleY * this.measurementRatio)
     if (width != 0 || height != 0) {
-      const converted_width = this.getRealSize(width)
-      const converted_height = this.getRealSize(height)
+      var converted_width =  this.getRealSize(width)
+      var converted_height = this.getRealSize(height)
       if(object.type == 'text') {
         const stroke_width = object.strokeWidth * object.scaleX * this.measurementRatio
-        converted_width.value = (parseFloat(converted_width.value) + parseFloat(this.getRealSize(stroke_width).value)).toFixed(1)
-        converted_height.value = (parseFloat(converted_height.value) + parseFloat(this.getRealSize(stroke_width).value)).toFixed(1)
+        converted_width = (parseFloat(converted_width) + parseFloat(this.getRealSize(stroke_width))).toFixed(1)
+        converted_height = (parseFloat(converted_height) + parseFloat(this.getRealSize(stroke_width))).toFixed(1)
       }
       dimText.set({
         left: object.left,
         top: object.top + ((object.height * object.scaleY) / 2) + dimText.height * dimText.scaleY + 20,
-        text: 'Size (W)' + converted_width!.value + this.$store.getters.getSetting('measurement_unit')?.unit + 
-        ' x (H)' + converted_height!.value + this.$store.getters.getSetting('measurement_unit')?.unit,
+        text: 'Size (W)' + converted_width + this.$store.getters.getSetting('measurement_unit')?.unit +
+        ' x (H)' + converted_height + this.$store.getters.getSetting('measurement_unit')?.unit,
         visible: true
       }).bringToFront()
     }
@@ -2973,18 +2973,18 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (setting) {
       switch (setting.conversion_operator) {
         case 'multiply':
-          return { value: (value * (parseFloat(setting.conversion_value))).toFixed(1) }
+          return (value * (parseFloat(setting.conversion_value))).toFixed(1)
           break;
         case 'divide':
-          return { value: (value / (parseFloat(setting.conversion_value))).toFixed(1) }
+          return (value / (parseFloat(setting.conversion_value))).toFixed(1)
           break;
         default: {
           const value_string = value ? value.toString() : '';
-          return { value: parseFloat(value_string).toFixed(1) }
+          return parseFloat(value_string).toFixed(1)
         }
       }
     }
-    return { value: '0' };
+    return '0' ;
   }
 
   public async resetTextsFromCanvas() {
@@ -3155,9 +3155,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                       const outline_width_converted = this.getRealSize(fabric_text.strokeWidth * fabric_text.scaleX * this.measurementRatio)
                       custom_text_item.actualWidth = fabric_text.width
                       custom_text_item.actualHeight = fabric_text.height
-                      custom_text_item.originalWidth = converted_width!.value
-                      custom_text_item.originalHeight = converted_height!.value
-                      custom_text_item.outline_width_converted = outline_width_converted!.value
+                      custom_text_item.originalWidth = converted_width
+                      custom_text_item.originalHeight = converted_height
+                      custom_text_item.outline_width_converted = outline_width_converted
 
                       this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement)
 
@@ -3307,9 +3307,9 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     const converted_width = this.getRealSize(width)
     const converted_height = this.getRealSize(height)
     const outline_width_converted = this.getRealSize(outline_width)
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width!.value;
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height!.value;
-    self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width_converted = outline_width_converted!.value;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalWidth = converted_width;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].originalHeight = converted_height;
+    self.product_custom_texts[custom_text_index].items[custom_text_item_index].outline_width_converted = outline_width_converted;
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {index: custom_text_index, value: self.product_custom_texts[custom_text_index]})
     self.$eventBus.$emit("customTextStoreUpdated", {custom_text_index: custom_text_index, custom_text_item_index: custom_text_item_index});
   }
@@ -3335,8 +3335,8 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           scaleY: fabric_object.get("scaleY"),
           actualWidth: fabric_object.get('width'),
           actualHeight: fabric_object.get('height'),
-          originalWidth: converted_width!.value,
-          originalHeight: converted_height!.value,
+          originalWidth: converted_width,
+          originalHeight: converted_height,
         }
       })
     }
