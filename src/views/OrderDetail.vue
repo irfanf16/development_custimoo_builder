@@ -1019,16 +1019,37 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     if (factory_product) {
       if (factory_product.reorder_data) {
         const reorder_data = factory_product.reorder_data;
-        message = `Note: Reorder of order #${reorder_data.order_number} `;
-        if (reorder_data.roster_change == true && reorder_data.design_change == true) {
-          message += 'with design and roster changes.';
-        } else if (reorder_data.roster_change == true && reorder_data.design_change == false) {
-          message += 'with roster changes.';
-        } else if (reorder_data.roster_change == false && reorder_data.design_change == true) {
-          message += 'with design changes.';
-        } else {
-          message += 'with no modifications';
+        if('is_possible_reorder' in factory_product && factory_product.is_possible_reorder){
+          message = `Note: Possible reorder of ${reorder_data.order_number? 'order': 'order_id'} #${reorder_data.order_number? reorder_data.order_number: reorder_data.order_id} `;
+          if(reorder_data.roster_change == true && reorder_data.design_change == true) {
+            message += 'with design and roster changes.';
+          } else if(reorder_data.roster_change == true && reorder_data.design_change == false) {
+            message += 'with roster changes.';
+          } else if(reorder_data.roster_change == false && reorder_data.design_change == true) {
+            message += 'with design changes.';
+          } else {
+            message += 'with no modifications';
+          }
+          if(!this.order.order_no){
+             message += ' (order not confirmed)'
+          }
         }
+        else {
+          message = `Note: Reorder of ${reorder_data.order_number? 'order': 'order_id'} #${reorder_data.order_number? reorder_data.order_number: reorder_data.order_id} `;
+          if(reorder_data.roster_change == true && reorder_data.design_change == true) {
+            message += 'with design and roster changes.';
+          } else if(reorder_data.roster_change == true && reorder_data.design_change == false) {
+            message += 'with roster changes.';
+          } else if(reorder_data.roster_change == false && reorder_data.design_change == true) {
+            message += 'with design changes.';
+          } else {
+            message += 'with no modifications';
+          }
+          if(!reorder_data.order_number){
+             message += ' (order not confirmed)'
+          }
+        }
+
       }
     }
 
