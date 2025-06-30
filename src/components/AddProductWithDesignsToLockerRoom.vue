@@ -394,16 +394,16 @@ public errors = [];
       (productSelectedDesign) => productSelectedDesign.suggested_product_name
     );
 
-    let response : Record<any, any> = await this.validateProductNames(suggestedProductNames, this.customer.id, this.room_id);
-    if(!response.data.success){
-      const {errors} = response.data;
+    let response: Record<any, any> = await this.validateProductNames(suggestedProductNames, this.customer.id, this.room_id);
+    if (!response.data.success) {
+      const { errors } = response.data;
       let errorArr: Record<any, any>[] = [];
-      Object.keys(errors).map((field:string) => {
-        let error:Record<any, any>[] = [];
+      Object.keys(errors).map((field: string) => {
+        let error: Record<any, any>[] = [];
         error.push(errors[field]);
         errorArr.push(error);
       });
-      this.showErrorArr(errorArr,3000);
+      this.showErrorArr(errorArr, 3000);
       this.loadingLocker = false;
       return;
     }
@@ -411,89 +411,82 @@ public errors = [];
     const fixed_logo_index = this.$store.getters.getFixedLogoIndex;
     const product_rosters = this.$store.getters.getProductRosters();
 
-    try {
-      for (const [productSelectedDesignIndex, productSelectedDesign] of this.productSelectedDesignsData.entries()) {
-        const scene_ref = this.$refs[`product-selected-design-${productSelectedDesignIndex}-ref`]?.[0]
-        const front_image = await this.getImageFromCanvasAsPromise('front', {}, scene_ref);
-        const front_image_base64 = base64ToFile(`data:image/png;base64,${front_image}`,true);
-        const back_image = await this.getImageFromCanvasAsPromise('back', {}, scene_ref);
-        const back_image_base64 = base64ToFile(`data:image/png;base64,${back_image}`,true);
-        const svg_groups = this.$refs[`product-selected-design-${productSelectedDesignIndex}-ref`]?.[0].svgGroups;
-        let default_colors = []
-        let group_colors = {}
-        if(scene_ref) {
-          //@ts-ignore
-          default_colors = scene_ref?.appliedDefaultColors
-          group_colors = scene_ref?.appliedGroupColors
-        }
-        if(!front_image_base64 && !back_image_base64){
-          this.showToast(`Front image and Back image is undefined for Product Design ${productSelectedDesign.id}`,"error")
-          return;
-        }
-        if(!svg_groups){
-          this.showToast(`svg groups are undefined for Product Design ${productSelectedDesign.id}`,"error")
-          return;
-        }
-
-        locker_design_data.push({
-          roster_url: this.rosterUrl,
-          room_id: this.room_id,
-          product_id: this.selectedProduct.product_id,
-          product_name: productSelectedDesign.suggested_product_name,
-          svg_parts: scene_ref.parts,
-          style_id: this.selectedProduct.productstyles[this.styleIndex].id,
-          design_id: productSelectedDesign.id,
-          custom_logos: this.customLogos,
-          text: this.customTexts,
-          colors: this.logoColors,
-          shuffle_color_number: this.shuffle_color_number,
-          defaultcolors: default_colors,
-          groupcolors: group_colors,
-          locker_front_png: base64ToFile(front_image_base64,true),
-          locker_back_png: base64ToFile(back_image_base64, true),
-          product_roster_detail: product_rosters,
-          fixed_logo_index: fixed_logo_index,
-          svgcolors: svg_groups,
-          batch_save:true,
-        })
+    for (const [productSelectedDesignIndex, productSelectedDesign] of this.productSelectedDesignsData.entries()) {
+      const scene_ref = this.$refs[`product-selected-design-${productSelectedDesignIndex}-ref`]?.[0]
+      const front_image = await this.getImageFromCanvasAsPromise('front', {}, scene_ref);
+      const front_image_file = base64ToFile(`data:image/png;base64,${front_image}`, true);
+      const back_image = await this.getImageFromCanvasAsPromise('back', {}, scene_ref);
+      const back_image_file = base64ToFile(`data:image/png;base64,` + back_image, true);
+      const svg_groups = this.$refs[`product-selected-design-${productSelectedDesignIndex}-ref`]?.[0].svgGroups;
+      let default_colors = []
+      let group_colors = {}
+      if (scene_ref) {
+        //@ts-ignore
+        default_colors = scene_ref?.appliedDefaultColors
+        group_colors = scene_ref?.appliedGroupColors
+      }
+      if (!front_image) {
+        this.showToast(`Image is undefined for Product Design ${productSelectedDesign.id}`, "error")
+        return;
+      }
+      if (!svg_groups) {
+        this.showToast(`svg groups are undefined for Product Design ${productSelectedDesign.id}`, "error")
+        return;
       }
 
-      const savePromises = locker_design_data.map((lockerDesignData) => {
-        let formData = createFormData(lockerDesignData);
-        return this.$store.dispatch('SAVE_TO_LOCKER', formData).then((response) => {
-          return response; // Return the response for Promise.all
-        }).catch((error) => {
-          return error
-        });
-      });
-
-      const responses = await Promise.all(savePromises);
-      // Extract collection_id from responses
-      const collectionIds = responses.map((response:any) => {
-        if (response.data && response.data.data && response.data.data.collection_id) {
-          return response.data.data.collection_id;
-        }
-        return null; // Handle cases where collection_id is not present
-      });
-      const filteredCollectionIds = collectionIds.filter(value => value !== null);
-      const [collection_id] = [...new Set(filteredCollectionIds)];
-      await this.executeCollectionPdfJob(collection_id);
-
-      this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
-      this.loadingLocker = false
-      await getLockerColors();
-      this.$store.commit("Change_Locker_Tabs_Index", 0);
-      this.showToast("Designs saved successfully","success");
-      this.productSelectedDesignsData.map(
-        (productSelectedDesign) => productSelectedDesign.suggested_product_name = ""
-      );
-      this.hideVModal('add-designs-to-locker-room');
-    } catch (error) {
-      this.showToast("Designs saved successfully","error");
-      this.loadingLocker = false
-      this.hideVModal('add-designs-to-locker-room');
-      // Handle the error appropriately, e.g., display a user-friendly message
+      locker_design_data.push({
+        roster_url: this.rosterUrl,
+        room_id: this.room_id,
+        product_id: this.selectedProduct.product_id,
+        product_name: productSelectedDesign.suggested_product_name,
+        svg_parts: scene_ref.parts,
+        style_id: this.selectedProduct.productstyles[this.styleIndex].id,
+        design_id: productSelectedDesign.id,
+        custom_logos: this.customLogos,
+        text: this.customTexts,
+        colors: this.logoColors,
+        shuffle_color_number: this.shuffle_color_number,
+        defaultcolors: default_colors,
+        groupcolors: group_colors,
+        locker_front_png: front_image_file,
+        locker_back_png: back_image_file,
+        product_roster_detail: product_rosters,
+        fixed_logo_index: fixed_logo_index,
+        svgcolors: svg_groups,
+        batch_save: true,
+      })
     }
+    const savePromises = locker_design_data.map((lockerDesignData) => {
+      let formData = createFormData(lockerDesignData);
+      return this.$store.dispatch('SAVE_TO_LOCKER', formData).then((response) => {
+        return response; // Return the response for Promise.all
+      }).catch((error) => {
+        return error
+      });
+    });
+
+    const responses = await Promise.all(savePromises);
+    // Extract collection_id from responses
+    const collectionIds = responses.map((response: any) => {
+      if (response.data && response.data.data && response.data.data.collection_id) {
+        return response.data.data.collection_id;
+      }
+      return null; // Handle cases where collection_id is not present
+    });
+    const filteredCollectionIds = collectionIds.filter(value => value !== null);
+    const [collection_id] = [...new Set(filteredCollectionIds)];
+    await this.executeCollectionPdfJob(collection_id);
+
+    this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
+    this.loadingLocker = false
+    await getLockerColors();
+    this.$store.commit("Change_Locker_Tabs_Index", 0);
+    this.showToast("Designs saved successfully", "success");
+    this.productSelectedDesignsData.map(
+      (productSelectedDesign) => productSelectedDesign.suggested_product_name = ""
+    );
+    this.hideVModal('add-designs-to-locker-room');
+    await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
   }
 
   async getImageFromCanvasAsPromise(side, options, canvasRef) {
