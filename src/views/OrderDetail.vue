@@ -713,6 +713,14 @@ import { isValidEmail } from "@/helpers/Helpers";
         }
       });
 
+    }else{
+      if(isEcommercePlatform()){
+          if (this.company.login_code.type == 'url') {
+            window.location.href = this.company.login_code.action
+          } else {
+            eval(this.company.login_code.action)
+          }
+      }
     }
 
   },
