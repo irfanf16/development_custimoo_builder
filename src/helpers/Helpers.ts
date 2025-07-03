@@ -2920,28 +2920,24 @@ const isEcomCompanyWithOrderTab = () => {
   return company.ecom_with_ordertab;
 }
 
-
-function canAccessCompanyFeatures({ for_cart = false } = {}) {
+function canAccessCompanyFeatures() {
   const company = Store.getters.getCompany;
   const requires_place_order_permission = Store.getters.getSetting('requires_order_permission');
   const customerPermissions = Store.getters.getCustomerPermissions;
 
-  const is_self = company.platform === 'self';
+  const platform = company.platform;
   const has_permission = customerPermissions.includes('place-order');
 
-  if (for_cart) {
-    // Cart-specific logic: includes cdnExceptLogin
-    if (company.platform === 'cdnExceptLogin') return true;
-  } else {
-    // Purchase-specific logic: disallow cdnExceptLogin
-    if (!is_self) return true;
+  // For self or cdnExceptLogin, check permission if required
+  if (platform === 'self' || platform === 'cdnExceptLogin') {
+    if (requires_place_order_permission) {
+      return has_permission;
+    }
+    return true;
   }
 
-  // Shared logic for 'self' platforms
-  if (is_self && !requires_place_order_permission) return true;
-  if (is_self && requires_place_order_permission && has_permission) return true;
-
-  return false;
+  // All other platforms (ecommerce, wordpress, shopify, etc.)
+  return true;
 }
 
 

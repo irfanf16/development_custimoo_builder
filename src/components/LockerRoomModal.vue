@@ -35,7 +35,7 @@
 
       <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
         <b-button
-        v-if="canAccessCompanyFeatures({ for_cart: true }) && (selectedCollectionProducts.length > 0)"
+        v-if="canAccessCompanyFeatures() && (selectedCollectionProducts.length > 0)"
           variant="secondary"
           @click="handleAddToCart"
           :disabled="$store.getters.getCartLoading">
@@ -170,8 +170,8 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   get customerPermissions() {
     return this.$store.getters.getCustomerPermissions
   }
-  public canAccessCompanyFeatures(options: { for_cart?: boolean } = {}): boolean {
-    return canAccessCompanyFeatures(options)
+  public canAccessCompanyFeatures(): boolean {
+    return canAccessCompanyFeatures()
   }
 
   // Add after other methods in the LockerRoomModal class
