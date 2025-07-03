@@ -2920,6 +2920,31 @@ const isEcomCompanyWithOrderTab = () => {
   return company.ecom_with_ordertab;
 }
 
+
+function canAccessCompanyFeatures({ for_cart = false } = {}) {
+  const company = Store.getters.getCompany;
+  const requires_place_order_permission = Store.getters.getSetting('requires_order_permission');
+  const customerPermissions = Store.getters.getCustomerPermissions;
+
+  const is_self = company.platform === 'self';
+  const has_permission = customerPermissions.includes('place-order');
+
+  if (for_cart) {
+    // Cart-specific logic: includes cdnExceptLogin
+    if (company.platform === 'cdnExceptLogin') return true;
+  } else {
+    // Purchase-specific logic: disallow cdnExceptLogin
+    if (!is_self) return true;
+  }
+
+  // Shared logic for 'self' platforms
+  if (is_self && !requires_place_order_permission) return true;
+  if (is_self && requires_place_order_permission && has_permission) return true;
+
+  return false;
+}
+
+
 const findActivityWithPosition = (activity_items, status, position) => {
   const submittedItems = activity_items.filter(item => item.status === status);
   // Return the second item if it exists, otherwise return the first
@@ -3340,6 +3365,6 @@ export {
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
   findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,isValidEmail,
-  containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups
+  containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures
 
 };

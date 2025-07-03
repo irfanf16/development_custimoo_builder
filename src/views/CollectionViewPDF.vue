@@ -80,8 +80,7 @@
                 </div>
                 <div class="pdf_price d-flex justify-content-center" style="border: none" >
                   <template v-if="isAuthenticated">
-                    <template v-if="company.platform !== 'self'  || (company.platform == 'self' && company.id !== 1)
-                                || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+                    <template v-if="canAccessCompanyFeatures()">
                       <button class="btn btn-secondary mx-2" v-if="active_product_index !== idxs"
                               @click="addToCart(collection_product,idxs)">
                         Purchase
@@ -190,7 +189,8 @@ import {
   getDomDocument,
   getPermissions,
   getRandom,
-  getRosterDetailDefaultObject
+  getRosterDetailDefaultObject,
+  canAccessCompanyFeatures
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationPreview from '@/components/CustomizationPreview.vue'
@@ -326,6 +326,10 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
 
   get customerPermissions(){
     return this.$store.getters.getCustomerPermissions
+  }
+
+  public canAccessCompanyFeatures(): boolean {
+    return canAccessCompanyFeatures()
   }
 
   private setRosterOpen(val: boolean) {

@@ -39,7 +39,7 @@
       <div class="d-flex mt-2 flex-column h-100">
         <div class="d-flex align-items-center justify-content-between fs-2 gap-2 font-weight-bold">
             <template v-if="isCustomerAuthenticated">
-              <template v-if="company.platform !== 'self' || (company.platform === 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+              <template v-if="canAccessCompanyFeatures()">
                 <template v-if="$store.getters.getUpdateOrderItemProducts == null">
                   <span v-if="!cartLoading" :disabled="canvasImage.scene == null" @click="addToCart" class="addPlayer no-icon">
                     <span class="fs-2 icon position-absolute" v-if="false"><b-icon-cart-plus /></span> <span class="d-inline-block ml-1">
@@ -122,7 +122,7 @@ import RosterTableMobile from "@/components/mobile/RosterTableMobile.vue";
 import {http} from "@/httpCommon";
 import EditRosterAreaTab from '@/components/EditRosterAreaTab.vue'
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {getRosterDetailDefaultObject, getSelectedProductPantones, getDomDocument, downloadTemplate} from "@/helpers/Helpers";
+import {getRosterDetailDefaultObject, getSelectedProductPantones, getDomDocument, downloadTemplate, canAccessCompanyFeatures} from "@/helpers/Helpers";
 import {cartModalData, RosterDetailsGlobal} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import CustomizationTabsMixin from '../mixins/CustomizationTabsMixin'
@@ -360,6 +360,9 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
 
   public homeScreen(){
     this.$router.push('/')
+  }
+  public canAccessCompanyFeatures(): boolean {
+    return canAccessCompanyFeatures()
   }
 
   private setPlayersDataHeight = (idx: number) => {

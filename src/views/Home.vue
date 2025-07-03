@@ -170,7 +170,7 @@
                         </template>
                       </div>
                     </li>
-                    <li class="position-relative" v-if="isCustomerAuthenticated && ((company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform == 'self' && company.id !== 1)  || company.platform == 'cdnExceptLogin')">
+                    <li class="position-relative" v-if="isCustomerAuthenticated && canAccessCompanyFeatures({for_cart : true})">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>
@@ -258,7 +258,12 @@
                       <template v-if="isCustomerAuthenticated">
                         <template>
                           <template v-if="$store.getters.getUpdateOrderItemProducts == null">
-                            <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+                            <template v-if="canAccessCompanyFeatures({for_cart : false})">
+                              <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
+                                <b-button :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
+                                  <b-icon-cart-plus />
+                                </b-button>
+                              </span>
                             <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`" v-if="canvasImage.scene == null || (is_admin_token && company.platform == 'wordpress')">
                               <b-button :disabled="canvasImage.scene == null" class="btn text-white fs-2 border-0 mr-3 btn-secondary btn-sm" @click="addToCart" style="line-height: normal; padding: 4.5px 5px">
                                 <b-icon-cart-plus />
@@ -501,7 +506,7 @@
             </div>
           </b-col>
           <div class="mobile-reset" v-if="mobileScreen">
-            <template v-if="(isCustomerAuthenticated && ((company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform == 'self' && company.id !== 1)  || company.platform == 'cdnExceptLogin'))">
+            <template v-if="(isCustomerAuthenticated && canAccessCompanyFeatures({for_cart : true}))">
               <b-button @click="openCartModal" variant="secondary" class="p-1 mobile-cart-btn">
                 <span class="cart-count">{{ cartItemsCount }}</span>
                 <b-icon-cart />
@@ -584,7 +589,7 @@ import {
   updateOrder,
   hasCompanyPermission,
   getStyleSelectedAddons, base64ToFile, createFormData, isEcommercePlatform,
-  generateRandomString
+  generateRandomString, canAccessCompanyFeatures
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -1294,6 +1299,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get shuffle_color_number(): number {
     return this.$store.getters.getShuffleColorNumber
+  }
+  public canAccessCompanyFeatures(options: { for_cart?: boolean } = {}): boolean {
+    return canAccessCompanyFeatures(options)
   }
 
   public getUrlParams() {

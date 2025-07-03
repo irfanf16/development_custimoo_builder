@@ -16,7 +16,7 @@
           <img width="20" height="20" src="@assets/images/loading.gif"/>
         </b-button>
 
-        <template v-if="show_cart_button && (company.platform !== 'self' || (company.platform == 'self' && company.id !== 1)  || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')))">
+        <template v-if="show_cart_button && canAccessCompanyFeatures()">
           <span v-b-tooltip="`You cannot add to cart because you are logged in as admin`"
                 v-if="canvasImage.scene == null || (is_admin_token && isEcommerceCompany())">
            <b-button :key="'AddToCart'" aria-label="Add to Cart" v-if="!cartLoading"
@@ -76,7 +76,7 @@
 import {Component, Mixins, Prop, Vue} from 'vue-property-decorator'
 import {cartModalData} from "@/mixins/LockerProduct";
 import {filter} from "lodash";
-import { hasCompanyPermission, isEcommercePlatform} from "@/helpers/Helpers";
+import { hasCompanyPermission, isEcommercePlatform, canAccessCompanyFeatures} from "@/helpers/Helpers";
 
 @Component<AddToCartButton>({
   computed:{
@@ -167,6 +167,10 @@ export default class AddToCartButton extends Mixins(cartModalData) {
 
   public isEcommerceCompany(): boolean {
     return isEcommercePlatform()
+  }
+
+  public canAccessCompanyFeatures(): boolean {
+    return canAccessCompanyFeatures()
   }
 
 

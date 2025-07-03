@@ -35,7 +35,7 @@
 
       <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
         <b-button
-        v-if="((company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order')) || (company.platform == 'self' && company.id !== 1)  || company.platform == 'cdnExceptLogin') && (selectedCollectionProducts.length > 0)"
+        v-if="canAccessCompanyFeatures({ for_cart: true }) && (selectedCollectionProducts.length > 0)"
           variant="secondary"
           @click="handleAddToCart"
           :disabled="$store.getters.getCartLoading">
@@ -71,6 +71,7 @@
 import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import LockerRoom from '@/components/LockerRoom.vue'
 import ModalAction from '@/mixins/ModalAction'
+import { canAccessCompanyFeatures} from "@/helpers/Helpers";
 
 @Component({
   components: {
@@ -168,6 +169,9 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   }
   get customerPermissions() {
     return this.$store.getters.getCustomerPermissions
+  }
+  public canAccessCompanyFeatures(options: { for_cart?: boolean } = {}): boolean {
+    return canAccessCompanyFeatures(options)
   }
 
   // Add after other methods in the LockerRoomModal class

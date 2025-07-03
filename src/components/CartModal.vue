@@ -355,7 +355,7 @@
           <b-button style="margin-right: 15px" class="mt-4" @click="getQuote()">Get Quote</b-button>
         </template>
 
-        <template v-if="company.platform !== 'self' || (company.platform == 'self' && company.id !== 1) || (company.platform == 'self' && company.id === 1 && customerPermissions.includes('place-order'))">
+        <template v-if="canAccessCompanyFeatures()">
           <template v-if="!customerPermissions.includes('skip-moq')">
             <b-button class="mt-4" @click="createOrder(false)" :disabled="(total_product_count < parseInt(moq)) || ((!can_finalize_order) && parseInt(moq) === 0)">Confirm Order</b-button>
           </template>
@@ -376,7 +376,8 @@ import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import {
   checkIsEmpty,
-  getEditModeDefaultObj, handleResponseException, logData, navigateToCustomProduct, santaClone, isEcommercePlatform
+  getEditModeDefaultObj, handleResponseException, logData, navigateToCustomProduct, santaClone, 
+  isEcommercePlatform, canAccessCompanyFeatures
 } from "@/helpers/Helpers";
 import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
@@ -601,6 +602,10 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
 
   get moq(){
     return this.$store.getters.getSetting("moq");
+  }
+
+  public canAccessCompanyFeatures(): boolean {
+    return canAccessCompanyFeatures()
   }
 
   public createOrder(get_quote = {quote:false, 'admin_salesrep_id': null}) {
