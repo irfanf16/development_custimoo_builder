@@ -1,5 +1,5 @@
 <template>
-    <header v-if="requires_order_permission && $route.name != 'CollectionUrl'" id="header" class="shadow py-3 py-lg-0">
+    <header v-if="is_hummel && $route.name != 'CollectionUrl'" id="header" class="shadow py-3 py-lg-0">
         <b-container fluid>
             <b-row class="align-items-center py-4">
                 <b-col cols="6" lg="2">
@@ -28,8 +28,8 @@ export default class Header extends Vue {
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
-  get requires_order_permission(): boolean {
-    return this.$store.getters.getSetting('requires_order_permission');
+  get is_hummel(): boolean {
+    return this.$store.getters.getCompany.id === 1;
   }
 }
 </script>
