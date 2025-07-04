@@ -2904,7 +2904,8 @@ const hasCompanyPermission = (permission) => {
 
   const company = Store.getters.getCompany
   const permissions = {
-    1: ['show_admin_salerep']
+    1: ['show_admin_salerep'],
+    31: ['show_admin_salerep']
   };
 
   if(company && permissions[company.id]) {
