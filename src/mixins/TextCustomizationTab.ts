@@ -12,10 +12,11 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
   public activeFolderIndex = 0
   public product_fonts: Record<any, any>[] = []
   public handle_text_change_timer:any = 0 // this will hold the id returned by the setTimeout()
-    public active_jersey_part: number[] = [];
+  public active_jersey_part: number[] = [];
   public text_accordion:boolean[] = [];
   public selected_font = '';
   public is_font_auto_changed = false;
+  public color_tab_mounted = false;
 
   get getColorType(): string {
     return this.$store.getters.getSetting('color_type');
@@ -122,16 +123,19 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     this.activeFolderIndex = 0;
   }
 
-  public handleTextOutline(custom_text_index:number, custom_text_item_index:number) {
-    const self: Record<any, any> = this;
-    const custom_text_item = this.product_custom_texts[custom_text_index].items[custom_text_item_index]
-    if(custom_text_item.color_tab_index == 1 && custom_text_item.outline_width == 0){
-      custom_text_item.outline_width = 3;
-      self.$eventBus.$emit("customTextUpdated", {
-        emitter: "outline_width", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index,
-        value: self.product_custom_texts[custom_text_index]
-      });
+  public handleTextOutline(custom_text_index:number, custom_text_item_index:number, tab_index = 0) {
+    if(tab_index == 1 && this.color_tab_mounted){
+      const self: Record<any, any> = this;
+      const custom_text_item = this.product_custom_texts[custom_text_index].items[custom_text_item_index]
+      if (custom_text_item.outline_width == 0){
+        custom_text_item.outline_width = 3;
+        self.$eventBus.$emit("customTextUpdated", {
+          emitter: "outline_width", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index,
+          value: self.product_custom_texts[custom_text_index]
+        });
+      }
     }
+    this.color_tab_mounted = true;
   }
 
   public resetCustomTextColorIndex(product_custom_text: Record<any, any>) {

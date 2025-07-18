@@ -170,7 +170,7 @@
                         </template>
                       </div>
                     </li>
-                    <li class="position-relative" v-if="isCustomerAuthenticated && canAccessCompanyFeatures()">
+                    <li class="position-relative" v-if="isCustomerAuthenticated && canAccessCompanyFeatures() && !isEcommercePlatform">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
                       </a>
@@ -506,7 +506,7 @@
             </div>
           </b-col>
           <div class="mobile-reset" v-if="mobileScreen">
-            <template v-if="(isCustomerAuthenticated && canAccessCompanyFeatures())">
+            <template v-if="isCustomerAuthenticated && canAccessCompanyFeatures() && !isEcommercePlatform">
               <b-button @click="openCartModal" variant="secondary" class="p-1 mobile-cart-btn">
                 <span class="cart-count">{{ cartItemsCount }}</span>
                 <b-icon-cart />
@@ -1299,6 +1299,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
   get shuffle_color_number(): number {
     return this.$store.getters.getShuffleColorNumber
+  }
+  get isEcommercePlatform(): boolean {
+    return isEcommercePlatform()
   }
   public canAccessCompanyFeatures(): boolean {
     return canAccessCompanyFeatures()

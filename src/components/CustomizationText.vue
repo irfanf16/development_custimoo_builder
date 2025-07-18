@@ -89,7 +89,7 @@
                   <div v-if="product_custom_text" class="text-color-holder customization-tabs"
                     :class="{'no-outline': product_custom_text_item.outline_width == 0}">
                     <b-tabs content-class="mt-0" class="color-types" v-model="product_custom_text_item.color_tab_index"
-                      @input="handleTextOutline(customTextIndex, productCustomTextItemIndex)">
+                      @input="handleTextOutline(customTextIndex, productCustomTextItemIndex, $event)">
                       <template v-for="(select_color_type, selectColorTypeIndex) in ['Fill Color', 'Outline Color']">
                         <b-tab :key="`select_color_type_${selectColorTypeIndex}`">
                           <template #title>
