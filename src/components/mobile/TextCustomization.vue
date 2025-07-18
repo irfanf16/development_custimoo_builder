@@ -51,7 +51,7 @@
                     {{product_custom_text_item.label}}
                   </template>
 
-                  <b-tabs class="mt-2" v-model="product_custom_text_item.color_tab_index" @input="handleTextOutline(customTextIndex, productCustomTextItemIndex)">
+                  <b-tabs class="mt-2" v-model="product_custom_text_item.color_tab_index">
                     <b-tab @click="setColorType('fill')">
                       <template #title>
                         <div class="d-flex align-items-center gap-1">
@@ -125,7 +125,7 @@
                       </div>
                     </b-tab>
 
-                    <b-tab @click="setColorType('outline')">
+                    <b-tab @click="setColorType('outline')" @activate-tab="handleTextOutline(customTextIndex, productCustomTextItemIndex, 1)">
                       <template #title>
                         <div class="d-flex align-items-center gap-1">
                           <span class="selected-color ml-2 flex-shrink-0" :style="{background: product_custom_text_item.outline_color}"></span>
