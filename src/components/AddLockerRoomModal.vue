@@ -94,7 +94,8 @@
       getImageFromCanvas,
       getLockerColors, getStyleSelectedAddons,
       createFormData,
-      generateRandomString
+      generateRandomString,
+      fireGtagConversion
       // syncGroupColorsWithSvgGroups
     } from '@/helpers/Helpers'
     import { Canvas, log } from 'fabric/fabric-impl'
@@ -524,6 +525,7 @@
         }
       }
       public showSaveToLockerRoomModal() {
+        fireGtagConversion();
         this.showVModal('add-to-lockerroom')
         this.recallProducts();
       }

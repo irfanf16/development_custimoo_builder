@@ -589,7 +589,7 @@ import {
   updateOrder,
   hasCompanyPermission,
   getStyleSelectedAddons, base64ToFile, createFormData, isEcommercePlatform,
-  generateRandomString, canAccessCompanyFeatures
+  generateRandomString, canAccessCompanyFeatures, fireGtagConversion
 } from '@/helpers/Helpers'
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
@@ -2219,6 +2219,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   private async shareDesign(random_string = '') {
+     fireGtagConversion();
     if(this.mobileScreen){
       this.showVModal('shareDesign')
     }
@@ -2245,6 +2246,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public async generatePdf(random_string = '') {
+    fireGtagConversion();
     this.pdf_generation_loading = true;
     this.showToast('Please wait your pdf is being generated', 'success');
     let cart_product: any = await getActiveProductData(this.products_fonts);

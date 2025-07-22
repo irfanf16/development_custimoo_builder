@@ -2482,6 +2482,26 @@ const getPermutation = (n: number, number_of_parts: number) => {
   return result;
 }
 
+const  fireGtagConversion = () =>  {
+  const companySendToMap: Record<number, string> = {
+    123: 'AW-756319592/EJQ0CL_62-saEOiK0ugC'
+  };
+
+  const company = Store.getters.getCompany;
+
+  const sendTo = companySendToMap[company.id];
+
+  if (!sendTo) return; // Not allowed, do nothing
+
+  if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
+    (window as any).gtag('event', 'conversion', {
+      send_to: sendTo,
+    });
+  } else {
+    console.warn(`[gtag] gtag is not available`);
+  }
+}
+
 const downloadTemplate = async (prod_id:any, product_name) => {
   await http.get(`template/download/${prod_id}`,{
     responseType: 'blob',
@@ -3342,7 +3362,7 @@ const containsObject = (array: any[], id: string): boolean => {
 
 
 export {
-  getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
+  fireGtagConversion, getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
   sortTextsArray, fontsColorsManipulation, fontsList, getReminderOptions, handleResponseException, logData, pathInfo, roundOff,
   CustimooOrderFlowStatuses, getActiveProductData, getRosterDetailDefaultObject, activityStatus, urlToBase64,
   getFileExtensionType, getProductLogoSetting, getCompany, getPermissions, getUploadedLogoObject, initCustomLogos,
