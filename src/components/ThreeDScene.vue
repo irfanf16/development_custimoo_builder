@@ -1345,6 +1345,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           })
 
           this.renderScene()
+          this.$store.commit('SET_UPDATING_LOGO', false)
 
         }, {crossOrigin: 'Anonymous'})
       }
@@ -2295,7 +2296,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     const pxScaled = px / this.design.scaleX;
     if (unit === 'cm') {
       return parseFloat((pxScaled / 28.3464567).toFixed(1));
-    } else if (unit === 'inch') {
+    } else if (unit === 'in') {
       return parseFloat((pxScaled / 72).toFixed(1));
     }
     return parseFloat((pxScaled).toFixed(1));

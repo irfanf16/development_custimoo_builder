@@ -101,31 +101,35 @@ import SceneMixin from "@/mixins/SceneMixin";
 @Component<Scene>({
   beforeDestroy() {
     const self: Record<any, any> = this;
-    self.$eventBus.$off("customTextUpdated", this.addTextsNew)
-    if((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
-      self.$eventBus.$off("rosterTextUpdated", this.addTextsNew)
-    }
     if(this.mainPreview) {
       self.$eventBus.$off("storeCanvasImage", this.storeCanvasImage)
     }
     if(this.selectedProductId == this.product_id) {
       self.$eventBus.$off("addAddons", this.addAddons)
     }
-    self.$eventBus.$off("customTextRemoved", this.deleteExistingTextsFromCanvas)
-    self.$eventBus.$off("resetTextsCanvas", this.resetTextsFromCanvas)
-    self.$eventBus.$off("handleCustomLogoUpdatedEvent", this.addLogo)
-    self.$eventBus.$off("customLogoResetAndAdd", this.resetAndAddLogos)
     self.$eventBus.$off("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
-    self.$eventBus.$off("customLogoRemoved", this.deleteExistingLogoFromCanvas)
-    self.$eventBus.$off("resetLogosCanvas", this.resetLogosFromCanvas)
     self.$eventBus.$off("changeDefaultColors", this.changeDefaultColorsEvent)
     self.$eventBus.$off("changeGroupColors", this.changeGroupColorsEvent)
     self.$eventBus.$off("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$off("changeColors", this.changeColors)
-    self.$eventBus.$off("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
-    self.$eventBus.$off("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
     self.$eventBus.$off("applyPattern", this.applyPattern)
     self.$eventBus.$off("applyAllPatterns", this.applyAllPatterns)
+    if (!this.product.is_3d_product) {
+      if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
+        self.$eventBus.$off("rosterTextUpdated", this.addTextsNew)
+      }
+      self.$eventBus.$off("customTextUpdated", this.addTextsNew)
+      self.$eventBus.$off("customTextRemoved", this.deleteExistingTextsFromCanvas)
+      self.$eventBus.$off("resetTextsCanvas", this.resetTextsFromCanvas)
+      self.$eventBus.$off("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
+      self.$eventBus.$off("customLogoRemoved", this.deleteExistingLogoFromCanvas)
+      self.$eventBus.$off("handleCustomLogoUpdatedEvent", this.addLogo)
+      self.$eventBus.$off("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+      self.$eventBus.$off("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
+      self.$eventBus.$off("resetLogosCanvas", this.resetLogosFromCanvas)
+    }
+    
+    
     if (this.front_time) {
       clearTimeout(this.front_time)
     }
@@ -1271,29 +1275,31 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           await this.addAddons(300)
 
           this.addBoundary([ImageData.safe_zone_url, ImageData.boundary_url], side).then(() => {
-            let logos: Record<any, any>[] = []
-            if (this.custom_logos && this.logoAllowed) {
-              let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
-              if (this.logosLimit) {
-                custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
+            if(!this.product.is_3d_product) {
+              let logos: Record<any, any>[] = []
+              if (this.custom_logos && this.logoAllowed) {
+                let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
+                if (this.logosLimit) {
+                  custom_logos = this.custom_logos.slice(0, this.logosLimit) as [Record<any, any>]
+                }
+                logos = logos.concat(custom_logos) as [Record<any, any>]
               }
-              logos = logos.concat(custom_logos) as [Record<any, any>]
-            }
-            if (logos.length) {
-              logos.forEach((logo: Record<any, any>) => {
-                if (logo && logo.url) {
-                  this.addLogo(logo, true)
-                }
-              })
-            }
+              if (logos.length) {
+                logos.forEach((logo: Record<any, any>) => {
+                  if (logo && logo.url) {
+                    this.addLogo(logo, true)
+                  }
+                })
+              }
 
-            if(this.productCustomTexts) {
-              this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
-                if(custom_text.value) {
-                  const text = { value: custom_text, custom_text_index: index }
-                  this.addTextsNew(text, true)
-                }
-              })
+              if(this.productCustomTexts) {
+                this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
+                  if(custom_text.value) {
+                    const text = { value: custom_text, custom_text_index: index }
+                    this.addTextsNew(text, true)
+                  }
+                })
+              }
             }
 
             if (this.mainPreview && this.selectedProductId == this.product_id) {
@@ -1449,31 +1455,34 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
   public listenEvents() {
     const self: Record<any, any> = this;
-    self.$eventBus.$on("customTextUpdated", this.addTextsNew)
-    if((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
-      self.$eventBus.$on("rosterTextUpdated", this.addTextsNew)
-    }
     if(this.mainPreview) {
       self.$eventBus.$on("storeCanvasImage", this.storeCanvasImage)
     }
     if(this.selectedProductId == this.product_id) {
       self.$eventBus.$on("addAddons", this.addAddons)
     }
-    self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
-    self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
-    self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
-    self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+    
     self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
-    self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
-    self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
     self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
     self.$eventBus.$on("changeGroupColors", this.changeGroupColorsEvent)
     self.$eventBus.$on("useProductOriginalColors", this.setInitialColors)
     self.$eventBus.$on("changeColors", this.changeColors)
-    self.$eventBus.$on("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
-    self.$eventBus.$on("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
     self.$eventBus.$on("applyPattern", this.applyPattern)
     self.$eventBus.$on("applyAllPatterns", this.applyAllPatterns)
+    if(!this.product.is_3d_product) {
+      if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
+        self.$eventBus.$on("rosterTextUpdated", this.addTextsNew)
+      }
+      self.$eventBus.$on("customTextUpdated", this.addTextsNew)
+      self.$eventBus.$on("customTextRemoved", this.deleteExistingTextsFromCanvas)
+      self.$eventBus.$on("resetTextsCanvas", this.resetTextsFromCanvas)
+      self.$eventBus.$on("customTextStoreUpdated", this.customTextStoreUpdatedHandler)
+      self.$eventBus.$on("customLogoRemoved", this.deleteExistingLogoFromCanvas)
+      self.$eventBus.$on("handleCustomLogoUpdatedEvent", this.addLogo)
+      self.$eventBus.$on("customLogoResetAndAdd", this.resetAndAddLogos) // some time on edit product is already loaded so load scene is not called then this function called
+      self.$eventBus.$on("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
+      self.$eventBus.$on("resetLogosCanvas", this.resetLogosFromCanvas)
+    }
   }
 
   public customTextStoreUpdatedHandler(indexes: Record<any, any>, from_3d = false) {
