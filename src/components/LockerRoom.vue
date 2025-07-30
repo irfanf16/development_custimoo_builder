@@ -56,6 +56,9 @@
                               <div class="fs-2">
                                 Total products: <strong class="font-weight-bolder">{{product.roster_total_quantity ? product.roster_total_quantity : '0'}}</strong>
                               </div>
+                                <div class="fs-2">
+                                Design ID: <strong class="font-weight-bolder">{{product.design_id ? product.design_id : ''}}</strong>
+                              </div>
                               <label :key="ind" class="w-100 mt-1" :class="product.class ? 'selected': ''"
                                      @click="product.class == undefined ? product.class = false : null; product.class = !product.class">
                                 <div class="image-holder">

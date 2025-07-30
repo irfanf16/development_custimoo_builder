@@ -1668,7 +1668,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
     if (response.data.success) {
       this.$store.dispatch('addToCart', response.data.result.items);
       this.showToast(response.data.message, 'success');
-
       // Handle platform-specific cart updates if needed
       const platform = company.platform;
       if (platform === 'shopify') {
@@ -1762,6 +1761,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       'FRONT IMAGE': custimoo_cart_item.front_image_short,
       'BACK IMAGE': custimoo_cart_item.back_image_short,
       'child_addons' : ecom_addon_ids,
+      'design_id' : (cart_product as Record<any, any>).design_id,
     };
 
     if(is_custimoo_moq ) {
@@ -2110,7 +2110,6 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
           window.location.replace(company.company_domain + '/cart.php');
         }
       }).catch(err => {
-        console.log('error cart', err)
         http.delete(delete_cart_item_url);
         self.showToast(err, 'ERROR');
         self.$store.dispatch('setCartLoading',false);

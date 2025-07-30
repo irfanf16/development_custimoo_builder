@@ -156,6 +156,15 @@
                               </ul>
                             </div>
                           </div>
+                          <div class="feedback-text align-items-start mt-1 gap-1 d-flex"
+                            v-if="order_item.factory_products[activity_item_index].design_id && activity_item.activity_files">
+                            <div><strong class="fs-1 font-weight-bold">Design ID:</strong></div>
+                            <div>
+                               <span class="badge badge-secondary fs-1">
+                                    {{ order_item.factory_products[activity_item_index].design_id }}
+                                  </span>
+                            </div>
+                          </div>
                           <div class="feedback-text align-items-start mt-2 d-flex"
                             v-if="activity_item.skip_customer_approval && activity_item.skip_customer_approval.reason && !(activity_item.skip_customer_approval.reason === null || activity_item.skip_customer_approval.reason === 'null' || activity_item.skip_customer_approval.reason === '')">
                             <div><strong>Skip Reason:</strong></div>

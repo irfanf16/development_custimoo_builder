@@ -16,8 +16,11 @@
         <table class="table table-bordered mb-0" v-if="cartItems" style="min-width: 800px; table-layout: fixed">
           <thead class="bg-light">
           <tr>
-            <th style="width: 30%" class="font-weight-bold">
+            <th style="width: 25%" class="font-weight-bold">
               Product Name
+            </th>
+            <th style="width: 10%" class="font-weight-bold">
+              Design ID
             </th>
             <th style="width: 25%" class="font-weight-bold">
               Design Image
@@ -25,7 +28,7 @@
             <th style="width: 10%" class="font-weight-bold">
               Quantity
             </th>
-            <th style="width: 25%" class="font-weight-bold">
+            <th style="width: 20%" class="font-weight-bold">
               Addons
             </th>
             <th style="width: 10%" class="font-weight-bold">
@@ -52,6 +55,9 @@
                       </template>
                     </a>
                   </template>
+                </td>
+                <td>
+                {{ factory_product.design_id ? factory_product.design_id : '' }}
                 </td>
                 <td>
                   <div class="d-inline-flex gap-1">
