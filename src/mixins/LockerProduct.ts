@@ -30,7 +30,8 @@ import {
   getProductAddonInfoDefaultObject,
   base64ToFile,
   decodeHtmlEntities,
-  isEcommercePlatform
+  isEcommercePlatform,
+  updateLastActiveProductData
 } from '@/helpers/Helpers'
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
@@ -560,6 +561,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         group_colors = {}
       }
       emit_color_change_event = true
+    
+      updateLastActiveProductData({ group_colors: group_colors })
       await this.$store.dispatch('overRideGroupColors', group_colors);
     }
     if (emit_color_change_event) {
