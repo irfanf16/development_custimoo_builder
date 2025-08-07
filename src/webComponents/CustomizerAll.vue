@@ -67,6 +67,10 @@ export default {
       // run time adding css for https://edgewear.ca/customizer as it is not accept any direct css
       ele = getWindowObject().document.getElementById('2c792c98-b7dd-4452-b435-1b48c5ed473b')?.querySelector('[data-ux="Container"]')
     }
+    if(!ele) {
+      // run time adding css for https://belleriverteamworks.godaddysites.com/ as it is not accept any direct css
+      ele = getWindowObject().document.getElementById('527c5fae-6830-4434-a7ec-e635c60a81d0')?.querySelector('[data-ux="Container"]')
+    }
     if(ele) {
       ele.style.width = '100%'
       ele.style.paddingLeft = '0'
