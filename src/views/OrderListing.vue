@@ -84,7 +84,7 @@
                   {{ order.customer_reference_no ? order.customer_reference_no : 'N / A' }}
                 </td>
                 <td>
-                  <a :href="`${storage_url}${order.design_file}`" target="_blank" class="btn btn-dark mx-2 fs-2">PDF</a>
+                  <a @click="openAWSFileFromOrder(order)" class="btn btn-dark mx-2 fs-2">PDF</a>
                   <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2 fs-2">Details</router-link>
                   <template v-for="(item, index) in order.items">
                       <button class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
@@ -315,6 +315,23 @@ export default class OrderListing  extends Mixins(ErrorMessages, ModalAction)  {
     }).catch((e:any) => {
       this.showError(e.response.data.message)
     })
+  }
+
+  public async openAWSFileFromOrder(order){
+    try{
+      let order_id = order.id
+
+      // Fetch the URL from the Laravel API
+      this.showLoader= true;
+      const response = await http.get(`designfile/order/${order_id}`);
+      this.showLoader = false;
+      const url = response.data.result.url;
+      if(url){
+        window.open(`${url}`, '_blank');
+      }
+    } catch (error) {
+      console.error('Error fetching the PDF URL:', error);
+    }
   }
 
   public hideOrderspopup(){

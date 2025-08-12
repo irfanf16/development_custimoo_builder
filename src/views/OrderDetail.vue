@@ -99,7 +99,7 @@
                               }}
                             </span>
                           </div>
-                      
+
                           <div class="feedback-images skipped-block" v-if="activity_item.activity_files"
                             @click="showPreview(activity_item)" style="cursor:pointer;"
                             :class="evaluateClass(activity_item)">
@@ -202,8 +202,8 @@
                             @click="showSampleDesigns(order_item, order_item_index, item_status_activity_index)">Take
                             action</button>
                         </div>
-                      
-                   
+
+
 
 
                         <div class="actions"
@@ -510,7 +510,7 @@
             <strong>Product:</strong> {{ activity_item_info.factory_product.product_name }}
           </b-col>
           <b-col class="col-2">
-            <a :href="`${storage_url}${order.design_file}`" class="btn btn-dark mx-1" v-if="order.design_file">Download
+            <a @click="openAWSFileFromOrder(order)" class="btn btn-dark mx-1" v-if="order.design_file">Download
               Pdf</a>
           </b-col>
           <b-col class="col-2">
@@ -1460,6 +1460,22 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     const now = new Date();
     return now.toISOString().replace(/:/g, '-').split('.')[0];
     // Formats to "YYYY-MM-DDTHH-MM-SS" (compatible for filenames)
+  }
+  async openAWSFileFromOrder(order){
+    try{
+      let order_id = order.id
+
+      // Fetch the URL from the Laravel API
+      this.showLoader= true;
+      const response = await http.get(`designfile/order/${order_id}`);
+      this.showLoader = false;
+      const url = response.data.result.url;
+      if(url){
+        window.open(`${url}`, '_blank');
+      }
+    } catch (error) {
+      console.error('Error fetching the PDF URL:', error);
+    }
   }
 }
 </script>
