@@ -1776,9 +1776,14 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   public async logoutCustomer() {
+    this.$store.commit('SET_DURING_RESET', true);
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
+       const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+      await this.editModeConfirmation(true); 
+      await this.forceResetStore(edit_info_obj);
       await this.$store.dispatch('logoutCustomer');
+     
       this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
       if(this.company.platform != 'self') {
@@ -1791,7 +1796,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
       this.$store.dispatch('setLockerroomColors', [])
     }
+    this.$store.commit('SET_DURING_RESET', false);
+
   }
+
 
   public copyLink() {
     let testingCodeToCopy = this.ref['share-design-link'] as Record<any, any>
@@ -1927,19 +1935,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       this.opacityset = true
     }, 10)
   }
-
-  public async resetStore() {
-    const self: Record<any, any> = this;
-    const confirmed_value = this.editModeConfirmation()
-    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
-    if(edit_info_obj.type == "reorder_product" && confirmed_value) {
-      return false;
-    }
-
-    confirmed_value.then(async (response) => {
-      const ok = await this.ref['reset-changes'].showConfirm()
-      if (ok) {
-        this.$store.commit('SET_DURING_RESET', true)
+  public async forceResetStore(edit_info_obj) {
+     this.$store.commit('RESET_PRODUCT_EDIT_INFO_OBJECT');
+     this.$store.commit('SET_DURING_RESET', true)
         this.search_products = '';
         if(this.$refs['ItemToCustomize']) {
           (this.$refs['ItemToCustomize'] as Record<any, any>).search = '';
@@ -1947,8 +1945,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
         this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
         await this.$store.dispatch('resetStore')
-
-        if(edit_info_obj.type == 'cart_product' || edit_info_obj.type == 'order_product') {
+        if(edit_info_obj.type == 'cart_product' || edit_info_obj.type == 'order_product') {    
           let product_id
           if(edit_info_obj.type == 'order_product') {
             product_id = edit_info_obj.order_product_info.active_product_id
@@ -1965,8 +1962,18 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
           await this.resetActions()
         }
         this.$store.commit('SET_DURING_RESET', false)
-      }
-    })
+  }
+
+  public async resetStore() {
+    const edit_info_obj = this.$store.getters.getProductEditInfoObject;
+    const confirmed_value = await this.editModeConfirmation();
+    if (edit_info_obj.type == "reorder_product" && confirmed_value) {
+      return false;
+    }
+    const ok = await this.ref['reset-changes'].showConfirm();
+    if (ok) {
+      await this.forceResetStore(edit_info_obj);
+    }
   }
 
   public async resetActions() {

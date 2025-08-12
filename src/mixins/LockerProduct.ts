@@ -819,7 +819,16 @@ export class exitEditMode extends Mixins(ErrorMessages) {
     exitFromEditMode()
   }
 
-  public editModeConfirmation() {
+  public editModeConfirmation(skip = false) {
+    if (skip) {
+    const info = this.$store.getters.getProductEditInfoObject;
+    if (info?.editing) {
+      this.showToast('Changes Discarded, Exiting from Editing State', 'error');
+      exitFromEditMode();
+    }
+    this.$store.commit('RESET_UNDO_REDO_ITEMS');
+    return Promise.resolve(false);
+  }
     let self: Record<any, any> = this;
     return new Promise((resolve,reject) => {
       if (self.$store.getters.getProductEditInfoObject.editing) {
