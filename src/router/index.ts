@@ -89,7 +89,7 @@ const routes: Array<RouteConfig> = [
     path:'/share/:product/:name',
     name: 'ShareUrl',
     component: Home,
-    
+
   },
   {
     path:'/thank-you',

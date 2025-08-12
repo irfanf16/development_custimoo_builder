@@ -169,6 +169,7 @@
                         @keydown.tab.stop="addRosterItemOnTab"
                         @input="handleRosterItemUpdate($event, 'quantity', productRosterItemIndex)"
                         placeholder="0" :value="product_roster_item.quantity"
+                        type="number" min="1" step="1"
                       />
                     </div>
                     <div class="remove" v-if="productRosterItemIndex > 0 && active_roster_index != productRosterItemIndex">

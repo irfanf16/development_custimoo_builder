@@ -75,7 +75,6 @@ const routes: Array<RouteConfig> = [
     meta: { layout: 'minimal' }
 
     },
-  
 ]
 
 const router = new VueRouter({

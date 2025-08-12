@@ -161,6 +161,7 @@
               <b-form-input @keydown.tab.stop="addRosterItemOnTab" @focus="handleRosterItemFocus(productRosterItemIndex)"
                             class="text-center" placeholder="0" :value="product_roster_item.quantity"
                             @input="handleRosterUpdate($event, 'quantity', productRosterItemIndex)"
+                            type="number" min="1" step="1"
               />
             </div>
             <div class="remove" v-if="productRoster.length > 1 && active_roster_index != productRosterItemIndex">
