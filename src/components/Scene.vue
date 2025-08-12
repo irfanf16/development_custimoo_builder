@@ -114,7 +114,7 @@ import SceneMixin from "@/mixins/SceneMixin";
     self.$eventBus.$off("changeColors", this.changeColors)
     self.$eventBus.$off("applyPattern", this.applyPattern)
     self.$eventBus.$off("applyAllPatterns", this.applyAllPatterns)
-    if (!this.product.is_3d_product) {
+    if (!this.product?.is_3d_product) {
       if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
         self.$eventBus.$off("rosterTextUpdated", this.addTextsNew)
       }
@@ -1275,7 +1275,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
           await this.addAddons(300)
 
           this.addBoundary([ImageData.safe_zone_url, ImageData.boundary_url], side).then(() => {
-            if(!this.product.is_3d_product) {
+            if(!this.product?.is_3d_product) {
               let logos: Record<any, any>[] = []
               if (this.custom_logos && this.logoAllowed) {
                 let custom_logos = JSON.parse(JSON.stringify(this.custom_logos))
@@ -1469,7 +1469,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     self.$eventBus.$on("changeColors", this.changeColors)
     self.$eventBus.$on("applyPattern", this.applyPattern)
     self.$eventBus.$on("applyAllPatterns", this.applyAllPatterns)
-    if(!this.product.is_3d_product) {
+    if(!this.product?.is_3d_product) {
       if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
         self.$eventBus.$on("rosterTextUpdated", this.addTextsNew)
       }

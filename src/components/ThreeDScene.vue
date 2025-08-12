@@ -19,6 +19,7 @@ import {fabric} from 'fabric'
 import * as THREE from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js"
 import {GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader.js"
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
 import {
@@ -28,11 +29,16 @@ import {
 } from '@/helpers/Helpers'
 import {HideUpdateLockerButton} from '@/mixins/SelectedProductMixin'
 import CustomLogosMixin from '@/mixins/CustomLogosMixin'
-import {Object3D, Texture, Vector2, Vector3} from "three";
+import {Object3D, Texture, Vector3} from "three";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 import SceneMixin from "@/mixins/SceneMixin";
 
 @Component<ThreeDScene>({
   beforeDestroy() {
+    this._isAlive = false;
     const self: Record<any, any> = this;
     self.$eventBus.$off("customTextUpdated", this.addTexts)
     if ((this.mainPreview && this.mobileScreen) || this.fromRosterModal) {
@@ -59,36 +65,40 @@ import SceneMixin from "@/mixins/SceneMixin";
     //restore fabricjs function after remove
     this.removeGetPointerFromFabricPrototype()
 
-    // dispose of all the 3D scene elements
-    const cleanMaterial = material => {
-      material.dispose()
-      // dispose textures
-      for (const key of Object.keys(material)) {
-        const value = material[key]
-        if (value && typeof value === 'object' && 'minFilter' in value) {
-          value.dispose()
-        }
-      }
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
     }
 
-    this.scene.traverse(object => {
-      if (!object.isMesh) return
+    if (this.composer) {
+      this.composer.passes.forEach(pass => pass.dispose && pass.dispose());
+      this.composer = null;
+    }
 
-      object.geometry.dispose()
+    if (this.scene) {
+      this.scene.traverse(obj => {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) {
+            obj.material.forEach(m => m.dispose && m.dispose());
+          } else {
+            obj.material.dispose && obj.material.dispose();
+          }
+        }
+      });
+      this.scene.clear();
+      this.scene = null;
+    }
 
-      if (object.material.isMaterial) {
-        cleanMaterial(object.material)
-      } else {
-        // an array of materials
-        for (const material of object.material) cleanMaterial(material)
-      }
-    })
-
-    this.renderer.dispose()
-    this.scene.clear()
-    this.renderer.forceContextLoss()
+    if (this.renderer) {
+      this.renderer.dispose();
+      this.renderer.forceContextLoss();
+      this.renderer.domElement = null;
+      this.renderer = null;
+    }
   },
   async mounted() {
+    this._isAlive = true;
     const self: Record<any, any> = this;
     self.$eventBus.$off("sceneMountedAction", this.sceneMountedAction)
     self.$eventBus.$on("sceneMountedAction", this.sceneMountedAction)
@@ -165,6 +175,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private initialSvgGroups: any[] = []
   private safe_zone: fabric.Group
   private patterns: Record<any, any> = {}
+  private composer!: EffectComposer;
+  private maxModelSizeValue: number
+  private animationId: number | null = null;
+  private _isAlive = false;
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -586,7 +600,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       this.callChangeColors()
     }
 
-    this.showLoader = false
   }
 
   public containsObject(obj: Record<any, any>): boolean {
@@ -599,63 +612,84 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   }
 
   public loadScene(ImageData: Record<any, any>) {
+    this.showLoader = true; // Show loader
+
+    const manager = new THREE.LoadingManager();
+    manager.onLoad = () => {
+      this.showLoader = false
+    };
+
+    manager.onProgress = (url, loaded, total) => {
+      this.showLoader = true;
+    };
+
+    const textureLoader = new THREE.TextureLoader(manager);
+    const gltfLoader = new GLTFLoader(manager);
+    const hdrLoader = new RGBELoader(manager);
     this.mounted = false
 
     this.container = this.$refs.renderer as HTMLDivElement
 
-    this.camera = new THREE.PerspectiveCamera(20, 1, 1, 10)
+    this.camera = new THREE.PerspectiveCamera(20, 1, 0.25, 10)
     this.camera.position.set(0, 0.5, 11.5);
 
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
-    this.renderer.toneMapping = THREE.NoToneMapping
+    // this.renderer.toneMapping = THREE.NoToneMapping
     this.renderer.setSize(this.containerWidth, this.containerHeight)
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
     // this.camera.updateProjectionMatrix()
     this.container.appendChild(this.renderer.domElement)
+    const hdrPath = `${this.storage_url}super_admin/files/product/env_map/Custom_studio_small.hdr`;
+    hdrLoader.load(hdrPath, (texture) => {
+      texture.mapping = THREE.EquirectangularReflectionMapping;
+      this.scene.environment = texture;
+      this.scene.background = new THREE.Color(0xffffff);
+    });
 
-    this.scene.background = new THREE.Color(0xffffff);
+    // this.scene.background = new THREE.Color(0xffffff);
 
-    const light = new THREE.HemisphereLight(0xffffff, 0x080820, 1.4)
-    this.scene.add(light)
-
-    /*const intensity = 0.7;
-    const directionalLight = new THREE.DirectionalLight(0xffffff, intensity);
-    directionalLight.position.set(0, 20, 50);
+    // const light = new THREE.HemisphereLight(0xffffff, 0x080820, 0.3)
+    // this.scene.add(light)
+    
+    const intensity = 100;
+    const directionalLight = new THREE.RectAreaLight(0xffffff, 6, 10, 10);
+    directionalLight.lookAt( 0, 0, -60 )
+    directionalLight.position.set(10, 0, 6);
     this.scene.add(directionalLight);
 
-    // const helper = new THREE.DirectionalLightHelper( directionalLight, 5 );
-    // this.scene.add( helper );
-
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, intensity);
-    directionalLight2.position.set(0, 20, -50);
+    const directionalLight2 = new THREE.RectAreaLight(0xffffff, 6, 10, 10);
+    directionalLight2.lookAt(0, 0, -60)
+    directionalLight2.position.set(-10, 0, 6);
     this.scene.add(directionalLight2);
 
-    // const helper2 = new THREE.DirectionalLightHelper( directionalLight2, 5 );
-    // this.scene.add( helper2 );
-
-    const directionalLight3 = new THREE.DirectionalLight(0xffffff, intensity);
-    directionalLight3.position.set(-20, 20, 0);
+    const directionalLight3 = new THREE.RectAreaLight(0xffffff, 6, 10, 10);
+    directionalLight3.lookAt(0, 0, 180)
+    directionalLight3.position.set(0, 0, -13.5);
     this.scene.add(directionalLight3);
 
-    // const helper3 = new THREE.DirectionalLightHelper( directionalLight3, 5 );
-    // this.scene.add( helper3 );
-
-    const directionalLight4 = new THREE.DirectionalLight(0xffffff, intensity);
-    directionalLight4.position.set(20, 20, 0);
+    const directionalLight4 = new THREE.RectAreaLight(0xffffff, 11, 20, 20);
+    directionalLight4.lookAt(-45, 0, 180)
+    directionalLight4.position.set(0, 28.75, -21);
     this.scene.add(directionalLight4);
 
-    // const helper4 = new THREE.DirectionalLightHelper( directionalLight4, 5 );
-    // this.scene.add( helper4);
-    */
+    const directionalLight5 = new THREE.RectAreaLight(0xffffff, 11, 20, 20);
+    directionalLight5.lookAt(-45, 0, -180)
+    directionalLight5.position.set(0, 28.75, 21);
+    this.scene.add(directionalLight5);
+
+    // const pointLight = new THREE.PointLight(0xffffff, 1, 300, 2)
+    // pointLight.position.set(0, 0, -5);
+    // this.scene.add(pointLight);
 
     const element = this.$refs.canvas as HTMLCanvasElement
     this.canvas = new fabric.Canvas(element)
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     this.controls.enableDamping = true
-    this.controls.minDistance = -500
     this.controls.maxDistance = 500
+    this.controls.maxPolarAngle = THREE.MathUtils.degToRad(120);
+    this.controls.minPolarAngle = THREE.MathUtils.degToRad(30);
     this.controls.target.set(0, 0, 0)
     this.controls.update()
 
@@ -665,11 +699,9 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     this.texture = new THREE.CanvasTexture(element)
     this.texture.anisotropy = 1;
-
     let promises = []
-    promises.push(this.addModel(ImageData.model_url, ImageData.texture_url) as never)
+    promises.push(this.addModel(ImageData.model_url, ImageData.texture_url, ImageData.roughness_map_url ?? null, ImageData.metalness_map_url ?? null, ImageData.ao_map_url ?? null, ImageData.alpha_map_url ?? null, ImageData.roughness ?? null, ImageData.metalness ?? null, gltfLoader, textureLoader) as never)
     promises.push(this.addDesign(ImageData.design_url + '.' + ImageData.file_extension) as never)
-
     Promise.all(promises).then(async (values) => {
       if(ImageData.safe_zone_url) {
         await this.addSafeZone(ImageData.safe_zone_url)
@@ -739,7 +771,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
         }, 500)
       }
       this.listenEvents()
-      this.showLoader = false
       this.mounted = true
       this.$store.commit('SET_START_LOAD_DESIGNS', true)
       this.$store.commit('SET_START_LOAD_PRODUCTS', true)
@@ -877,9 +908,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.camera.position.set(this.originalCameraPosition.x, this.originalCameraPosition.y, this.originalCameraPosition.z)
   }
 
-  public async addModel(modelUrl: string, designUrl: string) {
+  public async addModel(modelUrl: string, designUrl: string, roughness_map_url: string, metalness_map_url: string, ao_map_url: string, alpha_map_url: string, roughness: number, metalness: number, gltfLoader: GLTFLoader, textureLoader: THREE.TextureLoader) {
     return new Promise((resolve, reject) => {
-      const gltfLoader = new GLTFLoader(undefined)
       gltfLoader.load(this.storage_url + modelUrl, (gltf) => {
         const object = gltf.scene.children[0];
         if (!(object instanceof THREE.Mesh)) {
@@ -887,6 +917,16 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           return;
         }
         this.model = object
+        const box = new THREE.Box3().setFromObject(this.model);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+
+        if (size.y >= size.x) {
+          this.maxModelSizeValue = size.y
+        } else {
+          this.maxModelSizeValue = size.x
+        }
+        this.controls.minDistance = 1.07 * this.maxModelSizeValue
 
         this.fitCameraToCenteredObject(this.camera, this.model, 0, this.controls, this.renderer);
         this.originalCameraPosition = this.camera.position.clone()
@@ -939,20 +979,31 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
         // todo part from task-2988-AL
 
-        // Create the front side material (Phong)
-        const frontMaterial = new THREE.MeshPhongMaterial({map: this.texture});
-        frontMaterial.shininess = 10;
-        frontMaterial.needsUpdate = true;
-        frontMaterial.side = THREE.FrontSide; // Only render the front side
+        // Create the front side material
+        const outerMaterial = new THREE.MeshPhysicalMaterial({
+          map: this.texture,
+          roughness: (roughness_map_url && roughness) ? roughness : 1,
+          metalness: (metalness_map_url && metalness) ? metalness : 0,
+          aoMapIntensity: 0.75,
+          transparent: alpha_map_url ? true : false,
+          side: THREE.FrontSide,
+          // specularIntensity: 0.1,
+          sheen: 2.2,
+          sheenColor: new THREE.Color(0xd1d1d1),
+          sheenRoughness: 0.8,
+          envMapIntensity: 1.5,
+        });
+        outerMaterial.needsUpdate = true;
 
         // Create the back side material (Basic white material)
-        const backMaterial = new THREE.MeshStandardMaterial({color: 0xffffff});
-        backMaterial.side = THREE.BackSide; // Only render the back side
+        const innerMaterial = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          side: THREE.BackSide,
+        });
 
-
-        // First object: the front-facing material (Phong)
+        // First object: the front-facing material
         //@ts-ignore
-        const frontMesh = new THREE.Mesh(this.model.geometry, frontMaterial);
+        const frontMesh = new THREE.Mesh(this.model.geometry, outerMaterial);
         frontMesh.position.copy(this.model.position);
         frontMesh.rotation.copy(this.model.rotation);
         frontMesh.scale.copy(this.model.scale);
@@ -960,7 +1011,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
         // Second object: the back-facing material (Basic white)
         //@ts-ignore
-        const backMesh = new THREE.Mesh(this.model.geometry, backMaterial);
+        const backMesh = new THREE.Mesh(this.model.geometry, innerMaterial);
         backMesh.position.copy(this.model.position);
         backMesh.rotation.copy(this.model.rotation);
         backMesh.scale.copy(this.model.scale);
@@ -969,20 +1020,52 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
         // Ensure materials are updated after rendering
         this.canvas.on("after:render", () => {
-          frontMaterial.needsUpdate = true;
-          if (frontMaterial.map) {
-            frontMaterial.map.needsUpdate = true;
+          outerMaterial.needsUpdate = true;
+          if (outerMaterial.map) {
+            outerMaterial.map.needsUpdate = true;
           }
         });
 
         // Add normal map to the front material
-        const textureLoader = new THREE.TextureLoader();
         const normalMap = textureLoader.load(this.storage_url + designUrl);
-        normalMap.flipY = false;
-        frontMaterial.normalMap = normalMap;
-        backMaterial.normalMap = normalMap;
-        frontMaterial.needsUpdate = true;
 
+        if (roughness_map_url) {
+          const roughnessMap = textureLoader.load(this.storage_url + roughness_map_url);
+          roughnessMap.flipY = false;
+          outerMaterial.roughnessMap = roughnessMap;
+        }
+
+        if (metalness_map_url) {
+          const metalnessMap = textureLoader.load(this.storage_url + metalness_map_url);
+          metalnessMap.flipY = false;
+          metalnessMap.anisotropy = 1;
+          outerMaterial.metalnessMap = metalnessMap;
+        }
+
+        if (ao_map_url) {
+          (this.model as THREE.Object3D).traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              const geometry = child.geometry;
+              if (geometry.attributes.uv && !geometry.attributes.uv2) {
+                geometry.setAttribute('uv2', geometry.attributes.uv.clone());
+              }
+              const aoMap = textureLoader.load(this.storage_url + ao_map_url);
+              aoMap.flipY = false;
+              outerMaterial.aoMap = aoMap;
+            }
+          });
+        }
+
+        if (alpha_map_url) {
+          const alphaMap = textureLoader.load(this.storage_url + alpha_map_url);
+          alphaMap.flipY = false;
+          outerMaterial.alphaMap = alphaMap;
+          // innerMaterial.alphaMap = alphaMap;
+        }
+        normalMap.flipY = false;
+        outerMaterial.normalMap = normalMap;
+        outerMaterial.needsUpdate = true;
+        innerMaterial.needsUpdate = true;
         // todo end
 
         resolve('done')
@@ -1097,39 +1180,122 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     })
   }
 
+  public addShaderPasses(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera = this.camera) {
+    if (!this._isAlive || !this.renderer || !this.scene) return;
+
+    if (!this.composer) {
+      this.composer = new EffectComposer(this.renderer);
+      this.composer.addPass(new RenderPass(this.scene, camera));
+      const fxaaPass = new ShaderPass(FXAAShader);
+
+      const pixelRatio = this.renderer.getPixelRatio();
+      const size = this.renderer.getSize(new THREE.Vector2());
+      fxaaPass.material.uniforms['resolution'].value.x = 1 / (size.x * pixelRatio);
+      fxaaPass.material.uniforms['resolution'].value.y = 1 / (size.y * pixelRatio);
+
+      const BrightnessContrastShader = {
+        uniforms: {
+          'tDiffuse': { value: null },
+          'brightness': { value: 0 },
+          'contrast': { value: 0 },
+          'saturation': { value: 0 }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          precision mediump float;
+
+          uniform sampler2D tDiffuse;
+          uniform float brightness;
+          uniform float contrast;
+          uniform float saturation;
+          varying vec2 vUv;
+
+          vec3 applySaturation(vec3 color, float sat) {
+            float gray = dot(color, vec3(0.2126, 0.7152, 0.0722));
+            return mix(vec3(gray), color, 1.0 + sat);
+          }
+
+          void main() {
+            vec4 color = texture2D(tDiffuse, vUv);
+
+            color.rgb += brightness;
+
+            if (contrast > 0.0) {
+              color.rgb = (color.rgb - 0.5) / (1.0 - contrast) + 0.5;
+            } else {
+              color.rgb = (color.rgb - 0.5) * (1.0 + contrast) + 0.5;
+            }
+
+            color.rgb = applySaturation(color.rgb, saturation);
+
+            gl_FragColor = color;
+          }
+        `
+      };
+      
+      const brightnessContrastPass = new ShaderPass(BrightnessContrastShader);
+      brightnessContrastPass.uniforms['brightness'].value = -0.05;
+      brightnessContrastPass.uniforms['contrast'].value = 0.3;
+      brightnessContrastPass.uniforms['saturation'].value = -0.12;
+      this.composer.addPass(brightnessContrastPass);
+      this.composer.addPass(fxaaPass);
+    }
+  }
+
   public renderScene(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera = this.camera) {
+    this.addShaderPasses(camera)
+    this.composer.render();
     this.renderer.render(this.scene, camera)
   }
 
-  public animate() {
-    requestAnimationFrame(this.animate)
-    this.texture.needsUpdate = true
-    this.controls.update()
-    this.renderScene()
+
+  public animate () {
+    if (!this._isAlive || !this.renderer || !this.scene || !this.composer) return;
+    this.animationId = requestAnimationFrame(this.animate);
+    this.texture.needsUpdate = true;
+    this.controls.update();
+    this.composer.render(); // Reuse existing composer
   }
 
   public frontAnimate() {
-    requestAnimationFrame(this.frontAnimate)
+    if (!this._isAlive || !this.renderer || !this.scene || !this.composer) return;
+    this.animationId = requestAnimationFrame(this.frontAnimate)
     this.texture.needsUpdate = true
     this.controls.update()
     this.renderScene(this.frontCamera)
   }
 
   public backAnimate() {
-    requestAnimationFrame(this.backAnimate)
+    if (!this._isAlive || !this.renderer || !this.scene || !this.composer) return;
+    this.animationId = requestAnimationFrame(this.backAnimate)
     this.texture.needsUpdate = true
     this.controls.update()
     this.renderScene(this.backCamera)
   }
 
+  public delay(ms) {
+    return new Promise(resolve => {
+      setTimeout(resolve, ms)
+    })
+  }
+
   public async addSvgLogos(logo: Record<any, any>, index: string): Promise<boolean> {
+    await this.delay(1000)
     const threeDXPosition = this.canvasWidthRatio * logo.x_axis
     const threeDYPosition = this.canvasHeightRatio * logo.y_axis
     const fabricJSPoint = await this.findPositionOn3D(threeDXPosition, threeDYPosition, logo.side)
     return new Promise((resolve) => {
       let logoUrl = encodeURI((this.storage_url + logo.url).trim()) + '?nocache=11'
-      fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
-        options.crossOrigin = 'Anonymous'
+              fabric.loadSVGFromURL(logoUrl, (objects: any, options: any) => {
+         if(options) {
+          options.crossOrigin = 'Anonymous'
+         }
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
         img.scaleToHeight(logo.height as number / this.canvasHeightRatio)
         
@@ -1958,7 +2124,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
      * Three.js Helper functions
      */
     function getPositionOnScene(evt) {
-      // console.log(evt.clientX, evt.clientY, evt.offsetX, evt.offsetY, 'offset one is good')
       let array = self.getMousePosition(self.container, evt.clientX, evt.clientY, true)
       self.onClickPosition.fromArray(array)
       let intersects = self.getIntersects(self.onClickPosition, self.scene.children, self.camera)

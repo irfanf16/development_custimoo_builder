@@ -381,7 +381,13 @@
                             <template v-if="selectedProduct.is_3d_product">
                               <ThreeDScene :key="'main3dScene'+design.id" ref="mainScene"
                                            :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url,
-                                              texture_url: selectedProduct.productstyles[styleIndex]._3d_texture.file_url,
+                                              texture_url: selectedProduct.productstyles[styleIndex]._3d_texture?.file_url,
+                                              roughness_map_url: selectedProduct.productstyles[styleIndex]._3d_roughness_map?.file_url,
+                                              metalness_map_url: selectedProduct.productstyles[styleIndex]._3d_metalness_map?.file_url,
+                                              roughness: selectedProduct.productstyles[styleIndex].roughness ?? null,
+                                              metalness: selectedProduct.productstyles[styleIndex].metalness ?? null,
+                                              ao_map_url: selectedProduct.productstyles[styleIndex]._3d_ao_map?.file_url,
+                                              alpha_map_url: selectedProduct.productstyles[styleIndex]._3d_alpha_map?.file_url,
                                               safe_zone_url: design.productionsafezone_design? storageUrl+design.productionsafezone_design.file_url : '',
                                               design_url: design.production_design.file_url, file_extension:design.front_design.file_extension}"
                                            :svg_parts="design.svg_parts"
