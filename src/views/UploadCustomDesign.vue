@@ -186,7 +186,7 @@
                       </b-form-select>
                     </div>
                     <div v-if="selected_locker_room_products && selected_locker_room_products.length > 0">
-                      <label>Select locker product</label>
+                      <label>Select product to copy from</label>
                       <div class="d-flex gap-1 align-items-end">
                         <select class="form-control mt-1 custom-select" @change="handleLockerProductChange($event)">
                           <option :value="''">Please Select Locker Product</option>

@@ -49,7 +49,7 @@
                   ></b-form-select>
                 </div>
                 <div v-if="locker_rosters.length > 0">
-                  <label>Select locker product</label>
+                  <label>Select product to copy from</label>
                   <div class="d-flex gap-1 align-items-end">
                     <select class="form-control mt-1 custom-select" @change="handleLockerProductChange" :key="selected_locker_roster">
                       <option :value="null">Please Select Locker Product</option>
