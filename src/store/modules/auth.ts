@@ -25,6 +25,10 @@ const Auth:Module<any, any> = {
         localStorage.setItem(Vue.prototype.$customer_localstorage_key , JSON.stringify(payload.user))
         state.customer = payload.user
       }
+      if(payload && payload.refresh_token) {
+        localStorage.setItem(Vue.prototype.$refreshToken_localstorage_key, payload.refresh_token)
+      }
+
       state.jwtToken = payload.access_token
     },
     REMOVE_CUSTOMER(state:any){
@@ -76,7 +80,7 @@ const Auth:Module<any, any> = {
     async getCustomerFromToken({commit}, token:string){
       let customer = null
       customer = await http.get('customer/from/token', {params: {token:token}}).then((res) => {
-        return res.data.customer
+        return res.data
       }).catch(err =>{
         if (err.response.status == 404){
           return false

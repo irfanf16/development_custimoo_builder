@@ -690,10 +690,10 @@ const getActiveProductData = (products_fonts: Record<any, any>) => {
           side: string;
           is_customizable: boolean;
           placement_title: string;
-        }> = [] 
+        }> = []
         Object.entries(three_d_scene.fixed_logo_objects).forEach(([key, fixed_logo_object]: [string, fabric.Object]) => {
-          fixed_logos.push({ 
-            scaleX: fixed_logo_object.scaleX, scaleY: fixed_logo_object.scaleY, 
+          fixed_logos.push({
+            scaleX: fixed_logo_object.scaleX, scaleY: fixed_logo_object.scaleY,
             left: fixed_logo_object.left, top: fixed_logo_object.top,
             angle: fixed_logo_object.angle,
             url: fixed_logo_object['url'], side: fixed_logo_object['side'],
@@ -1634,7 +1634,8 @@ const authenticateUser = async (token: string, only_authenticate= false) => {
   if (customer){
     const payload = {
       access_token: token,
-      user: customer
+      refresh_token: customer.refresh_token,
+      user: customer.customer
     }
     Store.commit('SET_CUSTOMER', payload)
     if(!localStorage.getItem(Vue.prototype.$browserToken_localstorage_key)){
@@ -1767,7 +1768,8 @@ const fetchCustomer = async (jwtToken:string) => {
     if (customer){
       const payload = {
         access_token: jwtToken,
-        user: customer
+        user: customer.customer,
+        refresh_token: customer.refresh_token,
       }
       await Store.commit('SET_CUSTOMER', payload)
     }
@@ -2427,7 +2429,7 @@ const isShowProductPrice = () => {
 
 const initiateLocalStorageKeys = async ():Promise<void> => {
   const localstorage_keys = ['customer','jwtToken','adminToken','browserToken','actionBeforeLogin','logoDisclaimerInfo',
-    'animPlayed','logo_modal_status'];
+    'animPlayed','logo_modal_status', 'refreshToken'];
   localstorage_keys.forEach(key => {
     Vue.prototype['$' + key + '_localstorage_key'] = key;
   });
