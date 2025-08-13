@@ -84,7 +84,8 @@
                   {{ order.customer_reference_no ? order.customer_reference_no : 'N / A' }}
                 </td>
                 <td>
-                  <a @click="openAWSFileFromOrder(order)" class="btn btn-dark mx-2 fs-2">PDF</a>
+
+                  <a v-if="order.additional_fields && !order.additional_fields.hasOwnProperty('is_manual_order')" @click="openAWSFileFromOrder(order)" class="btn btn-dark mx-2 fs-2">PDF</a>
                   <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2 fs-2">Details</router-link>
                   <template v-for="(item, index) in order.items">
                       <button class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"

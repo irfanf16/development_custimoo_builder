@@ -510,7 +510,10 @@
             <strong>Product:</strong> {{ activity_item_info.factory_product.product_name }}
           </b-col>
           <b-col class="col-2">
-            <a @click="openAWSFileFromOrder(order)" class="btn btn-dark mx-1" v-if="order.design_file">Download
+
+            <a @click="openAWSFileFromOrder(order)" class="btn btn-dark mx-1" v-if="order.design_file &&
+                    order?.additional_fields &&
+                    !order?.additional_fields.hasOwnProperty('is_manual_order')">Download
               Pdf</a>
           </b-col>
           <b-col class="col-2">
