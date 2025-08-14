@@ -3,11 +3,11 @@
     <div class="row" style="margin-bottom: 60px">
       <div class="col-md-2" style="">
         <img src="../assets/images/custimoo_black_vertical.png" style="width: 200px; height: 30px" alt="Company Logo"
-             class="logo mt-5">
+          class="logo mt-5">
       </div>
     </div>
     <div class="row">
-      <div class="col-md-6">
+      <!-- <div class="col-md-6">
         <div class="col-lg-12 mx-auto">
           <div class="p-5">
             <div>
@@ -45,32 +45,40 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card">
+      </div> -->
+      <div class="col-md-6 col-12 mx-auto">
+        <div class="card" v-if="!paymentSuccess">
           <div>
             <div style="text-align: left">
               <p class="">Here's the deal:</p>
-              <h2 v-if="plan_term.price" class="font-weight-bold text-dark" style="font-size: 32px">
-                {{ plan_term.price }} {{ plan_term.currency }} /
-                <span style="text-transform: capitalize;">{{ plan_term.interval_type }}</span>
+              <h2 v-if="subscription_detail?.amount" class="font-weight-bold text-dark" style="font-size: 32px">
+                {{ subscription_detail.amount }} {{ subscription_detail.currency.toUpperCase() }}
+                <span style="text-transform: capitalize;">{{ subscription_detail.billing_period }}</span>
               </h2>
             </div>
             <hr class="border-gray-300 my-4 lg:my-6 xl:my-8">
             <div class="d-flex justify-content-between">
               <p style="font-size: 18px; color: gray;" class="text-gray-500">
-                {{ plan_term_text }}
+                {{ subscription_detail?.plan_name }}
               </p>
-              <p style="font-size: 18px; color: gray;" class="text-gray-500">{{ calculated_price }}{{ plan_term.currency }}</p>
+              <p style="font-size: 18px; color: gray;" class="text-gray-500 uppercase">
+                {{ subscription_detail?.amount }} {{ subscription_detail?.currency.toUpperCase() }}
+              </p>
             </div>
             <div class="mt-4">
-              <button v-if="subscription_status" :disabled="showLoader"  @click="subscribePayment"
-                      style="font-size: 22px"
-                      class="d-inline-flex justify-content-center align-items-center border rounded py-2 px-4 border-dark bg-dark text-white w-100">
-                <span>Subscribe <img style="width: 20px; height: 20px" v-if="showLoader" src="@assets/images/loading.gif" /></span>
+              <button v-if="subscription_detail?.id" :disabled="showLoader" @click="subscribePayment"
+                style="font-size: 22px"
+                class="d-inline-flex justify-content-center align-items-center border rounded py-2 px-4 border-dark bg-dark text-white w-100">
+                <span>Subscribe <img style="width: 20px; height: 20px" v-if="showLoader"
+                    src="@assets/images/loading.gif" /></span>
               </button>
-              <p v-if="discount_days > 0" class="mt-4" style="font-size: 20px; color: black;">
-                {{ discount_text }}
+              <p v-if="subscription_detail?.discount" class="mt-4" style="font-size: 20px; color: black;">
+                {{ subscription_detail?.discount }}{{ subscription_detail.coupon_type === 'percentage' ?
+                  '%' : subscription_detail.currency.toUpperCase() }} discount
+              </p>
+              <p v-if="subscription_detail?.trial_days" class="mt-1" style="font-size: 20px; color: black;">
+                Trial valid for: {{ `${subscription_detail?.trial_days > 1 ? subscription_detail?.trial_days + ' days' :
+                  subscription_detail?.trial_days + ' day'}` }}
               </p>
               <p class="text-gray-400 text-sm mb-2 antialiased mt-4 text-center">
                 By confirming your subscription, you allow Custimoo ApS to charge
@@ -80,169 +88,206 @@
             </div>
           </div>
         </div>
+
+        <div v-else class="text-center bg-success-light p-5">
+          <h2 class="text-success h2 ">Payment Successful!</h2>
+          <p class="mt-3">Thank you. You will be redirected shortly.</p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <script lang="ts">
-import {Component, Mixins, Vue, Watch} from 'vue-property-decorator'
-import {http} from "@/httpCommon";
+import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
+import { SubscriptionDetails, SubscriptionRequest } from "@/models/SubscriptionDetails";
+import { Component, Mixins, Vue, Watch } from 'vue-property-decorator';
 
 @Component<Payment>({
   components: {},
   async mounted() {
+    
+    this.showLoader = true;
+    const hash = window.location.hash;
+    const queryIndex = hash.indexOf('?');
+
+    if (queryIndex !== -1) {
+      const rawQuery = decodeURIComponent(hash.substring(queryIndex + 1));
+
+      let paymentStatus = '';
+      let sessionId = '';
+
+      if (rawQuery.includes('payment_status=success&session_id=')) {
+        const match = rawQuery.match(/payment_status=success&session_id=(.+)/);
+        if (match) {
+          paymentStatus = 'success';
+          sessionId = match[1];
+        }
+      } else if (rawQuery.includes('payment_status=cancelled')) {
+        paymentStatus = 'cancelled';
+      }
+
+      if (paymentStatus === 'success' && sessionId) {
+        this.sessionId = sessionId;
+        this.paymentSuccess = true;
+
+        setTimeout(() => {
+          this.$router.push({ name: 'home' });
+        }, 3000);
+        return;
+      }
+
+      if (paymentStatus === 'cancelled') {
+        this.showToast("Payment was cancelled.", "warning");
+      }
+    }
     this.getPaymentData();
   }
 
 })
 export default class Payment extends Mixins(ErrorMessages) {
 
-  public card_number = ''
-  public expiry_date = ''
-  public cvv = ''
-  public cardholder_name = ''
-  public isValidCardNumber = true
-  public isValidExpiryDate = true
-  public isValidCVV = true
-  public isValidCardholderName = true
-  public formSubmitted = false
+  // public card_number = ''
+  // public expiry_date = ''
+  // public cvv = ''
+  // public cardholder_name = ''
+  // public isValidCardNumber = true
+  // public isValidExpiryDate = true
+  // public isValidCVV = true
+  // public isValidCardholderName = true
+  // public formSubmitted = false
 
-  public subscription_status = false
-  public discount_days = 0
-  public plan_term_text = ''
-  public calculated_price = ''
-  public discount_text = ''
-  public plan_term: Record<any, any> = {}
+  // public subscription_status = false
+  // public discount_days = 0
+  // public plan_term_text = ''
+  // public calculated_price = ''
+  // public discount_text = ''
+  // public plan_term: Record<any, any> = {}
+  public paymentSuccess = false;
+  public sessionId: string | null = null;
+
+  public subscription_detail: SubscriptionDetails | null = null;
   public showLoader = false
+  // @Watch('card_number')
+  // onCardNumberChange(newValue: string, oldValue: string) {
+  //   this.validateCardNumber();
+  // }
 
-  @Watch('card_number')
-  onCardNumberChange(newValue: string, oldValue: string) {
-    this.validateCardNumber();
-  }
+  // @Watch('expiry_date')
+  // onExpiryDateChange(newValue: string, oldValue: string) {
+  //   this.validateExpiryDate();
+  // }
 
-  @Watch('expiry_date')
-  onExpiryDateChange(newValue: string, oldValue: string) {
-    this.validateExpiryDate();
-  }
+  // public formatCardNumber(event) {
+  //   let formattedValue = event.target.value.replace(/[^\d]/g, '');
+  //   formattedValue = formattedValue.replace(/(\d{4})/g, '$1 ').trim();
+  //   this.card_number = formattedValue;
+  // }
 
-  public formatCardNumber(event) {
-    let formattedValue = event.target.value.replace(/[^\d]/g, '');
-    formattedValue = formattedValue.replace(/(\d{4})/g, '$1 ').trim();
-    this.card_number = formattedValue;
-  }
+  // public formatExpiry(event) {
+  //   let formattedValue = event.target.value.replace(/[^\d]/g, '');
+  //   if (formattedValue.length > 2) {
+  //     formattedValue = formattedValue.slice(0, 2) + '/' + formattedValue.slice(2);
+  //   }
+  //   this.expiry_date = formattedValue;
+  // }
 
-  public formatExpiry(event) {
-    let formattedValue = event.target.value.replace(/[^\d]/g, '');
-    if (formattedValue.length > 2) {
-      formattedValue = formattedValue.slice(0, 2) + '/' + formattedValue.slice(2);
-    }
-    this.expiry_date = formattedValue;
-  }
+  // public validateCardNumber() {
+  //   const pattern = /^\d{4}\s\d{4}\s\d{4}\s\d{4}$/;
+  //   this.isValidCardNumber = pattern.test(this.card_number);
+  // }
 
-  public validateCardNumber() {
-    const pattern = /^\d{4}\s\d{4}\s\d{4}\s\d{4}$/;
-    this.isValidCardNumber = pattern.test(this.card_number);
-  }
+  // public validateExpiryDate() {
+  //   if (!this.expiry_date) {
+  //     this.isValidExpiryDate = false;
+  //     return;
+  //   }
 
-  public validateExpiryDate() {
-    if (!this.expiry_date) {
-      this.isValidExpiryDate = false;
-      return;
-    }
+  //   const [month, year] = this.expiry_date.split('/').map(Number);
 
-    const [month, year] = this.expiry_date.split('/').map(Number);
+  //   const currentDate = new Date();
+  //   const currentYear = currentDate.getFullYear() % 100;
+  //   const currentMonth = currentDate.getMonth() + 1;
 
-    const currentDate = new Date();
-    const currentYear = currentDate.getFullYear() % 100;
-    const currentMonth = currentDate.getMonth() + 1;
+  //   this.isValidExpiryDate = year >= currentYear && year <= 99 && month >= 1 && month <= 12;
 
-    this.isValidExpiryDate = year >= currentYear && year <= 99 && month >= 1 && month <= 12;
+  //   if (year === currentYear) {
+  //     this.isValidExpiryDate = this.isValidExpiryDate && month >= currentMonth;
+  //   }
+  // }
 
-    if (year === currentYear) {
-      this.isValidExpiryDate = this.isValidExpiryDate && month >= currentMonth;
-    }
-  }
+  // validateCVV() {
+  //   const pattern = /^\d{3,4}$/;
+  //   this.isValidCVV = pattern.test(this.cvv);
+  // }
 
-  validateCVV() {
-    const pattern = /^\d{3,4}$/;
-    this.isValidCVV = pattern.test(this.cvv);
-  }
-
-  validateCardholderName() {
-    const pattern = /^[a-zA-Z ]+$/;
-    this.isValidCardholderName = pattern.test(this.cardholder_name);
-  }
+  // validateCardholderName() {
+  //   const pattern = /^[a-zA-Z ]+$/;
+  //   this.isValidCardholderName = pattern.test(this.cardholder_name);
+  // }
 
   public async getPaymentData() {
-    const res = await http.get('payment/company-subscriptions').then((successResponse) => {
+    this.showLoader = true;
+    await http.get<{ result: { company_subscription_detail: SubscriptionDetails; customer_id?: string; } }>('get-subscription-details').then((successResponse) => {
       let response_data = successResponse.data;
-      if (response_data.status) {
-        this.subscription_status = response_data.status
-        this.discount_days = response_data.discount_days
-        this.plan_term_text = response_data.plan_term_text
-        this.calculated_price = response_data.calculated_price
-        this.discount_text = response_data.discount_text
-        this.plan_term = response_data.plan_term
+      if (response_data.result.company_subscription_detail) {
+        this.subscription_detail = response_data.result.company_subscription_detail;
       }
-
     }).catch((errorResponse) => {
       this.showToast(errorResponse, 'error')
+    }).finally(() => {
+      this.showLoader = false;
     })
   }
 
   async subscribePayment() {
-   this.formSubmitted = true;
-    if (
-      this.card_number &&
-      this.expiry_date &&
-      this.cvv &&
-      this.cardholder_name &&
-      this.isValidCardNumber &&
-      this.isValidExpiryDate &&
-      this.isValidCVV &&
-      this.isValidCardholderName
-    ){
+    //  this.formSubmitted = true;
+    //   if (
+    //     this.card_number &&
+    //     this.expiry_date &&
+    //     this.cvv &&
+    //     this.cardholder_name &&
+    //     this.isValidCardNumber &&
+    //     this.isValidExpiryDate &&
+    //     this.isValidCVV &&
+    //     this.isValidCardholderName
+    //   ){
 
-      const form_data = {
-        card_number: this.card_number.replace(/\s/g, ''), // Remove spaces from card number
-        card_expiry_month: parseInt(this.expiry_date.split('/')[0]),
-        card_expiry_year: parseInt(this.expiry_date.split('/')[1]),
-        cvv: this.cvv,
-        cardholder_name: this.cardholder_name
-      };
+    //     const form_data = {
+    //       card_number: this.card_number.replace(/\s/g, ''), // Remove spaces from card number
+    //       card_expiry_month: parseInt(this.expiry_date.split('/')[0]),
+    //       card_expiry_year: parseInt(this.expiry_date.split('/')[1]),
+    //       cvv: this.cvv,
+    //       cardholder_name: this.cardholder_name
+    //     };
 
-      this.showLoader = true;
-      const res = await http.post('payment/create-subscriptions', form_data).then((response) => {
-        this.showLoader = false;
-        if(response.data.status) {
-          this.showToast(response.data.message, 'success')
-          setTimeout(function (){
-            window.location.href = '/';
-          },1000)
-
-        } else {
-          this.showToast(response.data.message, 'error')
-        }
-
-      }).catch((errorResponse) => {
-        this.showLoader = false;
-        this.showToast(errorResponse, 'error')
-      })
+    this.showLoader = true;
+    let page_url = '#/payment';
+    let payload: SubscriptionRequest = {
+      cancel_url: `${page_url}?payment_status=cancelled`,
+      success_url: `${page_url}?payment_status=success`,
+      coupon_id: this.subscription_detail?.stripe_coupon_id ?? null,
+      price_id: this.subscription_detail!.price_id,
+      trial_days: this.subscription_detail!.trial_days ?? null
     }
+    await http.post('create-subscription', payload).then((response) => {
+      if (response.data) {
+        window.location.href = response.data.result.company_subscription_detail.url;
+      }
+    }).catch((errorResponse) => {
+      this.showLoader = false;
+      this.showToast(errorResponse, 'error')
+    })
+    // }
     //else {
-     // this.showToast('Card validation error', 'error')
-   // }
+    // this.showToast('Card validation error', 'error')
+    // }
     return;
-
-
-
   }
 }
 </script>
 
 <style scoped>
-
 .invalid-input {
   border: 1px solid red !important;
 }
@@ -261,7 +306,8 @@ export default class Payment extends Mixins(ErrorMessages) {
 
 .logo {
   display: block;
-  margin: 20px auto; /* Add margin around the logo */
+  margin: 20px auto;
+  /* Add margin around the logo */
 }
 
 .card {
@@ -281,13 +327,16 @@ export default class Payment extends Mixins(ErrorMessages) {
 }
 
 .card-text {
-  text-align: left; /* Align card text to the left */
+  text-align: left;
+  /* Align card text to the left */
 }
 
 .btn-subscribe {
   display: block;
-  margin: 0 auto; /* Center the button */
+  margin: 0 auto;
+  /* Center the button */
 }
+
 .input-with-image {
   position: relative;
 }
@@ -295,10 +344,12 @@ export default class Payment extends Mixins(ErrorMessages) {
 .input-with-image input {
   border: 1px solid #ccc;
   border-radius: 4px;
-  padding: 8px 30px 8px 10px; /* Adjust padding to accommodate the image */
+  padding: 8px 30px 8px 10px;
+  /* Adjust padding to accommodate the image */
   width: 100%;
   box-sizing: border-box;
-  outline: none; /* Remove default input focus outline */
+  outline: none;
+  /* Remove default input focus outline */
 }
 
 .input-with-image img {
@@ -306,7 +357,7 @@ export default class Payment extends Mixins(ErrorMessages) {
   top: 50%;
   right: 10px;
   transform: translateY(-50%);
-  height: 20px; /* Adjust height as needed */
+  height: 20px;
+  /* Adjust height as needed */
 }
-
 </style>
