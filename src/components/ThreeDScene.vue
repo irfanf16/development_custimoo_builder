@@ -34,6 +34,8 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+import { TAARenderPass } from 'three/examples/jsm/postprocessing/TAARenderPass.js';
 import SceneMixin from "@/mixins/SceneMixin";
 
 @Component<ThreeDScene>({
@@ -96,6 +98,7 @@ import SceneMixin from "@/mixins/SceneMixin";
       this.renderer.domElement = null;
       this.renderer = null;
     }
+    window.removeEventListener('resize', this.handleResize);
   },
   async mounted() {
     this._isAlive = true;
@@ -103,6 +106,7 @@ import SceneMixin from "@/mixins/SceneMixin";
     self.$eventBus.$off("sceneMountedAction", this.sceneMountedAction)
     self.$eventBus.$on("sceneMountedAction", this.sceneMountedAction)
     this.sceneMountedAction()
+    window.addEventListener('resize', this.handleResize);
   }
 })
 
@@ -157,7 +161,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private camera !: THREE.PerspectiveCamera
   private frontCamera !: THREE.OrthographicCamera
   private backCamera !: THREE.OrthographicCamera
-  private renderer = new THREE.WebGLRenderer({'alpha': false, 'antialias': true})
+  private renderer = new THREE.WebGLRenderer({'alpha': false, 'antialias': false, 'logarithmicDepthBuffer': true})
   private container!: HTMLDivElement
   private controls!: OrbitControls
   private raycaster = new THREE.Raycaster()
@@ -179,6 +183,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private maxModelSizeValue: number
   private animationId: number | null = null;
   private _isAlive = false;
+  private smaaPass = new SMAAPass(window.innerWidth, window.innerHeight);
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -1186,12 +1191,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     if (!this.composer) {
       this.composer = new EffectComposer(this.renderer);
       this.composer.addPass(new RenderPass(this.scene, camera));
-      const fxaaPass = new ShaderPass(FXAAShader);
 
       const pixelRatio = this.renderer.getPixelRatio();
       const size = this.renderer.getSize(new THREE.Vector2());
-      fxaaPass.material.uniforms['resolution'].value.x = 1 / (size.x * pixelRatio);
-      fxaaPass.material.uniforms['resolution'].value.y = 1 / (size.y * pixelRatio);
+      this.smaaPass = new SMAAPass(size.x * pixelRatio, size.y * pixelRatio);
 
       const BrightnessContrastShader = {
         uniforms: {
@@ -1238,15 +1241,27 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           }
         `
       };
-      
+
       const brightnessContrastPass = new ShaderPass(BrightnessContrastShader);
       brightnessContrastPass.uniforms['brightness'].value = -0.05;
       brightnessContrastPass.uniforms['contrast'].value = 0.3;
       brightnessContrastPass.uniforms['saturation'].value = -0.12;
       this.composer.addPass(brightnessContrastPass);
-      this.composer.addPass(fxaaPass);
+      this.composer.addPass(this.smaaPass);
     }
   }
+
+  public handleResize() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.composer.setSize(width, height);
+    this.smaaPass.setSize(width, height);
+  }
+
 
   public renderScene(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera = this.camera) {
     this.addShaderPasses(camera)
