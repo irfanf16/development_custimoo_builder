@@ -245,11 +245,11 @@
 </template>
 
 <script lang="ts">
-  import {Vue, Component, Mixins, Prop } from 'vue-property-decorator'
-  import ErrorMessages from "@/mixins/ErrorMessages";
-  import {getPermissions, hasCompanyPermission} from "@/helpers/Helpers";
-  import {http} from "@/httpCommon";
-  import ModalAction from "@/mixins/ModalAction";
+  import { getPermissions, hasCompanyPermission } from "@/helpers/Helpers";
+import { http } from "@/httpCommon";
+import ErrorMessages from "@/mixins/ErrorMessages";
+import ModalAction from "@/mixins/ModalAction";
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator';
 
   @Component<LoginForm>({
     mounted(){
@@ -345,6 +345,10 @@
     public async signUp(){
       try {
         let payload : Record<any, any> = this.form;
+        if(payload.password.trim() !== payload.password_confirmation.trim()){
+            this.showToast('Passwords must match.', 'error')
+            return;
+        }
         if(this.isAdminSaleRep()) {
           if(this.admin_salesrep_option.id) {
             payload.admin_salesrep_id = this.admin_salesrep_option.id;

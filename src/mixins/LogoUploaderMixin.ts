@@ -87,25 +87,31 @@ export class LogoUploaderMixin extends Mixins(CustomLogosMixin) {
   }
 
   public async handleInputOnDrag(e: any, replaceLogo: boolean, customLogo?:Record<any, any>, customLogoIndex?:number) {
-    // this.logo_file have file then it means user have accepted logo disclaimer so now simply upload file to server
-    this.preventDragDefaults(e);
-    if(this.logo_file) {
-      this.uploadLogo(this.logo_file, replaceLogo, customLogo, customLogoIndex)
-      return false
-    } else {
-      const target = e.target as HTMLInputElement
-      const logo_file = e.dataTransfer.files[0]
-      if(await this.validateLogoFile(logo_file, replaceLogo)) {
-        if(this.showLogoDisclaimer()) {
-          e.preventDefault()
-          // if logo disclaimer is shown then save uploaded file to public property (logo_file). When user accept the disclaimer then upload file to server
-          this.logo_file = e.dataTransfer.files[0]
-        } else {
-          this.uploadLogo(logo_file, replaceLogo, customLogo, customLogoIndex)
-        }
+    const self: Record<any, any> = this;
+    if(e.dataTransfer.files.length > 0){
+      this.preventDragDefaults(e);
+      if(this.logo_file) {
+        this.uploadLogo(this.logo_file, replaceLogo, customLogo, customLogoIndex)
+        return false
       } else {
-        target.value = '';
+        const target = e.target as HTMLInputElement
+        const logo_file = e.dataTransfer.files[0]
+        if(await this.validateLogoFile(logo_file, replaceLogo)) {
+          if(this.showLogoDisclaimer()) {
+            e.preventDefault()
+            // if logo disclaimer is shown then save uploaded file to public property (logo_file). When user accept the disclaimer then upload file to server
+            this.logo_file = e.dataTransfer.files[0]
+          } else {
+            this.uploadLogo(logo_file, replaceLogo, customLogo, customLogoIndex)
+          }
+        } else {
+          target.value = '';
+        }
       }
+    }
+    else{
+      self.showToast(`The file must be a file of type: ${this.logo_allowed_extensions.join(', ')}.`,'error');
+
     }
   }
 

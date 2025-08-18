@@ -3,7 +3,7 @@
     <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     <slither-slider ref="slider" @changed="loadMoreProduct" v-if="products.length" :options="{numberOfSlides: number_of_slides, adaptiveHeight: false, loop: false, dots: false, gap: 10}" :class="{'one-product' : products.length === 1, 'two-product': products.length === 2, 'three-product': products.length === 3, 'four-product': products.length > 3}" class="select-item-slider p-3 p-lg-0">
       <template v-for="(product, index) in products">
-        <a :title="product.display_name" ref="products" v-b-tooltip v-on:click="productDesigns(index)" :class="{'selected_item': selectedItemIndex == index}"
+        <a @mouseenter="showTooltip" @mouseleave="hideTooltip" :data-title="product.display_name" ref="products" v-on:click="productDesigns(index)" :class="{'selected_item': selectedItemIndex == index}"
            :key="product.product_id" v-if="product.productstyles[0] && Object.prototype.hasOwnProperty.call(product.productstyles[0],'productdesigns')">
           <template v-for="design in product.productstyles[0].productdesigns.filter(product_design => product_design.is_default)">
             <div class="image-holder" :key="'front'+design.id">
@@ -26,16 +26,17 @@
         </a>
       </template>
     </slither-slider>
+      <span class="hover_tooltip" ref="hoover_tooltip"></span>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
+import Scene from '@/components/Scene.vue';
+import { http } from "@/httpCommon";
+import { changeSelectedProduct, exitEditMode, handleMainProducts } from "@/mixins/LockerProduct";
+import { FetchCategories, HideUpdateLockerButton } from "@/mixins/SelectedProductMixin";
 import SlitherSlider from 'slither-slider';
-import Scene from '@/components/Scene.vue'
-import {http} from "@/httpCommon";
-import {handleMainProducts, exitEditMode, changeSelectedProduct} from "@/mixins/LockerProduct";
-import {FetchCategories, HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
+import { Component, Mixins, Prop, Vue } from 'vue-property-decorator';
 
 Vue.use(SlitherSlider)
 
@@ -130,6 +131,22 @@ export default class SelectItemCarousel extends Mixins(handleMainProducts, exitE
       }
     }
     this.setSliderIndex(product_slide_no)
+  }
+  private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>;
+    element.style.opacity = '1'
+    element.style.zIndex = '100'
+    element.style.left = ($event.clientX + (10 + leftOffset)) + 'px'
+    element.style.top = ($event.clientY + (topOffset)) + 'px'
+    element.innerHTML = $event.target.getAttribute('data-title')
+  }
+
+  private hideTooltip() {
+    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>
+    element.style.opacity = '0'
+    element.style.left = '0'
+    element.style.top = '0'
+    element.style.zIndex = '-10'
   }
 
 }

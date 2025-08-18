@@ -155,24 +155,24 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-  import Search from '@/components/Search.vue'
-  import SelectItemCarousel from '../components/SelectItemCarousel.vue'
-  import DesignAvailable from '../components/DesignAvailable.vue'
-  import ItemsGrid from "@/components/ItemsGrid.vue";
-  import { dragscroll } from 'vue-dragscroll'
+import ItemsGrid from "@/components/ItemsGrid.vue";
+import Search from '@/components/Search.vue';
 import {
-  resetLastActiveProductData,
   handleResponseException,
+  isEcommercePlatform,
   navigateToCustomProduct,
-  isEcommercePlatform
-} from '@/helpers/Helpers'
-import {ProductsQueryParamsMixin, exitEditMode, handleMainProducts} from "@/mixins/LockerProduct";
+  resetLastActiveProductData
+} from '@/helpers/Helpers';
+import { ProductsQueryParamsMixin, exitEditMode, handleMainProducts } from "@/mixins/LockerProduct";
+import { dragscroll } from 'vue-dragscroll';
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator';
+import DesignAvailable from '../components/DesignAvailable.vue';
+import SelectItemCarousel from '../components/SelectItemCarousel.vue';
 
 
-import { FetchCategories } from '@/mixins/SelectedProductMixin'
-import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
+import { LogoUploaderColors } from "@/mixins/LogoUploaderColors";
+import { FetchCategories } from '@/mixins/SelectedProductMixin';
 
 @Component<ItemToCustomize>({
   components: {
@@ -633,6 +633,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     }
 
     .activeBrand{
+      border-bottom: 2px solid #219F84;
       &:after{
         content: "";
         display: block;

@@ -1,18 +1,18 @@
-import Store from '../store'
+import { getClosestColor } from "@/pantoneColor";
+import { AxiosError } from "axios";
+import { default as $ } from "jquery";
 import rgbHex from "rgb-hex";
-import {getClosestColor} from "@/pantoneColor";
-import {default as $} from "jquery";
-import {AxiosError} from "axios";
 import Vue from "vue";
+import Store from '../store';
 // @ts-ignore
+import { eventBus } from "@/event/eventBus";
+import { http } from "@/httpCommon";
+import { loadState, saveState } from "@/indexedDBPersistence";
 import VsToast from '@vuesimple/vs-toast';
-import {http} from "@/httpCommon";
-import {find, findIndex, parseInt} from "lodash";
-import {eventBus} from "@/event/eventBus"
+import { fabric } from "fabric";
+import { find, findIndex, parseInt } from "lodash";
 import LZString from 'lz-string';
-import Router from '../router/index'
-import {fabric} from "fabric";
-import {loadState, saveState} from "@/indexedDBPersistence";
+import Router from '../router/index';
 
 const getLogoSettingsObject = (default_values = {}) => {
   const default_obj =  { id: null, product_id: null, product_style_id: null, following_product_ids: null, rotation: 0,
@@ -314,7 +314,7 @@ const CustimooOrderFlowStatuses : Record<any, any> = {
   quote_requested: 'Quote Requested',
   quote_rejected: 'Quote Rejected',
   quote_provided: 'Quote Provided',
-  pending_for_factory_assignment: 'Submitted for Factory Review',
+  pending_for_factory_assignment: 'Pending for Factory Assignment',
   submitted_for_factory_review: 'Submitted for Factory Review',
   order_approve: 'Marked to Factory',
   order_cancel: 'Cancelled',
@@ -3387,3 +3387,4 @@ export {
   containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures
 
 };
+

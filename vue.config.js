@@ -1,48 +1,40 @@
 const path = require("path");
 
 module.exports = {
-  publicPath: '/',
+  publicPath: "/",
   pluginOptions: {
     i18n: {
-      locale: 'en',
-      fallbackLocale: 'en',
-      localeDir: 'locales',
-      enableInSFC: true
-    }
+      locale: "en",
+      fallbackLocale: "en",
+      localeDir: "locales",
+      enableInSFC: true,
+    },
   },
   lintOnSave: false,
   configureWebpack: {
     output: {
-      filename: 'js/[name].[hash].js',
-      chunkFilename: 'js/[name].[hash].js',
+      filename: "js/[name].[hash].js",
+      chunkFilename: "js/[name].[hash].js",
     },
     resolve: {
-      extensions: ['*', '.js', '.vue', '.json'],
+      extensions: ["*", ".js", ".vue", ".json"],
       alias: {
-        '@assets': path.resolve(__dirname, 'src/assets'),
-
-      }
-    }
+        "@assets": path.resolve(__dirname, "src/assets"),
+      },
+    },
   },
-  chainWebpack: config => {
+  devServer: {
+    watchOptions: {
+      poll: true,
+      ignored: /node_modules/,
+    },
+  },
+  chainWebpack: (config) => {
     config.module
-      .rule('vue')
-      .use('vue-loader')
-      .tap(options => {
-        // modify the options...
-
-
-
-
-
-
-
-
-
-
-        return options
-      })
-    config.output.chunkFilename('[name].[hash].js')
-    config.resolve.alias.set('@assets', path.resolve(__dirname, 'src/assets'));
-  }
-}
+      .rule("vue")
+      .use("vue-loader")
+      .tap((options) => options);
+    config.output.chunkFilename("[name].[hash].js");
+    config.resolve.alias.set("@assets", path.resolve(__dirname, "src/assets"));
+  },
+};

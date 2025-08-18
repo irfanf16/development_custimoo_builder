@@ -377,18 +377,20 @@
 
 <script lang="ts">
 
-import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
+import {
+  canAccessCompanyFeatures,
+  checkIsEmpty,
+  getEditModeDefaultObj, handleResponseException,
+  hasCompanyPermission,
+  isEcommercePlatform,
+  logData, navigateToCustomProduct, santaClone
+} from "@/helpers/Helpers";
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {
-  checkIsEmpty,
-  getEditModeDefaultObj, handleResponseException, logData, navigateToCustomProduct, santaClone, 
-  isEcommercePlatform, canAccessCompanyFeatures
-} from "@/helpers/Helpers";
-import {LockerProducts, handleMainProducts, exitEditMode, ProductsQueryParamsMixin} from "@/mixins/LockerProduct";
+import { exitEditMode, handleMainProducts, LockerProducts, ProductsQueryParamsMixin } from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
-import { FetchCategories } from '@/mixins/SelectedProductMixin'
-import { hasCompanyPermission} from "@/helpers/Helpers";
+import { FetchCategories } from '@/mixins/SelectedProductMixin';
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator';
 @Component<CartModal>({
   methods: {logData},
   filters: {
@@ -657,8 +659,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
     http.post('order', payload).then((res: Record<any, any>) => {
       if (res.data.success) {
         this.$store.dispatch('addToCart', [])
-        this.showToast(res.data.message, 'success');
-        this.showToast('Your pdf is generating', 'success');
+        this.showToast(res.data.message ? `${res.data.message} and pdf is generating` : 'Your pdf is generating', 'success');
         this.viewLoader = false;
         // this.hideVModal('cart-modal')
         if(get_quote.quote) {

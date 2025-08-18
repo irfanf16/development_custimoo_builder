@@ -1,4 +1,4 @@
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue } from 'vue-property-decorator';
 // @ts-ignore
 import VsToast from '@vuesimple/vs-toast';
 
