@@ -21,6 +21,7 @@ const Deactive = ()=> import("@/views/Deactive.vue")
 const UploadCustomDesign = () => import("@/views/UploadCustomDesign.vue")
 const Payment = ()=> import("@/views/Payment.vue")
 const PrivacyPolicy = ()=> import('@/views/PrivacyPolicy.vue')
+const DirectAccessSampleApproval = () => import('@/views/DirectAccessSampleApproval.vue')
 
 
 
@@ -73,6 +74,12 @@ const routes: Array<RouteConfig> = [
     path: '/third-party-feedback/:order_item_id',
     name: 'ThirdParty',
     component: ThirdParty,
+    meta: { layout: 'minimal' }
+  },
+     {
+    path: '/sample-approval/:order_item_id',
+    name: 'DirectAccessSampleApproval',
+    component: DirectAccessSampleApproval,
     meta: { layout: 'minimal' }
   },
   {

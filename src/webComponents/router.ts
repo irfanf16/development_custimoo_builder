@@ -12,6 +12,7 @@ const OrderListing = ()=> import("@/views/OrderListing.vue")
 const OrderDetail = ()=> import('../views/OrderDetail.vue')
 const PrivacyPolicy = ()=> import('@/views/PrivacyPolicy.vue')
 const ThirdParty = ()=> import('../views/ThirdPartyFeedback.vue')
+const DirectAccessSampleApproval = () => import('@/views/DirectAccessSampleApproval.vue')
 
 Vue.use(VueRouter)
 
@@ -72,6 +73,13 @@ const routes: Array<RouteConfig> = [
     path: '/third-party-feedback/:order_item_id',
     name: 'ThirdParty',
     component: ThirdParty,
+    meta: { layout: 'minimal' }
+
+    },
+    {
+    path: '/sample-approval/:order_item_id',
+    name: 'DirectAccessSampleApproval',
+    component: DirectAccessSampleApproval,
     meta: { layout: 'minimal' }
 
     },
