@@ -94,10 +94,11 @@
       getImageFromCanvas,
       getLockerColors, getStyleSelectedAddons,
       createFormData,
-      generateRandomString,
-      fireGtagConversion
+      generateRandomString, 
       // syncGroupColorsWithSvgGroups
     } from '@/helpers/Helpers'
+    import { fireGtagConversion } from '@/helpers/analytics-events';
+
     import { Canvas, log } from 'fabric/fabric-impl'
     import {lowerCase} from "lodash";
     import Store from "@/store";

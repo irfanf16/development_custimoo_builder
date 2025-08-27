@@ -595,8 +595,10 @@ import {
   updateOrder,
   hasCompanyPermission,
   getStyleSelectedAddons, base64ToFile, createFormData, isEcommercePlatform,
-  generateRandomString, canAccessCompanyFeatures, fireGtagConversion
+  generateRandomString, canAccessCompanyFeatures
 } from '@/helpers/Helpers'
+import { fireGtagConversion, GTAGEVENTS, trackEvent } from '@/helpers/analytics-events';
+
 import ModalAction from "@/mixins/ModalAction";
 import { Popper } from 'popper-vue'
 import 'popper-vue/dist/popper-vue.css'
@@ -2233,6 +2235,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   private async shareDesign(random_string = '') {
      fireGtagConversion();
+     trackEvent(GTAGEVENTS.SHARE_DESIGN);
     if(this.mobileScreen){
       this.showVModal('shareDesign')
     }
@@ -2260,6 +2263,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public async generatePdf(random_string = '') {
     fireGtagConversion();
+    trackEvent(GTAGEVENTS.DOWNLOAD_PDF);
     this.pdf_generation_loading = true;
     this.showToast('Please wait your pdf is being generated', 'success');
     let cart_product: any = await getActiveProductData(this.products_fonts);

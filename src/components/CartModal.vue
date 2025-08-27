@@ -385,6 +385,7 @@ import {
   isEcommercePlatform,
   logData, navigateToCustomProduct, santaClone
 } from "@/helpers/Helpers";
+import { GTAGEVENTS, trackEvent } from '@/helpers/analytics-events';
 import { http } from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import { exitEditMode, handleMainProducts, LockerProducts, ProductsQueryParamsMixin } from "@/mixins/LockerProduct";
@@ -617,6 +618,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
 
   public createOrder(get_quote = {quote:false, 'admin_salesrep_id': null}) {
+    trackEvent(GTAGEVENTS.CONFIRM_ORDER);
     if(!this.customerPermissions.includes('skip-moq')) {
       if (this.total_product_count < parseInt(this.moq)) {
         this.showToast(`${this.$t('minimum_order_moq_message',

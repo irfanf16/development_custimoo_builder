@@ -33,6 +33,7 @@ import {
   isEcommercePlatform,
   updateLastActiveProductData
 } from '@/helpers/Helpers'
+import { GTAGEVENTS, trackEvent } from '@/helpers/analytics-events';
 import {http} from "@/httpCommon";
 import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
@@ -1301,6 +1302,7 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
 
   public async addToCartMixin(product_fonts: Record<any, any>[], resolve:any = null,
                               get_quote = {quote:false, 'admin_salesrep_id': null}) {
+    trackEvent(GTAGEVENTS.ADD_TO_CART);
     const customerPermissions = this.$store.getters.getCustomerPermissions;
     if(!customerPermissions.includes('skip-moq')) {
       if (!this.checkMinimumOrderQtyBYDesign(
