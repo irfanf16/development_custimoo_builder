@@ -98,7 +98,6 @@ import SceneMixin from "@/mixins/SceneMixin";
       this.renderer.domElement = null;
       this.renderer = null;
     }
-    window.removeEventListener('resize', this.handleResize);
   },
   async mounted() {
     this._isAlive = true;
@@ -106,7 +105,6 @@ import SceneMixin from "@/mixins/SceneMixin";
     self.$eventBus.$off("sceneMountedAction", this.sceneMountedAction)
     self.$eventBus.$on("sceneMountedAction", this.sceneMountedAction)
     this.sceneMountedAction()
-    window.addEventListener('resize', this.handleResize);
   }
 })
 
@@ -1249,17 +1247,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       this.composer.addPass(brightnessContrastPass);
       this.composer.addPass(this.smaaPass);
     }
-  }
-
-  public handleResize() {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-
-    this.renderer.setSize(width, height);
-    this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
-    this.composer.setSize(width, height);
-    this.smaaPass.setSize(width, height);
   }
 
 
