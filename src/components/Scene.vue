@@ -1064,6 +1064,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]
     design.forEach((item: Record<any, any>) => {
       if(item.id) {
+        item.set('id', item.id.split('_')[0])
         item.id = item.id?.toLowerCase()
         if (!item.id.includes('noncustomizable') && !item.id.includes('inside') && !item.id.includes('anchor') && !this.containsObject({id: item.id})) {
           let count = 1
