@@ -1267,17 +1267,17 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     this.showMarkerActionButtons()
   }
   public approveRejectDesigns(action: string) {
+    let imageEdit = false;
 
-    let imageEdit = false
     if (this.markerActive) {
-      imageEdit = true
+      imageEdit = true;
       $(".modal-header").next(".d-flex").children("div:not(.fs-5)").each(function () {
         $(this).find(".__markerjs2_toolbar-block:eq(2) .__markerjs2_toolbar_button_colors:eq(0)").trigger("click")
-      })
+      });
     }
 
-    this.markerActive = false
-    setTimeout(() => {
+    this.markerActive = false;
+    setTimeout(async () => {
       let activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
       let show_message = false;
       if (action == 'reject') {
@@ -1288,31 +1288,76 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
       }
 
       if (!show_message) {
-        this.renderMarkerJsImages().then(marker_js_base64_images => {
-          marker_js_base64_images.forEach((marker_js_base64_image_item, marker_js_base64_image_index) => {
-            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files[marker_js_base64_image_index].file = marker_js_base64_image_item
-            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files[marker_js_base64_image_index].file_type = 'encode'
-          })
-          this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].action = action;
-          if (action === "reject") {
-            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].status = this.CUSTOMERREJECTED;
-          } else {
-            this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].status = this.CUSTOMERAPPROVED;
-          }
-          this.navigateActivitySlider('next')
-        })
+        const { results, marker_js_images } = await this.renderMarkerJsImages();
+        results.forEach((img, idx) => {
+          activityObj.files[idx].file = img;
+          activityObj.files[idx].file_type = marker_js_images[idx].edited ? 'encode' : null;
+        });
+        activityObj.action = action;
+        activityObj.status = (action === "reject") ? this.CUSTOMERREJECTED : this.CUSTOMERAPPROVED;
+        this.navigateActivitySlider('next');
       }
-    }, 1000)
-
+    }, 1000);
   }
 
-  public renderMarkerJsImages() {
-    let marker_js_render_events: any[] = [];
-    this.design_approval_activity_item_data[this.design_approval_activity_navigation_index].files.forEach(marker_js_item => {
-      marker_js_render_events.push(marker_js_item.marker_ref.render())
-      delete marker_js_item.marker_ref
-    })
-    return Promise.all(marker_js_render_events)
+  public async renderMarkerJsImages() {
+      let marker_js_render_events: any[] = [];
+      let marker_js_images: any[] = [];
+      const activityObj = this.design_approval_activity_item_data[this.design_approval_activity_navigation_index];
+
+      for (let i = 0; i < activityObj.files.length; i++) {
+          const marker_ref = activityObj.files[i].marker_ref;
+
+          if (marker_ref) {
+              const hasModifications = this.checkMarkerModifications(marker_ref);
+
+              if (hasModifications) {
+                  marker_js_render_events.push(
+                      marker_ref.render().then((dataUrl: string) => {
+                          marker_js_images.push({ index: i, edited: true });
+                          return dataUrl;
+                      })
+                  );
+              } else {
+                  marker_js_render_events.push(Promise.resolve(activityObj.files[i].file));
+                  marker_js_images.push({ index: i, edited: false });
+              }
+          } else {
+              marker_js_render_events.push(Promise.resolve(activityObj.files[i].file));
+              marker_js_images.push({ index: i, edited: false });
+          }
+
+          // Clean up marker reference
+          delete activityObj.files[i].marker_ref;
+      }
+
+      const results = await Promise.all(marker_js_render_events);
+      return { results, marker_js_images };
+  }
+
+  private checkMarkerModifications(marker_ref: any): boolean {
+      if (marker_ref.getState && typeof marker_ref.getState === 'function') {
+          const state = marker_ref.getState();
+          return state && state.markers && state.markers.length > 0;
+      }
+
+      //Check if marker has been modified (if such property exists)
+      if (marker_ref.isModified !== undefined) {
+          return marker_ref.isModified;
+      }
+
+      //Check if marker has any child elements/annotations
+      if (marker_ref.markers && Array.isArray(marker_ref.markers)) {
+          return marker_ref.markers.length > 0;
+      }
+
+      //Check if there are any drawing/annotation elements
+      if (marker_ref.getAllMarkers && typeof marker_ref.getAllMarkers === 'function') {
+          const allMarkers = marker_ref.getAllMarkers();
+          return allMarkers && allMarkers.length > 0;
+      }
+
+      return false;
   }
 
   updateOrderProducts(order_item: Record<any, any>, order_item_status_activity: number) {
