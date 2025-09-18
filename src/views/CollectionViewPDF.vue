@@ -620,7 +620,7 @@ async saveToLockerRoom(collection,product) {
       product_locker_room
     } = product;
 
-    const{ id, room_id, product_name, design_id, style_id, product_id , custom_logos, text, colors, defaultcolors, groupcolors, locker_product_images_folder, product_attribute, room, product_roster_detail, sort_order } = product_locker_room;
+    const{ id, room_id, product_name, design_id, style_id, product_id , custom_logos, text, colors, defaultcolors, groupcolors, locker_product_images_folder, product_attribute, room, product_roster_detail } = product_locker_room;
     const attribute = JSON.parse(product_attribute);
 
     let modified_product:Record<any, any> = {
@@ -640,15 +640,17 @@ async saveToLockerRoom(collection,product) {
       front_image: `${locker_product_images_folder}/front.png`,
       back_image: `${locker_product_images_folder}/back.png`,
       product_roster_detail: product_roster_detail,
-      svg_groups: [],
-      sort_order: sort_order
+      svg_groups: room.folders,
+      svg_parts: [],
+      shuffle_color_number: 1
     }
     if(attribute && Object.prototype.hasOwnProperty.call(attribute, "fixed_logo_index")) {
       modified_product.fixed_logo_index = attribute.fixed_logo_index
     }
 
-    if (attribute && Object.prototype.hasOwnProperty.call(attribute, "svg_groups")) {
-      modified_product.svg_groups = attribute.svg_groups
+    if (attribute && Object.prototype.hasOwnProperty.call(attribute, "svg_parts")) {
+      modified_product.svg_parts = attribute.svg_parts
+      modified_product.shuffle_color_number = attribute.shuffle_color_number
     }
 
     this.locker_room_product = {...modified_product, collection:collection}

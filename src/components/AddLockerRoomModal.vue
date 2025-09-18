@@ -280,6 +280,7 @@
           this.locker_room_action.created = false;
           this.locker_room_action.saved = false;
           this.hideVModal('add-to-lockerroom');
+          this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
 
         }).catch(errorResponse => {
           this.showLoader = false
@@ -298,19 +299,21 @@
           logo_colors = custom_logos.logo_colors
         }
         let distinct:Record<any, any> = []
-        let unique:any = [];
-        for( let i = 0; i < svg_groups.length; i++ ) {
-          if( !unique[svg_groups[i].color]){
-            distinct.push({value: svg_groups[i].color, name: svg_groups[i].name});
+        let unique: any = [];
+        for (let i = 0; i < svg_groups.length; i++) {
+          if (!unique[svg_groups[i].color]) {
+            distinct.push({ value: svg_groups[i].color, name: svg_groups[i].name });
             unique[svg_groups[i].color] = 1;
           }
         }
         const scene_ref = Store.getters.getCanvasImage.scene
+        let shuffle_color_number = this.shuffle_color_number
         let svg_parts = []
         if (scene_ref) {
           svg_parts = scene_ref.part
         } else {
           svg_parts = locker_room_product.svg_parts ? locker_room_product.svg_parts : []
+          shuffle_color_number = locker_room_product.shuffle_color_number
         }
         let locker_data: Record<any, any> = {
           roster_url: this.rosterUrl,
@@ -323,7 +326,7 @@
           custom_logos: custom_logos ? custom_logos : [],
           text: product_custom_texts,
           colors: logo_colors,
-          shuffle_color_number: this.shuffle_color_number,
+          shuffle_color_number: shuffle_color_number,
           defaultcolors: defaultcolors,
           groupcolors: groupcolors,
           locker_front_png: front_image,
