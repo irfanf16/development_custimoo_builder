@@ -178,6 +178,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private safe_zone: fabric.Group
   private patterns: Record<any, any> = {}
   private composer!: EffectComposer;
+  private renderPass!: RenderPass;
   private maxModelSizeValue: number
   private animationId: number | null = null;
   private _isAlive = false;
@@ -1188,7 +1189,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     if (!this.composer) {
       this.composer = new EffectComposer(this.renderer);
-      this.composer.addPass(new RenderPass(this.scene, camera));
+      this.renderPass = new RenderPass(this.scene, camera);
+      this.composer.addPass(this.renderPass);
 
       const pixelRatio = this.renderer.getPixelRatio();
       const size = this.renderer.getSize(new THREE.Vector2());
@@ -1246,6 +1248,11 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       brightnessContrastPass.uniforms['saturation'].value = -0.12;
       this.composer.addPass(brightnessContrastPass);
       this.composer.addPass(this.smaaPass);
+    } else {
+      // Ensure the RenderPass uses the active camera when switching views
+      if (this.renderPass && this.renderPass.camera !== camera) {
+        this.renderPass.camera = camera;
+      }
     }
   }
 
@@ -1253,7 +1260,6 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   public renderScene(camera: THREE.OrthographicCamera | THREE.PerspectiveCamera = this.camera) {
     this.addShaderPasses(camera)
     this.composer.render();
-    this.renderer.render(this.scene, camera)
   }
 
 
@@ -1262,23 +1268,36 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     this.animationId = requestAnimationFrame(this.animate);
     this.texture.needsUpdate = true;
     this.controls.update();
+    // Ensure default perspective camera is used in the main loop
+    if (this.renderPass && this.renderPass.camera !== this.camera) {
+      this.renderPass.camera = this.camera;
+    }
     this.composer.render(); // Reuse existing composer
   }
 
-  public frontAnimate() {
+  // Render a single frame with the front camera (no animation loop)
+  public renderFrontOnce() {
     if (!this._isAlive || !this.renderer || !this.scene || !this.composer) return;
-    this.animationId = requestAnimationFrame(this.frontAnimate)
-    this.texture.needsUpdate = true
-    this.controls.update()
     this.renderScene(this.frontCamera)
   }
 
-  public backAnimate() {
+  // Render a single frame with the back camera (no animation loop)
+  public renderBackOnce() {
     if (!this._isAlive || !this.renderer || !this.scene || !this.composer) return;
-    this.animationId = requestAnimationFrame(this.backAnimate)
-    this.texture.needsUpdate = true
-    this.controls.update()
     this.renderScene(this.backCamera)
+  }
+
+  // Cancel any camera-specific loops and resume the default 3D camera loop
+  public resumeDefaultAnimation() {
+    if (!this._isAlive || !this.renderer || !this.scene || !this.composer) return;
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId)
+      this.animationId = null
+    }
+    if (this.renderPass && this.renderPass.camera !== this.camera) {
+      this.renderPass.camera = this.camera
+    }
+    this.animate()
   }
 
   public delay(ms) {

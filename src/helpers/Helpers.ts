@@ -1868,14 +1868,12 @@ const getImageFromCanvas = (side: string, options={}, scene=null) => {
     const three_d_scene = scene? scene : Store.getters.getCanvasImage.scene
     three_d_scene.canvas.discardActiveObject().renderAll()
     if(side == 'back') {
-      three_d_scene.backAnimate()
+      three_d_scene.renderBackOnce()
     } else {
-      three_d_scene.frontAnimate()
+      three_d_scene.renderFrontOnce()
     }
     const base64_image = three_d_scene.renderer.domElement.toDataURL(canvas_options.image_type)
-    setTimeout(() => {
-      three_d_scene.animate()
-    })
+    three_d_scene.resumeDefaultAnimation()
     return base64_image;
   }
   //@ts-ignore
