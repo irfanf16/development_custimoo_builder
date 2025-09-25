@@ -888,8 +888,8 @@ const activityStatus = {
       "    <p><strong class='font-weight-bold'>Note:</strong> Any changes or comments before test print approval may delay production. Production starts after test print approval.</p>\n" +
       "    \n" +
       "    <ul class=\"square-list\">\n" +
-      "        <li><strong class='font-weight-bold'>Sublimation Production Time:</strong> ~2 weeks</li>\n" +
-      "        <li><strong class='font-weight-bold'>Tackle Twill Production Time:</strong> 4-5 weeks</li>\n" +
+      "        <li><strong class='font-weight-bold'>Sublimation Production Time:</strong> 3–4 weeks (including shipping)</li>\n" +
+      "        <li><strong class='font-weight-bold'>Tackle Twill Production Time:</strong> 7–8 weeks (including shipping)</li>\n" +
       "    </ul>.",
   },
   customer_approved: {
@@ -909,8 +909,8 @@ const activityStatus = {
     message: "<p>The factory has started manufacturing your products. <strong class='font-weight-bold'>Important:</strong> No further changes can be made at this stage.</p>\n" +
       "    \n" +
       "    <ul class=\"square-list\">\n" +
-      "        <li><strong class='font-weight-bold'>Sublimation Production Time:</strong> ~2 weeks</li>\n" +
-      "        <li><strong class='font-weight-bold'>Tackle Twill Production Time:</strong> 4-5 weeks</li>\n" +
+      "        <li><strong class='font-weight-bold'>Sublimation Production Time:</strong> 3–4 weeks (including shipping)</li>\n" +
+      "        <li><strong class='font-weight-bold'>Tackle Twill Production Time:</strong> 7–8 weeks (including shipping)</li>\n" +
       "    </ul>",
   },
   shipped: {
