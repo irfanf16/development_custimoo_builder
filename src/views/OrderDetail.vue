@@ -78,7 +78,13 @@
                       <div class="activity-text p-2 fs-2 text-muted">
                         {{ activityStatus[item_status_activity.status].message }}
                       </div>
-
+                        <div v-if="item_status_activity.status == QUALITYCONTROL" >
+                            <span class="badge" :class="{
+                              'badge-success': item_status_activity.activity_items[0].quality_control.qa_status == 'Approved',
+                              'badge-danger': item_status_activity.activity_items[0].quality_control.qa_status == 'Rejected',
+                              'badge-warning': item_status_activity.activity_items[0].quality_control.qa_status == 'Pending',
+                            }">{{ item_status_activity.activity_items[0].quality_control.qa_status }}</span>
+                          </div>  
                     </template>
                     <div class="images-grid p-2 d-flex gap-1 w-100">
                       <div class="d-flex align-items-stretch flex-wrap gap-1">
@@ -131,16 +137,16 @@
                             </template>
                           </div>
                               <div
-  v-if="activity_item.third_party_approval_obj && activity_item.third_party_approval_obj.approval_status === 'rejected' && activity_item.third_party_approval_obj.feedback"
-  class="feedback-ui-enhanced mt-2">
-  <div class="feedback-title">
-    <span class="text-danger mr-2 font-weight-bold" > Rejection Feedback</span>
+                            v-if="activity_item.third_party_approval_obj && activity_item.third_party_approval_obj.approval_status === 'rejected' && activity_item.third_party_approval_obj.feedback"
+                            class="feedback-ui-enhanced mt-2">
+                            <div class="feedback-title">
+                              <span class="text-danger mr-2 font-weight-bold" > Rejection Feedback</span>
 
-  </div>
-  <div class="feedback-body">
-    {{ activity_item.third_party_approval_obj.feedback }}
-  </div>
-</div>
+                            </div>
+                            <div class="feedback-body">
+                              {{ activity_item.third_party_approval_obj.feedback }}
+                            </div>
+                          </div>
                           <div class="feedback-text align-items-start mt-1 gap-1 d-flex"
                             v-if="order_item.factory_products[activity_item_index].addons && order_item.factory_products[activity_item_index].addons.length > 0">
                             <div><strong class="fs-1 font-weight-bold">Addons:</strong></div>
@@ -177,7 +183,8 @@
                           <div class="feedback-text"
                             v-if="(item_status_activity.status == ORDERSHIPPED && activity_item_index == 0 && order_item.tracking_no)"
                             :key="`afd-${activity_item_index}`">The shipping no is <strong style="font-weight:bold"><a
-                                :href="order_item.tracking_link">{{ order_item.tracking_no }}</a></strong>.</div>
+                                :href="order_item.tracking_link">{{ order_item.tracking_no }}</a></strong>.
+                          </div>
                           <template v-else>
                             <div class="feedback-text" :key="`afd-${activity_item_index}`"
                               v-if="activity_item.message && activity_item.message != ''">{{ activity_item.message }}
@@ -187,6 +194,7 @@
                             <span>{{ makeReorderMessage(activity_item.factory_product_id,
                               order_item.factory_products) }}</span>
                           </template>
+                          
                         </div>
                       </div>
 
@@ -215,6 +223,14 @@
                       </template>
 
                     </div>
+                    <template v-if="item_status_activity.status == QUALITYCONTROL">
+                            <div v-for="(report, index) in item_status_activity.activity_items[0].quality_control.reports" :key="`report-${index}`" >
+                            {{ index + 1 }}. QC report {{report.status}}: <a :href="report.pdf_url" class="text-primary" target="_blank">
+                                {{ report.pdf_name }} 
+                              </a> submitted at {{ report.created_at | formatDate('DD/MM/YYYY  ') }}
+                            </div>
+                          
+                          </template>
 
                     <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
                       v-if="order.general_comments && item_status_activity_index === 0">
@@ -798,6 +814,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   public CUSTOMERAPPROVED = "customer_approved"
   public CUSTOMERREJECTED = "customer_rejected"
   public ORDERINPRODUCTION = "in_production"
+  public QUALITYCONTROL = "quality_control"
   public ORDERSHIPPED = "shipped"
   public ORDERCOMPLETED = "completed"
   public status_icons: Record<any, any> = {

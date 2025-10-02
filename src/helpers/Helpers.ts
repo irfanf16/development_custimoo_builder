@@ -913,6 +913,10 @@ const activityStatus = {
       "        <li><strong class='font-weight-bold'>Tackle Twill Production Time:</strong> 7–8 weeks (including shipping)</li>\n" +
       "    </ul>",
   },
+  quality_control: {
+    title: "Quality Control",
+    message: "Quality Control",
+  },
   shipped: {
     title: "Order Shipped",
     message: "The manufacturer has shipped your products.",
