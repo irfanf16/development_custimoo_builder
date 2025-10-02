@@ -1,40 +1,47 @@
 <template>
-  <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
-    <template v-if="selectedProduct.productstyles[styleIndex]">
-      <div class="design-col" v-for="(design, index) in selectedProduct.productstyles[styleIndex].productdesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
-        <div class="d-flex justify-content-between">
-          <template>
-            <label :class="{ 'select-design-checkbox': !mobileScreen, 'custom-checkbox': isCustomerAuthenticated }">
-              <input v-if="isCustomerAuthenticated" type="checkbox" :value="index" @change="handleActiveProductDesignSelection($event, index)" class="design-available-product-design-selection">
-              <span></span>
-            </label>
-          </template>
-          <button @click="handleLockDesign(design.id)" class="btn d-inline-flex" :class="{'btn-gray': !locked_designs[design.id], 'btn-active': locked_designs[design.id], 'lock-design-icon': !mobileScreen}">
-            <font-awesome-icon :icon="['fas', 'lock']" class="design-available-product-design-selection"/>
-          </button>
+  <div>
+    <b-tabs class="w-100 category-tabs-container" pills card v-if="selectedProduct.productstyles[styleIndex] && selectedProduct.productstyles[styleIndex].design_categories.length > 0">
+      <b-tab @click="filteredDesigns = selectedProduct.productstyles[styleIndex].productdesigns" title="All"></b-tab>
+      <b-tab v-for="(category, category_index) in selectedProduct.productstyles[styleIndex].design_categories" @click="handleCategoryChange(category_index)" :key="category_index"
+      :title="category.category_name" />
+    </b-tabs>
+    <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
+      <template v-if="selectedProduct.productstyles[styleIndex]">
+        <div class="design-col" v-for="(design, index) in filteredDesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
+          <div class="d-flex justify-content-between">
+            <template>
+              <label :class="{ 'select-design-checkbox': !mobileScreen, 'custom-checkbox': isCustomerAuthenticated }">
+                <input v-if="isCustomerAuthenticated" type="checkbox" :value="index" @change="handleActiveProductDesignSelection($event, index)" class="design-available-product-design-selection">
+                <span></span>
+              </label>
+            </template>
+            <button @click="handleLockDesign(design.id)" class="btn d-inline-flex" :class="{'btn-gray': !locked_designs[design.id], 'btn-active': locked_designs[design.id], 'lock-design-icon': !mobileScreen}">
+              <font-awesome-icon :icon="['fas', 'lock']" class="design-available-product-design-selection"/>
+            </button>
+          </div>
+          <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
+            <Scene :canvasWidth="150" :canvasHeight="150" :measurement-ratio="selectedProduct.measurement_ratio" :ref="`design_scene_${design.id}`"
+                   :front="{
+                      textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
+                      safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
+                      boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
+                      models: selectedProduct.productstyles[styleIndex].front_models
+                    }"
+                   :svg_parts="design.svg_parts"
+                   :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
+                   :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
+                   :logos="selectedProduct.productstyles[styleIndex].logo"
+                   :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
+                   :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
+                   :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
+                   :design_id="design.id" :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
+            />
+          </a>
+          <div v-else :style="{width: design_width+ 'px', height: design_height+ 'px'}"></div>
+          <h3>{{ design.design_name }}</h3>
         </div>
-        <a @click="changeDesign(index); showPreview()" v-if="(first_load && index < 4) || design.design_show_on_scroll" ref="design_canvas">
-          <Scene :canvasWidth="150" :canvasHeight="150" :measurement-ratio="selectedProduct.measurement_ratio" :ref="`design_scene_${design.id}`"
-                 :front="{
-                    textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
-                    safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
-                    boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                    models: selectedProduct.productstyles[styleIndex].front_models
-                  }"
-                 :svg_parts="design.svg_parts"
-                 :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
-                 :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
-                 :logos="selectedProduct.productstyles[styleIndex].logo"
-                 :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
-                 :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
-                 :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
-                 :design_id="design.id" :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
-          />
-        </a>
-        <div v-else :style="{width: design_width+ 'px', height: design_height+ 'px'}"></div>
-        <h3>{{ design.design_name }}</h3>
-      </div>
-    </template>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -68,13 +75,13 @@ import {getDomDocument} from "@/helpers/Helpers";
           const time_out = this.first_load? 0 : 800
           this.design_times[entry.target.id] = setTimeout(() => {
             // Load the content or perform your lazy loading logic
-            Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[entry.target.id], 'design_show_on_scroll', 1)
+            Vue.set(this.filteredDesigns[entry.target.id], 'design_show_on_scroll', 1)
           }, time_out)
         } else {
           // elements are hiding here
           if (!this.first_load) {
             if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
-            Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[entry.target.id], 'design_show_on_scroll', 0)
+            Vue.set(this.filteredDesigns[entry.target.id], 'design_show_on_scroll', 0)
           }
         }
       })
@@ -97,6 +104,8 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   public design_width = 0
   public design_height = 0
   public design_times = []
+  public currentCategoryIndex = 0
+  public filteredDesigns: Array<any> = this.selectedProduct.productstyles[this.styleIndex].productdesigns
 
   get locked_designs() {
     return this.$store.getters.getLockedDesigns()
@@ -139,24 +148,30 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
 
 
   public changeDesign(index: number) {
-    if(this.selectedDesignId != this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id) {
+    if(this.selectedDesignId != this.filteredDesigns[index].id) {
       if(this.logoColorsInfo.using_logo_colors) {
         this.useLogoColors(false)
       }
       this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
-        design_index: index, design_id: this.selectedProduct.productstyles[this.styleIndex].productdesigns[index].id
+        design_index: index, design_id: this.filteredDesigns[index].id
       })
       this.$store.commit('Change_Locker_Tabs_Index', undefined)
       this.$store.dispatch('setActiveTab', -1)
       this.$store.commit('SET_SHUFFLE', false)
-      this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any, key: number) => {
-        if (index == key) {
-          Vue.set(design, 'design_show', 1)
-          this.$store.dispatch('setSelectedProductDesignID', design.id);
-        } else {
-          Vue.set(design, 'design_show', 0)
-        }
+      
+      // First, reset design_show for ALL designs in the main product designs array
+      this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any) => {
+        Vue.set(design, 'design_show', 0)
       })
+      
+      // Then, set design_show = 1 only for the selected design
+      const selectedDesign = this.filteredDesigns[index]
+      const mainDesignIndex = this.selectedProduct.productstyles[this.styleIndex].productdesigns.findIndex((design: any) => design.id === selectedDesign.id)
+      if (mainDesignIndex !== -1) {
+        Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[mainDesignIndex], 'design_show', 1)
+      }
+      
+      this.$store.dispatch('setSelectedProductDesignID', selectedDesign.id);
       this.hideLockerProductUpdateButton()
     }
   }
@@ -191,6 +206,18 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     } else {
       (this.$refs[`design_scene_${design_id}`] as Record<any, any>)[0].setLockedDesign()
     }
+  }
+
+  public handleCategoryChange(tab_index: number) {
+    const currentCategory = this.selectedProduct.productstyles[this.styleIndex].design_categories[tab_index];
+
+    this.currentCategoryIndex = tab_index;
+
+    this.filteredDesigns = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design: any) => {
+      return design.front_design.design_categories_pivot.some(
+        (pivot: any) => pivot.design_category_id === currentCategory.id
+      )
+    });
   }
 }
 </script>

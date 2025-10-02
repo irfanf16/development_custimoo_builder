@@ -7125,3 +7125,42 @@ html, body{
     position: relative;
     padding-left: rem; /* Space for the square */
 }
+.category-tabs-container {
+    .card-header {
+        overflow-x: auto;
+        width: 100% !important;
+        padding-bottom:  5px !important;
+        &::-webkit-scrollbar{
+            width: 7px;
+        }
+        &::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: rgba(33, 159, 132, 0.267);
+            border-radius: 100px;
+        }
+      
+        scrollbar-color: #219F84 #f1f1f1;
+        scrollbar-width: thin;
+      
+        &:hover{
+          &::-webkit-scrollbar-thumb {
+              background: #219F84;
+          }
+        }
+
+        .nav.nav-pills.card-header-pills {
+            flex-wrap: nowrap !important;
+            li > a {
+                white-space: nowrap !important;
+                &.active {
+                    background: #219F84 !important;
+                }
+            }
+        }
+    }
+    .card-body {
+        padding: 0 !important;
+    }
+}
