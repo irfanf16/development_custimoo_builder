@@ -2312,7 +2312,7 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
   }
   let roster_quantity_total = 0;
   product_roster.forEach(roster_item => {
-    roster_quantity_total += parseInt(roster_item.quantity)
+    roster_quantity_total += Number(roster_item.quantity) || 0
   })
   let product_price_object: Record<any, any> = {
     total_quantity: roster_quantity_total
