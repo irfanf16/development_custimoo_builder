@@ -163,6 +163,48 @@ export default class ColorsTabMixin extends Vue{
     }
   }
 
+  setShuffledColors(customColors?: Array<Record<string, any>>) {
+    const self: Record<any, any> = this
+    const groups: Array<Record<string, any>> = (this.$store.getters.getInitialSvgGroups || [])
+    if (!groups.length) { return }
+  
+    // If a custom array is passed, use it; otherwise fall back to the groups from the store
+    const baseArray = customColors?.length ? customColors : groups
+  
+    // Shuffling logic
+    let shuffled = [...baseArray].sort(() => Math.random() - 0.5)
+    let safety = 0
+    while (
+      safety < 10 &&
+      JSON.stringify(shuffled.map(s => s.id)) === JSON.stringify(baseArray.map(o => o.id))
+    ) {
+      shuffled = [...baseArray].sort(() => Math.random() - 0.5)
+      safety++
+    }
+  
+    // Apply shuffled colors back to ALL groups
+    groups.forEach((group, i) => {
+      // pick color from shuffled (cycle through if customColors < groups.length)
+      const colorInfo = shuffled[i % shuffled.length]
+  
+      this.$store.commit('UPDATE_GROUP_COLORS', {
+        index: group.id,
+        gradient_index: undefined,
+        color: colorInfo.color,
+        pantone: colorInfo.pantone,
+        name: colorInfo.name
+      })
+    })
+  
+    // Persist last active product data if needed and emit change
+    if (this.lastActiveProductData && !this.lastActiveProductData.editing) {
+      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', { group_colors: this.$store.getters.getGroupColors })
+    }
+    self.$eventBus.$emit('changeGroupColors', true)
+  }
+  
+  
+
   public setPatternColor(groupId: string, color: Record<any, any>) {
     this.$store.commit('UPDATE_GROUP_PATTERNS', {
       index: groupId,

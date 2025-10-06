@@ -33,6 +33,7 @@
             </template>
             <div v-if="hideTab.colorHide">
               <h2 class="fw-bold fz-16 p-3 d-none d-lg-block">Choose Color</h2>
+              <product-extracted-colors />
               <div class="d-none d-lg-block">
                 <ColorAccordion :tabIndex="tabIndex" :productColors="productColors" :key="selectedProduct.id" />
               </div>
@@ -111,6 +112,7 @@ import CustomizationTabsMixin from "@/mixins/CustomizationTabsMixin";
 import {filter} from "lodash"
 import ModalAction from "@/mixins/ModalAction";
 import OrderSummary from "@/components/OrderSummary.vue";
+import ProductExtractedColors from './ProductExtractedColors.vue'
 
 @Component<CustomizationTabs>({
   components: {
@@ -121,6 +123,7 @@ import OrderSummary from "@/components/OrderSummary.vue";
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,
+    ProductExtractedColors
   },
   beforeDestroy() {
     const self: Record<any, any> = this;

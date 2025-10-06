@@ -165,7 +165,8 @@ const ProductAttributes:Module<any, any> = {
       selection_mode: false,
       selected_designs: []
     },
-    locked_designs: {}
+    locked_designs: {},
+    initialSvgGroups: []
   },
   mutations: {
     SET_LOCKED_DESIGN(state: Record<any, any>, locked_design) {
@@ -1352,6 +1353,9 @@ const ProductAttributes:Module<any, any> = {
       });
       state.collectionMode[mode] = true;
     },
+    SET_INITIAL_SVG_GROUPS(state, payload) {
+      state.initialSvgGroups = payload
+    }
   },
   getters: {
     getLockedDesigns: state => (design_id) => {
@@ -1703,6 +1707,9 @@ const ProductAttributes:Module<any, any> = {
     getProductSelectionDesignInfo(state: Record<any, any>) {
       return state.product_designs_selection_info;
     },
+    getInitialSvgGroups(state: Record<any, any>) {
+      return state.initialSvgGroups
+    }
   },
   actions: {
     setLockerroomColors({commit}, payload){
@@ -1740,6 +1747,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setPrivateProduct({commit},payload){
       commit('SET_PRIVATE_PRODUCT',payload);
+    },
+    setInitialSvgGroups({ commit }, payload) {
+      commit('SET_INITIAL_SVG_GROUPS', payload)
     },
     async setCategories({commit}, payload){
       let url = '/product/categories'

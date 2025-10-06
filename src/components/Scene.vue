@@ -1163,6 +1163,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
 
     if (this.mainPreview) {
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
+      await this.$store.dispatch('setInitialSvgGroups', this.initialSvgGroups);
     }
 
     if(!this.parts) {
