@@ -16,9 +16,9 @@
           <div class="col  my-4">
             <router-link to="dashboard" class="btn btn-outline-secondary w-100">My Account</router-link>
           </div>
-          <div class="col  my-4">
+          <!-- <div class="col  my-4">
             <button type="button" class="btn btn-outline-secondary w-100">My profile settings</button>
-          </div>
+          </div> -->
           <div class="col  my-4">
             <router-link to="address" class="btn btn-outline-secondary w-100">Address book</router-link>
           </div>
