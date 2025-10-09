@@ -13,7 +13,7 @@ import {fabric} from "fabric";
 import {getClosestColor} from "@/pantoneColor";
 @Component<SceneMixin>({
   async created() {
-    this.parts = this.svg_parts? JSON.parse(this.svg_parts) : []
+    this.parts = JSON.parse(this.svg_parts)? JSON.parse(this.svg_parts) : []
   }
 })
 export default class SceneMixin extends Vue {
