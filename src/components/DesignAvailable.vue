@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-tabs class="w-100 category-tabs-container" pills card v-if="selectedProduct.productstyles[styleIndex] && selectedProduct.productstyles[styleIndex].design_categories.length > 0">
-      <b-tab @click="filteredDesigns = selectedProduct.productstyles[styleIndex].productdesigns" title="All"></b-tab>
+      <b-tab @click="handleAllTabClick" title="All"></b-tab>
       <b-tab v-for="(category, category_index) in selectedProduct.productstyles[styleIndex].design_categories" @click="handleCategoryChange(category_index)" :key="category_index"
       :title="category.category_name" />
     </b-tabs>
@@ -52,49 +52,11 @@ import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 import {LogoUploaderColors} from "@/mixins/LogoUploaderColors";
 import {getDomDocument} from "@/helpers/Helpers";
 
-@Component<DesignAvailable>({
+@Component({
   components: {
     Scene
-  },
-  mounted() {
-    this.$eventBus.$on("product_designs_selection_reset", this.handleProductDesignsSelectionInfoReset)
-    this.first_load = true
-    this.design_width = (this.$refs['design_canvas'] as Record<any, any>)[0].clientWidth
-    this.design_height = (this.$refs['design_canvas'] as Record<any, any>)[0].clientHeight;
-    setTimeout(() => {
-      (this.$refs['design_item'] as Record<any, any>[]).forEach((design_element: HTMLDivElement) => {
-        observer.observe(design_element);
-      })
-    }, 1000)
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        // Check if the target element is in view
-        if (entry.isIntersecting) {
-          if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
-          const time_out = this.first_load? 0 : 800
-          this.design_times[entry.target.id] = setTimeout(() => {
-            // Load the content or perform your lazy loading logic
-            Vue.set(this.filteredDesigns[entry.target.id], 'design_show_on_scroll', 1)
-          }, time_out)
-        } else {
-          // elements are hiding here
-          if (!this.first_load) {
-            if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
-            Vue.set(this.filteredDesigns[entry.target.id], 'design_show_on_scroll', 0)
-          }
-        }
-      })
-      setTimeout(() => {
-        this.first_load = false
-      }, 1000)
-    })
-  },
-  beforeDestroy() {
-    this.$eventBus.$off("product_designs_selection_reset")
   }
 })
-
 export default class DesignAvailable extends Mixins(HideUpdateLockerButton, LogoUploaderColors) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
 
@@ -106,6 +68,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   public design_times = []
   public currentCategoryIndex = 0
   public filteredDesigns: Array<any> = this.selectedProduct.productstyles[this.styleIndex].productdesigns
+  public observer: IntersectionObserver | null = null
 
   get locked_designs() {
     return this.$store.getters.getLockedDesigns()
@@ -146,6 +109,61 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     return this.$store.getters.isCustomerAuthenticated
   }
 
+  mounted() {
+    this.$eventBus.$on("product_designs_selection_reset", this.handleProductDesignsSelectionInfoReset)
+    this.first_load = true
+    this.design_width = (this.$refs['design_canvas'] as Record<any, any>)[0].clientWidth
+    this.design_height = (this.$refs['design_canvas'] as Record<any, any>)[0].clientHeight;
+    this.setupObserver()
+  }
+
+  beforeDestroy() {
+    this.$eventBus.$off("product_designs_selection_reset")
+    if (this.observer) {
+      this.observer.disconnect()
+    }
+  }
+
+  public setupObserver() {
+    // Disconnect existing observer if any
+    if (this.observer) {
+      this.observer.disconnect()
+    }
+
+    // Create new observer
+    this.observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        // Check if the target element is in view
+        if (entry.isIntersecting) {
+          if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
+          const time_out = this.first_load? 0 : 800
+          this.design_times[entry.target.id] = setTimeout(() => {
+            // Load the content or perform your lazy loading logic
+            Vue.set(this.filteredDesigns[entry.target.id], 'design_show_on_scroll', 1)
+          }, time_out)
+        } else {
+          // elements are hiding here
+          if (!this.first_load) {
+            if (this.design_times[entry.target.id]) clearTimeout(this.design_times[entry.target.id])
+            Vue.set(this.filteredDesigns[entry.target.id], 'design_show_on_scroll', 0)
+          }
+        }
+      })
+      setTimeout(() => {
+        this.first_load = false
+      }, 1000)
+    })
+
+    // Observe all design elements
+    setTimeout(() => {
+      const designItems = this.$refs['design_item'] as Record<any, any>[]
+      if (designItems && designItems.length > 0) {
+        designItems.forEach((design_element: HTMLDivElement) => {
+          this.observer!.observe(design_element);
+        })
+      }
+    }, 100)
+  }
 
   public changeDesign(index: number) {
     if(this.selectedDesignId != this.filteredDesigns[index].id) {
@@ -158,19 +176,19 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
       this.$store.commit('Change_Locker_Tabs_Index', undefined)
       this.$store.dispatch('setActiveTab', -1)
       this.$store.commit('SET_SHUFFLE', false)
-      
+
       // First, reset design_show for ALL designs in the main product designs array
       this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any) => {
         Vue.set(design, 'design_show', 0)
       })
-      
+
       // Then, set design_show = 1 only for the selected design
       const selectedDesign = this.filteredDesigns[index]
       const mainDesignIndex = this.selectedProduct.productstyles[this.styleIndex].productdesigns.findIndex((design: any) => design.id === selectedDesign.id)
       if (mainDesignIndex !== -1) {
         Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[mainDesignIndex], 'design_show', 1)
       }
-      
+
       this.$store.dispatch('setSelectedProductDesignID', selectedDesign.id);
       this.hideLockerProductUpdateButton()
     }
@@ -208,6 +226,15 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     }
   }
 
+  public handleAllTabClick() {
+    this.filteredDesigns = this.selectedProduct.productstyles[this.styleIndex].productdesigns
+
+    // Re-setup observer for all designs
+    this.$nextTick(() => {
+      this.setupObserver()
+    })
+  }
+
   public handleCategoryChange(tab_index: number) {
     const currentCategory = this.selectedProduct.productstyles[this.styleIndex].design_categories[tab_index];
 
@@ -218,6 +245,11 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
         (pivot: any) => pivot.design_category_id === currentCategory.id
       )
     });
+
+    // Re-setup observer for the new filtered designs
+    this.$nextTick(() => {
+      this.setupObserver()
+    })
   }
 }
 </script>
