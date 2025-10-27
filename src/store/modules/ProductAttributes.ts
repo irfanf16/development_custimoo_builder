@@ -138,6 +138,7 @@ const ProductAttributes:Module<any, any> = {
     selectedCategories:[],
     products_next_page_no: null, //null value mean has no more pages,
     products_rosters:{},
+    shop_products_rosters: {},
     active_roster_index:0,
     edit_roster_from_locker:false,
     back_from_roster: {},
@@ -165,8 +166,11 @@ const ProductAttributes:Module<any, any> = {
       selection_mode: false,
       selected_designs: []
     },
+    initialSvgGroups: [],
     locked_designs: {},
-    initialSvgGroups: []
+    shop_cart: {
+      products: [],
+    }
   },
   mutations: {
     SET_LOCKED_DESIGN(state: Record<any, any>, locked_design) {
@@ -1260,6 +1264,40 @@ const ProductAttributes:Module<any, any> = {
       }
       updateLastActiveProductData({products_rosters: state.products_rosters})
     },
+    SET_SHOP_PRODUCTS_ROSTERS(state: Record<any, any>, payload: Record<any, any>) {
+      Object.entries(payload).forEach(([product_id, roster_data]) => {
+        const get_product_from_id = this.getters.getProduct(product_id)
+        if (get_product_from_id) {
+          const product_sizes = get_product_from_id ? get_product_from_id?.sizes[0]?.json_data : []
+          //@ts-ignore
+          roster_data.forEach(payload_product_roster_item => {
+            if (isAbandonedSize(product_sizes, payload_product_roster_item.size)) {
+              payload_product_roster_item.size = product_sizes[0].name
+            }
+          })
+        }
+      })
+      if (payload.product_id in state.shop_products_rosters) {
+        state.shop_products_rosters[payload.product_id] = [...state.shop_products_rosters[payload.product_id], ...payload.roster_data]
+      }
+      else {
+        state.shop_products_rosters = { ...state.shop_products_rosters, [payload.product_id]: [...payload.roster_data] }
+      }
+    },
+    SET_SHOP_PRODUCTS_CART_REBUILD(state, payload) {
+      state.shop_cart.products.push(payload);
+      // localStorage.setItem("cartData", JSON.stringify(state.shop_cart.products));
+    },
+    SET_SHOP_PRODUCTS_CART(state: Record<any, any>, payload: Record<any, any>) {
+      // const { id, selected_size, roster_detail } = payload;
+      const { id } = payload;
+      state.shop_cart.products.push({ ...payload });
+      this.commit("SET_SHOP_PRODUCTS_ROSTERS_UPDATE", {
+        productId: id,
+        roster: [],
+      });
+    },
+
     REMOVE_ROSTER_ITEM(state:Record<any, any>, payload: number) {
       state.products_rosters[state.selectedPrdId].splice(payload, 1)
       updateLastActiveProductData({products_rosters: state.products_rosters})
@@ -1355,6 +1393,78 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_INITIAL_SVG_GROUPS(state, payload) {
       state.initialSvgGroups = payload
+    },
+    SET_SHOP_PRODUCTS_ROSTERS_UPDATE(state, { productId, roster }) {
+      state.shop_products_rosters = {
+        ...state.shop_products_rosters,
+        [productId]: roster
+      };
+    },
+    SET_CART_PRODUCT_UPDATE_PLAYER_FIELD(state, { productIndex, index, key, value }) {
+      const product = state.shop_cart.products[productIndex];
+      if (!product) return;
+      const roster = product.roster_detail[index];
+      if (!roster) return;
+      roster[key] = value;
+      const existingCart = JSON.parse(localStorage.getItem("cartData") || "[]");
+      if (existingCart[productIndex]) {
+        existingCart[productIndex].roster_details = product.roster_detail;
+      }
+      localStorage.setItem("cartData", JSON.stringify(existingCart));
+    },
+    SET_CART_PRODUCT_ADD_PLAYER(state, { productIndex, player }) {
+      const product = state.shop_cart.products[productIndex];
+      if (!product) return;
+      product.roster_detail.push(player);
+      const existingCart = JSON.parse(localStorage.getItem("cartData") || "[]");
+      if (existingCart[productIndex]) {
+        existingCart[productIndex].roster_details.push(player);
+        localStorage.setItem("cartData", JSON.stringify(existingCart));
+      }
+    },
+
+    SET_CART_PRODUCT_REMOVE_PLAYER(state, {index, productIndex }) {
+      const product = state.shop_cart.products[productIndex];
+      if (!product || !product.roster_detail) return;
+      product.roster_detail.splice(index, 1);
+      const existingCart = JSON.parse(localStorage.getItem("cartData") || "[]");
+      if (existingCart[productIndex]?.roster_details) {
+        existingCart[productIndex].roster_details.splice(index, 1);
+        localStorage.setItem("cartData", JSON.stringify(existingCart));
+      }
+    },
+
+    SET_CART_PRODUCT_CHANGE_QTY(state, { productIndex, index, change }) {
+      const product = state.shop_cart.products[productIndex];
+      if (!product) return;
+      const roster = product.roster_detail[index];
+      if (!roster) return;
+      const newQty = roster.quantity + change;
+      if (newQty >= 1) {
+        roster.quantity = newQty;
+      }
+      const existingCart = JSON.parse(localStorage.getItem("cartData") || "[]");
+      if (existingCart[productIndex]) {
+        existingCart[productIndex].roster_details = product.roster_detail;
+      }
+      localStorage.setItem("cartData", JSON.stringify(existingCart));
+    },
+
+    REMOVE_CART_PRODUCT(state, {index, productId}) {
+      state.shop_cart.products.splice(index, 1);
+      const existingCart = JSON.parse(localStorage.getItem("cartData") || "[]");
+      existingCart.splice(index, 1);
+      localStorage.setItem("cartData", JSON.stringify(existingCart));
+      if (state.shop_products_rosters && state.shop_products_rosters[productId]) {
+        delete state.shop_products_rosters[productId];
+      }
+    },
+    EMPTY_CART(state){
+      state.shop_cart = { products: [] };
+      localStorage.removeItem("cartData");
+    },
+    EMPTY_CART_ONLY(state){
+      state.shop_cart.products = []
     }
   },
   getters: {
@@ -1709,7 +1819,13 @@ const ProductAttributes:Module<any, any> = {
     },
     getInitialSvgGroups(state: Record<any, any>) {
       return state.initialSvgGroups
-    }
+    },
+    getShopProductRosters: (state) => (productId: number) => {
+      return state.shop_products_rosters[productId] || [];
+    },
+    getCurrentShopCart: state => {
+      return state.shop_cart
+    },
   },
   actions: {
     setLockerroomColors({commit}, payload){
@@ -1948,6 +2064,9 @@ const ProductAttributes:Module<any, any> = {
         await commit('SET_COLLECTIONS', res.data)
       })
     },
+    createShop({ commit }, payload) {
+      return http.post("customer-shops", payload)
+    },
     resetStore({commit}){
       resetCustomizedAddons()
       commit('RESET_STORE')
@@ -2107,6 +2226,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setProductsRosters({commit}, payload) {
       commit('SET_PRODUCTS_ROSTERS', payload)
+    },
+    setShopProductsRosters({ commit }, payload) {
+      commit('SET_SHOP_PRODUCTS_ROSTERS', payload)
     },
     setShowLoader({commit},payload){
       commit("SET_SHOW_LOADER",payload);

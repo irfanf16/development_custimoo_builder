@@ -2257,5 +2257,22 @@ export class CollectionMixin extends Mixins(ErrorMessages) {
 
 }
 
+@Component
+export class CustomerShopMixin extends Mixins() {
+
+  mounted() {
+    this.getDefaultCoverPhotos();
+  }
+  public customerShopsDefaultCoverPhotosUrls = [];
+  public async getDefaultCoverPhotos() {
+    await http.get(`shop-default-cover-photos`)
+      .then((successResponse) => {
+        this.customerShopsDefaultCoverPhotosUrls = successResponse.data.result
+      }).catch((errorResponse) => {
+        handleResponseException(errorResponse)
+      })
+  }
+}
+
 
 

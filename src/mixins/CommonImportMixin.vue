@@ -49,7 +49,15 @@ import {
   faTrashAlt,
   faTshirt,
   faUserFriends,
-  faUserSecret, faSignOutAlt, faBell, faCartArrowDown, faFileExport, faSpinner, faSync, faExpand
+  faUserSecret, faSignOutAlt, faBell, faCartArrowDown, faFileExport, faSpinner, faSync, faExpand,
+  faClock,
+  faCalendar,
+  faArrowUp,
+  faArrowDown,
+  faChevronLeft,
+  faChevronRight,
+  faCalendarCheck,
+  faTimesCircle
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
@@ -96,6 +104,15 @@ library.add(faFileExport)
 library.add(faSpinner)
 library.add(faSync)
 library.add(faExpand)
+library.add(faClock)
+library.add(faCalendar)
+library.add(faCalendarCheck)
+library.add(faArrowUp)
+library.add(faArrowDown)
+library.add(faChevronLeft)
+library.add(faChevronRight)
+library.add(faTrashAlt)
+library.add(faTimesCircle)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 import Vue2TouchEvents from 'vue2-touch-events';
@@ -136,6 +153,11 @@ import 'sweetalert2/dist/sweetalert2.min.css';
 
 Vue.use(VueSweetalert2);
 
+import Toasted from 'vue-toasted'
+// Vue.use(Toasted, {
+//   container: getDomDocument() || document.body,
+// });
+
 Vue.directive('click-outside-custom', {
   bind: function (el:Record<any, any>, binding:Record<any, any>, vnode:Record<any, any>) {
     el.clickOutsideEvent = function (event) {
@@ -172,11 +194,41 @@ Vue.use(VueGtag, {
   }
 });
 
+import { can } from "@/helpers/Helpers"
+Vue.prototype.$can = can
+
 @Component<CommonImportMixin>({
   i18n
 })
 export default class CommonImportMixin extends Vue{
   async mounted () {
+
+   //font awsome icons not showing issue fixed
+    const rootDocument = getDomDocument(true); 
+
+    const alreadyExists = Array.from(rootDocument.querySelectorAll('style')).some(
+      (styleEl: any) => styleEl.textContent?.includes('font-awesome')
+    );
+
+    if (!alreadyExists) {
+      const styleEl = rootDocument.createElement('style'); // ✅ use document here
+      styleEl.type = 'text/css';
+      styleEl.textContent = `
+        @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css");
+      `;
+      rootDocument.head.appendChild(styleEl);
+    }
+
+    if (!Vue.prototype.$toasted) {
+      Vue.use(Toasted, {
+        container: getDomDocument() || document.body,
+      });
+    }
+    const toasted = this.$toasted as any;
+    if (toasted) {
+      toasted.options = toasted.options || {};
+      toasted.options.container = getDomDocument() || document.body;
+    }
     await getCompany()
     /*
     * Initialize store state default values starts
@@ -310,6 +362,9 @@ export default class CommonImportMixin extends Vue{
   destroyed(){
     window.removeEventListener('beforeunload', this.saveBeforeExit);
   }
+
+  public getDomDocument = getDomDocument
+
 
   get company():Record<any, any> {
     return store.getters.getCompany

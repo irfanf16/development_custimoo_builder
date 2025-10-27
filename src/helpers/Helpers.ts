@@ -10,7 +10,7 @@ import { http } from "@/httpCommon";
 import { loadState, saveState } from "@/indexedDBPersistence";
 import VsToast from '@vuesimple/vs-toast';
 import { fabric } from "fabric";
-import { find, findIndex, parseInt } from "lodash";
+import { find, findIndex, flatMap, groupBy, intersection, keyBy, maxBy, parseInt, sortBy } from "lodash";
 import LZString from 'lz-string';
 import Router from '../router/index';
 
@@ -285,29 +285,43 @@ const getReminderOptions = () => {
   return optionArray;
 }
 
-const handleResponseException = (errorResponse: AxiosError | TypeError) => {
+const handleResponseException = (errorResponse: AxiosError | TypeError, timeout=5000, showMessage = false) => {
   let message:string|undefined = ''
+  let errors: string[] = []
   if("isAxiosError" in errorResponse) {
     // errorResponse.response.data object have keys { exception, file, line, message, trace }
     message = errorResponse.response?.data?.message;
+    const responseErrors = errorResponse.response?.data?.errors ?? [];
     if(!message) {
       message = errorResponse.response?.statusText;
     }
-    console.error("Error (Axios): ", message)
+    if(showMessage) {
+      errors = [(message ?? ''), ...responseErrors]
+    } else {
+      errors = responseErrors
+    }
   } else {
-    message = errorResponse.message;
-    console.error(`Error (${errorResponse.name}): `, {
-      name: errorResponse.name,
-      message: errorResponse.message,
-      stack: errorResponse.stack
-    })
+    if(showMessage) {
+      message = errorResponse.message;
+    }
+    errors.push(message ?? '')
   }
-  VsToast.show({
-    title: message,
-    variant: 'info',
-    timeout: 5000
-  });
-  return message;
+  errors.forEach(error => {
+    //Vue as any is due to type script give keepOnHover error
+    (Vue as any).toasted.show(error, {
+      type: 'error',
+      position: 'bottom-left',
+      keepOnHover: true,
+      duration: 5000,
+      action: {
+        text: '×',
+        onClick: (e, toastObject) => {
+          toastObject.goAway(0) // dismiss on click
+        }
+      }
+    })
+  })
+  return errors;
 }
 
 const CustimooOrderFlowStatuses : Record<any, any> = {
@@ -3344,6 +3358,253 @@ const containsObject = (array: any[], id: string): boolean => {
     return array.some(item => item.id === id);
 }
 
+const getShopProductsFromLockerProducts1 = (lockerSelectedProducts): Record<any, any>[] => {
+  const shop = Store.getters.getShop
+  let shopProductsGroupById = {}
+  let shopOwnProducts     = []
+  if(!checkIsEmpty(shop)) {
+    shopProductsGroupById = groupBy(shop.products, 'product_locker_room_id')
+    if(shopProductsGroupById["null"]) {
+      shopOwnProducts = shopProductsGroupById["null"]
+    }
+  }
+  let shopLockerProducts =  lockerSelectedProducts.map(lockerSelectedProduct => {
+    const shopProductExistsInLockerRoom = shopProductsGroupById[lockerSelectedProduct.id]?.[0] ?? null
+    if(shopProductExistsInLockerRoom) {
+      return shopProductsGroupById[lockerSelectedProduct.id][0]
+    } else {
+      const lockerProductId = lockerSelectedProduct.id
+      const frontBackImageBasePath = `company_${lockerSelectedProduct.company_id}/files/locker_products/${lockerProductId}`
+      return getShopProductDefaultObject({
+        customer_shop_id: null,
+        product_locker_room_id: lockerProductId,
+        name: lockerSelectedProduct.name,
+        description: lockerSelectedProduct.description,
+        price: lockerSelectedProduct.price,
+        override_product_info: false,
+        custom_name: lockerSelectedProduct.name,
+        custom_description: lockerSelectedProduct.description,
+        custom_price: lockerSelectedProduct.price,
+        front_image: `${frontBackImageBasePath}/front.png?q=${lockerSelectedProduct.random_string}`,
+        back_image: `${frontBackImageBasePath}/front.png?q=${lockerSelectedProduct.random_string}`,
+        sizes: [],
+        publish_at: null,
+        unpublish_at: null
+      })
+    }
+  })
+  return [...shopLockerProducts, ...shopOwnProducts]
+}
+
+const getShopProductsFromLockerProducts = (lockerSelectedProducts): Record<any, any>[] => {
+  const shop = Store.getters.getShop
+  let lastSortOrder = getShopLastProductSortOrder()
+  let shopOtherProducts = []
+  let shopExistingLockerProductsById = {}
+
+  if(!checkIsEmpty(shop)) {
+    let lockerSelectedProductsById =  {}
+    if(lockerSelectedProducts.length > 0) {
+      lockerSelectedProductsById = groupBy(lockerSelectedProducts, 'id')
+    }
+
+    shopOtherProducts = shop.products.filter(shopProduct => !shopProduct.is_added_from_locker)
+    shopExistingLockerProductsById = keyBy(shop.products.filter(shopProduct => shopProduct.is_added_from_locker), "product_locker_room_id")
+  }
+
+
+  const shopUpdatedProducts = lockerSelectedProducts.map(lockerSelectedProduct => {
+        const isProductAlreadyInShop = shopExistingLockerProductsById[lockerSelectedProduct.id]
+        if(isProductAlreadyInShop) {
+          return isProductAlreadyInShop
+        } else {
+          const lockerProductId = lockerSelectedProduct.id
+          const frontBackImageBasePath = `company_${lockerSelectedProduct.company_id}/files/locker_products/${lockerProductId}`
+          return getShopProductDefaultObject({
+            sort_order: ++lastSortOrder,
+            customer_shop_id: shop.id,
+            product_locker_room_id: lockerProductId,
+            is_added_from_locker: true,
+            name: lockerSelectedProduct.name,
+            description: lockerSelectedProduct.description,
+            price: lockerSelectedProduct.price,
+            override_product_info: false,
+            custom_name: lockerSelectedProduct.name,
+            custom_description: lockerSelectedProduct.description,
+            custom_price: lockerSelectedProduct.price,
+            front_image: `${frontBackImageBasePath}/front.png?q=${lockerSelectedProduct.random_string}`,
+            back_image: `${frontBackImageBasePath}/front.png?q=${lockerSelectedProduct.random_string}`,
+            sizes: [],
+            publish_at: null,
+            unpublish_at: null
+          })
+        }
+  })
+  return sortBy([...shopUpdatedProducts, ...shopOtherProducts], shopProduct => shopProduct.sort_order)
+
+}
+
+const getLockerRoomSelectedProducts = () => {
+  const lockerIndex = Store.getters.getLockerTabsIndex
+  const lockerSelectedProductIds = Store.getters.getSelectedCollectionProducts
+  const lockerRooms = Store.getters.getLockerProducts
+  return flatMap(lockerRooms, 'product').filter(lockerRoomProduct => {
+    return lockerSelectedProductIds.includes(lockerRoomProduct.id);
+  })
+}
+
+const getShopProductDefaultObject = (updatedValues = {}) => {
+  return {
+    ...{
+      id: null,
+      customer_shop_id: null,
+      product_locker_room_id: null,
+      is_added_from_locker: false,
+      override_product_info: false,
+      sort_order: 0,
+      name: '',
+      description: '',
+      price: '',
+      custom_name: '',
+      custom_description: '',
+      custom_price: '',
+      front_image: '',
+      back_image: '',
+      manage_inventory: false,
+      sizes: [],
+      publish_at: null,
+      unpublish_at: null,
+      is_produced_by_custimoo: false,
+      is_custom_product: false,
+      product_id: null,
+    },
+    ...updatedValues
+  }
+}
+
+const getShopDefaultObject = (updatedValues = {}) => {
+  const customer = Store.getters.getCustomer
+  const company  = Store.getters.getCompany
+  return {
+    ...{
+      id: null,
+      company_id: company.id ?? null,
+      customer_id: customer.id ?? null,
+      password: null,
+      password_confirmation: null,
+      name: "",
+      slug: "",
+      logo: "",
+      cover_photo: "",
+      status: "",
+      publish_at: null,
+      unpublish_at: null,
+      products: [] as Record<any, any>[],
+    },
+    ...updatedValues,
+  };
+};
+
+const getImagePreview = (
+  fileOrPath: string | File,
+  usePlaceholder = false
+): string => {
+  const baseStorageUrl = process.env.VUE_APP_STORAGE_URL || "";
+
+  // Case 1: No input provided
+  if (!fileOrPath) {
+    return usePlaceholder ? `${baseStorageUrl}placeholder.png` : "";
+  }
+
+  // Case 2: Input is a path string
+  if (typeof fileOrPath === "string") {
+    return `${baseStorageUrl}${fileOrPath}`;
+  }
+
+  // Case 3: Input is a File object
+  if (fileOrPath instanceof File) {
+    return URL.createObjectURL(fileOrPath);
+  }
+
+  return ""; // fallback
+};
+
+const showToastedMessage = (message, type="success") => {
+  (Vue as any).toasted.show(message, {
+    type: type,
+    position: 'bottom-left',
+    keepOnHover: true,
+    duration: 5000,
+    action: {
+      text: '×',
+      onClick: (e, toastObject) => {
+        toastObject.goAway(0) // dismiss on click
+      }
+    }
+  })
+}
+
+const can = (permissions: string | Array<any>, all = false) => {
+  const auth_permissions = Store.getters.getCustomerPermissions;
+  if (permissions.constructor.name == "String") {
+    return auth_permissions.includes(permissions)
+  } else {
+    const can_do = intersection(auth_permissions, permissions);
+    if (can_do) {
+      if (all) {
+        return can_do.length == permissions.length;
+      } else {
+        return can_do.length > 0;
+      }
+    }
+  }
+}
+const formatCustomPrice = (value: any): number => {
+  if (value === null || value === undefined || value === '') return 0;
+  const num = parseFloat(value);
+  if (isNaN(num) || num < 0) return 0;
+  return parseFloat(num.toFixed(2));
+}
+const getShopLastProductSortOrder =  () => {
+  const shop = Store.getters.getShop
+  let lastSortOrder = 0
+    if(!checkIsEmpty(shop)) {
+      const lastShopProduct = maxBy(shop.products, (shopProduct: Record<any , any>) => shopProduct.sort_order)
+      if(lastShopProduct) {
+        lastSortOrder = lastShopProduct?.sort_order ?? 0
+      }
+    }
+    return lastSortOrder
+}
+
+interface Player {
+  text: string;
+  number: string;
+  quantity: number;
+  size: string;
+  information: null;
+  size_index?: number;
+  code?: string;
+}
+const createDefaultPlayer = (
+  sizes: { name: string }[] = [],
+  selectedSize?: string | null
+): Player => {
+  const sizeName = selectedSize ?? sizes[0]?.name ?? "";
+  const sizeIndex = sizes.findIndex((s) => s.name === sizeName);
+  return {
+    text: "",
+    number: "",
+    size: sizeName,
+    code: sizeName,
+    size_index: sizeIndex >= 0 ? sizeIndex : 0,
+    quantity: 1,
+    information: null,
+  };
+};
+
+
+
 
 export {
   getLogoSettingsObject, getLogoObject, getRandom, getLogoSettings, setLogoSettings, getCustomLogos, fileToBase64, processColorsCustom,
@@ -3366,7 +3627,8 @@ export {
   updateOrderProducts, getExtensionFromMimeType, getBase64FileInfo, getDateTimeFormatted, selectedDesign, startExportStatusChecker, isEcommercePlatform, downloadTemplate,
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
   findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,isValidEmail,
-  containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures
+  containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures, getShopDefaultObject, getShopProductsFromLockerProducts, getLockerRoomSelectedProducts, getShopProductDefaultObject, getImagePreview, showToastedMessage, can,
+  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice
 
 };
 

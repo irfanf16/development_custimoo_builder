@@ -1604,6 +1604,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const product_style = this.selectedProduct.productstyles[this.styleIndex]
     let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
     let locker = {
+      addons: this.selectedProduct.active_addons.filter(addon => {
+        return addon.selected;
+      }),
       product_id: this.selectedProduct.product_id,
       style_id: product_style.id,
       design_id: currentDesign[0].id,

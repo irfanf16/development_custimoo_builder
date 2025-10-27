@@ -354,6 +354,72 @@
             <template v-else><p>No Collection Exists</p></template>
           </div>
         </b-tab>
+        <b-tab lazy class="shopList designCollections">
+          <template #title>
+            <span class="btn btn-secondary btn-sm">Shops</span>
+          </template>
+          <div class="loader relative" v-if="loader"><img src="@assets/images/loading.gif" /></div>
+          <template v-else>
+            <div class="products-holder collection grid gap-5 mobile-cols-2 grid-6">
+              <template v-for="(customerShop, customerShopIndex) in customerShops">
+                <div :key="`customer-shop-${customerShopIndex}-id-${customerShop.id}`" @click="getSelectionMode.eventCollectionMode ? setEventCollection(0) : null" class="products-block" :style="getSelectionMode.eventCollectionMode ? 'cursor:pointer' : 'cursor:move' ">
+                  <div class="image-holder">
+                    <div class="convas_container">
+                      <img :src="`${storageUrl}${customerShop.logo}`" alt="sdfsdfsdfsdf">
+                    </div>
+
+                    <div class="controls">
+                      <a v-b-tooltip.hover.right title="Delete shop"
+                        class="remove btn" @click="deleteShop(customerShop.id, customerShopIndex)">
+                        <font-awesome-icon :icon="['fas', 'trash-alt']"/>
+                      </a>
+                      <a v-b-tooltip.hover.right title="Edit shop" @click="editShop(customerShop)"
+                        class="btn light btn-secondary rounded-circle"><font-awesome-icon
+                        :icon="['fas', 'edit']"/></a>
+                      <a v-b-tooltip.hover.right title="Preview shop" target="_blank"
+                         class="btn light btn-secondary rounded-circle" :href="`/#/shop-preview/${customerShop.slug}`">
+                        <font-awesome-icon :icon="['fas', 'eye']"/>
+                      </a>
+                      <b-button title="Share shop link" class="light rounded-circle"
+                                custom-class="share-tooltip"  @click.stop="onShareShop(customerShop)"><font-awesome-icon :icon="['fas', 'share-alt']"/></b-button>
+                      <aside v-show="shareShopId === customerShop.id" class="tooltip b-tooltip bs-tooltip share-tooltip share-collection-tooltip" v-click-outside="onCloseShareShop">
+                        <div class="share-holder">
+                          <h3>Copy link and Share</h3>
+                          <div class="share-form">
+                            <b-form inline>
+                              <b-form-input @mouseenter="markText"
+                                            :value="`${baseUrl}merchant-shop/${customerShop.slug}`"
+                              ></b-form-input>
+                              <b-button variant="primary" @click="onCopyShopLink(customerShop)">Copy Link</b-button>
+                            </b-form>
+                          </div>
+                        </div>
+                      </aside>
+                    </div>
+                  </div>
+
+                   <div class="d-none d-lg-block text-center mb-2">
+                   <b-button :class="{'live-status': customerShop.status === 'live'}" variant="secondary" class="published-btn">
+                      <span v-if="customerShop.status === 'live'" class="live-indicator">
+                        <span class="live-icon"></span>
+                        Live
+                      </span>
+                      <span v-else  class="capitalize">{{ customerShop.status }}</span>
+                    </b-button>
+                  </div>
+                  <div class="d-none d-lg-block product-description text-center">
+                    <p> {{customerShop.name}}</p>
+                  </div>
+                </div>
+              </template>
+              <template v-if="customerShops.length == 0">
+                <div class="text-center">
+                  <p>No Shops Exists</p>
+                </div>
+               </template>
+            </div>
+          </template>
+        </b-tab>
       </b-tabs>
     </div>
 
@@ -470,6 +536,8 @@ import lazyImage from '@/directives/lazyImage.js';
 import {fabric} from 'fabric';
 import {getClosestColor} from '@/pantoneColor'
 import rgbHex from 'rgb-hex'
+import ClickOutside from 'vue-click-outside';
+
 
 
 interface FactoryProduct {
@@ -513,7 +581,8 @@ interface FactoryProduct {
     draggable
   },
   directives: {
-    lazyImage
+    lazyImage,
+    ClickOutside,
   },
   mounted() {
     const doc = getDomDocument() as Record<any, any>;
@@ -539,7 +608,7 @@ interface FactoryProduct {
         classObserver(allElems, this.triggerDropping)
       }, 500)
     }
-
+    this.getCustomeShops()
     this.$emit('lockerModalOpened', ()=>{this.getLockerProductsRosters()})
   },
   beforeDestroy() {
@@ -581,6 +650,18 @@ interface FactoryProduct {
 export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, exitEditMode, ProductsQueryParamsMixin, CollectionMixin, cartModalData) {
   @Prop({required: true}) opacityset:boolean
   @Prop() products_fonts!: Record<string, any>[];
+  @Prop({default: false}) is_shops_tab_active!:boolean
+
+  @Watch('is_shops_tab_active', {
+    immediate: true
+  })
+
+  isShopsTabActiveChanged() {
+    if(this.is_shops_tab_active){
+      this.main_locker_tabs = 2
+    }
+  }
+
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   private baseUrl = location.host + "/#/"
   public ref = this.$refs as Record<any, any>
@@ -613,6 +694,21 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public showLoader = false
   public filtered_locker_products = [];
   public localLockers: Record<any, any> = [];
+  public customerShops: Record<any, any>[] = []
+  public shareShopId?: string | null = null;
+  public loader: boolean = false;
+
+  public getCustomeShops() {
+    this.loader = true
+     http.get(`customer-shops`)
+      .then((successResponse) => {
+        this.loader = false
+        this.customerShops = successResponse.data.result
+      }).catch((err) => {
+        this.loader = false
+        handleResponseException(err)
+      })
+  }
 
 
 
@@ -1273,6 +1369,11 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
     this.$emit('showCollectionModal');
   }
 
+  public createShopModal = () => {
+    this.$emit('hideLockerRoomModal');
+    this.$emit('showShopModal');
+  }
+
   get selected() {
     return this.group;
   }
@@ -1410,6 +1511,26 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
       this.showToast('Shareable link was copied to your clipboard.', 'success');
     } catch (err) {
       alert('Oops, unable to copy');
+
+    }
+  }
+
+  public onShareShop(customerShop) {
+    this.shareShopId = customerShop?.id;
+  }
+
+  public onCloseShareShop() {
+    if (this.shareShopId) {
+      this.shareShopId = null;
+    }
+  }
+
+  public onCopyShopLink(customerShop) {
+    try {
+      navigator.clipboard.writeText(`${this.baseUrl}merchant-shop/${customerShop.slug}`);
+      this.showToast('Shareable link was copied to your clipboard.', 'success');
+    } catch (err) {
+      alert('Oops, unable to copy');
     }
   }
 
@@ -1470,6 +1591,26 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
     } catch (e) {
       this.showError(e);
     }
+  }
+
+  public async deleteShop(id: number, index:number) {
+    try {
+      const ok = await this.ref['reset-confirm-modal'].showConfirm()
+      if (ok) {
+        const res = await http.delete(`customer-shops/${id}`);
+        this.showToast(res.data.message, 'success');
+        this.getCustomeShops();
+      }
+    } catch (e) {
+      this.showError(e);
+    }
+  }
+
+  public editShop(customerShop) {
+    this.$store.commit('SET_SHOP', {...customerShop, ...{password_confirmation : null}})
+    this.$store.commit("SET_SHOP_MODE", 'updating')
+    this.showVModal('create-update-shop-modal')
+    this.hideVModal('locker-modal')
   }
 
   public async deleteRoom($event, id: number, index: number | string) {
@@ -1995,6 +2136,71 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
 </script>
 
 <style lang="scss" scoped>
+:deep(.products-holder .products-block:nth-of-type(6n) .share-collection-tooltip) {
+  right: 0 !important;
+  left: auto !important;
+}
+
+.published-btn {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  &:not(.live-status) {
+    background-color: #555;
+    border-color: #555;
+    color: #fff;
+  }
+  &.live-status {
+    background-color: #9ef1be !important;
+    border-color: #9ef1be !important;
+    color: #38793b !important;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 500;
+    cursor: pointer;
+
+    &:hover {
+      background-color: #8de0ad !important;
+      border-color: #8de0ad !important;
+    }
+
+    .live-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+        .live-icon {
+          width: 8px;
+          height: 8px;
+          background-color: #38793b;
+          border-radius: 50%;
+          display: inline-block;
+          animation: pulse 2s infinite;
+        }
+    }
+  }
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
 .notactive{
   pointer-events: none;
 }
@@ -2439,6 +2645,12 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
   &.animate {
     animation: moveToCart 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
   }
+}
+
+.locker-room__loader--center {
+  margin-right: auto;
+  margin-left: auto;
+  display: block;
 }
 
 @keyframes moveToCart {

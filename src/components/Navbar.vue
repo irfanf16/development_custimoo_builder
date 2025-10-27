@@ -1,5 +1,7 @@
 <template>
-    <ul class="d-flex gap-3 main-nav">
+    <ul
+     v-if="$route.name !== 'MerchantShop'"
+    class="d-flex gap-3 main-nav">
       <li class="position-relative" v-if="isCustomerAuthenticated && (company.platform == 'self' || company.platform == 'cdnExceptLogin') && showCartIcon">
         <a  class="icon mr-0" @click="openCartModal">
           <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
@@ -51,7 +53,7 @@
           <router-link class="nav-link fs-2" active-class="active" :to="'/dashboard'">Logout</router-link>
         </b-dropdown>
       </li>
-      
+
     </ul>
 </template>
 

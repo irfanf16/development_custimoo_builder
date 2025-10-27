@@ -1,4 +1,5 @@
 <template>
+  <span>
     <modal :width="screenWidth"
            :resizable="true"
            :scrollable="true"
@@ -12,7 +13,7 @@
         <span class="fs-5 font-weight-bold">Locker Room</span>
         <div class="d-flex gap-2">
           <span v-b-tooltip.leftbottom.hover="'Close locker room'" class="add_new_locker" >
-            <span class="btn btn-secondary light" style="white-space: nowrap" @click="hideVModal('locker-modal')">Close</span>
+            <span class="btn btn-secondary light" style="white-space: nowrap" @click="closeLockerModal(getSelectionMode.shopAddmoreMode ? 'shop-modal' : '')"> Close</span>
           </span>
           <span v-b-tooltip.leftbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
                 role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom >
@@ -23,17 +24,23 @@
       </div>
       <div class="modal-content lockerroom-modal">
         <div id="modal-center-lockerroom" class="modal-body" ref="locker-modal-body">
-          <LockerRoom ref="lockerRoom" :products_fonts="products_fonts"
+          <LockerRoom ref="lockerRoom" :products_fonts="products_fonts" :is_shops_tab_active="isShopsTabActive"
                       @hideLockerRoomModal="hideVModal('locker-modal')"
                       @showCollectionModal="showCollectionModal" @lockerModalOpened="lockerModalOpened"
                       @editCollectionModal="editCollectionModal" :opacityset="opacityset"
-                      @setOpacity="setOpacity"
+                      @setOpacity="setOpacity" @showShopModal="showShopModal" @editShopModal="editShopModal"
                       @isElementOverflowingContainer="isElementOverflowingContainer"
                       />
         </div>
       </div>
 
-      <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
+      <div v-if="shopMode" class="text-right modal-footer">
+        <b-button @click="addProductsToShop" variant="secondary" class="light">Add Products To Shop</b-button>
+        <b-button @click="cancelAddingProductsToShop" variant="secondary" class="light">Cancel</b-button>
+      </div>
+      <template v-else>
+        <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
+        <b-button v-if="$can('create-shop') && selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading" @click="createShop">Create a shop</b-button>
         <b-button
         v-if="canAccessCompanyFeatures() && (selectedCollectionProducts.length > 0)"
           variant="secondary"
@@ -50,10 +57,10 @@
         <b-button v-if="selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading"  @click="addExistingDesignCollection"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
         <b-button v-if="selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
 
-      </div>
-      <div v-else class="text-right modal-footer">
+        </div>
+        <div v-else class="text-right modal-footer">
          <b-button
-          v-if="selectedCollectionProducts.length > 0"
+          v-if="selectedCollectionProducts.length > 0 && !$store.getters.getSelectionMode.shopAddmoreMode"
           variant="primary"
           @click="handleAddToCart"
           :disabled="$store.getters.getCartLoading">
@@ -63,19 +70,26 @@
           </span>
         </b-button>
         <b-button v-if="selectedCollectionProducts.length > 0 && ($store.getters.getSelectionMode.readonly && $store.getters.getSelectionMode.collectionAddmoreMode)" @click="addMoreCollectionModal" variant="secondary">Add Products</b-button>
-      </div>
+        </div>
+      </template>
     </modal>
+    <ShopModal @shop-model-closed="handleShopModalCloseEvent" />
+  </span>
+
 </template>
 
 <script lang="ts">
 import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import LockerRoom from '@/components/LockerRoom.vue'
 import ModalAction from '@/mixins/ModalAction'
-import { canAccessCompanyFeatures} from "@/helpers/Helpers";
+import { canAccessCompanyFeatures, getLockerRoomSelectedProducts, getShopDefaultObject, getShopProductsFromLockerProducts} from "@/helpers/Helpers";
+import ShopModal from '@/components/ShopModal.vue';
+import { find, findIndex, flatMap } from 'lodash';
 
 @Component({
   components: {
-    LockerRoom
+    LockerRoom,
+    ShopModal
   }
 })
 export default class LockerRoomModal extends Mixins(ModalAction){
@@ -83,6 +97,8 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   public ref = this.$refs as Record<any, any>
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
+
+  public isShopsTabActive = false
 
   public company = this.$store.getters.getCompany;
   private opacityset = false;
@@ -92,6 +108,15 @@ export default class LockerRoomModal extends Mixins(ModalAction){
 
   private showCollectionModal = () => {
     this.$emit('showCollectionModal')
+  }
+  private showShopModal = () => {
+    this.$emit('showShopModal')
+  }
+
+  private closeLockerModal(back_to_modal=''){
+    this.hideVModal('locker-modal')
+    this.isShopsTabActive = false
+    this.$store.commit('RESET_SHOP_STATE')
   }
 
   private lockerModalOpened(callback:() => any){
@@ -110,14 +135,28 @@ export default class LockerRoomModal extends Mixins(ModalAction){
     this.$emit('editCollectionModal')
  }
 
+  public editShopModal = () => {
+    this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
+    this.$emit('editShopModal')
+
+
+
+ }
+
   public addMoreCollectionModal = () => {
-    this.$emit('editCollectionModal')
+    if(this.$store.getters.getSelectionMode.shopAddmoreMode){
+      this.$emit('editShopModal')
+    }else{
+      this.$emit('editCollectionModal')
+    }
     this.hideVModal('locker-modal')
-    this.$store.commit('SET_SELECTION_MODE',{
-      readonly:false,
-      collectionAddmoreMode:false,
-      eventProductMode:false,
-      eventCollectionMode:false
+    this.$store.commit('SET_SELECTION_MODE', {
+      readonly: false,
+      collectionAddmoreMode: false,
+      shopAddmoreMode: false,
+      eventProductMode: false,
+      eventCollectionMode: false
     })
   }
 
@@ -149,6 +188,36 @@ export default class LockerRoomModal extends Mixins(ModalAction){
     this.ref['lockerRoom'].addDesignCollection();
     this.$store.commit("Change_Locker_Active_Tab", 3)
   }
+  public createShop () {
+    this.$store.commit('SET_SHOP_MODE', "creating");
+    const shopProducts = getShopProductsFromLockerProducts(getLockerRoomSelectedProducts())
+    let shopData = getShopDefaultObject()
+    shopData.products = shopProducts
+    this.$store.commit('SET_SHOP', shopData)
+    this.showVModal('create-update-shop-modal')
+    this.hideVModal('locker-modal')
+  }
+  public handleShopModalCloseEvent() {
+    // this.$store.commit('SET_SHOP_MODE', null);
+    if(!this.$store.getters.getShopMode) {
+      this.isShopsTabActive = true
+    }
+  }
+  public addProductsToShop() {
+    const shopProducts = getShopProductsFromLockerProducts(getLockerRoomSelectedProducts())
+    this.$store.commit('UPDATE_SHOP', {shopUpdatedData: {products: shopProducts}})
+    this.showVModal('create-update-shop-modal')
+    this.hideVModal('locker-modal')
+  }
+  public cancelAddingProductsToShop() {
+    this.showVModal('create-update-shop-modal')
+    this.hideVModal('locker-modal')
+  }
+
+  get shopMode() {
+    return this.$store.getters.getShopMode
+  }
+
   get selectedCollectionProducts(){
     return this.$store.getters.getSelectedCollectionProducts;
   }

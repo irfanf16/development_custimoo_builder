@@ -104,7 +104,7 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
     return count
   }
 
-  public async uploadExcelFile($event: Record<any, any>, from_locker = false){
+  public async uploadExcelFile($event: Record<any, any>, from_locker = false,  product: Record<string, any> | null = null){
     this.showLoader = true
     const files = $event.target.files ? $event.target.files[0] : null;
     const ext = files.name.split('.').pop();
@@ -150,21 +150,48 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
             updated_roster.push(roster)
           }
         })
-       setTimeout(() => {
-         this.handleRosterItemFocus(0)
-        }, 500)
+        if(!product){
+          setTimeout(() => {
+            this.handleRosterItemFocus(0)
+          }, 500)
+        }
       }else{
         alert('Please upload the file with valid pattern');
         this.showLoader = false;
       }
-      if(from_locker) {
-        // @ts-ignore this variable is available in EditRosterDetails
-        this.product_locker_roster = updated_roster
-        // @ts-ignore this function is available in EditRosterDetails
-        this.fixRosterSizes()
+      if(product) {
+        this.$store.commit("SET_SHOP_PRODUCTS_ROSTERS_UPDATE", {
+          productId: product.id,
+          roster: [],
+        });
+        const rosters = updated_roster.map((roster)=>{
+          const ind = product.sizes.findIndex(s => s.name === roster.size);
+          return {
+            text: roster.text,
+            number: roster.number,
+            size: roster.size,
+            code: roster.size,
+            quantity: roster.quantity > 0  ? roster.quantity : 1,
+            size_index:  ind >= 0 ? ind : 0,
+            information: null
+          }
+        })
+        this.$store.commit("SET_SHOP_PRODUCTS_ROSTERS_UPDATE", {
+          productId: product.id,
+          roster: rosters,
+        });
+        return true
       } else {
-        this.$store.dispatch('setProductsRosters', {roster_data: updated_roster, product_id: this.selectedProduct.id});
+        if(from_locker) {
+          // @ts-ignore this variable is available in EditRosterDetails
+          this.product_locker_roster = updated_roster
+          // @ts-ignore this function is available in EditRosterDetails
+          this.fixRosterSizes()
+        } else {
+          this.$store.dispatch('setProductsRosters', {roster_data: updated_roster, product_id: this.selectedProduct.id});
+        }
       }
+
 
       handleProductPriceUpdate()
       this.showLoader = false;

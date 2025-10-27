@@ -6,6 +6,7 @@ import Main from "@/store/modules/main";
 import Product from "@/store/modules/product";
 import Event from "@/store/modules/event";
 import Cart from "@/store/modules/cart";
+import Shop from "@/store/modules/shop";
 import { saveState, loadState } from '@/indexedDBPersistence.js';
 
 Vue.use(Vuex)
@@ -64,7 +65,8 @@ export default new Vuex.Store({
     Main,
     Product,
     Event,
-    Cart
+    Cart,
+    Shop
   },
   mutations: {
     SET_STATE(state, { path, value }) {

@@ -2,6 +2,8 @@ import Vue from 'vue'
 import VueRouter, { RouteConfig } from 'vue-router'
 import {persistToken,fetchCustomer} from "@/helpers/Helpers";
 import {checkCompanyStatus} from '../../middleware/checkCompany'
+import shopLockerRoom from '@/views/shopLockerRoom.vue';
+
 
 const Home = ()=> import('../views/Home.vue')
 const Addresses = ()=> import('../views/Addresses.vue')
@@ -22,6 +24,8 @@ const UploadCustomDesign = () => import("@/views/UploadCustomDesign.vue")
 const Payment = ()=> import("@/views/Payment.vue")
 const PrivacyPolicy = ()=> import('@/views/PrivacyPolicy.vue')
 const DirectAccessSampleApproval = () => import('@/views/DirectAccessSampleApproval.vue')
+const MerchantShop = () => import('@/views/MerchantShop.vue')
+const ShopPreview = () => import('@/views/ShopPreview.vue')
 
 
 
@@ -32,6 +36,11 @@ const routes: Array<RouteConfig> = [
     path: '/',
     name: 'Home',
     component: Home
+  },
+  {
+    path: '/shop-locker-room',
+    name: 'LockerRoom',
+    component: shopLockerRoom
   },
   {
     path: '/cart',
@@ -144,6 +153,17 @@ const routes: Array<RouteConfig> = [
       path: '/privacy-policy',
       name: 'privacyPolicy',
       component: PrivacyPolicy,
+      meta: { layout: 'minimal' }
+    },
+    {
+      path: '/merchant-shop/:slug',
+      name: 'MerchantShop',
+      component: MerchantShop
+    },
+    {
+      path: '/shop-preview/:slug',
+      name: 'ShopPreview',
+      component: ShopPreview,
       meta: { layout: 'minimal' }
     },
 ]

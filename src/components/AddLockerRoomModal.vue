@@ -316,6 +316,9 @@
           shuffle_color_number = locker_room_product.shuffle_color_number
         }
         let locker_data: Record<any, any> = {
+          addons: this.selectedProduct.active_addons.filter(addon => {
+            return addon.selected;
+          }),
           roster_url: this.rosterUrl,
           room_id: this.room_id,
           product_id: product_id,
@@ -379,6 +382,9 @@
           let {grouped_addons: selected_grouped_addons, ungrouped_addons: selected_ungrouped_addons} = await getStyleSelectedAddons(product_style)
           const scene_ref = Store.getters.getCanvasImage.scene
           let locker = {
+            addons: this.selectedProduct.active_addons.filter(addon => {
+              return addon.selected;
+            }),
             roster_url: this.rosterUrl,
             room_id: this.room_id,
             product_id: this.selectedProduct.product_id,
