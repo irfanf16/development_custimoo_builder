@@ -290,6 +290,9 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         if(append_products) {
           this.$store.commit('SET_PRODUCTS', {products: retrieved_products, append_products: true});
           this.$store.commit('SET_APPLICATION_MOUNTED')
+          this.$store.dispatch("setProductsRosters");
+          setRetrievedProductsCustomTexts(retrieved_products)
+          await initCustomLogosNew(retrieved_products)
           return false;
         } else {
           if(!this.mobileScreen && response_products_obj.current_page == 1 && active_product_id != this.selectedProductId) {

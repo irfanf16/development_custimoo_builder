@@ -1005,8 +1005,9 @@ const getPermissions = async () => {
 const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[], reset=false) => {
   const last_active_product_custom_texts = Store.getters.getLastActiveProductData['product_custom_texts']
   const retrieved_products_custom_texts = retrieved_products.map((retrieved_product: Record<any, any>) => {
-    if(reset)
+    if(reset) {
       return retrieved_product.product_texts
+    }
     const product_id = retrieved_product.id;
     return last_active_product_custom_texts && last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
   })
