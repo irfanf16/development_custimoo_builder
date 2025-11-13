@@ -497,46 +497,56 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
-import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue'
-import YearlyPlanner from '@/components/YearlyPlanner.vue'
-import EventModal from "@/components/EventModal.vue";
-import ErrorMessages from "@/mixins/ErrorMessages";
-import Scene from "@/components/Scene.vue";
-import draggable from "vuedraggable";
-import {http} from "@/httpCommon";
-import ConfirmModal from "@/components/ConfirmModal.vue";
-import {
-  getRandom,
-  classObserver,
-  handleResponseException,
-  getDomDocument,
-  getEditModeDefaultObj, exitFromEditMode, urlToBase64, downloadNodeCollectionPDF, startExportStatusChecker
-  ,getSelectedProductPantones,getColorType,base64ToFile, fetchUrlContent, parseSvgStringFileFromSource,
-  getAllSvgGroups, containsObject, getAllSvgGroupsFor3D
-} from "@/helpers/Helpers";
-import {differenceBy, intersectionBy, union, includes, findIndex} from 'lodash';
-import {
-  LockerProducts,
-  handleMainProducts,
-  exitEditMode,
-  ProductsQueryParamsMixin,
-  CollectionMixin,
-  cartModalData
-} from "@/mixins/LockerProduct";
-import ContactModal from "@/components/ContactModal.vue";
-import { Popper } from 'popper-vue'
-import 'popper-vue/dist/popper-vue.css'
-import ModalAction from "@/mixins/ModalAction";
-import {AxiosError} from "axios";
-import EditRosterDetails from "@/components/EditRosterDetails.vue";
 import CollectionPDF from "@/components/CollectionPDF.vue";
+import ConfirmModal from "@/components/ConfirmModal.vue";
+import ContactModal from "@/components/ContactModal.vue";
+import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue';
+import EditRosterDetails from "@/components/EditRosterDetails.vue";
+import EventModal from "@/components/EventModal.vue";
+import ExistingCollectionModal from '@/components/ExistingCollectionModal.vue';
+import Scene from "@/components/Scene.vue";
+import YearlyPlanner from '@/components/YearlyPlanner.vue';
 import lazyImage from '@/directives/lazyImage.js';
-import {fabric} from 'fabric';
-import {getClosestColor} from '@/pantoneColor'
-import rgbHex from 'rgb-hex'
+import {
+  base64ToFile,
+  classObserver,
+  containsObject,
+  downloadNodeCollectionPDF,
+  exitFromEditMode,
+  fetchUrlContent,
+  getAllSvgGroups,
+  getAllSvgGroupsFor3D,
+  getColorType,
+  getDomDocument,
+  getEditModeDefaultObj,
+  getRandom,
+  getSelectedProductPantones,
+  handleResponseException,
+  parseSvgStringFileFromSource,
+  startExportStatusChecker,
+  urlToBase64
+} from "@/helpers/Helpers";
+import { http } from "@/httpCommon";
+import ErrorMessages from "@/mixins/ErrorMessages";
+import {
+  CollectionMixin,
+  LockerProducts,
+  ProductsQueryParamsMixin,
+  cartModalData,
+  exitEditMode,
+  handleMainProducts
+} from "@/mixins/LockerProduct";
+import ModalAction from "@/mixins/ModalAction";
+import { getClosestColor } from '@/pantoneColor';
+import { AxiosError } from "axios";
+import { fabric } from 'fabric';
+import { differenceBy, findIndex, includes, intersectionBy, union } from 'lodash';
+import { Popper } from 'popper-vue';
+import 'popper-vue/dist/popper-vue.css';
+import rgbHex from 'rgb-hex';
 import ClickOutside from 'vue-click-outside';
+import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator';
+import draggable from "vuedraggable";
 
 
 
@@ -690,13 +700,13 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   public isSafari = (navigator.userAgent.toLowerCase().indexOf('safari') != -1) && !(navigator.userAgent.toLowerCase().indexOf('chrome') > -1)
   public renameRef = "";
   public lockerToRename: Record<any, any> = {};
-  public locker_roster_id: number = 0
+  public locker_roster_id = 0
   public showLoader = false
   public filtered_locker_products = [];
   public localLockers: Record<any, any> = [];
   public customerShops: Record<any, any>[] = []
   public shareShopId?: string | null = null;
-  public loader: boolean = false;
+  public loader = false;
 
   public getCustomeShops() {
     this.loader = true
@@ -1253,7 +1263,7 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
       this.design_moved_to_locker = target.target.getAttribute('data-title')
       const pos = target.target.getBoundingClientRect()
       let targetEl = {getAttribute: (title)=>`Move to ${target.target.getAttribute(title)}`}
-      this.showTooltip({clientX: (pos.left + 130), clientY: (pos.top - 135), target: targetEl})
+      this.showTooltip({clientX: (pos.left + 130), clientY: (pos.top - 135), target: targetEl as unknown as EventTarget} as MouseEvent )
     }else{
       this.hideTooltip()
     }
@@ -1329,13 +1339,48 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
     return this.$store.getters.getExportingCollections
   }
 
-  private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
-    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>;
-    element.style.opacity = '1'
-    element.style.zIndex = '100'
-    element.style.left = ($event.clientX + (10 + leftOffset)) + 'px'
-    element.style.top = ($event.clientY + (17 + topOffset)) + 'px'
-    element.innerHTML = $event.target.getAttribute('data-title')
+  private showTooltip($event: MouseEvent, leftOffset = 0, topOffset = 0) {
+    const tooltip = this.$el.querySelector(".hover_tooltip") as HTMLElement;
+    if (!tooltip) return;
+
+    const tooltipText = ($event.target as HTMLElement).getAttribute("data-title");
+    if (!tooltipText) return;
+
+    tooltip.innerHTML = tooltipText;
+    tooltip.style.opacity = "1";
+    tooltip.style.zIndex = "100";
+    tooltip.style.position = "fixed"; // important for viewport positioning
+
+    // Small base offsets
+    const padding = 10;
+    const mouseX = $event.clientX;
+    const mouseY = $event.clientY;
+
+    // Temporarily show to measure size
+    tooltip.style.left = "0px";
+    tooltip.style.top = "0px";
+    const rect = tooltip.getBoundingClientRect();
+
+    // Calculate preferred position (right & below cursor)
+    let left = mouseX + padding + leftOffset;
+    let top = mouseY + padding + topOffset;
+
+    // --- Boundary checks ---
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // If tooltip would go beyond right edge, show on the left instead
+    if (left + rect.width > viewportWidth) {
+      left = mouseX - rect.width - padding;
+    }
+
+    // If tooltip would go beyond bottom edge, move it up
+    if (top + rect.height > viewportHeight) {
+      top = mouseY - rect.height - padding;
+    }
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
   }
 
   private hideTooltip() {

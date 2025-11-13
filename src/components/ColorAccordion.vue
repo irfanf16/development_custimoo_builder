@@ -1,6 +1,6 @@
 <template>
   <div class="accordion color-accordion" role="tablist">
-    <span class="hover_tooltip" ref="hoover_pattern_tooltip"></span>  
+    <span class="hover_tooltip" ref="hoover_pattern_tooltip"></span>
     <b-card no-body v-for="(svgElement, index) in svgGroups" :key="'color-accordion'+index">
       <b-card-header header-tag="header" class="p-0" role="tab">
         <b-button class="color-accordion-header" block v-b-toggle="'accordion-'+(index+1)" @click="showColor(index, svgElement.gradient_colors? gradient_index === undefined? 0 : gradient_index : undefined)">
@@ -296,14 +296,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Prop, Watch, Mixins} from 'vue-property-decorator'
-import {LockerProducts, ProductsQueryParamsMixin} from '../mixins/LockerProduct'
+import { getColorType, getLockerColors } from '@/helpers/Helpers'
 import colorPicker from '@caohenghu/vue-colorpicker'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import ColorsTabMixin from '../mixins/ColorsTabMixin'
-import {getColorType} from '@/helpers/Helpers'
-import {
-  getLockerColors
-} from "@/helpers/Helpers";
+import { LockerProducts, ProductsQueryParamsMixin } from '../mixins/LockerProduct'
 
 @Component<ColorAccordion>({
   components: {
@@ -385,13 +382,48 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     return groupPattern && groupPattern.name === pattern.name;
   }
 
-  private showTooltip($event: Record<any, any>, leftOffset = 0, topOffset = 0) {
-    let element = this.$el.querySelector(".hover_tooltip") as Record<any, any>;
-    element.style.opacity = '1'
-    element.style.zIndex = '100'
-    element.style.left = ($event.clientX + (leftOffset)) + 'px'
-    element.style.top = ($event.clientY + (5 + topOffset)) + 'px'
-    element.innerHTML = $event.target.getAttribute('data-title')
+  private showTooltip($event: MouseEvent, leftOffset = 0, topOffset = 0) {
+    const tooltip = this.$el.querySelector(".hover_tooltip") as HTMLElement;
+    if (!tooltip) return;
+
+    const tooltipText = ($event.target as HTMLElement).getAttribute("data-title");
+    if (!tooltipText) return;
+
+    tooltip.innerHTML = tooltipText;
+    tooltip.style.opacity = "1";
+    tooltip.style.zIndex = "100";
+    tooltip.style.position = "fixed"; // important for viewport positioning
+
+    // Small base offsets
+    const padding = 10;
+    const mouseX = $event.clientX;
+    const mouseY = $event.clientY;
+
+    // Temporarily show to measure size
+    tooltip.style.left = "0px";
+    tooltip.style.top = "0px";
+    const rect = tooltip.getBoundingClientRect();
+
+    // Calculate preferred position (right & below cursor)
+    let left = mouseX + padding + leftOffset;
+    let top = mouseY + padding + topOffset;
+
+    // --- Boundary checks ---
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // If tooltip would go beyond right edge, show on the left instead
+    if (left + rect.width > viewportWidth) {
+      left = mouseX - rect.width - padding;
+    }
+
+    // If tooltip would go beyond bottom edge, move it up
+    if (top + rect.height > viewportHeight) {
+      top = mouseY - rect.height - padding;
+    }
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
   }
 
   private hideTooltip() {
