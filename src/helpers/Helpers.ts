@@ -3610,7 +3610,7 @@ const getCompanyBaseUrl = () => {
   if(company) {
     baseUrl = company.company_domain
     if(company.subpage_url) {
-      baseUrl = `${baseUrl}/${company.subpage_url}`
+      baseUrl = `${baseUrl}/${company.customizer_page_url}`
     }
     baseUrl = `${baseUrl}/#/`
   }
