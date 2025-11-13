@@ -87,10 +87,12 @@
 
                   <a v-if="order.additional_fields && !order.additional_fields.hasOwnProperty('is_manual_order')" @click="openAWSFileFromOrder(order)" class="btn btn-dark mx-2 fs-2">PDF</a>
                   <router-link  :to="`order/${order.id}/detail`" class="btn btn-dark mx-2 fs-2">Details</router-link>
-                  <template v-for="(item, index) in order.items">
-                      <button class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
-                              v-if="item.status === 'submitted_for_factory_review'" @click.stop="cancelOrder(order)">Cancel</button>
-                  </template>
+                      <button
+                        class="btn btn-dark mx-2 cursor-pointer fs-2" :key="`${order.id}_cancel_${index}`"
+                        v-if="order.items.every((item)=> item.status === 'submitted_for_factory_review')"
+                        @click.stop="cancelOrder(order)">
+                        Cancel
+                      </button>
                   <div class="btn d-inline-flex accordion-icon">
                     <b-icon
                       :icon="isAccordionOpen === index ? 'chevron-right' : 'chevron-down'"
@@ -202,21 +204,21 @@
 </template>
 
 <script lang="ts">
-import {Component, Mixins, Prop, Vue} from "vue-property-decorator";
-import ErrorMessages from "@/mixins/ErrorMessages";
-import {http} from "@/httpCommon";
-import moment from "moment";
+import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
+import ConfirmModal from "@/components/ConfirmModal.vue";
+import Search from '@/components/Search.vue';
 import {
   CustimooOrderFlowStatuses,
   exitFromEditMode, getReorderDataDefaultObject,
   handleResponseException, isGetCategories, navigateToCustomProduct,
   resetLastActiveProductData, santaClone, updateOrderProducts
 } from '@/helpers/Helpers';
-import Search from '@/components/Search.vue';
-import {query} from "vue-gtag";
-import AddLockerRoomModal from "@/components/AddLockerRoomModal.vue";
+import { http } from "@/httpCommon";
+import ErrorMessages from "@/mixins/ErrorMessages";
 import ModalAction from "@/mixins/ModalAction";
-import ConfirmModal from "@/components/ConfirmModal.vue";
+import moment from "moment";
+import { query } from "vue-gtag";
+import { Component, Mixins, Prop, Vue } from "vue-property-decorator";
 
 Vue.filter('orderDate', function(value:string) {
   if (value) {
