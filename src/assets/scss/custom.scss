@@ -6257,6 +6257,9 @@ $fontSize: 0.5;
 }
 
 .vm--container{
+    &.password-modal{
+        z-index: 1000 !important;
+    }
     &.absolute-modals{
         position: absolute;
         padding-bottom: 100px;

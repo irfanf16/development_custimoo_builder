@@ -3604,6 +3604,19 @@ const createDefaultPlayer = (
   };
 };
 
+const getCompanyBaseUrl = () => {
+  const company = Store.getters.getCompany
+  let baseUrl = location.host + "/#/"  
+  if(company) {
+    baseUrl = company.company_domain
+    if(company.subpage_url) {
+      baseUrl = `${baseUrl}/${company.subpage_url}`
+    }
+    baseUrl = `${baseUrl}/#/`
+  }
+  return baseUrl
+}
+
 
 
 
@@ -3629,7 +3642,7 @@ export {
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
   findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,isValidEmail,
   containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures, getShopDefaultObject, getShopProductsFromLockerProducts, getLockerRoomSelectedProducts, getShopProductDefaultObject, getImagePreview, showToastedMessage, can,
-  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice
+  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, getCompanyBaseUrl
 
 };
 

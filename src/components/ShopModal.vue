@@ -83,7 +83,7 @@
                 <div class="share-popover" role="dialog" aria-label="Share" ref="sharePopover">
                   <!-- URL row -->
                   <div class="row url-row m-0">
-                    <span class="url-prefix">{{company.company_domain}}/#/merchant-shop/{{shop.slug}}</span>
+                    <span class="url-prefix">{{companyDomain}}merchant-shop/{{shop.slug}}</span>
                     <input class="url-input" v-model="shop.slug" @keyup.enter="checkSlugAvailability"
                       @input="onSlugInput" />
                     <button class="square-btn" title="Check slug availbility" @click="checkSlugAvailability">
@@ -298,7 +298,7 @@ import datePicker from 'vue-bootstrap-datetimepicker';
 import ModalAction from "@/mixins/ModalAction";
 import { CustomerShopMixin } from "@/mixins/LockerProduct"
 import Swal from 'sweetalert2';
-import { handleResponseException, santaClone, getImagePreview, showToastedMessage, checkIsEmpty, getShopDefaultObject, getShopLastProductSortOrder, getShopProductDefaultObject,getDomDocument, formatCustomPrice } from '@/helpers/Helpers';
+import { handleResponseException, santaClone, getImagePreview, showToastedMessage, checkIsEmpty, getShopDefaultObject, getShopLastProductSortOrder, getShopProductDefaultObject,getDomDocument, formatCustomPrice, getCompanyBaseUrl } from '@/helpers/Helpers';
 import VsToast from '@vuesimple/vs-toast';
 import moment from "moment";
 import { find, maxBy } from 'lodash';
@@ -318,6 +318,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   //hooks ends
 
   //data props starts
+  public companyDomain = getCompanyBaseUrl()
   private storageUrl = process.env.VUE_APP_STORAGE_URL
   public showLoader = false
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
@@ -408,7 +409,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
 
   public fetchUrlProducts() {
     this.showLoader = true;
-    let productsUrl = this.productsUrl.replace(`${this.company.company_domain}/#/`, '')
+    let productsUrl = this.productsUrl.replace(`${this.companyDomain}/#/`, '')
     http.post('products-from-url', {product_url: productsUrl}).then(successResponse => {
       this.showLoader = false
       const urlProducts = successResponse.data.result
@@ -831,7 +832,7 @@ public formatProdCustomPrice(product:any){
 
 copyShareLink() {
     const done = () => { this.shareCopied = true; setTimeout(() => (this.shareCopied = false), 1200); };
-    const text = `${this.company.company_domain}/#/merchant-shop/${this.shop.slug}`
+    const text = `${getCompanyBaseUrl()}merchant-shop/${this.shop.slug}`
 
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(text).then(done).catch(done);

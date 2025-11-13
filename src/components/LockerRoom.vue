@@ -388,7 +388,7 @@
                           <div class="share-form">
                             <b-form inline>
                               <b-form-input @mouseenter="markText"
-                                            :value="`${baseUrl}merchant-shop/${customerShop.slug}`"
+                                            :value="`${companyDomain}merchant-shop/${customerShop.slug}`"
                               ></b-form-input>
                               <b-button variant="primary" @click="onCopyShopLink(customerShop)">Copy Link</b-button>
                             </b-form>
@@ -517,6 +517,7 @@ import {
   getAllSvgGroups,
   getAllSvgGroupsFor3D,
   getColorType,
+  getCompanyBaseUrl,
   getDomDocument,
   getEditModeDefaultObj,
   getRandom,
@@ -676,7 +677,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   }
 
   private storageUrl = process.env.VUE_APP_STORAGE_URL
-  private baseUrl = location.host + "/#/"
+  private companyDomain = getCompanyBaseUrl()
   public ref = this.$refs as Record<any, any>
   public colors: [] = []
   public confirmMessage = 'Do you really want to delete?'; // Default message
@@ -1575,7 +1576,7 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
 
   public onCopyShopLink(customerShop) {
     try {
-      navigator.clipboard.writeText(`${this.baseUrl}merchant-shop/${customerShop.slug}`);
+      navigator.clipboard.writeText(`${this.companyDomain}merchant-shop/${customerShop.slug}`);
       this.showToast('Shareable link was copied to your clipboard.', 'success');
     } catch (err) {
       alert('Oops, unable to copy');
