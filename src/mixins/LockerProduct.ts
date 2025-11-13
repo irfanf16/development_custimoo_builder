@@ -2231,7 +2231,7 @@ export class CollectionMixin extends Mixins(ErrorMessages) {
         }
         let shared_url = "";
         if (collection.shared_url) {
-          shared_url += collection.shared_url;
+          shared_url = collection.shared_url;
         }
         else {
           let res = await http.post('collection/link', collections)

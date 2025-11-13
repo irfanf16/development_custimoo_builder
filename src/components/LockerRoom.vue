@@ -575,7 +575,6 @@ interface FactoryProduct {
   is_custom_product?: boolean;
 }
 
-
 @Component<LockerRoom>({
   components: {
     CollectionPDF,
@@ -595,6 +594,7 @@ interface FactoryProduct {
     ClickOutside,
   },
   mounted() {
+    this.$store.dispatch("setCollectionMode","LOCKER_STORYBOARD")
     const doc = getDomDocument() as Record<any, any>;
     doc.addEventListener('click', this.onClickOutside);
     let href: any = location.href;
@@ -654,6 +654,9 @@ interface FactoryProduct {
       return (id: number) => {
         return this.getExportingCollections.some((collection: { id: number }) => collection.id === id);
       };
+    },
+    collectionMode() {
+      return !!this.$store.getters.getCollectionMode?.COLLECTION;
     }
   }
 })

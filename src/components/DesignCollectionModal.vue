@@ -142,7 +142,7 @@
    <div class="modal-footer">
       <div class="d-flex align-items-center justify-content-end w-100 gap-1">
         <b-button @click="hideCollectionModal" variant="secondary" class="light">Cancel</b-button>
-        <b-button v-if="!lockerStoryBoard" @click="openLockerModel">Add more</b-button>
+        <b-button v-if="!lockerStoryBoard && collectionMode" @click="openLockerModel(true,'locker_room')">Add more</b-button>
         <b-button variant="secondary" @click="saveCollectionForm">Save</b-button>
       </div>
     </div>
@@ -188,6 +188,9 @@ import Store from "@/store";
       return (id: number) => {
         return this.getExportingCollections.some((collection: { id: number }) => collection.id === id);
       };
+    },
+    collectionMode() {
+      return !!this.$store.getters.getCollectionMode?.COLLECTION;
     }
   }
 })
