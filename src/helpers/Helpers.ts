@@ -3605,16 +3605,7 @@ const createDefaultPlayer = (
 };
 
 const getCompanyBaseUrl = () => {
-  const company = Store.getters.getCompany
-  let baseUrl = location.host + "/#/"  
-  if(company) {
-    baseUrl = company.company_domain
-    if(company.subpage_url) {
-      baseUrl = `${baseUrl}/${company.customizer_page_url}`
-    }
-    baseUrl = `${baseUrl}/#/`
-  }
-  return baseUrl
+  return window.location.origin + window.location.pathname + "#/"
 }
 
 
