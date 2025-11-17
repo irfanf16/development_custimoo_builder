@@ -344,6 +344,10 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
   public async addRosterItem() {
     this.show_roster_change_warning = true
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.product_locker_roster[0])));
+    let prevPlayer = this.product_locker_roster.length > 0 ? this.product_locker_roster[this.product_locker_roster.length -1] : null;
+    if(prevPlayer) {
+      roster_items.size = prevPlayer.size;
+    }
     this.product_locker_roster = Array.isArray(this.product_locker_roster) ? [...this.product_locker_roster, roster_items] : [this.product_locker_roster, roster_items];
   }
 
