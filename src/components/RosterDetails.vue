@@ -148,9 +148,9 @@
             <div class="shirt-size" :class="{ 'no-name-number': !(custom_name_index != -1 || custom_number_index != -1)}">
               <b-form-select @focus="handleRosterItemFocus(productRosterItemIndex)"
                              @change="handleRosterUpdate($event, 'size', productRosterItemIndex)"
-                             :value="product_roster_item.size" ref="size-select"
+                             :value="normalizeProductSizeText(product_roster_item.size)" ref="size-select"
               >
-                <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="productSize.text">
+                <b-form-select-option v-for="(productSize, psIdx) in productSizes" :key="psIdx" :value="normalizeProductSizeText(productSize.text)">
                   {{ productSize.text }}</b-form-select-option>
               </b-form-select>
               <div v-if="false" class="tooltip guide">Press enter to view the options</div>
@@ -211,7 +211,7 @@ import {cartModalData} from "@/mixins/LockerProduct";
 import ModalAction from "@/mixins/ModalAction";
 import {HideUpdateLockerButton} from "@/mixins/SelectedProductMixin";
 import RosterTabMixin from "@/mixins/RosterTabMixin";
-import {handleProductPriceUpdate, downloadTemplate, isEcommercePlatform} from "@/helpers/Helpers";
+import {handleProductPriceUpdate, downloadTemplate, isEcommercePlatform,normalize } from "@/helpers/Helpers";
 import AddToCartButton from "@/components/AddToCartButton.vue";
 import AdminSalesRepresentativeModal from '@/components/AdminSalesRepresentativeModal.vue'
 
@@ -572,6 +572,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
     const self: Record<any, any> = this
     self.$eventBus.$emit('saveRosterToLocker', this.isEditingFromLocker);
     this.hideVModal('rostermodal')
+  }
+
+  public normalizeProductSizeText(productSize){
+    return normalize(productSize)
   }
 
   /*

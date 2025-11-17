@@ -1216,7 +1216,7 @@ const ProductAttributes:Module<any, any> = {
             //@ts-ignore
             payload_product_roster.forEach(payload_product_roster_item => {
               if(isAbandonedSize(product_sizes, payload_product_roster_item.size)) {
-                payload_product_roster_item.size = product_sizes[0].name
+                payload_product_roster_item.size = ''
               }
             })
           }
@@ -1229,14 +1229,14 @@ const ProductAttributes:Module<any, any> = {
           if('roster_index' in payload) {
             let product_roster_item = state.products_rosters[payload.product_id][payload.roster_index];
             if (payload.roster_data.size && isAbandonedSize(product_sizes, payload.roster_data.size)) {
-              product_roster_item.size = product_sizes[0].name
+              product_roster_item.size = ''
             }
             product_roster_item = Object.assign(product_roster_item, payload.roster_data)
             Vue.set(state.products_rosters[payload.product_id], payload.roster_index, product_roster_item)
           } else {
             payload.roster_data.forEach( payload_product_roster_item => {
               if(isAbandonedSize(product_sizes, payload_product_roster_item.size)) {
-                payload_product_roster_item.size = product_sizes[0].name
+                payload_product_roster_item.size = ''
               }
             })
             Vue.set(state.products_rosters, payload.product_id, payload.roster_data)

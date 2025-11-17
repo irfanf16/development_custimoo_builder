@@ -2847,9 +2847,16 @@ const isEcommercePlatform = () => {
   return ['shopify', 'wordpress', 'bigcommerce'].includes(company?.platform)
 }
 
+
+const normalize = str => str?.replace(/[-–—]/g, "-")?.trim()
+
+
 const isAbandonedSize = (sizes, size_code) => {
+
+  if (!size_code) return true; // treat undefined or empty size_code as abandoned
+
   const is_size_found =  find(sizes,  (size) => {
-    return size.name == size_code
+    return normalize(size.name) == normalize(size_code)
   })
   return !is_size_found;
 }
@@ -3633,7 +3640,9 @@ export {
   isAbandonedSize, getProductAddonInfoDefaultObject, includesLoose, handleExistingAddonsSelection, hasCompanyPermission,
   findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,isValidEmail,
   containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures, getShopDefaultObject, getShopProductsFromLockerProducts, getLockerRoomSelectedProducts, getShopProductDefaultObject, getImagePreview, showToastedMessage, can,
-  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, getCompanyBaseUrl
+
+  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, normalize,getCompanyBaseUrl
+
 
 };
 
