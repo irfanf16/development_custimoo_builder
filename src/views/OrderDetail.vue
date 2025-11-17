@@ -1378,6 +1378,7 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
   }
 
   updateOrderProducts(order_item: Record<any, any>, order_item_status_activity: number) {
+    console.log("order_item", order_item);
     updateOrderProducts(order_item, order_item_status_activity);
   }
 

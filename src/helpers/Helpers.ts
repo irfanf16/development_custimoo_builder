@@ -3614,6 +3614,13 @@ const createDefaultPlayer = (
 const getCompanyBaseUrl = () => {
   return window.location.origin + window.location.pathname + "#/"
 }
+const getCustomProductFilePathInfo = (): { name: string, url: string, extension: string } => {
+  return {
+    name: "Custom Design",
+    url: "placeholders/custom-design.svg",
+    extension: "svg",
+  }
+}
 
 
 
@@ -3641,7 +3648,7 @@ export {
   findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,isValidEmail,
   containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures, getShopDefaultObject, getShopProductsFromLockerProducts, getLockerRoomSelectedProducts, getShopProductDefaultObject, getImagePreview, showToastedMessage, can,
 
-  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, normalize,getCompanyBaseUrl
+  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, normalize,getCompanyBaseUrl,getCustomProductFilePathInfo
 
 
 };

@@ -488,7 +488,8 @@ import {http} from "@/httpCommon";
 import {
   createOrUpdateOrderUpdateDataState, getCustomLockers, getCustomProductData, getEditModeDefaultObj,
   getExtensionFromString, getOrderUpdateIdentifier, handleProductPriceUpdate, handleResponseException,
-  isFilePreviewable, santaClone, downloadTemplate
+  isFilePreviewable, santaClone, downloadTemplate,
+  getCustomProductFilePathInfo
 } from "@/helpers/Helpers";
 import {find, findIndex} from "lodash"
 import {cartModalData} from "@/mixins/LockerProduct";
@@ -756,7 +757,19 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
   }
 
   public getPayload(return_object=false) {
+    const custom_product_path_info = getCustomProductFilePathInfo()
     const { edit_mode_info_obj } = this.product
+    const product_edit_mode_object = this.$store.getters.getProductEditInfoObject
+    let back_image = custom_product_path_info.url
+    let front_image = custom_product_path_info.url
+    if(product_edit_mode_object.type == "order_product" && product_edit_mode_object.order_product_info) {
+      if(this.customizeProduct && this.customizeProduct.edit_mode_info_obj) {
+        const factoryProductIndex = this.customizeProduct.edit_mode_info_obj.factory_product_index
+        const activeFactoryProduct = product_edit_mode_object.order_product_info.factory_products[factoryProductIndex]
+        back_image = activeFactoryProduct.back_image
+        front_image = activeFactoryProduct.front_image
+      }    
+    }
     let payload_obj = {
       addons: this.getSelectedAddons(),
       //assets property added in while storing item in cart
@@ -767,13 +780,14 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
       pdf_file: "",
       style_id: this.product.selected_style_id,
       design_id: -1,
-      back_image: "",
+      back_image: back_image,
       product_id: this.product.id,
       sku_number: this.product?.sku?.sku_number,
       //sort_order property added in while storing item in cart
       style_name: this.getSelectedStyle().name,
       svg_groups: [],
-      front_image: "",
+      front_image: front_image,
+      svg_parts: [],
       groupcolors: [],
       logo_colors: [],
       custom_logos: [],
@@ -836,7 +850,7 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
         const stringify_value = [
           "addons", "colors", "svg_groups", "groupcolors", "logo_colors", "custom_logos", "defaultcolors", "custom_logo_svgs", "ecommerce_cart_id",
           "ecommerce_post_id", "is_custom_product", "ecommerce_variant_id", "product_custom_texts", "product_price_object", "product_roster_detail",
-          "product_custom_text_objects", "reorder_data", "assets", "existing_assets", "deleted_assets", "reorder_data"
+          "product_custom_text_objects", "reorder_data", "assets", "existing_assets", "deleted_assets", "reorder_data", "svg_parts"
         ].includes(payload_obj_key)
         if(stringify_value) {
           factory_product.append(`factory_product[${payload_obj_key}]`, JSON.stringify(payload_obj_value));
@@ -851,75 +865,6 @@ export default class CustomDesign extends Mixins(cartModalData, ErrorMessages) {
       }
     }
     return return_object ? payload_obj : factory_product
-    // factory_product.append("factory_product[addons]", JSON.stringify(this.getSelectedAddons()));
-    // //assets property added in while storing item in cart
-    // factory_product.append("factory_product[colors]", "[]");
-    // //status property added in while storing item in cart
-    // factory_product.append("factory_product[svg_url]", "");
-    // factory_product.append("factory_product[sync_id]", "");
-    // factory_product.append("factory_product[pdf_file]", "");
-    // factory_product.append("factory_product[style_id]", this.product.selected_style_id as string);
-    // factory_product.append("factory_product[design_id]", "-1");
-    // factory_product.append("factory_product[back_image]", '');
-    // factory_product.append("factory_product[product_id]", this.product.id as string);
-    // factory_product.append("factory_product[sku_number]", this.product?.sku?.sku_number);
-    // //sort_order property added in while storing item in cart
-    // factory_product.append("factory_product[style_name]", this.getSelectedStyle().name as string);
-    // factory_product.append("factory_product[svg_groups]", "[]");
-    // factory_product.append("factory_product[front_image]", '');
-    // factory_product.append("factory_product[groupcolors]", '[]');
-    // factory_product.append("factory_product[logo_colors]", '[]');
-    // factory_product.append("factory_product[custom_logos]", '[]');
-    // factory_product.append("factory_product[product_name]", `${this.product.name}`);
-    // factory_product.append("factory_product[product_type]", this.product.product_type);
-    // //reorder_data property is added at method end
-    // factory_product.append("factory_product[defaultcolors]", '[]');
-    // factory_product.append("factory_product[production_url]", "");
-    // factory_product.append("factory_product[back_image_short]", "");
-    // factory_product.append("factory_product[custom_logo_svgs]", '[]');
-    // factory_product.append("factory_product[fixed_logo_index]", this.product?.fixed_logo_index ? this.product?.fixed_logo_index : 0);
-    // factory_product.append("factory_product[ecommerce_cart_id]", "null");
-    // factory_product.append("factory_product[ecommerce_post_id]", "null");
-    // factory_product.append("factory_product[front_image_short]", "");
-    // factory_product.append("factory_product[is_custom_product]", "true");
-    // factory_product.append("factory_product[measurement_ratio]", this.product.measurement_ratio);
-    // factory_product.append("factory_product[product_name_custom]", `${this.product.name}-Custom Design`);
-    // factory_product.append("factory_product[sizechart_reference]", this.product?.sku?.sizechart_reference);
-    // factory_product.append("factory_product[ecommerce_variant_id]", "null");
-    // factory_product.append("factory_product[product_custom_texts]", '[]');
-    // factory_product.append("factory_product[product_price_object]", JSON.stringify(this.getProductPriceObject()));
-    // factory_product.append("factory_product[product_roster_detail]", JSON.stringify(this.product.product_roster));
-    // factory_product.append("factory_product[minimum_order_quantity]", this.product?.sku?.minimum_order_quantity);
-    // factory_product.append("factory_product[custom_product_placeholder]", `placeholders/custom-design.svg`);
-    // factory_product.append("factory_product[minimum_order_quantity_type]", this.product?.sku?.minimum_order_quantity_type);
-    // factory_product.append("factory_product[product_custom_text_objects]", JSON.stringify({common: [], roster: []}));
-    //
-    // //new uploaded files stored in base64
-    // this.product_assets.forEach((product_asset) => {
-    //   factory_product.append("product_assets[]", product_asset.file);
-    // });
-    //
-    // let existing_assets = santaClone(this.product.existing_assets);
-    // existing_assets = existing_assets.map(existing_asset => {
-    //   delete existing_asset.existing_asset
-    //   return existing_asset
-    // })
-    // factory_product.append("factory_product[existing_assets]", JSON.stringify(existing_assets));
-    // if(edit_mode_info_obj.mode) {
-    //   const edit_mode = edit_mode_info_obj.mode;
-    //   if(this.deleted_assets.length > 0) {
-    //     factory_product.append("factory_product[deleted_assets]", JSON.stringify(this.deleted_assets));
-    //   }
-    //   if(edit_mode == "cart_edit") {
-    //     factory_product.append("_method", 'PUT');
-    //   }
-    //   factory_product.append("factory_product[id]", edit_mode_info_obj.factory_product_id);
-    //   factory_product.append("factory_product[factory_product_index]", edit_mode_info_obj.factory_product_index);
-    //   if(edit_mode === "reorder") {
-    //     factory_product.append("factory_product[reorder_data]", JSON.stringify(this.product.reorder_data));
-    //   }
-    // }
-    // return factory_product
   }
 
   public async validateAssets() {

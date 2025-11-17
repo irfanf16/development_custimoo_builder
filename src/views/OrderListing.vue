@@ -116,11 +116,7 @@
                             <template v-for="(product,factoryProductIndex) in item.factory_products">
                               <tr class="product-details" :key="indexItem + factoryProductIndex + index">
                                 <td>{{ product.product_name }}</td>
-                                <template v-if="!product.shop_id && product.is_custom_product">
-                                  <td class="image"><img :src="`${storage_url}${product.custom_product_placeholder}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                                  <td class="image"><img :src="`${storage_url}${product.custom_product_placeholder}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
-                                </template>
-                                <template v-else>
+                                <template>
                                   <td class="image"><img :src="`${storage_url}${product.front_image}`" class="img-thumbnail img-fluid" style="width: 80px"></td>
                                   <td class="image">
                                     <img v-if="product.back_image" :src="`${storage_url}${product.back_image}`" class="img-thumbnail img-fluid" style="width: 80px">
