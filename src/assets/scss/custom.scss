@@ -2696,6 +2696,12 @@ button {
     }
 }
 
+.confirm-copy-modal{
+    .modal-body{
+        padding: 1rem;
+    }
+}
+
 .order-details-area {
     overflow: hidden;
     display: flex;

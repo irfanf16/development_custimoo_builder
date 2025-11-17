@@ -186,6 +186,8 @@
 
           <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
             <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem">Add Player</button>
+            <button class="btn btn-secondary w-auto fw-bold" v-if="(product_locker_roster.length > 0)" @click="copyRoster(product_locker_roster)">Copy Roster</button>
+            <button class="btn btn-secondary w-auto fw-bold" v-if="copiedRoster.isAnyRosterCopied && locker_id != copiedRoster.copiedRosterFromId" @click="pasteRoster">Paste Roster</button>
             <button class="btn btn-secondary w-auto fw-bold light" @click="close">
               Close
             </button>
@@ -193,7 +195,7 @@
 
           <div class="d-flex justify-content-center mt-3">
             <b-button v-if="!loading" aria-label="Update Roster"
-                      class="mx-2 px-5 w-25" variant="secondary" @click="updateRoster">Update Roster
+                      class="mx-2 px-5" variant="secondary" @click="updateRoster">Update Roster
             </b-button>
             <b-button v-else aria-label="Update Roster" class="mx-2 px-5 w-25" variant="secondary" @click="updateRoster">
               <img width="20" height="20" src="@assets/images/loading.gif"/>
@@ -216,6 +218,8 @@
         </div>
       </div>
     </div>
+    <confirm-modal class="confirm-copy-modal" message="You already have a roster copied. Do you want to copy this product’s roster instead?"
+                   cancel_text="Cancel" confirm_text="Yes, copy this roster" ref="confirm-recopy" name="confirm-recopy"></confirm-modal>
   </modal>
 </template>
 
@@ -226,9 +230,15 @@ import ErrorMessages from '@/mixins/ErrorMessages';
 import ModalAction from "@/mixins/ModalAction";
 import {http} from "@/httpCommon";
 import RosterTabMixin from "@/mixins/RosterTabMixin";
+import ConfirmModal from './ConfirmModal.vue';
 
 
-@Component<EditRosterDetails>({})
+
+@Component<EditRosterDetails>({
+    components: {
+    ConfirmModal
+  }
+})
 export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction, RosterTabMixin) {
   /*
   * component props starts
@@ -276,6 +286,10 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
 
   get company() {
     return this.$store.getters.getCompany
+  }
+
+  get copiedRoster(): Record<any, any> {
+    return this.$store.getters.getCopiedRoster
   }
 
   get totalQuantity() {
@@ -343,6 +357,10 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
 
   public async addRosterItem() {
     this.show_roster_change_warning = true
+    if(!this.product_locker_roster || this.product_locker_roster.length == 0){
+      this.product_locker_roster = [this.resetRosterItem(this.default_obj)];
+      return;
+    }
     let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.product_locker_roster[0])));
     let prevPlayer = this.product_locker_roster.length > 0 ? this.product_locker_roster[this.product_locker_roster.length -1] : null;
     if(prevPlayer) {
@@ -442,20 +460,33 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
 
   public updateRoster(){
     this.loading = true;
-    const product_roster = JSON.stringify(this.product_locker_roster);
-    const payload = {
-      locker_product_id: this.locker_id,
-      product_roster_detail: product_roster
+    let anySizeEmpty = false;
+    this.product_locker_roster.forEach((product_roster) => {
+      if(product_roster.size == ""){
+        anySizeEmpty = true;
+        this.showToast("Please make sure all roster rows have a size selected","error")
+      }
+    })
+
+    if(!anySizeEmpty){
+      const product_roster = JSON.stringify(this.product_locker_roster);
+      const payload = {
+        locker_product_id: this.locker_id,
+        product_roster_detail: product_roster
+      }
+      http.post(`update-roster`, payload).then((res) => {
+        this.hide()
+        this.loading = false
+        this.showToast('Roster updated Successfully', 'success');
+        this.$emit('roster-updated',{id: this.locker_id, totalQuantity: this.totalQuantity});
+      }).catch(err => {
+        this.loading = false
+        this.showToast('Something went wrong, pleas try again', 'error');
+      });
     }
-    http.post(`update-roster`, payload).then((res) => {
-      this.hide()
-      this.loading = false
-      this.showToast('Roster updated Successfully', 'success');
-      this.$emit('roster-updated',{id: this.locker_id, totalQuantity: this.totalQuantity});
-    }).catch(err => {
-      this.loading = false
-      this.showToast('Something went wrong, pleas try again', 'error');
-    });
+    else{
+      this.loading = false;
+    }
   }
 
   public async downloadSampleTemplate(prod_id:any){
@@ -508,6 +539,58 @@ export default class EditRosterDetails extends Mixins(ErrorMessages, ModalAction
       }
     }, 200)
 
+  }
+
+  public async copyRoster(roster_details: Record<any, any>[]){
+    if(this.copiedRoster != null && this.copiedRoster.isAnyRosterCopied) {
+      // show confirmation modal
+      const ok = await this.ref['confirm-recopy'].showConfirm();
+      if (ok) {
+        // copy roster
+        this.setCopiedRoster(this.locker_id, roster_details);
+        this.showToast('Roster copied to clipboard', 'success');
+      }
+    }
+    else{
+      // copy roster
+      this.setCopiedRoster(this.locker_id, roster_details);
+      this.showToast('Roster copied to clipboard', 'success');
+    }
+  }
+
+  public setCopiedRoster(locker_id: number, roster: Record<any,any>[]) {
+    this.copiedRoster.isAnyRosterCopied = true;
+    this.copiedRoster.copiedRosterFromId = locker_id;
+    this.copiedRoster.rosterData = roster;
+    this.$store.commit('SET_COPIED_ROSTER', this.copiedRoster);
+  }
+
+  public async pasteRoster(){
+    // paste roster
+    const copied_roster_data = this.copiedRoster.rosterData;
+    let new_roster_data: Record<any,any>[] = [];
+
+    copied_roster_data.forEach((copied_roster_item: Record<any,any>) => {
+      let matchedSize = '';
+      this.productSizes.forEach((productSizeObj) => {
+        if(productSizeObj.text == copied_roster_item.size){
+          matchedSize = productSizeObj.value
+        }
+      })
+      let new_roster_item = {
+        text: copied_roster_item.text,
+        number: copied_roster_item.number,
+        size: matchedSize,
+        quantity: copied_roster_item.quantity,
+        information: copied_roster_item.information
+      };
+      new_roster_data.push(new_roster_item);
+    });
+    this.product_locker_roster = new_roster_data;
+
+    // let roster_items = JSON.parse(JSON.stringify(this.resetRosterItem(this.product_locker_roster[0])));
+    this.product_locker_roster = Array.isArray(this.product_locker_roster) ? [...this.product_locker_roster] : [this.product_locker_roster];
+    this.showToast('Roster pasted successfully', 'success');
   }
 }
 </script>

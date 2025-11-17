@@ -26,7 +26,12 @@ const Product:Module<any, any> = {
     factory_settings:[],
     product_price_object: {},
     sales_rep_modal_from: '',
-    last_sync_id: null
+    last_sync_id: null,
+    copiedRoster: {
+      isAnyRosterCopied: false,
+      copiedRosterFromId: null,
+      rosterData: null
+    }
   },
   getters:{
     getSkuInformation(state:Record<any, any>){
@@ -84,6 +89,9 @@ const Product:Module<any, any> = {
     getLastSyncId(state: Record<any, any>) {
       return state.last_sync_id;
     },
+    getCopiedRoster(state: Record<any, any>) {
+      return state.copiedRoster;
+    }
   },
   mutations:{
     SET_SKU_INFORMATION(state: Record<any, any>, paylod: Record<any, any>){
@@ -165,6 +173,11 @@ const Product:Module<any, any> = {
     },
     SET_LAST_SYNC_ID(state: Record<any, any>, payload) {
       state.last_sync_id = payload
+    },
+    SET_COPIED_ROSTER(state: Record<any, any>, payload: Record<any, any>) {
+      state.copiedRoster.isAnyRosterCopied = true
+      state.copiedRoster.copiedRosterFromId = payload.copiedRosterFromId;
+      state.copiedRoster.rosterData = JSON.parse(JSON.stringify(payload.rosterData));
     }
   },
   actions: {

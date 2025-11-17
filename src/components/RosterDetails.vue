@@ -177,6 +177,9 @@
 
     <div class="button-holder mt-3 gap-2 d-flex justify-content-end">
       <button class="btn btn-secondary w-auto fw-bold" @click="addRosterItem(productSizes)">Add Player</button>
+      <button class="btn btn-secondary w-auto fw-bold" v-if="productRoster.length > 0" @click="copyRoster(productRoster)">Copy Roster</button>
+      <button class="btn btn-secondary w-auto fw-bold" v-if="copiedRoster.isAnyRosterCopied && copiedRoster.copiedRosterFromId != selectedProduct.id" @click="pasteRoster()">Paste Roster</button>
+
       <button v-if="getProductEditInfoObject.editing && getProductEditInfoObject.type == 'locker_product'" class="btn btn-secondary w-auto fw-bold" @click="handleLockerProductUpdate">
         Save & close
       </button>
@@ -200,6 +203,8 @@
       <AddToCartButton :products_fonts="products_fonts"></AddToCartButton>
       <AdminSalesRepresentativeModal ref="cart-representative-modal" />
     </div>
+      <confirm-modal class="confirm-copy-modal" message="You already have a roster copied. Do you want to copy this product’s roster instead?"
+                   cancel_text="Cancel" confirm_text="Yes, copy this roster" ref="confirm-recopy" name="confirm-recopy"></confirm-modal>
   </div>
 </template>
 
@@ -214,12 +219,14 @@ import RosterTabMixin from "@/mixins/RosterTabMixin";
 import {handleProductPriceUpdate, downloadTemplate, isEcommercePlatform,normalize } from "@/helpers/Helpers";
 import AddToCartButton from "@/components/AddToCartButton.vue";
 import AdminSalesRepresentativeModal from '@/components/AdminSalesRepresentativeModal.vue'
+import ConfirmModal from './ConfirmModal.vue';
 
 
 @Component<RosterDetails>({
   components: {
     AddToCartButton,
-    AdminSalesRepresentativeModal
+    AdminSalesRepresentativeModal,
+    ConfirmModal
   },
   mounted() {
     this.fontsColorsManipulation()
@@ -336,6 +343,10 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
 
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
+  }
+
+  get copiedRoster(): Record<any, any> {
+    return this.$store.getters.getCopiedRoster
   }
 
   get allowNameAndNumbers() {
@@ -576,6 +587,56 @@ export default class RosterDetails extends Mixins(ErrorMessages, ModalAction, ca
 
   public normalizeProductSizeText(productSize){
     return normalize(productSize)
+  }
+
+  public async copyRoster(product_roster: Record<any,any>[]) {
+    if(this.copiedRoster != null && this.copiedRoster.isAnyRosterCopied) {
+      // show confirmation modal
+      const ok = await this.ref['confirm-recopy'].showConfirm();
+      if (ok) {
+        // copy roster
+        this.setCopiedRoster(this.selectedProduct.id, product_roster);
+        this.showToast('Roster copied to clipboard', 'success');
+      }
+    }
+    else{
+      // copy roster
+      this.setCopiedRoster(this.selectedProduct.id, product_roster);
+      this.showToast('Roster copied to clipboard', 'success');
+    }
+  }
+
+public setCopiedRoster(factory_product_index: number, roster: Record<any,any>[]) {
+  this.copiedRoster.isAnyRosterCopied = true;
+  this.copiedRoster.copiedRosterFromId = factory_product_index;
+  this.copiedRoster.rosterData = roster;
+  this.$store.commit('SET_COPIED_ROSTER', this.copiedRoster);
+}
+
+public async pasteRoster() {
+    // paste roster
+    const copied_roster_data = this.copiedRoster.rosterData;
+    let new_roster_data: Record<any,any>[] = [];
+
+    copied_roster_data.forEach((copied_roster_item: Record<any,any>) => {
+      let matchedSize = '';
+      this.productSizes.forEach((productSizeObj) => {
+        if(productSizeObj.text == copied_roster_item.size){
+          matchedSize = productSizeObj.value
+        }
+      })
+      let new_roster_item = {
+        text: copied_roster_item.text,
+        number: copied_roster_item.number,
+        size: matchedSize,
+        quantity: copied_roster_item.quantity,
+        information: copied_roster_item.information
+      };
+      new_roster_data.push(new_roster_item);
+    });
+    this.$store.dispatch('setProductsRosters', {product_id: this.selectedProduct.id, roster_data: new_roster_data});
+
+    this.showToast('Roster pasted successfully', 'success');
   }
 
   /*
