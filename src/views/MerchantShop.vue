@@ -43,12 +43,12 @@
     <CoverPhoto
       :coverPhoto="shopCover"
     >
-      <template #shop-name>
+      <template v-if="previewShopName" #shop-name>
         <ShopName :name="shopName" />
       </template>
     </CoverPhoto>
 
-    <div class="profile-info-container">
+    <div class="profile-info-container" v-if="previewShopLogo">
       <div class="profile-content">
          <div v-if="isInitialLoading || !shopLogo" class="logo-placeholder"></div>
          <MerchantLogo
@@ -130,10 +130,12 @@ export default class MerchantShop extends  Mixins(ErrorMessages) {
   public currentProduct: Record<string, any> | null = null;
   public slug = "";
   public shopName = "";
+  public previewShopName = "";
   public currency = "";
   public shopMessage = "";
   public shopCover = "";
   public shopLogo = "";
+  public previewShopLogo = "";
   public showSearch = false;
   public searchQuery = "";
    public isInitialLoading = true;
@@ -187,6 +189,8 @@ export default class MerchantShop extends  Mixins(ErrorMessages) {
           return;
         }
         this.shopName = response.name
+        this.previewShopName = response.preview_name
+        this.previewShopLogo = response.preview_logo
          if (this.isInitialLoading) {
           this.shopCover = response.cover_photo
           this.shopLogo = response.logo

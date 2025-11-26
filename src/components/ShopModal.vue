@@ -167,6 +167,20 @@
         <div class="d-flex flex-row-reverse">
           <div class="position-relative pl-4 ml-4"
             style="border-left: 1px solid #eee; flex-basis: 20%; min-width: 160px; flex-grow: 0">
+            <div class="form-row switch-row">
+              <label class="text-muted" for="preview-name">Preview Name</label>
+              <label class="switch" for="preview-name">
+                <input type="checkbox" id="preview-name" v-model="shop.preview_name" />
+                <span class="slider"></span>
+              </label>
+            </div>
+            <div class="form-row switch-row">
+              <label class="text-muted" for="preview-logo">Preview Logo</label>
+              <label class="switch" for="preview-logo">
+                <input type="checkbox" id="preview-logo" v-model="shop.preview_logo" />
+                <span class="slider" ></span>
+              </label>
+            </div>
             <div>
               <h2 class="fs-2 mb-2 font-weight-bolder">Upload Shop Logo</h2>
               <FileUploader :selectedFileUrl="shop.logo" :filesListing="recentLogos" @selected-file="handleLogoUpdate">
@@ -614,7 +628,9 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
     formData.append("company_id", shop.company_id)
     formData.append("customer_id", shop.customer_id)
     formData.append("name", shop.name)
+    formData.append("preview_name", shop.preview_name)
     formData.append("logo", shop.logo)
+    formData.append("preview_logo", shop.preview_logo)
     formData.append("cover_photo", shop.cover_photo)
     formData.append("slug", this.shop.slug)
     formData.append("status", shop.status)
@@ -1054,48 +1070,7 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
       font-size: 13px;
     }
 
-    .switch {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      cursor: pointer;
-
-      input {
-        display: none;
-      }
-
-      .track {
-        width: 44px;
-        height: 24px;
-        background: #d6dde3;
-        border-radius: 999px;
-        position: relative;
-        display: inline-block;
-        transition: background .2s;
-
-        .thumb {
-          position: absolute;
-          top: 3px;
-          left: 3px;
-          width: 18px;
-          height: 18px;
-          border-radius: 999px;
-          background: #fff;
-          box-shadow: 0 1px 2px rgba(0, 0, 0, .2);
-          transition: left .2s;
-        }
-      }
-
-      input:checked+.track {
-        background: $accent;
-
-        .thumb {
-          left: 23px;
-        }
-      }
-    }
   }
-
   .copy-cta {
     display: flex;
     align-items: center;
@@ -1217,4 +1192,60 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
     opacity: 1;
   }
 }
+
+
+.switch-row {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 220px auto;
+  align-items: center;
+  &:last-of-type{
+    margin-top: 10px !important;
+  }
+  label{
+  cursor: pointer;
+  }
+/* Switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  cursor: pointer;
+  height: 18px;
+
+  input {
+    display: none;
+  }
+
+  .slider {
+    position: absolute;
+    inset: 0;
+    background: grey;
+    border-radius: 999px;
+    transition: .2s;
+
+    &:before {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 0px;
+      top: 0px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .2s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+    }
+  }
+
+  input:checked+.slider {
+    background: $accent;
+  }
+
+  input:checked+.slider:before {
+    transform: translateX(12px);
+  }
+}
+}
+
 </style>
