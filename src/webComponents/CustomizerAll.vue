@@ -71,6 +71,10 @@ export default {
       // run time adding css for https://belleriverteamworks.godaddysites.com/ as it is not accept any direct css
       ele = getWindowObject().document.getElementById('527c5fae-6830-4434-a7ec-e635c60a81d0')?.querySelector('[data-ux="Container"]')
     }
+    if(!ele) {
+      // run time adding css for https://brandonsource.com/  as it is not accept any direct css
+      ele = getWindowObject().document.getElementById('3d7b2a19-8d69-47ee-af45-fbcc339e9868')?.querySelector('[data-ux="Container"]')
+    }
     if(ele) {
       ele.style.width = '100%'
       ele.style.paddingLeft = '0'
