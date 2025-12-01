@@ -79,7 +79,9 @@ export default {
 
     // run time adding css for https://brandonsource.com/  as it is not accept any direct css
     const widget = getWindowObject().document.getElementById('3d7b2a19-8d69-47ee-af45-fbcc339e9868')?.querySelector('[data-ux="Widget"]')
+    console.log("widget", widget)
     if(widget) {
+      console.log("inside widget", widget.className);
       widget.className = 'x-el x-el-div x-el c1-1 c1-2 c1-u c1-b c1-c c1-d c1-e c1-f c1-g c1-1 c1-2 c1-b c1-c c1-d c1-e c1-f c1-g'
     }
 
