@@ -71,14 +71,16 @@ export default {
       // run time adding css for https://belleriverteamworks.godaddysites.com/ as it is not accept any direct css
       ele = getWindowObject().document.getElementById('527c5fae-6830-4434-a7ec-e635c60a81d0')?.querySelector('[data-ux="Container"]')
     }
-    if(!ele) {
-      // run time adding css for https://brandonsource.com/  as it is not accept any direct css
-      ele = getWindowObject().document.getElementById('3d7b2a19-8d69-47ee-af45-fbcc339e9868')?.querySelector('[data-ux="Container"]')
-    }
     if(ele) {
       ele.style.width = '100%'
       ele.style.paddingLeft = '0'
       ele.style.paddingRight = '0'
+    }
+
+    // run time adding css for https://brandonsource.com/  as it is not accept any direct css
+    const widget = getWindowObject().document.getElementById('3d7b2a19-8d69-47ee-af45-fbcc339e9868')?.querySelector('[data-ux="Widget"]')
+    if(widget) {
+      widget.className = 'x-el x-el-div x-el c1-1 c1-2 c1-u c1-b c1-c c1-d c1-e c1-f c1-g c1-1 c1-2 c1-b c1-c c1-d c1-e c1-f c1-g'
     }
 
     if(this.$root.$options.shadowRoot) {
