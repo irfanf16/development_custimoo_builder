@@ -565,7 +565,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         group_colors = {}
       }
       emit_color_change_event = true
-    
+
       updateLastActiveProductData({ group_colors: group_colors })
       await this.$store.dispatch('overRideGroupColors', group_colors);
     }
@@ -2264,7 +2264,9 @@ export class CollectionMixin extends Mixins(ErrorMessages) {
 export class CustomerShopMixin extends Mixins() {
 
   mounted() {
-    this.getDefaultCoverPhotos();
+    if(this.$can('create-shop')){
+      this.getDefaultCoverPhotos();
+    }
   }
   public customerShopsDefaultCoverPhotosUrls = [];
   public async getDefaultCoverPhotos() {

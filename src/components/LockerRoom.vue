@@ -354,7 +354,7 @@
             <template v-else><p>No Collection Exists</p></template>
           </div>
         </b-tab>
-        <b-tab lazy class="shopList designCollections">
+        <b-tab lazy class="shopList designCollections" v-if="$can('create-shop')">
           <template #title>
             <span class="btn btn-secondary btn-sm">Shops</span>
           </template>
@@ -619,7 +619,9 @@ interface FactoryProduct {
         classObserver(allElems, this.triggerDropping)
       }, 500)
     }
-    this.getCustomeShops()
+    if(this.$can('create-shop')){
+      this.getCustomeShops()
+    }
     this.$emit('lockerModalOpened', ()=>{this.getLockerProductsRosters()})
   },
   beforeDestroy() {

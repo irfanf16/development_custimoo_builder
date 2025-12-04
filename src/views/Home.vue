@@ -565,7 +565,7 @@ import $ from 'jquery';
 import CustomTabs from "@/components/CustomTabs.vue";
 import ReplaceLogos from "@/components/ReplaceLogos.vue";
 import ErrorMessages from "@/mixins/ErrorMessages";
-import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData} from "@/mixins/LockerProduct";
+import {LockerProducts, handleMainProducts, ProductsQueryParamsMixin, exitEditMode, cartModalData, CustomerShopMixin} from "@/mixins/LockerProduct";
 import CustomLogosMixin from "@/mixins/CustomLogosMixin";
 import moment from 'moment'
 import CartModal from "@/components/CartModal.vue";
@@ -756,7 +756,7 @@ Vue.filter('formatDate', function(value:string) {
 })
 
 export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMainProducts, ModalAction, LogoUploaderColors,
-  ProductsQueryParamsMixin, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories, CustomLogosMixin) {
+  ProductsQueryParamsMixin, cartModalData, HideUpdateLockerButton, exitEditMode, FetchCategories, CustomLogosMixin, CustomerShopMixin) {
   public langs = ['en','dk'];
   public products_fonts: Record<any, any>[] = []
   public prevRoute: Record<any, any> = {};
@@ -866,6 +866,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  getPermissions()
+      if(this.$can('create-shop')){
+        this.getDefaultCoverPhotos()
+      }
       let show_cart = await this.$store.getters.getShowCart
       if(show_cart){
         this.showVModal('cart-modal');
@@ -1418,6 +1421,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public actionAfterLogin() {
     const customer = this.customer
+    if(this.$can('create-shop')){
+      this.getDefaultCoverPhotos()
+    }
     if(customer.password_updated) {
       this.$modal.show('resetPasswordModal')
     }
@@ -1791,10 +1797,10 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const ok = await this.ref['reset-modal'].showConfirm()
     if (ok) {
        const edit_info_obj = this.$store.getters.getProductEditInfoObject;
-      await this.editModeConfirmation(true); 
+      await this.editModeConfirmation(true);
       await this.forceResetStore(edit_info_obj);
       await this.$store.dispatch('logoutCustomer');
-     
+
       this.$store.commit('ADD_LOCKER_ROOM_COLORS', [])
       await this.$store.commit('SET_RECENT_LOGOS')
       if(this.company.platform != 'self') {
@@ -1956,7 +1962,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
         this.$store.commit('RESET_LAST_ACTIVE_DATA')
         this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
         await this.$store.dispatch('resetStore')
-        if(edit_info_obj.type == 'cart_product' || edit_info_obj.type == 'order_product') {    
+        if(edit_info_obj.type == 'cart_product' || edit_info_obj.type == 'order_product') {
           let product_id
           if(edit_info_obj.type == 'order_product') {
             product_id = edit_info_obj.order_product_info.active_product_id
