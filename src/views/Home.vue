@@ -772,6 +772,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   public ref = this.$refs as Record<any, any>
   private jwtToken !: string
   private apiBaseUrl = process.env.VUE_APP_API_BASE_URL
+  //@ts-ignore
   public mounted = false
   public productUpdated = false
   public pdf_generation_loading = false
@@ -866,7 +867,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     if (this.isCustomerAuthenticated){
       await this.$store.dispatch('getNotifications')
       await  getPermissions()
-      if(this.$can('create-shop')){
+      if((this as any).$can('create-shop')){
         this.getDefaultCoverPhotos()
       }
       let show_cart = await this.$store.getters.getShowCart
@@ -1421,7 +1422,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
 
   public actionAfterLogin() {
     const customer = this.customer
-    if(this.$can('create-shop')){
+    if((this as any).$can('create-shop')){
       this.getDefaultCoverPhotos()
     }
     if(customer.password_updated) {

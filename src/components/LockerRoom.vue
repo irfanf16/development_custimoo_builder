@@ -619,7 +619,7 @@ interface FactoryProduct {
         classObserver(allElems, this.triggerDropping)
       }, 500)
     }
-    if(this.$can('create-shop')){
+    if((this as any).$can('create-shop')){
       this.getCustomeShops()
     }
     this.$emit('lockerModalOpened', ()=>{this.getLockerProductsRosters()})
