@@ -423,7 +423,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
 
   public fetchUrlProducts() {
     this.showLoader = true;
-    let productsUrl = this.productsUrl.replace(`${this.companyDomain}/#/`, '')
+    let productsUrl = this.productsUrl.replace(`${this.companyDomain}`, '')
     http.post('products-from-url', {product_url: productsUrl}).then(successResponse => {
       this.showLoader = false
       const urlProducts = successResponse.data.result
