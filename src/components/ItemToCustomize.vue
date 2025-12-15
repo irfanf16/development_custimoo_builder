@@ -191,7 +191,7 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin';
       this.$emit('switchTabs')
     }
 
-    this.$on('update:search', (search_val: string) => {
+    this.$on('update:search_products', (search_val: string) => {
       self.search = search_val ? search_val : ''
     })
 
