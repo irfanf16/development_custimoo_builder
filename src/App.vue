@@ -1,6 +1,6 @@
 <template>
   <div  id="full-layout" v-cloak>
-  <component :is="layoutComponent" />
+  <component :is="layoutComponent" :key="$store.getters.getAppComponentKey" />
   </div>
 </template>
 

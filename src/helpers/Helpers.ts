@@ -3622,6 +3622,10 @@ const getCustomProductFilePathInfo = (): { name: string, url: string, extension:
   }
 }
 
+const setAppComponentKey = () => {
+  Store.commit('SET_APP_COMPONENT_KEY')
+}
+
 
 
 
@@ -3648,7 +3652,7 @@ export {
   findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,isValidEmail,
   containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures, getShopDefaultObject, getShopProductsFromLockerProducts, getLockerRoomSelectedProducts, getShopProductDefaultObject, getImagePreview, showToastedMessage, can,
 
-  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, normalize,getCompanyBaseUrl,getCustomProductFilePathInfo
+  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, normalize,getCompanyBaseUrl,getCustomProductFilePathInfo, setAppComponentKey
 
 
 };

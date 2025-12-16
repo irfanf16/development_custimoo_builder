@@ -1,7 +1,7 @@
 <script src="../mixins/LockerProduct.ts"></script>
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
-    <component :is="layoutComponent" />
+    <component :is="layoutComponent" :key="$store.getters.getAppComponentKey"/>
   </div>
 </template>
 

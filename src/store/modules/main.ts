@@ -28,10 +28,14 @@ const Main:Module<any, any> = {
     mainTotalTabs: 3,
     popperID: '',
     index_db_store_time:1000,
-    adminSalesRep: []
+    adminSalesRep: [],
+    appComponentKey: 0
 
   },
   mutations: {
+    SET_APP_COMPONENT_KEY(state: Record<any, any>) {
+      state.appComponentKey = Math.random()
+    },
     SET_APPLICATION_MOUNTED(state:Record<any, any>) {
       state.application_mounted = true
       state.showLoader = false
@@ -69,6 +73,9 @@ const Main:Module<any, any> = {
     },
   },
   getters: {
+    getAppComponentKey: state => {
+      return state.appComponentKey
+    },
     getApplicationMounted: state => {
       return state.application_mounted
     },

@@ -1,7 +1,7 @@
 <template>
   <div style="font-family: 'Ubuntu', sans-serif;">
     <Navbar v-if="isEcomCompanyWithOrderTab()" />
-    <router-view />
+    <router-view :key="$store.getters.getAppComponentKey"/>
   </div>
 </template>
 <script>
@@ -20,7 +20,7 @@ export default {
     Navbar
   },
   mounted: async function() {
-    
+
     // This will only work on your root Vue component since it's using $parent
     const { shadowRoot } = this.$parent.$options
 

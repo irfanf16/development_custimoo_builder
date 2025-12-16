@@ -595,7 +595,8 @@ import {
   updateOrder,
   hasCompanyPermission,
   getStyleSelectedAddons, base64ToFile, createFormData, isEcommercePlatform,
-  generateRandomString, canAccessCompanyFeatures
+  generateRandomString, canAccessCompanyFeatures,
+  setAppComponentKey
 } from '@/helpers/Helpers'
 import { fireGtagConversion, GTAGEVENTS, trackEvent } from '@/helpers/analytics-events';
 
@@ -661,6 +662,7 @@ Vue.filter('formatDate', function(value:string) {
     self.$eventBus.$off('cancelCart', this.cancelCart)
   },
   async mounted() {
+    console.log("inside mounted")
     /*
     * if order_update_identifier value is set then it means the page is not refreshed and if it is empty then page is refreshed in that case delete existing order updated data
     * */
@@ -856,8 +858,9 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const shared_url = getUrlParameter()
     if (shared_url?.includes('share')) {
       routerPush(this.$router,'Home');
+      setAppComponentKey()
     }
-
+    console.log('after routerPush')
     this.jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key) as string
     // await this.$store.dispatch('setJwtToken')
     if(!localStorage.getItem(Vue.prototype.$browserToken_localstorage_key)){
