@@ -2264,9 +2264,7 @@ export class CollectionMixin extends Mixins(ErrorMessages) {
 export class CustomerShopMixin extends Mixins() {
 
   mounted() {
-    if((this as any).$can('create-shop')){
-      this.getDefaultCoverPhotos();
-    }
+    this.getDefaultCoverPhotos();
   }
   public customerShopsDefaultCoverPhotosUrls = [];
   public async getDefaultCoverPhotos() {
