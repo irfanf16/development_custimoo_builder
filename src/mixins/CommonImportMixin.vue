@@ -266,11 +266,16 @@ export default class CommonImportMixin extends Vue{
     * this condition checks if customizer is loaded in iframe. If it's loaded inside iframe then vue router won't work
     * so here we get the url and pass it to customizer to navigate to that route.
     * */
+
+    
     if(iframe) {
-      const url_params = getUrlParameter()
-      if(url_params) {
-        await this.$router.push(url_params)
-      }
+      console.log('iframe loaded');
+      setTimeout(async()=>{
+        const url_params = getUrlParameter()
+        if(url_params) {
+          await this.$router.push(url_params)
+        }
+      }, 1000)
     }
 
     const token = getUrlParameter('token')
