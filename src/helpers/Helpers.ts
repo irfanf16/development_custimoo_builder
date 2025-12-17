@@ -890,7 +890,7 @@ const activityStatus = {
   },
   factory_approved: {
     title: "Artwork Approved, Pending Test Print",
-    message: "The factory has approved your artwork. Expect a physical sample to be uploaded within 72 hours (Monday to Friday).",
+    message: "The factory has approved your artwork. Expect a physical sample to be uploaded within 5-7 days.",
   },
   factory_rejected: {
     title: "Artwork Rejected",
