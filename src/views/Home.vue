@@ -858,7 +858,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     const shared_url = getUrlParameter()
     if (shared_url?.includes('share')) {
       routerPush(this.$router,'Home');
-      setAppComponentKey()
+      //setAppComponentKey()
     }
     console.log('after routerPush')
     this.jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key) as string
