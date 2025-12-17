@@ -7,9 +7,9 @@
       <div v-if="main_locker_tabs === 0" style="max-width: 300px; width: 80%; flex-shrink: 1; padding-left: 4px; position: absolute; right: 5%">
          <b-input-group>
            <template #append>
-             <b-input-group-text @click="searchText = ''" style="height: 33px; cursor: pointer"><strong class="text-secondary">X</strong></b-input-group-text>
+             <b-input-group-text @click="clearSearch" style="height: 33px; cursor: pointer"><strong class="text-secondary">X</strong></b-input-group-text>
            </template>
-           <b-form-input type="text" style="height: 33px;" placeholder="Search" v-model="searchText" />
+           <b-form-input type="text" style="height: 33px;" placeholder="Search" v-model="searchText" @keyup.enter="handleSearchEnter" />
          </b-input-group>
        </div>
       <b-tabs class="main-locker-tabs" @input="updateTab" ref="main-locker-tabs" v-model="main_locker_tabs">
@@ -726,6 +726,20 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       })
   }
 
+  /**
+   * Activate search - trigger when user presses Enter
+   */
+  public handleSearchEnter(): void {
+    this.isSearchActive = true;
+  }
+
+  /**
+   * Clear search and show all products
+   */
+  public clearSearch(): void {
+    this.searchText = '';
+    this.isSearchActive = false;
+  }
 
 
 private async formatProductForCart(product: any): Promise<any> {

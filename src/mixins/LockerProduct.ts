@@ -47,6 +47,9 @@ import Store from "@/store";
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
   public searchText = '';
+  public isSearchActive = false;
+  private initialLockerProducts: Record<any, any>[] = [];
+  
   get mainTotalTabs(){
     return this.$store.getters.getMainTotalTabs;
   }
@@ -83,10 +86,21 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
   get getLockerProducts() {
     let main_product_id = this.$store.getters.getEditProductId;
     let locker_products:Record<any, any> = this.$store.getters.getLockerProducts;
-    //locker_products = santaClone(locker_products)
-    let locker_products_count = locker_products.length
+    
+    // Store initial state on first load
+    if (this.initialLockerProducts.length === 0 && locker_products.length > 0) {
+      this.initialLockerProducts = JSON.parse(JSON.stringify(locker_products));
+    }
+    
+    // Use initial state as base for filtering
+    if (this.isSearchActive && this.searchText) {
+      locker_products = JSON.parse(JSON.stringify(this.initialLockerProducts));
+    }
+    
+    let locker_products_count = this.initialLockerProducts.length || locker_products.length;
     let locker_room_index = locker_products.findIndex((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
-    if (this.searchText) {
+    
+    if (this.isSearchActive && this.searchText) {
       let filtered_locker_rooms = locker_products.filter((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
       if (locker_room_index !== -1) {
         let payload = {index: locker_room_index, attribute: 'active_tab', value: true};
@@ -95,7 +109,12 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
       }
       if (filtered_locker_rooms.length === 0) {
         locker_products = locker_products.filter((locker) => {
-            let filteredProducts = locker.product.filter((product) => product.product_name.toLowerCase().includes(this.searchText.toLowerCase()));
+            let filteredProducts = locker.product.filter((product) => {
+              const productNameMatch = product.product_name.toLowerCase().includes(this.searchText.toLowerCase());
+              const designNameMatch = product.design?.design_name?.toLowerCase().includes(this.searchText.toLowerCase());
+              const designIdMatch = product.design_id?.toString().includes(this.searchText);
+              return productNameMatch || designNameMatch || designIdMatch;
+            });
           let active_tab_index = locker_products.findIndex((locker) => locker.id === filteredProducts[0]?.room_id);
           if (filteredProducts.length) {
             let payload = {index: active_tab_index, attribute: 'active_tab', value: true};
