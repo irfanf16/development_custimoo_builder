@@ -55,7 +55,7 @@
                   <div>
                     <div class="d-flex align-items-center justify-content-between position-absolute controls">
                       <div>
-                        <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
+                        <a v-b-tooltip.hover title="Delete design" class="btn remove" @click="deleteProduct(ind, product.id, product.collections)"><font-awesome-icon :icon="['fas', 'trash-alt']" /></a>
                       </div>
                       <div>
                         <a v-if="product.design && product.design.back_design_count > 0" v-b-tooltip.hover :title="product.is_back_img ? 'Show front' : 'Show back' " class="btn btn-secondary light rounded-circle" @click="swapDesign(ind)" style="font-size: 1em">
@@ -74,6 +74,7 @@
           </div>
         </div>
       </div>
+      <confirm-modal :message="confirmMessage" :cancel_text="cancelButtonText" :confirm_text="confirmButtonText" ref="reset-confirm-modal" name="reset-confirm-modal"></confirm-modal>
         <confirm-modal name="confirm-locker-modal" message="Do you really want to exit without saving the changes" cancel_text="No" confirm_text="Yes" ref="confirm-locker-modal"></confirm-modal>
         <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
       <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
@@ -147,6 +148,10 @@
         created: true,
         saved:false,
       };
+
+      public confirmMessage: string = 'Do you really want to delete?'; // Default message
+      public confirmButtonText: string = 'Yes'; // Default confirm button text
+      public cancelButtonText: string = 'Cancel'; // Default cancel button text
 
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts()
@@ -543,18 +548,56 @@
       //   this.showVModal('add-to-lockerroom');
       //   this.recallProducts();
       // }
-      public async deleteProduct(ind:number, id:number){
-        let room_index = this.roomWithProducts.findIndex((room:Record<any, any>) => room.id == this.room_id)
-        const ok = await this.ref['reset-modal'].showConfirm()
-        if (ok) {
-          let res = await this.$store.dispatch('deleteRoomProduct', {room_index: room_index, product_index: ind, id:id});
-          if (res == true){
-            this.showToast('Product Deleted', 'success')
-          }else{
-            this.showError(res)
-          }
-        }
-      }
+
+  public async deleteProduct( ind: number | string, id: number, collections: { id: number; name: string }[] = []) 
+  {
+
+    const room_index = this.roomWithProducts.findIndex((room:Record<any, any>) => room.id === this.room_id);
+    if (room_index === -1) {
+        this.showError('Room not found');
+        return;
+    }
+
+    // Generate the collection confirmation message
+    if (collections.length > 0) {
+        const collectionNames = collections.map(col => col.name).join('" and "');
+        const collectionWord = collections.length === 1 ? 'collection' : 'collections'; // Singular or plural
+        this.confirmMessage = `This product is used in the ${collectionWord} "${collectionNames}". If you delete the design, it will also be removed from the ${collectionWord}. Do you want to delete the product from both the locker and ${collectionWord}?`;
+    } else {
+        this.confirmMessage = `This product is not associated with any collections. Do you really want to delete it from the locker?`;
+    }
+
+    this.confirmButtonText = 'Delete';
+    this.cancelButtonText = 'Cancel';
+
+    // Show the confirmation modal
+    const ok = await this.ref['reset-confirm-modal'].showConfirm()
+
+    // Reset the modal text to default values
+    this.confirmMessage = 'Do you really want to delete?';
+    this.confirmButtonText = 'Yes';
+    this.cancelButtonText = 'Cancel';
+
+    if (!ok) {
+      console.log('clicked cancel');
+      return false; // User canceled the operation
+    }
+
+    // Proceed with deletion if no collections or user confirmed
+    const res = await this.$store.dispatch('deleteRoomProduct', {
+      room_index: room_index,
+      product_index: ind,
+      id: id,
+    });
+
+    if (res === true) {
+      this.$store.commit('SET_RECENT_LOGOS');
+      this.showToast('Product Deleted', 'success');
+    } else {
+      this.showError(res);
+    }
+  }
+
       public swapDesign(productIndex: number){
 
         let product: Record<any, any> = this.productData[productIndex];

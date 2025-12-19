@@ -23,7 +23,7 @@
             <!-- Main Preview -->
             <div class="upload-drop preview-box">
               <div class="upload-inner">
-                <img v-if="activeImage" :src="imagePreview(activeImage)" alt="preview" width="318" height="318"
+                <img v-if="activeImage" :src="imagePreview(activeImage, false, ownProduct?.random_string ?? '')" alt="preview" width="318" height="318"
                   style="object-fit: contain;" />
                 <div v-else class="upload-placeholder">No Image Selected</div>
               </div>
@@ -34,7 +34,7 @@
               <!-- Front -->
               <div class="thumb" :style="{ border: validationErrors.front_image ? '1px solid red' : '' }">
                 <template v-if="ownProduct.front_image">
-                  <img :src="imagePreview(ownProduct.front_image)" alt="Front Preview" width="80" height="80"
+                  <img :src="imagePreview(ownProduct.front_image, false, ownProduct?.random_string ?? '')" alt="Front Preview" width="80" height="80"
                     style="object-fit: contain;" @click="activeImage = ownProduct.front_image" />
                   <button type="button" class="remove-btn" @click.stop="removeImage('front_image')">✕</button>
                 </template>
@@ -47,7 +47,7 @@
               <!-- Back -->
               <div class="thumb">
                 <template v-if="imagePreview(ownProduct.back_image)">
-                  <img :src="imagePreview(ownProduct.back_image)" alt="Back Preview" width="80" height="80"
+                  <img :src="imagePreview(ownProduct.back_image, false, ownProduct?.random_string ?? '')" alt="Back Preview" width="80" height="80"
                     style="object-fit: contain;" @click="activeImage = ownProduct.back_image" />
                   <button type="button" class="remove-btn" @click.stop="removeImage('back_image')">✕</button>
                 </template>

@@ -228,10 +228,10 @@
                       <div class="text-center fs-2 toggle_pdf">
                         <div class="mt-3 respCanvas">
                           <div>
-                            <img :src="imagePreview(product.front_image)" alt="">
+                            <img :src="imagePreview(product.front_image, false, product?.random_string ?? '')" alt="">
                           </div>
                           <div>
-                            <img :src="imagePreview(product.back_image)" alt="">
+                            <img :src="imagePreview(product.back_image, false, product?.random_string ?? '')" alt="">
                           </div>
                         </div>
                         <template>

@@ -3515,26 +3515,39 @@ const getShopDefaultObject = (updatedValues = {}) => {
 
 const getImagePreview = (
   fileOrPath: string | File,
-  usePlaceholder = false
+  usePlaceholder = false,
+  query_string?: string
 ): string => {
   const baseStorageUrl = process.env.VUE_APP_STORAGE_URL || "";
+  const qs = query_string ? `?q=${query_string}` : "";
 
-  // Case 1: No input provided
-  if (!fileOrPath) {
-    return usePlaceholder ? `${baseStorageUrl}placeholder.png` : "";
-  }
+    const appendQuery = (url: string) => {
+      if (!qs) return url;
 
-  // Case 2: Input is a path string
-  if (typeof fileOrPath === "string") {
-    return `${baseStorageUrl}${fileOrPath}`;
-  }
+      // If URL already has a query string, do not add another
+      if (url.includes("?")) return url;
 
-  // Case 3: Input is a File object
-  if (fileOrPath instanceof File) {
-    return URL.createObjectURL(fileOrPath);
-  }
+      return `${url}?q=${qs}`;
+    };
 
-  return ""; // fallback
+    // Case 1: No input provided
+    if (!fileOrPath) {
+      const placeholder = `${baseStorageUrl}placeholder.png`;
+      return usePlaceholder ? appendQuery(placeholder) : "";
+    }
+  
+    // Case 2: Input is a path string
+    if (typeof fileOrPath === "string") {
+      const fullPath = `${baseStorageUrl}${fileOrPath}`;
+      return appendQuery(fullPath);
+    }
+  
+    // Case 3: Input is a File object
+    if (fileOrPath instanceof File) {
+      return URL.createObjectURL(fileOrPath);
+    }
+  
+    return ""; // fallback
 };
 
 const showToastedMessage = (message, type="success") => {
