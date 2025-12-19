@@ -1274,7 +1274,8 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   }
 
   get hideSaveLockerButton(): boolean {
-    return this.$store.getters.getHideSaveLockerButton;
+    // return this.$store.getters.getHideSaveLockerButton;
+    return false;
   }
 
   get styleIndex(): number {
