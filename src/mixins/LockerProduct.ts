@@ -1,6 +1,6 @@
 /* eslint-disable */
 import {Component, Mixins, Vue} from 'vue-property-decorator'
-import {findIndex} from 'lodash';
+import {debounce, findIndex} from 'lodash';
 
 import {
   getActiveProductData,
@@ -47,8 +47,9 @@ import Store from "@/store";
 @Component
 export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
   public searchText = '';
-  public isSearchActive = false;
+  public inputText = ''      // instant typing (smooth)
   private initialLockerProducts: Record<any, any>[] = [];
+  public debouncedSearch!: (val: string) => void
   
   get mainTotalTabs(){
     return this.$store.getters.getMainTotalTabs;
@@ -82,25 +83,27 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
 
     await hideLockerProductUpdateButton(true)
   }
-
+public created() {
+  this.debouncedSearch = debounce((val: string) => {
+    this.searchText = val
+  }, 1000)
+}
   get getLockerProducts() {
     let main_product_id = this.$store.getters.getEditProductId;
     let locker_products:Record<any, any> = this.$store.getters.getLockerProducts;
-    
+
     // Store initial state on first load
     if (this.initialLockerProducts.length === 0 && locker_products.length > 0) {
       this.initialLockerProducts = JSON.parse(JSON.stringify(locker_products));
     }
-    
     // Use initial state as base for filtering
-    if (this.isSearchActive && this.searchText) {
+    if (this.searchText) {
       locker_products = JSON.parse(JSON.stringify(this.initialLockerProducts));
     }
-    
     let locker_products_count = this.initialLockerProducts.length || locker_products.length;
     let locker_room_index = locker_products.findIndex((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
     
-    if (this.isSearchActive && this.searchText) {
+    if (this.searchText) {
       let filtered_locker_rooms = locker_products.filter((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
       if (locker_room_index !== -1) {
         let payload = {index: locker_room_index, attribute: 'active_tab', value: true};
@@ -111,9 +114,8 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
         locker_products = locker_products.filter((locker) => {
             let filteredProducts = locker.product.filter((product) => {
               const productNameMatch = product.product_name.toLowerCase().includes(this.searchText.toLowerCase());
-              const designNameMatch = product.design?.design_name?.toLowerCase().includes(this.searchText.toLowerCase());
               const designIdMatch = product.design_id?.toString().includes(this.searchText);
-              return productNameMatch || designNameMatch || designIdMatch;
+              return productNameMatch || designIdMatch;
             });
           let active_tab_index = locker_products.findIndex((locker) => locker.id === filteredProducts[0]?.room_id);
           if (filteredProducts.length) {

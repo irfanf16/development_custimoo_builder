@@ -9,7 +9,8 @@
            <template #append>
              <b-input-group-text @click="clearSearch" style="height: 33px; cursor: pointer"><strong class="text-secondary">X</strong></b-input-group-text>
            </template>
-           <b-form-input type="text" style="height: 33px;" placeholder="Search" v-model="searchText" @keyup.enter="handleSearchEnter" />
+
+           <b-form-input type="text" style="height: 33px;" placeholder="Search" @input="onSearchInput" />
          </b-input-group>
        </div>
       <b-tabs class="main-locker-tabs" @input="updateTab" ref="main-locker-tabs" v-model="main_locker_tabs">
@@ -727,20 +728,18 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
       })
   }
 
-  /**
-   * Activate search - trigger when user presses Enter
-   */
-  public handleSearchEnter(): void {
-    this.isSearchActive = true;
-  }
+  public onSearchInput(val: string) {
+  this.inputText = val
+  this.debouncedSearch(val) 
+}
 
   /**
    * Clear search and show all products
    */
   public clearSearch(): void {
     this.searchText = '';
-    this.isSearchActive = false;
   }
+
 
 
 private async formatProductForCart(product: any): Promise<any> {
