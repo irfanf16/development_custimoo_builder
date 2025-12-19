@@ -1,9 +1,10 @@
 import Vue from "vue";
 import { http, noTokenRequest } from "@/httpCommon";
 import { Module } from "vuex";
-import { getShopDefaultObject } from "@/helpers/Helpers";
+import { getShopDefaultObject, handleResponseException } from "@/helpers/Helpers";
 const Shop: Module<any, any> = {
   state: {
+    customerShops: [] as Record<any, any>[],
     shop_mode: null as null | "creating" | "updating",
     shop:{} as Record<any, any>,
     currency: "$",
@@ -12,6 +13,9 @@ const Shop: Module<any, any> = {
     shopInfo: {} as Record<any, any>,
   },
   getters: {
+    getCustomerShops(state: Record<any, any>){
+      return state.customerShops
+    },
     getShopCartItems(state:Record<any, any>){
       const cartItems = JSON.parse(localStorage.getItem("cartData") || "[]");
      if (cartItems && cartItems.constructor.name=== 'Array'){
@@ -63,13 +67,23 @@ const Shop: Module<any, any> = {
     },
     SET_SHOP_INFO(state: Record<any, any>, shopInfo: Record<any, any>) {
       state.shopInfo = shopInfo
+    },
+    SET_CUSTOMER_SHOPS(state: Record<any, any>, payload: Record<any, any>[]){
+      console.log(state, payload)
+      state.customerShops = payload;
+    },
+    UPDATE_SHOPS(state: Record<any, any>, payload: Record<any, any>){
+      const shop_id = payload.id;
+      const shopIndex = state.customerShops.findIndex(shop => shop.id === shop_id);
+      if(shopIndex !== -1){
+        state.customerShops[shopIndex] = payload;
+      }
     }
   },
   actions: {
     setShop({ commit }, shopData: Record<any, any>) {
       commit("SET_SHOP", shopData);
     },
-
   },
 };
 export default Shop;

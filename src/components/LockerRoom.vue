@@ -719,7 +719,8 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
      http.get(`customer-shops`)
       .then((successResponse) => {
         this.loader = false
-        this.customerShops = successResponse.data.result
+        this.$store.commit('SET_CUSTOMER_SHOPS', successResponse.data.result);
+        this.customerShops = this.$store.getters.getCustomerShops;
       }).catch((err) => {
         this.loader = false
         handleResponseException(err)
@@ -1675,7 +1676,7 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
     this.$store.commit('SET_SHOP', {...customerShop, ...{password_confirmation : null}})
     this.$store.commit("SET_SHOP_MODE", 'updating')
     this.showVModal('create-update-shop-modal')
-    this.hideVModal('locker-modal')
+    // this.hideVModal('locker-modal')
   }
 
   public async deleteRoom($event, id: number, index: number | string) {

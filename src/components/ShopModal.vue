@@ -589,6 +589,8 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
     const shopPayload = this.getShopPayload()
     const url = this.shop.id ? `customer-shops/${this.shop.id}` : 'customer-shops'
     http.post(url, shopPayload).then(successResponse => {
+      // console.log(successResponse.data.result)
+      this.$store.commit('UPDATE_SHOPS', successResponse.data.result);
       this.showLoader = false
       this.$emit('shop-saved', shopPayload)
       this.resetShopState()
