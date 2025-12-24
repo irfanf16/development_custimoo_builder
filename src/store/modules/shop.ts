@@ -11,6 +11,7 @@ const Shop: Module<any, any> = {
     cartItems:[] as Record<any, any>[],
     company_shop_products: [],
     shopInfo: {} as Record<any, any>,
+    shopActiveTab: false
   },
   getters: {
     getCustomerShops(state: Record<any, any>){
@@ -38,6 +39,9 @@ const Shop: Module<any, any> = {
     },
     getShopInfo(state: Record<any, any>): Record<any, any> {
       return state.shopInfo;
+    },
+    getShopActiveTab(state: Record<any, any>): boolean {
+      return state.shopActiveTab;
     }
   },
   mutations: {
@@ -69,15 +73,48 @@ const Shop: Module<any, any> = {
       state.shopInfo = shopInfo
     },
     SET_CUSTOMER_SHOPS(state: Record<any, any>, payload: Record<any, any>[]){
-      console.log(state, payload)
       state.customerShops = payload;
     },
-    UPDATE_SHOPS(state: Record<any, any>, payload: Record<any, any>){
-      const shop_id = payload.id;
-      const shopIndex = state.customerShops.findIndex(shop => shop.id === shop_id);
-      if(shopIndex !== -1){
-        state.customerShops[shopIndex] = payload;
-      }
+    UPDATE_SHOPS(state: Record<any, any>, payload: Record<any, any>) {
+      const shopIndex = state.customerShops.findIndex(
+        shop => shop.id === payload.id
+      );
+    
+      if (shopIndex === -1) return;
+    
+      const existingShop = state.customerShops[shopIndex];
+    
+      const updatedProducts = payload.products.map(product => {
+        let sizesArray = product.sizes;
+    
+        if (typeof sizesArray === 'string') {
+          try {
+            sizesArray = JSON.parse(sizesArray);
+          } catch {
+            sizesArray = null;
+          }
+        }
+    
+        const existingProduct = existingShop.products.find(
+          p => p.id === product.id
+        );
+    
+        return {
+          ...(existingProduct || {}),
+          ...product,
+          sizes: sizesArray
+        };
+      });
+    
+      state.customerShops.splice(shopIndex, 1, {
+        ...existingShop,
+        ...payload,
+        products: updatedProducts,
+        slug: payload.slug || payload.latest_slug?.name
+      });
+    },
+    SET_SHOP_ACTIVE_TAB(state: Record<any, any>, payload: boolean){
+      state.shopActiveTab = payload;
     }
   },
   actions: {

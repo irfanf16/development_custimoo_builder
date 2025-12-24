@@ -231,6 +231,7 @@ import draggable from "vuedraggable";
 import ModalAction from "@/mixins/ModalAction";
 import CollectionLogoUploader from "@/components/Logo/CollectionLogoUploader.vue";
 import datePicker from 'vue-bootstrap-datetimepicker';
+import VsToast from '@vuesimple/vs-toast';
 import moment from "moment";
 import { checkIsEmpty, getImagePreview, getShopProductDefaultObject, santaClone, showToastedMessage, formatCustomPrice } from '@/helpers/Helpers';
 import { forEach } from 'lodash';
@@ -333,15 +334,23 @@ export default class ShopOwnProductModal extends Mixins(ErrorMessages, ModalActi
     const publishDate = this.ownProduct.publish_at ? new Date(this.ownProduct.publish_at).getTime() : null
     const unpublishDate = this.ownProduct.unpublish_at ? new Date(this.ownProduct.unpublish_at).getTime() : null
 
-    delete validationErrorMessages.publish_at
-    delete validationErrorMessages.unpublish_at
+     // 🔹 Availability validation
+  if (this.ownProductAvailabilityEnabled) {
+    if (!publishDate) {
+      validationErrorMessages['publish_at'] = 'Start date is required.'
+    }
+
+    if (!unpublishDate) {
+      validationErrorMessages['unpublish_at'] = 'End date is required.'
+    }
 
     if (publishDate && unpublishDate) {
-        if (publishDate >= unpublishDate) {
-            validationErrorMessages['publish_at'] = 'Start date must be before the End date.'
-            validationErrorMessages['unpublish_at'] = 'End date must be after the Start date.'
-        }
+      if (publishDate >= unpublishDate) {
+        validationErrorMessages['publish_at'] = 'Start date must be before the End date.'
+        validationErrorMessages['unpublish_at'] = 'End date must be after the Start date.'
+      }
     }
+  }
 
     if(this.ownProduct.front_image) {
       delete validationErrorMessages.front_image
@@ -487,7 +496,6 @@ export default class ShopOwnProductModal extends Mixins(ErrorMessages, ModalActi
   }
 
   public handleProductChangeEvent(selectedProductId, customPrice=null) {
-    console.log('handleProductChangeEvent', customPrice)
     const selectedProduct = this.getProductFromId(selectedProductId)
     if(selectedProduct) {
       this.ownProduct.custom_price =  customPrice ? customPrice : selectedProduct.price
@@ -562,12 +570,18 @@ export default class ShopOwnProductModal extends Mixins(ErrorMessages, ModalActi
   }
 
   public addOwnProduct() {
-    if(checkIsEmpty(this.validationErrors) ) {
-      const selectedSizes = this.ownProduct.sizes.filter(selectedSize => selectedSize.is_selected)
-      this.activeImage = ''
-      this.$emit('own-product-upserted', {...this.ownProduct, ...{sizes: selectedSizes}})
-      this.hideVModal('shop-own-product-modal')
+    if (!checkIsEmpty(this.validationErrors)) {
+      VsToast.show({
+          title: 'Please fix the highlighted errors before continuing.',
+          variant: 'error',
+          timeout: 5000
+        })
+        return
     }
+    const selectedSizes = this.ownProduct.sizes.filter(selectedSize => selectedSize.is_selected)
+    this.activeImage = ''
+    this.$emit('own-product-upserted', {...this.ownProduct, ...{sizes: selectedSizes}})
+    this.hideVModal('shop-own-product-modal')
   }
 
   public handleCancelEvent() {

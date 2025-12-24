@@ -196,6 +196,10 @@ export default class RosterTabMixin extends Mixins(RosterDetailsGlobal, ModalAct
       handleProductPriceUpdate()
       this.showLoader = false;
       this.showToast('Excel file uploaded successfully', 'success');
+      const input = this.$refs.excelInput as HTMLInputElement;
+      if (input) {
+        input.value = '';
+      }
       (this.$refs['upload_excel'] as Record<any, any>).reset();
     })
   }

@@ -17,7 +17,7 @@
           </span>
           <span v-b-tooltip.leftbottom.hover="'Add New Locker Room'" v-if="!getSelectionMode.readonly"
                 role="presentation" class="add_new_locker" v-b-modal.modal-center-createlockerroom >
-            <span class="btn btn-secondary" style="white-space: nowrap" @click="showVModal('create-modal')" v-if="!collectionMode">Add <BIconPlus/></span>
+            <span class="btn btn-secondary" style="white-space: nowrap" @click="showVModal('create-modal')" v-if="!collectionMode && !shopActiveTab">Add <BIconPlus/></span>
           </span>
         </div>
 <!--        <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('locker-modal')"><BIconX /></span>-->
@@ -216,6 +216,10 @@ export default class LockerRoomModal extends Mixins(ModalAction){
 
   get shopMode() {
     return this.$store.getters.getShopMode
+  }
+
+  get shopActiveTab(){
+    return !!this.$store.getters.getShopActiveTab;
   }
 
   get selectedCollectionProducts(){

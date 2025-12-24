@@ -256,8 +256,11 @@
               type="text"
               class="input"
               v-model="order_reference"
-              placeholder="Enter team or reference number"
+              placeholder="Enter team or reference number 2123"
             />
+            <small v-if="orderReferenceError" class="text-danger">
+              {{ orderReferenceError }}
+            </small>
           </div>
           <button class="btn btn-secondary w-100" @click="submitOrder">
             Place Order
@@ -344,7 +347,8 @@ export default class ShopCartModal extends Mixins(
   private isEditting = false;
   private addressLoading = false;
   private general_comments = "";
-  private order_reference = "";
+  private order_reference
+  private orderReferenceError = '';
   public errors = [];
   private addresses = [];
   private screenWidth = Math.min(window.screen.availWidth - 100, 1400);
@@ -473,6 +477,7 @@ export default class ShopCartModal extends Mixins(
     this.$emit('hide');
     this.errors = []
     this.order_reference = ""
+    this.orderReferenceError = ''
     this.general_comments = ""
     this.$modal.hide("shopCartModal");
   }
@@ -537,6 +542,12 @@ export default class ShopCartModal extends Mixins(
     let modalEl = document.querySelector('.shop-cart.vm--container.scrollable > .vm--modal');
     if(modalEl){
       modalEl.scrollTo({top:0})
+    }
+    if (!this.order_reference || !this.order_reference.trim()) {
+      this.orderReferenceError = 'Order reference is required';
+      return;
+    } else {
+      this.orderReferenceError = '';
     }
     if (this.isCustomerAuthenticated){
       if (this.isEditting) {

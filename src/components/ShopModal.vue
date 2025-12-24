@@ -165,16 +165,16 @@
 
       <div class="modal-body">
         <div class="d-flex flex-row-reverse">
-          <div class="position-relative pl-4 ml-4"
-            style="border-left: 1px solid #eee; flex-basis: 20%; min-width: 160px; flex-grow: 0">
-            <div class="form-row switch-row">
+          <div class="position-relative pl-3 md:pl-4 ml-2 md:ml-4 gap-1 d-flex flex-column"
+            style="border-left: 1px solid #eee; flex-basis: 20%; flex-grow: 0">
+            <div class="switch-row">
               <label class="text-muted" for="preview-name">Preview Name</label>
               <label class="switch" for="preview-name">
                 <input type="checkbox" id="preview-name" v-model="shop.preview_name" />
                 <span class="slider"></span>
               </label>
             </div>
-            <div class="form-row switch-row">
+            <div class="switch-row">
               <label class="text-muted" for="preview-logo">Preview Logo</label>
               <label class="switch" for="preview-logo">
                 <input type="checkbox" id="preview-logo" v-model="shop.preview_logo" />
@@ -189,7 +189,7 @@
                 </template>
               </FileUploader>
             </div>
-            <hr class="my-3">
+            <hr class="my-1">
             <div>
               <h2 class="fs-2 mb-2 font-weight-bolder">Upload Shop Cover</h2>
               <FileUploader :selectedFileUrl="shop.cover_photo" :filesListing="customerShopsDefaultCoverPhotosUrls"
@@ -199,7 +199,7 @@
                 </template>
               </FileUploader>
             </div>
-            <hr class="my-3">
+            <hr class="my-1">
             <div>
               <h2 class="fs-2 mb-2 font-weight-bolder">Shop Expiry</h2>
                 <date-picker :config="datepickerOptions"  v-model="shop.unpublish_at" class="mb-2" placeholder="Select Shop Expiry Date"></date-picker>
@@ -249,9 +249,10 @@
                             </div>
                           </div>
 
-                          <div class="mt-3">
+                          <div class="mt-3 text-left">
+                            <label class="fw-bold d-block mb-1">Custom Price</label>
                             <b-input-group>
-                              <b-form-input v-model.number="product.custom_price"  @blur="formatProdCustomPrice(product)" aria-describedby="currency-badge"
+                              <b-form-input placeholder="Custom Price" v-model.number="product.custom_price"  @blur="formatProdCustomPrice(product)" aria-describedby="currency-badge"
                             />
                             <b-input-group-append>
                               <b-input-group-text id="currency-badge">{{ activeCurrencyCode }}</b-input-group-text>
@@ -455,6 +456,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       showToastedMessage(message)
     }).catch(errorResponse => {
       this.showLoader = false
+      showToastedMessage(errorResponse.response.data.message, 'error')
       handleResponseException(errorResponse)
     })
   }
@@ -547,6 +549,10 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   }
 
   public addProductToShopFromLockerRoom() {
+  const switchTab = this.$root.switchLockerTab
+    if (switchTab) {
+      switchTab(0)
+    }
     const shopSelectedProductsIds = this.shop.products.map(shopProduct => {
       return shopProduct.product_locker_room_id
     })
@@ -569,6 +575,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       this.isProductsUrlModalOpen = !this.isProductsUrlModalOpen
       this.isPasswordModalOpen = false
       this.isShareModalOpen = false
+      this.productsUrl = ''
   }
 
   public handleLogoUpdate(selectedFile) {
@@ -589,8 +596,8 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
     const shopPayload = this.getShopPayload()
     const url = this.shop.id ? `customer-shops/${this.shop.id}` : 'customer-shops'
     http.post(url, shopPayload).then(successResponse => {
-      // console.log(successResponse.data.result)
       this.$store.commit('UPDATE_SHOPS', successResponse.data.result);
+      this.$store.commit('SET_SHOP_ACTIVE_TAB', true);
       this.showLoader = false
       this.$emit('shop-saved', shopPayload)
       this.resetShopState()
@@ -612,6 +619,8 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
     this.showVModal('locker-modal')
     this.hideVModal('create-update-shop-modal')
     this.$emit('shop-model-closed')
+    this.shopPassword = ''
+    this.shopConfirmPassword = ''
   }
 
   public getShopPayload() {
@@ -1131,7 +1140,7 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
   background: #f0f0f0;
   color: #555;
   padding: 8px;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .url-input {
@@ -1197,10 +1206,10 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
 
 
 .switch-row {
-  display: grid;
+  display: flex;
   width: 100%;
-  grid-template-columns: 220px auto;
   align-items: center;
+  justify-content: space-between;
   &:last-of-type{
     margin-top: 10px !important;
   }

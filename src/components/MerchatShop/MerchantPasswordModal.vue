@@ -12,9 +12,9 @@
     <div class="modal-content">
        <div class="centered-content p-5">
         <div class="logo-container">
-          <img :src="firstProductFrontImage" alt="Logo"  class="logo-img">
+          <img :src="firstProductFrontImage" alt="Logo"  class="logo-img" v-if="firstProductFrontImage"/>
         </div>
-           <h2 class="font-weight-bold mb-2 fs-4">{{  ShopName }}</h2>
+           <h2 class="font-weight-bold mb-2 fs-4" v-if="ShopName">{{  ShopName }}</h2>
            <p class="text-muted mb-4">
           Enter the password to access this exclusive shop
         </p>
@@ -65,13 +65,12 @@ export default class PasswordModal extends Mixins(ErrorMessages) {
   public passwordVisible = false;
   private password = "";
   private errorMessage = "";
-
   get ShopName(): string {
-    return this.MerchantShopData?.name || "Shop";
+    return this.MerchantShopData?.preview_name ? this.MerchantShopData?.name || "Shop" : '';
   }
 
   get firstProductFrontImage(): string {
-    const imageUrl = `${this.storageUrl}${this.MerchantShopData?.products?.[0]?.front_image || ""}`;
+    const imageUrl = this.MerchantShopData?.preview_logo ? `${this.storageUrl}${this.MerchantShopData?.logo || ""}`: "";
     return imageUrl;
   }
 

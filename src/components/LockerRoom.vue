@@ -541,6 +541,7 @@ import {
 import ModalAction from "@/mixins/ModalAction";
 import { getClosestColor } from '@/pantoneColor';
 import { AxiosError } from "axios";
+import { BTab } from "bootstrap-vue";
 import { fabric } from 'fabric';
 import { differenceBy, findIndex, includes, intersectionBy, union } from 'lodash';
 import { Popper } from 'popper-vue';
@@ -624,10 +625,15 @@ interface FactoryProduct {
       this.getCustomeShops()
     }
     this.$emit('lockerModalOpened', ()=>{this.getLockerProductsRosters()})
+    this.$root.switchLockerTab = (index: number) => {
+      this.main_locker_tabs = index
+    }
+
   },
   beforeDestroy() {
     const doc = getDomDocument() as Record<any, any>;
     doc.removeEventListener('click', this.onClickOutside);
+    this.$root.switchLockerTab = undefined
   },
   destroyed() {
     const lockerTabs = this.$el.querySelector('.locker-tabs .lockerroom_titles') as Record<any, any>;
@@ -676,6 +682,7 @@ export default class LockerRoom extends Mixins(ErrorMessages, LockerProducts, ha
   isShopsTabActiveChanged() {
     if(this.is_shops_tab_active){
       this.main_locker_tabs = 2
+      this.$store.commit('SET_SHOP_ACTIVE_TAB', true);
     }
   }
 
@@ -1531,9 +1538,15 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
   public updateTab(){
     this.hidePopper();
     if(this.main_locker_tabs){
-      this.$store.dispatch("setCollectionMode","COLLECTION");
+      if(this.main_locker_tabs == 2){
+        this.$store.commit("SET_SHOP_ACTIVE_TAB",true);
+      }else{
+        this.$store.commit("SET_SHOP_ACTIVE_TAB",false);
+        this.$store.dispatch("setCollectionMode","COLLECTION");
+      }
     }
     else {
+      this.$store.commit("SET_SHOP_ACTIVE_TAB",false);
       this.$store.dispatch("setCollectionMode","LOCKER_STORYBOARD");
     }
   }

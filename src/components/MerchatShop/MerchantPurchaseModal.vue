@@ -118,6 +118,7 @@
                  </div>
                  <input
                    type="file"
+                   ref="excelInput"
                    @input="
                     uploadExcelFile($event, false, product)
                   "
@@ -369,6 +370,10 @@ export default class PurchaseModal extends Mixins(
       productId: this.product.id,
       roster: [],
     });
+    const input = this.$refs.excelInput as HTMLInputElement;
+    if (input) {
+      input.value = '';
+    }
   }
   public addNewPlayer(useFirstSize = false): void {
     const sizeToUse = useFirstSize ? this.sizes[0]?.name ?? null : this.selectedSize ?? null;
