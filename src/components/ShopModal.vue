@@ -214,6 +214,9 @@
                   <b-col cols="12" md="6" lg="4" xl="3" v-for="(product, productIndex) in shop.products"
                     :key="`product-${productIndex}-b-col`">
                     <b-card>
+                        <div class="product-status-badge" :class="product.status === 'expired' ? 'expired' : 'active'">
+                          {{ product.status === "expired" ? 'Expired' : 'Active' }}
+                        </div>
                       <!-- Delete button -->
                       <a class="btn remove edit absolute" @click="editShopProduct(productIndex, product)" v-if="!product.product_locker_room_id">
                         <b-icon-check v-if="product.override_product_info"
@@ -252,8 +255,19 @@
                           <div class="mt-3 text-left">
                             <label class="fw-bold d-block mb-1">Custom Price</label>
                             <b-input-group>
-                              <b-form-input placeholder="Custom Price" v-model.number="product.custom_price"  @blur="formatProdCustomPrice(product)" aria-describedby="currency-badge"
-                            />
+                              <!-- restrict input to numeric values only; use number type and keydown guard -->
+                              <b-form-input
+                                type="number"
+                                inputmode="decimal"
+                                step="0.01"
+                                min="0"
+                                placeholder="Custom Price"
+                                v-model.number="product.custom_price"
+                                @keydown="onCustomPriceKeydown($event)"
+                                @paste="onCustomPricePaste($event)"
+                                @blur="formatProdCustomPrice(product)"
+                                aria-describedby="currency-badge"
+                              />
                             <b-input-group-append>
                               <b-input-group-text id="currency-badge">{{ activeCurrencyCode }}</b-input-group-text>
                             </b-input-group-append>
@@ -721,6 +735,37 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       this.isSlugValidated = false;
       handleResponseException(errorResponse)
     })
+  }
+  
+  public onCustomPriceKeydown(e: KeyboardEvent): void {
+    const allowedKeys: string[] = ['Backspace', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
+    const key = e.key;
+
+    if (allowedKeys.includes(key)) return;
+    if (e.ctrlKey || e.metaKey) return;
+
+    const isNumber = /^[0-9]$/.test(key);
+    const isDot = key === '.';
+
+    const input = e.target as HTMLInputElement | null;
+    const value = input ? input.value : '';
+
+    if (isNumber) return;
+    if (isDot) {
+      if (value.includes('.')) {
+        e.preventDefault();
+      }
+      return;
+    }
+
+    e.preventDefault();
+  }
+
+  public onCustomPricePaste(e: ClipboardEvent): void {
+    const paste = e.clipboardData?.getData('text') ?? '';
+    if (!/^[0-9]*\.?[0-9]*$/.test(paste)) {
+      e.preventDefault();
+    }
   }
 public formatProdCustomPrice(product:any){
   product.custom_price = formatCustomPrice(product.custom_price)
@@ -1258,5 +1303,25 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
   }
 }
 }
+/* Product status badge (top-left of each product) */
+.product-status-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  z-index: 30;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.product-status-badge.expired {
+  background: #e74c3c; /* red */
+}
+.product-status-badge.active {
+  background: #2ecc71; /* green */
+}
+
 
 </style>
