@@ -84,7 +84,7 @@
                               'badge-danger': item_status_activity.activity_items[0].quality_control.qa_status == 'Rejected',
                               'badge-warning': item_status_activity.activity_items[0].quality_control.qa_status == 'Pending',
                             }">{{ item_status_activity.activity_items[0].quality_control.qa_status }}</span>
-                          </div>  
+                          </div>
                     </template>
                     <div class="images-grid p-2 d-flex gap-1 w-100">
                       <div class="d-flex align-items-stretch flex-wrap gap-1">
@@ -194,7 +194,7 @@
                             <span>{{ makeReorderMessage(activity_item.factory_product_id,
                               order_item.factory_products) }}</span>
                           </template>
-                          
+
                         </div>
                       </div>
 
@@ -226,10 +226,10 @@
                     <template v-if="item_status_activity.status == QUALITYCONTROL">
                             <div v-for="(report, index) in item_status_activity.activity_items[0].quality_control.reports" :key="`report-${index}`" >
                             {{ index + 1 }}. QC report {{report.status}}: <a :href="report.pdf_url" class="text-primary" target="_blank">
-                                {{ report.pdf_name }} 
+                                {{ report.pdf_name }}
                               </a> submitted at {{ report.created_at | formatDate('DD/MM/YYYY  ') }}
                             </div>
-                          
+
                           </template>
 
                     <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
@@ -1166,6 +1166,9 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
     }
 
     let artwork_created_activity = findActivityWithPosition(this.order.items[this.activity_items.order_item_index]?.status_activities, status_to_check, 0)
+    if(artwork_created_activity.length == 0) {
+      artwork_created_activity = this.order.items[this.activity_items.order_item_index]?.status_activities[0]
+    }
     if (this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.status === this.CUSTOMERAPPROVED) && this.activity_items.activity_item_data.length < artwork_created_activity.activity_items.length) {
       if (this.activity_items.activity_item_data.some((activity_item: Record<any, any>) => activity_item.action === 'accept')) {
         let submitted_customer_review_activity = findActivity(this.order.items[this.activity_items.order_item_index]?.status_activities, this.CUSTOMERREVIEW, artwork_created_activity.activity_items.length)
