@@ -13,6 +13,7 @@ const OrderDetail = ()=> import('../views/OrderDetail.vue')
 const PrivacyPolicy = ()=> import('@/views/PrivacyPolicy.vue')
 const ThirdParty = ()=> import('../views/ThirdPartyFeedback.vue')
 const DirectAccessSampleApproval = () => import('@/views/DirectAccessSampleApproval.vue')
+const MerchantShop = () => import('@/views/MerchantShop.vue')
 
 Vue.use(VueRouter)
 
@@ -68,6 +69,11 @@ const routes: Array<RouteConfig> = [
       name: 'privacyPolicy',
       component: PrivacyPolicy,
       meta: { layout: 'minimal' }
+  },
+  {
+    path: '/merchant-shop/:slug',
+    name: 'MerchantShop',
+    component: MerchantShop
   },
    {
     path: '/third-party-feedback/:order_item_id',
