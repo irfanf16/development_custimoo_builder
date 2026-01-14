@@ -1937,9 +1937,13 @@ private addToCartAnimation(frontImage: string, backImage: string | null) {
 
   async downloadProductPreviewImages(lockerIndex: number, productIndex: number) {
     let product: Record<any, any> = this.getLockerProducts[lockerIndex].product[productIndex];
-    let preview_file_paths = [product.product_front_url];
+    const randomString = product.random_string;
+
+    let preview_file_paths = [
+      `${product.product_front_url}?q=${randomString}`
+    ];
     if (product.product_back_url) {
-      preview_file_paths = [...preview_file_paths, product.product_back_url];
+      preview_file_paths = [...preview_file_paths, `${product.product_back_url}?q=${randomString}`];
     }
     this.showLoader = true;
     const base64_files = await urlToBase64(preview_file_paths);
