@@ -42,7 +42,7 @@
         <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
         <b-button v-if="$can('create-shop') && selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading" @click="createShop">Create a shop</b-button>
         <b-button
-        v-if="canAccessCompanyFeatures() && (selectedCollectionProducts.length > 0)"
+        v-if="canAccessCompanyFeatures() && (selectedCollectionProducts.length > 0) && !isEcommercePlatform()"
           variant="secondary"
           @click="handleAddToCart"
           :disabled="$store.getters.getCartLoading">
@@ -60,7 +60,7 @@
         </div>
         <div v-else class="text-right modal-footer">
          <b-button
-          v-if="selectedCollectionProducts.length > 0 && !$store.getters.getSelectionMode.shopAddmoreMode"
+          v-if="selectedCollectionProducts.length > 0 && !$store.getters.getSelectionMode.shopAddmoreMode && !isEcommercePlatform()"
           variant="primary"
           @click="handleAddToCart"
           :disabled="$store.getters.getCartLoading">
@@ -82,7 +82,7 @@
 import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
 import LockerRoom from '@/components/LockerRoom.vue'
 import ModalAction from '@/mixins/ModalAction'
-import { canAccessCompanyFeatures, getLockerRoomSelectedProducts, getShopDefaultObject, getShopProductsFromLockerProducts} from "@/helpers/Helpers";
+import { canAccessCompanyFeatures, getLockerRoomSelectedProducts, getShopDefaultObject, getShopProductsFromLockerProducts, isEcommercePlatform} from "@/helpers/Helpers";
 import ShopModal from '@/components/ShopModal.vue';
 import { find, findIndex, flatMap } from 'lodash';
 
@@ -249,6 +249,9 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   }
   public canAccessCompanyFeatures(): boolean {
     return canAccessCompanyFeatures()
+  }
+  public isEcommercePlatform(): boolean {
+    return isEcommercePlatform()
   }
 
   // Add after other methods in the LockerRoomModal class
