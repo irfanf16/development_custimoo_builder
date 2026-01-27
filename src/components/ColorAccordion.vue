@@ -94,7 +94,7 @@
             <div class="color-container">
               <!-- SVG group wise colors -->
               <template v-if="getSvgGroupColors(svgElement.id) && selectTypeIndex !== (productColors.length + 3)">
-                <div v-for="(color, c_index) in getSvgGroupColors(svgElement.id).json_data" v-if="color.value" class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
+                <div v-for="(color, c_index) in getSvgGroupColors(svgElement.id).json_data" v-if="color.value" class="color-box"  @click="color.value == svgElement.color ? null : setColorForIndex(color, index)"
                      :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
                   <span v-if="isColorSelected(color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
@@ -123,16 +123,16 @@
             </div>
               <!-- logo colors -->
               <template v-else-if="selectTypeIndex == productColors.length && !showOtherColors" v-for="(ext_color, ext_index) in logoColorsInfo">
-                <div v-if="ext_color.hex"  class="color-box" @click="ext_color.hex == svgElement.color ? null : setColor({value: ext_color.hex, ...ext_color})"
+                <div v-if="ext_color.hex"  class="color-box" @click="ext_color.hex == svgElement.color ? null : setColorForIndex({value: ext_color.hex, ...ext_color},index)"
                      :title="ext_color.pantone ? ext_color.pantone : ext_color.name" :style="{background: ext_color.hex }" :key="'base-color' +ext_index + ext_color.name">
-                  <span v-if="ext_color.hex == svgElement.color || (gradient_index !== undefined && svgElement.gradient_colors && svgElement.gradient_colors[gradient_index].color == ext_color.hex)" class="selected" style="z-index: 100; opacity: 1">
+                  <span v-if="isColorSelected(ext_color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
                   </span>
                 </div>
               </template>
               <!-- locker colors -->
               <template v-else-if="selectTypeIndex == (productColors.length + 1) && !showOtherColors" v-for="(color, index) in JSON.parse(lockerroomColors[activeLockerIndex].folders[activeFolderIndex].color)">
-                <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
+                <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColorForIndex(color, index)"
                      :title="color.name" :style="{background: color.value }" :key="`locker_color${index}${activeLockerIndex}${activeFolderIndex}`">
                   <span v-if="isColorSelected(color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
                     <BIconCheck />
@@ -140,14 +140,29 @@
                 </div>
               </template>
               <!-- product colors -->
-              <template v-else-if="!showOtherColors" v-for="(color, c_index) in productColors[selectTypeIndex]?.color_text">
-                <div v-if="color.value"  class="color-box"  @click="color.value == svgElement.color ? null : setColor(color)"
-                     :title="color.name" :style="{background: color.value }" :key="index+'product_color_box'+c_index">
-                  <span v-if="isColorSelected(color, svgElement, gradient_index)" class="selected" style="z-index: 100; opacity: 1">
-                    <BIconCheck />
-                  </span>
+              <template v-else-if="!showOtherColors">
+                <div
+                  v-for="(color, c_index) in uniqueProductColors"
+                  :key="index + 'product_color_box' + c_index"
+                >
+                  <div
+                    v-if="color.value"
+                    class="color-box"
+                    @click="color.value == svgElement.color ? null : setColorForIndex(color, index)"
+                    :title="color.name"
+                    :style="{ background: color.value }"
+                  >
+                    <span
+                      v-if="isColorSelected(color, svgElement, gradient_index)"
+                      class="selected"
+                      style="z-index: 100; opacity: 1"
+                    >
+                      <BIconCheck />
+                    </span>
+                  </div>
                 </div>
               </template>
+
               <template v-if="selectTypeIndex == (productColors.length + 3)">
                 <template v-for="(pattern, pattern_index) in selectedProduct.patterns[0].json_data">
                   <div class="pattern-designs" :key="'pattern_' + pattern_index">
@@ -351,26 +366,57 @@ export default class ColorAccordion extends Mixins(LockerProducts, ColorsTabMixi
     return this.$store.getters.getGroupPatterns
   }
 
-  public isColorSelected(color, svgElement, gradient_index) {
-    // Check if color or name matches
-    if (color.value === svgElement.color ||
-      (color.name && svgElement.name && color.name === svgElement.name)) {
-      return true;
-    }
+  get uniqueProductColors() {
+  const colors =
+    this.productColors?.[this.selectTypeIndex]?.color_text || []
 
-    // Check for gradient color match
-    if (gradient_index !== undefined && svgElement.gradient_colors) {
-      const gradientColor = svgElement.gradient_colors[gradient_index];
-      if (gradientColor.color === color.value || (gradientColor.name && color.name && gradientColor.name === color.name)) {
+  const seen = new Set<string>()
+  return colors.filter((color) => {
+    const key = `${color.value}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+ public isColorSelected(color, svgElement, gradient_index) {
+    // Get the stored group color for this specific accordion item
+    const groupColor = this.$store.getters.getGroupColorsById(svgElement.id);
+
+    // Normalize color value (handle both 'value' and 'hex' properties)
+    const colorValue = color.value || color.hex;
+
+    if (!groupColor) {
+      // Fallback to checking svgElement.color if no stored color exists
+      if (colorValue === svgElement.color ||
+        (color.name && svgElement.name && color.name === svgElement.name)) {
         return true;
+      }
+    } else {
+      // Check against stored group color
+      if (gradient_index !== undefined && groupColor.gradient_colors) {
+        const gradientColor = groupColor.gradient_colors[gradient_index];
+        if (gradientColor && (gradientColor.color === colorValue ||
+            (gradientColor.name && color.name && gradientColor.name === color.name))) {
+          return true;
+        }
+      } else if (groupColor.color) {
+        if (groupColor.color === colorValue ||
+          (groupColor.name && color.name && groupColor.name === color.name)) {
+          return true;
+        }
       }
     }
 
     return false
   }
-
   public isPatternColorSelected(color, patternColor) {
     return color.value === patternColor?.value
+  }
+
+   public setColorForIndex(color: Record<any, any>, accordionIndex: number) {
+    this.selectAccordionIndex = accordionIndex;
+    this.setColor(color);
   }
 
   public getColorTypeBySvgGroup(svg_group: string, color_type) {
