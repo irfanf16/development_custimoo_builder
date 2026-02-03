@@ -1,7 +1,7 @@
 <template>
   <modal :minWidth="1000" width="100%" :minHeight="600" height="auto"
     name="cart-modal" ref="cart-modal" id="cart-center-lockerroom" size="xl" class="cart-modal absolute-modals" modal-class="modal-fullscreen2"
-    content-class="lockerroom-modal" @closed="customer_reference_no = null" @before-open="getAddresses">
+    content-class="lockerroom-modal" @before-open="getAddresses">
     <div class="modal-header d-flex justify-content-between">
       <span class="fs-5 font-weight-bold">Cart</span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="hideVModal('cart-modal')">
@@ -351,7 +351,7 @@
           <div class="fs-2 font-weight-bold mt-3"><span class="text-danger">*</span> Team Name / order reference</div>
           <div class="mt-1">
             <b-form-input class="form-input" placeholder="Team Name / order reference" type="text" name="customer_reference_no"
-              v-model="customer_reference_no" />
+              v-model="customer_reference_no" @blur="handleCustomerReference" />
           </div>
         </div>
       </div>
@@ -417,6 +417,8 @@ import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator';
   },
   async mounted() {
     // this.getColors()
+    const referenceNumber = localStorage.getItem('customerReferenceNumber')
+    this.customer_reference_no = referenceNumber ?? ''
     if (this.isCustomerAuthenticated){
       let ecommerce_update_id = this.$route.query.update_item;
       let santa_cart_id = String(this.$route.query.update_cart);
@@ -616,7 +618,11 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   public canAccessCompanyFeatures(): boolean {
     return canAccessCompanyFeatures()
   }
-
+  public handleCustomerReference(){
+    localStorage.setItem('customerReferenceNumber', this.customer_reference_no);
+    const referenceNumber = localStorage.getItem('customerReferenceNumber')
+    console.log(referenceNumber, "This is LocalStorage");
+  }
   public createOrder(get_quote = {quote:false, 'admin_salesrep_id': null}) {
     trackEvent(GTAGEVENTS.CONFIRM_ORDER);
     if(!this.customerPermissions.includes('skip-moq')) {
@@ -663,6 +669,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
         this.$store.dispatch('addToCart', [])
         this.showToast(res.data.message ? `${res.data.message} and pdf is generating` : 'Your pdf is generating', 'success');
         this.viewLoader = false;
+        localStorage.removeItem('customerReferenceNumber')
         // this.hideVModal('cart-modal')
         if(get_quote.quote) {
           this.$router.push({name: 'CustomerQuotes'});
