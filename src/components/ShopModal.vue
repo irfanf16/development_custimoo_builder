@@ -31,21 +31,52 @@
                 <div class="share-popover" role="dialog" aria-label="Share" ref="sharePopover">
                   <!-- Password toggle -->
                   <div class="row toggler">
-                    <span class="muted" v-if="shop.id && shop.password">
+                    <span class="muted" v-if="shop.id && shop.plain_password">
                       Update Shop Password
                     </span>
                     <span class="muted" v-else>Set Shop Password</span>
                   </div>
 
                   <template>
-                    <div class="row m-0 url-row">
-                      <input class="url-input" type="password" placeholder="Password" v-model="shopPassword"
-                      autocomplete="off" novalidate />
-                    </div>
-                    <div class="row m-0 mt-2 url-row">
-                      <input class="url-input" type="password" placeholder="Confirm password"
-                        v-model="shopConfirmPassword" autocomplete="off" novalidate />
-                    </div>
+                    <!-- Password -->
+                      <div class="row m-0 url-row password-row">
+                        <input
+                          class="url-input"
+                          :type="(!isPasswordHashed && showPassword) ? 'text' : 'password'"
+                          placeholder="Password"
+                          v-model="shopPassword"
+                          autocomplete="off"
+                          novalidate
+                        />
+                        <template v-if="!isPasswordHashed">
+                          <span  class="eye-icon" @click.stop="showPassword = !showPassword">
+                            <b-icon-eye v-if="showPassword"></b-icon-eye>
+                            <b-icon-eye-slash v-else></b-icon-eye-slash>
+                          </span>
+                        </template>
+
+                      </div>
+
+                      <!-- Confirm Password -->
+                      <div class="row m-0 mt-2 url-row password-row">
+                        <input
+                          class="url-input"
+                          :type="(!isPasswordHashed && showConfirmPassword) ? 'text' : 'password'"
+                          placeholder="Confirm password"
+                          v-model="shopConfirmPassword"
+                          autocomplete="off"
+                          novalidate
+                        />
+
+                        <template v-if="!isPasswordHashed">
+                          <span class="eye-icon" @click.stop="showConfirmPassword = !showConfirmPassword">
+                            <b-icon-eye v-if="showConfirmPassword"></b-icon-eye>
+                            <b-icon-eye-slash v-else></b-icon-eye-slash>
+                          </span>
+                        </template>
+
+                      </div>
+
                   </template>
 
                   <div class="d-flex" style="gap: 10px">
@@ -359,6 +390,9 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   public shopConfirmPassword = ''
   public shareCopied = false;
   public showDropdown = false
+  public showPassword: boolean = false;        // default SHOW
+  public showConfirmPassword: boolean = false; // default SHOW
+
 
   public productsUrl = ''
 
@@ -414,10 +448,14 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       return false
     }
     if(this.shop.id) {
-      return this.shop.password ? true : false
+      return (this.shop.password || this.shop.plain_password) ? true : false
     } else {
       return (this.shop.password ? true : false) && ( this.shop.password === this.shop.password_confirmation)
     }
+  }
+
+  get isPasswordHashed(): boolean {
+    return this.shop.password ? true : false
   }
 
   get company() {
@@ -550,16 +588,25 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
     }
 
   public handleModelBeforeOpenEvent() {
-    const logo = this.shopData.logo
-    const coverPhoto = this.shopData.cover_photo
-    this.shop = santaClone(this.shopData)
-    this.shop.logo = logo;
-    this.shop.cover_photo = coverPhoto;
+      const logo = this.shopData.logo;
+      const coverPhoto = this.shopData.cover_photo;
+      this.shop = santaClone(this.shopData);
+      this.shop.logo = logo;
+      this.shop.cover_photo = coverPhoto;
 
-    this.isPasswordModalOpen = false
-    this.isShareModalOpen = false
-    this.isProductsUrlModalOpen = false
-    this.getMerchantProducts()
+      // Populate password fields
+      if (this.shop?.plain_password) {
+        this.shopPassword = this.shop.plain_password;
+        this.shopConfirmPassword = this.shop.plain_password;
+      } else {
+        this.shopPassword = this.shop.password;
+        this.shopConfirmPassword = this.shop.password;
+      }
+
+      this.isPasswordModalOpen = false;
+      this.isShareModalOpen = false;
+      this.isProductsUrlModalOpen = false;
+      this.getMerchantProducts();
   }
 
   public addProductToShopFromLockerRoom() {
@@ -645,7 +692,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       formData.append('_method', 'PUT');
     }
     formData.append("is_shop_password_protected", JSON.stringify(this.isShopPasswordProtected));
-    if(shop.password) {
+    if(this.isShopPasswordProtected) {
         formData.append("password", this.shopPassword)
         formData.append("password_confirmation", this.shopConfirmPassword )
       }
@@ -839,9 +886,15 @@ public formatProdCustomPrice(product:any){
   public setPassword() {
     if (this.shopPassword || this.shopConfirmPassword) {
       if (this.shopPassword === this.shopConfirmPassword) {
-        this.shop.password = this.shopPassword
+        if(this.shop.id) {
+          this.shop.plain_password = this.shopPassword
+        } else {
+          this.shop.password = this.shopPassword
+        }
         this.shop.password_confirmation = this.shopConfirmPassword
         this.isPasswordModalOpen = false;
+        this.showPassword = false;
+        this.showConfirmPassword = false;
         showToastedMessage("Shop password protection enabled")
       } else {
         showToastedMessage("Password and confirm password must be same", "error")
@@ -855,6 +908,7 @@ public formatProdCustomPrice(product:any){
     this.shopPassword = ''
     this.shopConfirmPassword = ''
     this.shop.password = ''
+    this.shop.plain_password = ''
     this.shop.password_confirmation = ''
     this.togglePasswordModal()
     showToastedMessage("Shop password protection disabled")
@@ -1321,6 +1375,22 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
 }
 .product-status-badge.active {
   background: #2ecc71; /* green */
+}
+
+.password-row {
+  position: relative;
+}
+
+.eye-icon {
+  cursor: pointer;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  color: #666;
+}
+
+.eye-icon:hover {
+  color: #000;
 }
 
 
