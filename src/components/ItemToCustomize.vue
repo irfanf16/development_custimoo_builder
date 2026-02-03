@@ -149,7 +149,14 @@
      </template>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable v-if="startLoadDesigns" :key="this.selectedProduct.productstyles[styleIndex]? this.selectedProduct.productstyles[styleIndex].id : ''" :products_fonts="products_fonts" />
+      <DesignAvailable 
+        v-if="startLoadDesigns || designBrowseMode === 'ALL' || designBrowseMode === 'STYLE'"
+          :key="designBrowseMode === 'ALL'
+            ? `all-styles`
+            : `style-${selectedProduct.productstyles[styleIndex]?.id}`"
+          :products_fonts="products_fonts"
+      />
+
     </div>
   </div>
 </template>
@@ -318,7 +325,9 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   get styleIndex():number{
     return  this.$store.getters.getCurrentStyleIndex
   }
-
+  get designBrowseMode():string {
+    return this.$store.getters.getDesignBrowseMode
+  }
   get logoColorsInfo() {
     return this.$store.getters.getLogoColorsInfo();
   }

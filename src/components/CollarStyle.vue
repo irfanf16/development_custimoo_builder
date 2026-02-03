@@ -18,17 +18,35 @@
         <div><hr /></div>
           <div v-if="selectedProduct.productstyles.length > 1" class="choose-collar mb-3">
             <h2 class="fw-bold mb-2 fz-18">Choose option</h2>
+             <!-- ALL BUTTON -->
               <div class="collar-designs">
-                <template v-for="(style, i) in selectedProduct.productstyles">
-                  <div :key="i+'collar'" class="text-center">
-                      <b-button :key="'front_style_' + i" :class="{'active': styleIndex === i}"
-                                variant="outline-light" @click="styleIndex === i ? '' : changeStyleIndex(i)">
-                        <img v-if="style.style_icon_url" :src="storageUrl+style.style_icon_url" alt="Collar" :key="'style_icon' + i"/>
-                        <img v-else :src="storageUrl+style.front_models[0].file_url" alt="Collar" :key="'front_style_image' + i"/>
-                      </b-button>
-                      <span class="mt-1 d-inline-flex" :key="'style_name' + i">{{style.name}}</span>
+                 <div
+                    class="text-center"
+                    :key="'all-style'"
+                    v-if="selectedProduct.merge_styles"
+                  >
+                    <b-button
+                      :class="{ active: designBrowseMode === 'ALL' }"
+                      variant="outline-light"
+                      @click="setAllMode"
+                    >
+                      <span class="fw-bold text-dark">All</span>
+                    </b-button>
+                    <span class="mt-1 d-inline-flex">All</span>
                   </div>
-                </template>
+                 <template v-for="(style, i) in selectedProduct.productstyles">
+                    <div :key="i+'collar'" class="text-center">
+                      <b-button
+                       :class="{ active: styleIndex === i && designBrowseMode === 'STYLE' }"
+                        variant="outline-light"
+                        @click="changeStyleIndex(i)"
+                      >
+                        <img v-if="style.style_icon_url" :src="storageUrl+style.style_icon_url" />
+                        <img v-else :src="storageUrl+style.front_models[0].file_url" />
+                      </b-button>
+                      <span class="mt-1 d-inline-flex">{{style.name}}</span>
+                    </div>
+                  </template>
               </div>
           </div>
 
@@ -121,6 +139,9 @@ import Store from "@/store";
 
       get styleIndex():number{
         return this.$store.getters.getCurrentStyleIndex;
+      }
+      get designBrowseMode():string{
+        return this.$store.getters.getDesignBrowseMode
       }
 
       get company(){

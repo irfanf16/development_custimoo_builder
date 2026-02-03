@@ -1,13 +1,22 @@
 <template>
   <div>
-    <b-tabs class="w-100 category-tabs-container" pills card v-if="selectedProduct.productstyles[styleIndex] && selectedProduct.productstyles[styleIndex].design_categories.length > 0">
+    <b-tabs v-if="selectedProduct.productstyles && selectedProduct.productstyles.length && this.$store.getters.getDesignBrowseMode !== 'ALL' ">
       <b-tab @click="handleAllTabClick" title="All"></b-tab>
-      <b-tab v-for="(category, category_index) in selectedProduct.productstyles[styleIndex].design_categories" @click="handleCategoryChange(category_index)" :key="category_index"
-      :title="category.category_name" />
+    
+      <!-- Only show category tabs in normal mode -->
+      <b-tab
+        v-for="(category, category_index) in selectedProduct.productstyles[styleIndex].design_categories"
+        @click="handleCategoryChange(category_index)"
+        :key="category_index"
+        :title="category.category_name"
+      />
     </b-tabs>
+
     <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
-      <template v-if="selectedProduct.productstyles[styleIndex]">
-        <div class="design-col" v-for="(design, index) in filteredDesigns" :key="design.id" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
+      
+      <template v-if="selectedProduct?.productstyles?.[styleIndex] &&
+         filteredDesigns.length">
+        <div class="design-col" v-for="(design, index) in filteredDesigns" :key="`${design.id}-${currentCategoryIndex}`" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
           <div class="d-flex justify-content-between">
             <template>
               <label :class="{ 'select-design-checkbox': !mobileScreen, 'custom-checkbox': isCustomerAuthenticated }">
@@ -25,16 +34,16 @@
                       textureUrl: storageUrl+design.front_design.file_thumbnail_url, file_extension:design.front_design.file_extension,
                       safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
                       boundary_url: design.frontboundary_design? storageUrl+design.frontboundary_design.file_url : '',
-                      models: selectedProduct.productstyles[styleIndex].front_models
+                      models: selectedProduct.productstyles[effectiveStyleIndex(design)].front_models
                     }"
                    :svg_parts="design.svg_parts"
                    :backTextureUrl="design.back_design? design.back_design.file_thumbnail_url: ''"
                    :backTextrueExtension="design.back_design? design.back_design.file_extension: ''"
-                   :logos="selectedProduct.productstyles[styleIndex].logo"
+                   :logos="selectedProduct.productstyles[effectiveStyleIndex(design)].logo"
                    :logosSettings="selectedProduct.logos_setting" :logoAllowed="Boolean(selectedProduct.is_logo_allowed)" :logosLimit="selectedProduct.allowed_logos_count"
                    :productNamesSetting="selectedProduct.productnames" :productColors="selectedProduct.colors" :colorGrouping="JSON.parse(design.front_design.color_group)"
                    :productType="selectedProduct.product_type" :product_id="selected_product_id" :product_index="selectedProductIndex" :products_fonts="products_fonts"
-                   :design_id="design.id" :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
+                   :design_id="design.id" :visual_addons="selectedProduct.productstyles[effectiveStyleIndex(design)].customized_addons"
             />
           </a>
           <div v-else :style="{width: design_width+ 'px', height: design_height+ 'px'}"></div>
@@ -55,7 +64,13 @@ import {getDomDocument} from "@/helpers/Helpers";
 @Component({
   components: {
     Scene
+  },
+  watch: {
+  styleIndex() {
+    this.currentCategoryIndex = 0
+    this.loadDesignsByStyleIndex()
   }
+}
 })
 export default class DesignAvailable extends Mixins(HideUpdateLockerButton, LogoUploaderColors) {
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
@@ -67,7 +82,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   public design_height = 0
   public design_times = []
   public currentCategoryIndex = 0
-  public filteredDesigns: Array<any> = this.selectedProduct.productstyles[this.styleIndex].productdesigns
+  public filteredDesigns: Array<any> = []
   public observer: IntersectionObserver | null = null
 
   get locked_designs() {
@@ -89,10 +104,16 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   get selectedDesignId(): number{
     return this.$store.getters.getSelectedDesignId
   }
-  get styleIndex():number{
-    return  this.$store.getters.getCurrentStyleIndex;
+  get styleIndex(): number {
+    const idx = this.$store.getters.getCurrentStyleIndex
+    return typeof idx === 'number' ? idx : 0
   }
-
+  public effectiveStyleIndex(design: Record<string, any>): number {
+    if (this.$store.getters.getDesignBrowseMode === 'ALL' && typeof design._styleIndex === 'number') {
+      return design._styleIndex
+    }
+    return this.styleIndex
+  }
   get getLastActiveProductData(): Record<any, any> {
     return this.$store.getters.getLastActiveProductData
   }
@@ -108,17 +129,28 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
+  
 
   mounted() {
     this.$eventBus.$on("product_designs_selection_reset", this.handleProductDesignsSelectionInfoReset)
+    // clear per-component loader when the 3D scene reports it is visible
+    this.$eventBus.$on('three-scene-loaded', this.onThreeSceneLoaded)
     this.first_load = true
-    this.design_width = (this.$refs['design_canvas'] as Record<any, any>)[0].clientWidth
-    this.design_height = (this.$refs['design_canvas'] as Record<any, any>)[0].clientHeight;
-    this.setupObserver()
+    this.$nextTick(() => {
+      const canvas = (this.$refs['design_canvas'] as any)?.[0]
+      if (canvas) {
+        this.design_width = canvas.clientWidth
+        this.design_height = canvas.clientHeight
+      }
+    })
+    // this.setupObserver()
+     this.loadDesignsByStyleIndex()
   }
+  
 
   beforeDestroy() {
     this.$eventBus.$off("product_designs_selection_reset")
+    this.$eventBus.$off('three-scene-loaded', this.onThreeSceneLoaded)
     if (this.observer) {
       this.observer.disconnect()
     }
@@ -164,35 +196,46 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
       }
     }, 100)
   }
+  public async changeDesign(index: number) {
 
-  public changeDesign(index: number) {
-    if(this.selectedDesignId != this.filteredDesigns[index].id) {
-      if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors(false)
+    const selectedDesign = this.filteredDesigns[index]
+
+    if (!selectedDesign) return
+    if (this.$store.getters.getDesignBrowseMode === 'ALL') {    
+
+      this.$store.commit('CHANGE_STYLE_INDEX', selectedDesign._styleIndex)
+    }
+
+    const targetStyleIndex = this.styleIndex
+    const targetStyle = this.selectedProduct.productstyles[targetStyleIndex]
+    targetStyle.productdesigns.forEach((d: any) =>
+    Vue.set(d, 'design_show', 0)
+    )
+    const designIndex = targetStyle.productdesigns.findIndex(
+    (d: any) => d.id === selectedDesign.id
+    )
+    if (designIndex === -1) return
+    Vue.set(targetStyle.productdesigns[designIndex], 'design_show', 1)
+    this.$store.dispatch('setSelectedProductDesignID', selectedDesign.id)
+    await this.$nextTick()
+
+  }
+
+  public onThreeSceneLoaded(payload: {product_id?: number, design_id?: number|null}) {
+    // clear per-component loader only when the loaded scene matches our selected product/design
+    try {
+      const currentSelectedDesign = this.$store.getters.getSelectedDesignId
+      const currentProductId = this.selected_product_id
+      if ((payload.design_id && currentSelectedDesign && payload.design_id == currentSelectedDesign) || (payload.product_id && payload.product_id == currentProductId)) {
+        this.$store.commit('SET_START_LOAD_DESIGNS', false)
       }
-      this.$store.commit('SET_LAST_ACTIVE_PRODUCT_DATA', {
-        design_index: index, design_id: this.filteredDesigns[index].id
-      })
-      this.$store.commit('Change_Locker_Tabs_Index', undefined)
-      this.$store.dispatch('setActiveTab', -1)
-      this.$store.commit('SET_SHUFFLE', false)
-
-      // First, reset design_show for ALL designs in the main product designs array
-      this.selectedProduct.productstyles[this.styleIndex].productdesigns.forEach((design: any) => {
-        Vue.set(design, 'design_show', 0)
-      })
-
-      // Then, set design_show = 1 only for the selected design
-      const selectedDesign = this.filteredDesigns[index]
-      const mainDesignIndex = this.selectedProduct.productstyles[this.styleIndex].productdesigns.findIndex((design: any) => design.id === selectedDesign.id)
-      if (mainDesignIndex !== -1) {
-        Vue.set(this.selectedProduct.productstyles[this.styleIndex].productdesigns[mainDesignIndex], 'design_show', 1)
-      }
-
-      this.$store.dispatch('setSelectedProductDesignID', selectedDesign.id);
-      this.hideLockerProductUpdateButton()
+    } catch (e) {
+      // ignore
     }
   }
+
+
+
 
   public showPreview() {
     if(this.mobileScreen){
@@ -226,31 +269,101 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     }
   }
 
-  public handleAllTabClick() {
-    this.filteredDesigns = this.selectedProduct.productstyles[this.styleIndex].productdesigns
+public handleAllTabClick() {
+  this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')
+  this.loadDesignsByStyleIndex()
+}
+public handleCategoryChange(tab_index: number) {
+  if (this.$store.getters.getDesignBrowseMode === 'ALL') return
 
-    // Re-setup observer for all designs
-    this.$nextTick(() => {
-      this.setupObserver()
+  const currentCategory =
+    this.selectedProduct.productstyles[this.styleIndex].design_categories[tab_index]
+
+  this.currentCategoryIndex = tab_index
+
+  this.filteredDesigns =
+    this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter(
+      (design: any) =>
+        design.front_design.design_categories_pivot.some(
+          (pivot: any) => pivot.design_category_id === currentCategory.id
+        )
+    )
+
+  // 🔥 render immediately
+  this.filteredDesigns.forEach(d => {
+    Vue.set(d, 'design_show_on_scroll', 1)
+  })
+  this.first_load = true
+  this.$nextTick(() => {
+    this.setupObserver()
+  })
+}
+public loadDesignsByStyleIndex() {
+  if (!this.selectedProduct?.productstyles?.length) return
+   const isAllMode = this.$store.getters.getDesignBrowseMode === 'ALL'
+  if (isAllMode) {
+       this.filteredDesigns = this.getAllGroupedDesigns()
+
+    // 🔥 IMPORTANT: reset lazy flags
+    this.filteredDesigns.forEach(d => {
+      Vue.set(d, 'design_show_on_scroll', 0)
     })
+
+    // ❳ attach observer AFTER DOM is painted
+    this.$nextTick(() => {
+      requestAnimationFrame(() => {
+        this.setupObserver()
+      })
+    })
+  } else {
+   this.filteredDesigns =
+      this.selectedProduct.productstyles[this.styleIndex].productdesigns
+
+    // 🔥 force render everything
+    this.filteredDesigns.forEach(d => {
+      Vue.set(d, 'design_show_on_scroll', 1)
+    })
+
+    // 🧹 cleanup observer
+    if (this.observer) {
+      this.observer.disconnect()
+      this.observer = null
+    } 
   }
 
-  public handleCategoryChange(tab_index: number) {
-    const currentCategory = this.selectedProduct.productstyles[this.styleIndex].design_categories[tab_index];
+  this.$nextTick(this.setupObserver)
+}
 
-    this.currentCategoryIndex = tab_index;
 
-    this.filteredDesigns = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((design: any) => {
-      return design.front_design.design_categories_pivot.some(
-        (pivot: any) => pivot.design_category_id === currentCategory.id
-      )
-    });
+public getAllGroupedDesigns(): Array<any> {
+  if (!this.selectedProduct || !this.selectedProduct.productstyles) return []
 
-    // Re-setup observer for the new filtered designs
-    this.$nextTick(() => {
-      this.setupObserver()
+  const map: Record<string, any[]> = {}
+
+  this.selectedProduct.productstyles.forEach((style: any, styleIndex: number) => {
+    style.productdesigns.forEach((design: any) => {
+      const key = design.design_name?.toLowerCase() || 'unknown'
+
+      if (!map[key]) map[key] = []
+
+      map[key].push({
+        ...design,
+        _styleIndex: styleIndex
+      })
     })
-  }
+  })
+
+  const result: any[] = []
+
+  Object.keys(map).forEach((key) => {
+    const sorted = map[key].sort((a, b) => a._styleIndex - b._styleIndex)
+    result.push(...sorted)
+  })
+
+  return result
+}
+
+
 }
 </script>
 

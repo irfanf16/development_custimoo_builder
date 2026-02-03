@@ -58,6 +58,7 @@ const ProductAttributes:Module<any, any> = {
     },
     customTexts: {},
     styleIndex: 0,
+    designBrowseMode : 'ALL',
     shuffle_color_number: 1,
     // changing defaultColors object will also need to change value in helper method getDefaultColorsObject
     defaultColors: [{title: 'Color One', color: null, pantone: null, name: null}, {title: 'Color Two', color: null, pantone: null, name: null}, {title: 'Color Three', color: null, pantone: null, name: null}, {title: 'Color Four', color: null, pantone: null, name: null}],
@@ -562,6 +563,10 @@ const ProductAttributes:Module<any, any> = {
     CHANGE_STYLE_INDEX(state:  Record<any, any>, payload:number){
       state.styleIndex = payload;
     },
+    CHANGE_DESIGN_BROWSE_MODE(state: Record<any, any>, payload:number){
+      state.designBrowseMode =payload;
+    },
+
     SET_CUSTOM_OBJ(state:  Record<any, any>, prd_id:number){
       const arr:Record<any, any> = []
       const default_setting = setLogoSettings(0)
@@ -1654,6 +1659,9 @@ const ProductAttributes:Module<any, any> = {
     getActiveLogoIndex: (state: any) => state.logoTabIndex,
     getCurrentStyleIndex: state => {
       return state.styleIndex
+    },
+    getDesignBrowseMode:state=>{
+      return state.designBrowseMode
     },
     getSelectedDesignId: state => {
       return state.selectedDesignId

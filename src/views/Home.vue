@@ -370,16 +370,15 @@
                    class="w-100 fs-1 font-weight-bolder text-center main-home-price">
                 MSRP: <span v-if="productPriceObject.active_currency && productPriceObject.active_currency.ecommerce_min_price"> - From : </span> {{productPriceObject.product_price + " " + productPriceObject.currency_code}}
               </div>
-
               <div v-bind:class="{active: isActive}">
                 <div class="twoD-view">
                   <div class="main-preview p-3 d-flex flex-wrap justify-content-center align-items-center" :class="mobileScreen && (isFront ? 'front': 'back')" v-if="selectedProduct">
-                    <template v-if="selectedProduct.productstyles[styleIndex]" >
-                      <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
+                 <template v-if="selectedProduct?.productstyles?.[styleIndex]">
+                     <template v-for="design in selectedProduct.productstyles[styleIndex].productdesigns.filter(product_design => product_design.design_show)">
                         <div class="image-holder" ref="scene-holder" :key="'front'+design.id">
                           <template v-if="!initializingProductData">
                             <template v-if="selectedProduct.is_3d_product">
-                              <ThreeDScene :key="'main3dScene'+design.id" ref="mainScene"
+                              <ThreeDScene :key="'main3dScene-'+(styleIndex)+'-'+design.id" :ref="`mainScene-${design.id}-${styleIndex}`"
                                            :imageData="{model_url: selectedProduct.productstyles[styleIndex]._3d_model.file_url,
                                               texture_url: selectedProduct.productstyles[styleIndex]._3d_texture?.file_url,
                                               roughness_map_url: selectedProduct.productstyles[styleIndex]._3d_roughness_map?.file_url,
@@ -401,7 +400,7 @@
                               />
                             </template>
                             <div v-else>
-                              <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
+                              <Scene v-if="design.back_design" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene-'+(styleIndex)+'-'+design.id"
                                      :front="{
                                         textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                                         safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -423,7 +422,7 @@
                                      :visual_addons="selectedProduct.productstyles[styleIndex].customized_addons"
                               />
 
-                              <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene'+design.id"
+                              <Scene v-else class="view-back" :measurement-ratio="selectedProduct.measurement_ratio" ref="mainScene" :key="'main2dScene-'+(styleIndex)+'-'+design.id"
                                      :front="{
                                         textureUrl: storageUrl+design.front_design.file_base_url, file_extension:design.front_design.file_extension,
                                         safe_zone_url: design.frontsafezone_design? storageUrl+design.frontsafezone_design.file_url : '',
@@ -811,6 +810,7 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   private initProductsFontsEvent = async (products: Record<any, any>[], resolve: any) => {
     await this.initProductsFonts(products, resolve)
   }
+
   private tabIcons = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
       <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
@@ -860,7 +860,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
       routerPush(this.$router,'Home');
       //setAppComponentKey()
     }
-    console.log('after routerPush')
     this.jwtToken = localStorage.getItem(Vue.prototype.$jwtToken_localstorage_key) as string
     // await this.$store.dispatch('setJwtToken')
     if(!localStorage.getItem(Vue.prototype.$browserToken_localstorage_key)){
@@ -919,7 +918,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get mainTabIndex() {
     return this.$store.getters.getMainTab
   }
-
   @Watch('mainTabIndex')
   mainTabIndexChanged(newVal: number) {
     this.switchTabs(newVal, false)

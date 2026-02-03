@@ -323,6 +323,15 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
         }
         let active_product: Record<any, any> = retrieved_products[active_product_index]
+        // Handle merge styles case
+        console.log("active",active_product.merge_styles)
+        if (active_product.merge_styles === 1) {
+          this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')      
+        }
+        else{
+          this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE')      
+        }
+
         let product_custom_texts: Record<any, any>[] = active_product.product_custom_texts;
 
         this.$store.commit('SET_PRODUCTS', {products: retrieved_products, active_product_index: active_product_index});
@@ -390,7 +399,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
                 active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
                   return style.id == active_style_id
                 })
-                this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
+               
+                this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);  
                 const active_style_designs = active_product_styles[active_style_index].productdesigns
                 active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
                   return design.id == active_design_id
@@ -982,56 +992,117 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
   get logoColorsInfo() {
     return this.$store.getters.getLogoColorsInfo();
   }
-  public changeStyleIndex(i: number) {
-    if(this.styleIndex != i) {
-      if(this.logoColorsInfo.using_logo_colors) {
-        this.useLogoColors(false)
-      }
-      if (this.mobileScreen) {
-        (this.$parent!.$parent as Record<any, any>).isFront = true
-      } else {
-        this.$store.commit('SET_START_LOAD_DESIGNS', false)
-        this.$store.commit('SET_START_LOAD_PRODUCTS', false)
-      }
+  private startLoader() {
+  this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
+  this.$store.commit('SET_START_LOAD_DESIGNS', true)
+}
 
-      const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
-        return item.design_show
-      })
-      if (currentDesign.length) {
-        const design_name = currentDesign[0].design_name
-        let designFound = false;
-        this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>) => {
-          if (item.design_name.toLowerCase() == design_name.toLowerCase()) {
-            designFound = true
-            Vue.set(item, 'design_show', 1)
-            this.$store.dispatch('setSelectedProductDesignID', item.id)
-          } else {
-            Vue.set(item, 'design_show', 0)
-          }
-        })
-        this.hideLockerProductUpdateButton(true)
-        if (!designFound) {
-          if (!this.selectedProduct.productstyles[i].productdesigns.filter((design: Record<any, any>) => design.design_show).length) {
-            this.selectedProduct.productstyles[i].productdesigns.forEach((item: Record<any, any>, index: number) => {
-              if (index == 0) {
-                Vue.set(this.selectedProduct.productstyles[i].productdesigns[0], 'design_show', 1)
-                this.$store.dispatch('setSelectedProductDesignID', this.selectedProduct.productstyles[i].productdesigns[0].id)
-              } else {
-                Vue.set(this.selectedProduct.productstyles[i].productdesigns[index], 'design_show', 0);
-              }
-            })
-          }
-        }
-      }
-      this.$store.commit('CHANGE_STYLE_INDEX', i);
-      let design_index = findIndex(this.selectedProduct.productstyles[i].productdesigns, "design_show")
-      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
-        style_index: i, style_id: this.selectedProduct.productstyles[i].id,
-        design_index: design_index, design_id: this.selectedProduct.productstyles[i].productdesigns[design_index].id
-      })
-      hideLockerProductUpdateButton(false)
+private stopLoader() {
+  this.$store.commit('SET_START_LOAD_DESIGNS', false)
+  this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', false)
+}
+private activateStyleAndFirstDesign(targetStyleIndex: number) {
+  const styles = this.selectedProduct.productstyles
+  const targetStyle = styles[targetStyleIndex]
+
+  if (!targetStyle || !targetStyle.productdesigns?.length) return
+
+  // reset all designs
+  styles.forEach(style => {
+    style.productdesigns.forEach(design => {
+      Vue.set(design, 'design_show', 0)
+    })
+  })
+
+  // activate first design
+  const designIndex = 0
+  const design = targetStyle.productdesigns[designIndex]
+
+  Vue.set(design, 'design_show', 1)
+
+  this.$store.dispatch('setSelectedProductDesignID', design.id)
+
+  this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+    style_index: targetStyleIndex,
+    style_id: targetStyle.id,
+    design_index: designIndex,
+    design_id: design.id
+  })
+}
+
+public setAllMode() {
+  this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')
+
+  // 🔥 START LOADER
+  this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
+  this.$store.commit('SET_START_LOAD_DESIGNS', true)
+
+  const styles = this.selectedProduct.productstyles
+  if (!styles || !styles.length) return
+
+  // 1️⃣ find first style that has designs
+  let targetStyleIndex = -1
+  let targetDesignIndex = -1
+
+  for (let i = 0; i < styles.length; i++) {
+    if (styles[i].productdesigns?.length) {
+      targetStyleIndex = i
+      targetDesignIndex = 0
+      break
     }
   }
+
+  if (targetStyleIndex === -1) return
+
+  // 2️⃣ set style index (Scene/Home depends on this)
+  this.$store.commit('CHANGE_STYLE_INDEX', targetStyleIndex)
+
+  // 3️⃣ reset all designs
+  styles.forEach(style => {
+    style.productdesigns.forEach(design => {
+      Vue.set(design, 'design_show', 0)
+    })
+  })
+
+  // 4️⃣ activate first design
+  const targetStyle = styles[targetStyleIndex]
+  const targetDesign = targetStyle.productdesigns[targetDesignIndex]
+
+  Vue.set(targetDesign, 'design_show', 1)
+
+  this.$store.dispatch('setSelectedProductDesignID', targetDesign.id)
+
+  this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+    style_index: targetStyleIndex,
+    style_id: targetStyle.id,
+    design_index: targetDesignIndex,
+    design_id: targetDesign.id
+  })
+
+  // 🔥 STOP LOADER
+  this.$store.commit('SET_START_LOAD_DESIGNS', false)
+  this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', false)
+
+  this.hideLockerProductUpdateButton(false)
+}
+
+public changeStyleIndex(i: number) {
+  const targetStyleIndex = i
+
+  this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE')
+  this.startLoader()
+
+  this.$store.commit('CHANGE_STYLE_INDEX', i)
+
+  this.activateStyleAndFirstDesign(targetStyleIndex)
+
+  this.stopLoader()
+  this.hideLockerProductUpdateButton(false)
+}
+
+
+
+
   async productDesigns(index: number) {
     if (index != this.selectedProductIndex) {
       this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
@@ -1054,7 +1125,18 @@ export class changeSelectedProduct extends Mixins(exitEditMode, HideUpdateLocker
       await handleProductPriceUpdate()
       this.$store.dispatch('setColorSectionVisibility')
       this.hideLockerProductUpdateButton()
-      this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
+       this.$store.commit('CHANGE_EDIT_STATUS', {status: false, id: 0, designId: 0, styleId: 0, product_id: 0});
+      if (this.selectedProduct.merge_styles) {
+        this.setAllMode();
+        const factory_setting = this.$store.getters.getFactorySettings(this.selectedProduct.factory_id);
+        this.$store.commit('SET_SETTING', factory_setting);
+        if (this.mobileScreen) {
+          await this.$store.dispatch('setColorSectionVisibility');
+        }
+        return;
+      }
+      this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE');
+      this.$store.commit('CHANGE_STYLE_INDEX', 0);
       let design_index = 0;
       let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
         if (product_design.design_show === 1) {
