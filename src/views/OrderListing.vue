@@ -115,7 +115,7 @@
                           <table class="w-100">
                             <template v-for="(product,factoryProductIndex) in item.factory_products">
                               <tr class="product-details" :key="indexItem + factoryProductIndex + index">
-                                <td>{{ product.product_name }}</td>
+                                <td>{{ !product.is_custom_product ? product.product_name : product.new_product_name }}</td>
 
                                 <template v-if="!product.shop_id && product.is_custom_product">
                                   <td class="image"><img :src="`${storage_url}${product.custom_product_placeholder}`" class="img-thumbnail img-fluid" style="width: 80px" ></td>
