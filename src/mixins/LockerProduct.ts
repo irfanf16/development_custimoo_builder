@@ -1119,7 +1119,7 @@ public changeStyleIndex(i: number) {
       if(edit_info_obj.type == "reorder_product" && confirmed_value) {
         return false;
       }
-      this.$store.commit('Change_Locker_Tabs_Index', undefined)
+      // this.$store.commit('Change_Locker_Tabs_Index', undefined)
       await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
       await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
       await handleProductPriceUpdate()

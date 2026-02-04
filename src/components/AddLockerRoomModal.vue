@@ -11,7 +11,7 @@
          :class="{'absolute-modals': is_absolute}"
          id="modal-center-addlockerroom" hide-footer centered size="xl"  modal-class="add_locker" content-class="lockerroom-modal">
     <div class="modal-header d-flex justify-content-between">
-      <span class="fs-5 font-weight-bold">Save your design <span v-if="$store.getters.getIsShareDesign">before sharing</span></span>
+      <span class="fs-5 font-weight-bold">Save your design<span v-if="$store.getters.getIsShareDesign">before sharing</span></span>
       <span class="fs-5 font-weight-bold cursor-pointer modal-close" @click="handleModalCloseEvent"><BIconX /></span>
     </div>
     <div class="p-4">
@@ -79,80 +79,85 @@
         <confirm-modal message="Do you really want to delete" cancel_text="Cancel" confirm_text="Yes" ref="reset-modal"></confirm-modal>
       <div class="loader" v-if="showLoader"><img src="@assets/images/loading.gif" /></div>
     </div>
-    </modal>
+  </modal>
 </template>
-  <script lang="ts">
-    import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
-    import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
-    import ErrorMessages from "@/mixins/ErrorMessages";
-    import ConfirmModal from "@/components/ConfirmModal.vue";
-    import LockerRoom from "@/components/LockerRoom.vue";
-    import ModalAction from "@/mixins/ModalAction";
-    import {
-      base64ToFile,
-      checkIsEmpty,
-      getEditModeDefaultObj,
-      getImageFromCanvas,
-      getLockerColors, getStyleSelectedAddons,
-      createFormData,
-      generateRandomString, 
-      // syncGroupColorsWithSvgGroups
-    } from '@/helpers/Helpers'
-    import { fireGtagConversion } from '@/helpers/analytics-events';
+<script lang="ts">
+import {Component, Mixins, Prop, Vue, Watch} from 'vue-property-decorator'
+import CreateLockerRoomModal from '@/components/CreateLockerRoomModal.vue'
+import ErrorMessages from "@/mixins/ErrorMessages";
+import ConfirmModal from "@/components/ConfirmModal.vue";
+import LockerRoom from "@/components/LockerRoom.vue";
+import ModalAction from "@/mixins/ModalAction";
+import {
+  base64ToFile,
+  checkIsEmpty,
+  getEditModeDefaultObj,
+  getImageFromCanvas,
+  getLockerColors, getStyleSelectedAddons,
+  createFormData,
+  generateRandomString, 
+  // syncGroupColorsWithSvgGroups
+} from '@/helpers/Helpers'
+import { fireGtagConversion } from '@/helpers/analytics-events';
+import { Canvas, log } from 'fabric/fabric-impl'
+import {lowerCase} from "lodash";
+import Store from "@/store";
+@Component<AddLockerRoomModal>({
+  components: {
+    ConfirmModal,
+    LockerRoom,
+    CreateLockerRoomModal
+  },
+})
+export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
+  @Prop({required: false, default: true}) readonly close_on_add !: boolean
+  @Prop({required: false, default: false})  rosterUrl !: boolean
+  @Prop({required: true})  frontPreview !: string
+  @Prop({required: true})  backPreview !: string
+  @Prop({required: false, default: () => {} })  locker_room_product:Record<any, any>
+  @Prop({required: false, default: ''})  locker_room_product_type:string
+  @Prop({required: false, default: true}) readonly is_absolute !: boolean;
 
-    import { Canvas, log } from 'fabric/fabric-impl'
-    import {lowerCase} from "lodash";
-    import Store from "@/store";
-    @Component<AddLockerRoomModal>({
-      components: {
-        ConfirmModal,
-        LockerRoom,
-        CreateLockerRoomModal
-      },
-    })
-    export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalAction) {
-      @Prop({required: false, default: true}) readonly close_on_add !: boolean
-      @Prop({required: false, default: false})  rosterUrl !: boolean
-      @Prop({required: true})  frontPreview !: string
-      @Prop({required: true})  backPreview !: string
-      @Prop({required: false, default: () => {} })  locker_room_product:Record<any, any>
-      @Prop({required: false, default: ''})  locker_room_product_type:string
-      @Prop({required: false, default: true}) readonly is_absolute !: boolean;
-
-      async recallProducts(){
-        if(!(this.locker_room_product_type === 'collection_product')){
-          this.showLoader = true;
-          await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
-            if (res) {
-              this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
-            }
-          });
-          this.showLoader = false;
-          if (this.roomWithProducts.length){
-            this.productData = this.roomWithProducts[0].product
-            this.tabIndex = 0
-          }
-        }
-        this.generateNameSuggestion(this.productData);
+  async recallProducts(){
+    if(!(this.locker_room_product_type === 'collection_product')){
+      this.showLoader = true;
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+      // .then((res) => {
+      //   if (res) {
+      //     this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+      //   }
+      // });
+      this.showLoader = false;
+      if (this.roomWithProducts.length){
+        this.productData = this.roomWithProducts[this.tabIndex].product
+        // this.tabIndex = 0
       }
-      private storageUrl = process.env.VUE_APP_STORAGE_URL
-      public showLoader = false
-      private baseUrl = location.host+"/#/"
-      public room_id = this.lockers.length? this.lockers[0].id : 0
-      public product_name = '';
-      public ref = this.$refs as Record<any, any>
-      public tabIndex = this.$store.getters.getLockerActiveTabIndex
-      public productData: any[] = []
-      private screenWidth = (window.screen.availWidth - 100)
-      public locker_room_action = {
-        created: true,
-        saved:false,
-      };
+    }
+    this.generateNameSuggestion(this.productData);
+  }
+  private storageUrl = process.env.VUE_APP_STORAGE_URL
+  public showLoader = false
+  private baseUrl = location.host+"/#/"
+  public room_id = this.lockers.length? this.lockers[0].id : 0
+  public product_name = '';
+  public ref = this.$refs as Record<any, any>
+  // public tabIndex = this.$store.getters.getLockerActiveTabIndex
+  public productData: any[] = []
+  private screenWidth = (window.screen.availWidth - 100)
+  public locker_room_action = {
+    created: true,
+    saved:false,
+  };
+  public confirmMessage: string = 'Do you really want to delete?'; // Default message
+  public confirmButtonText: string = 'Yes'; // Default confirm button text
+  public cancelButtonText: string = 'Cancel'; // Default cancel button text
 
-      public confirmMessage: string = 'Do you really want to delete?'; // Default message
-      public confirmButtonText: string = 'Yes'; // Default confirm button text
-      public cancelButtonText: string = 'Cancel'; // Default cancel button text
-
+      private get tabIndex() {
+        return this.$store.getters.getLockerTabsIndex
+      }
+      private set tabIndex(value){
+        this.$store.commit('Change_Locker_Tabs_Index',value);
+      }
       get customTexts(): [Record<any, any>] {
         return this.$store.getters.getCustomTexts()
       }
@@ -163,12 +168,18 @@
         const room = this.$store.getters.getLockerProducts
         return room
       }
-      @Watch('lockers', {
-        deep: true
-      })
-      lockersChanged() {
-        if (this.lockers.length > 0 && !this.room_id){
-          this.room_id = this.lockers[0].id
+      // @Watch('lockers', {
+      //   deep: true
+      // })
+      // lockersChanged() {
+      //   if (this.lockers.length > 0 && !this.room_id){
+      //     this.room_id = this.lockers[this.tabIndex].id
+      //   }
+      // }
+      @Watch('tabIndex', { immediate: true })
+      onTabIndexChanged(newVal: number) {
+        if (this.lockers.length > 0) {
+          this.room_id = this.lockers[newVal]?.id
         }
       }
       get isCustomerAuthenticated(): boolean {
@@ -220,7 +231,7 @@
                 await this.$store.dispatch('getLockers')
                 this.room_id = id;
                 this.tabIndex = index
-                this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
+                // this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
                 this.productData = this.roomWithProducts[index].product
                 this.generateNameSuggestion(this.productData)
             // }
@@ -228,7 +239,7 @@
           else {
             this.room_id = id;
             this.tabIndex = index
-            this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
+            // this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
             this.productData = this.roomWithProducts[index].product
             this.generateNameSuggestion(this.productData)
           }
@@ -548,7 +559,20 @@
       //   this.showVModal('add-to-lockerroom');
       //   this.recallProducts();
       // }
+    // }
+  //   else {
+  //     this.room_id = id;
+  //     this.tabIndex = index
+  //     this.$store.commit('Change_Locker_Active_Tab', this.tabIndex)
+  //     this.productData = this.roomWithProducts[index].product
+  //     this.generateNameSuggestion(this.productData)
+  //   }
+  // }
 
+  // public saveBeforeShareDesign() {
+  //   this.showVModal('add-to-lockerroom');
+  //   this.recallProducts();
+  // }
   public async deleteProduct( ind: number | string, id: number, collections: { id: number; name: string }[] = []) 
   {
 
@@ -597,145 +621,143 @@
       this.showError(res);
     }
   }
+  public swapDesign(productIndex: number){
 
-      public swapDesign(productIndex: number){
+    let product: Record<any, any> = this.productData[productIndex];
 
-        let product: Record<any, any> = this.productData[productIndex];
-
-        if(product.is_back_img==0){
-          product.is_back_img = 1
-          product.product_url = product.product_back_url
-        }else{
-          product.is_back_img = 0
-          product.product_url = product.product_front_url
-        }
-        this.productData[productIndex] = product;
+    if(product.is_back_img==0){
+      product.is_back_img = 1
+      product.product_url = product.product_back_url
+    }else{
+      product.is_back_img = 0
+      product.product_url = product.product_front_url
+    }
+    this.productData[productIndex] = product;
+  }
+  public async createLocker(name: string) {
+    return new Promise<Record<any,any>>(async (resolve) => {
+      let res:Record<any,any> = this.$store.dispatch('createLocker', name);
+      if (res.status == 201) {
+        this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+          if (res) {
+            this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+          }
+        });
+        this.lockerAdded()
+      } else if (res.status == 422) {
+        this.showError(res.message)
       }
-      public async createLocker(name: string) {
-        return new Promise<Record<any,any>>(async (resolve) => {
-          let res:Record<any,any> = this.$store.dispatch('createLocker', name);
-          if (res.status == 201) {
-            this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+      resolve(res);
+    });
+  }
+  public async handleModalOpenEvent() {
+    this.$emit('genImages')
+    if(!checkIsEmpty(this.locker_room_product)) {
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
+        if (res) {
+          this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+        }
+      });
+      this.product_name = this.locker_room_product.product_name
+      if(this.locker_room_product_type === "order_product"){
+          this.tabIndex = 0;
+          this.room_id = this.roomWithProducts[0].id;
+      }
+      //create locker room with collection name if not exists
+      if (this.locker_room_product_type === "collection_product") {
+        // Check if locker room already exists by name
+        const existingLockerRoom = this.lockers.length > 0 ? this.lockers[0] : null
+
+        if (existingLockerRoom) {
+          // Use existing locker room
+          const lockerRoomIndex = this.roomWithProducts.findIndex(room =>
+            room.id === existingLockerRoom.id
+          );
+
+          if (lockerRoomIndex > -1) {
+            this.tabIndex = lockerRoomIndex;
+            this.locker_room_action.created = false;
+            this.productData = this.roomWithProducts[lockerRoomIndex].product;
+            this.locker_room_product.room_id = existingLockerRoom.id;
+            this.room_id = existingLockerRoom.id;
+            this.generateNameSuggestion(this.productData);
+          }
+        }
+        else {
+          // Create new locker room
+          this.createLocker(this.locker_room_product.room_name).then(async (room) => {
+            this.locker_room_action.created = true;
+            this.locker_room_product.room_id = room.data.data.id;
+
+            // Refresh locker products
+            await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
               if (res) {
-                this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
+                this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true');
               }
             });
-            this.lockerAdded()
-          } else if (res.status == 422) {
-            this.showError(res.message)
-          }
-          resolve(res);
-        });
-      }
-      public async handleModalOpenEvent() {
-        this.$emit('genImages')
-        if(!checkIsEmpty(this.locker_room_product)) {
-          await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
-            if (res) {
-              this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
-            }
+
+            // Set to newly created locker room
+            this.tabIndex = this.roomWithProducts.length - 1;
+            this.productData = this.roomWithProducts[this.tabIndex].product;
+            this.room_id = room.data.data.id;
           });
-          this.product_name = this.locker_room_product.product_name
-          if(this.locker_room_product_type === "order_product"){
-              this.tabIndex = 0;
-              this.room_id = this.roomWithProducts[0].id;
-          }
-          //create locker room with collection name if not exists
-          if (this.locker_room_product_type === "collection_product") {
-            // Check if locker room already exists by name
-            const existingLockerRoom = this.lockers.length > 0 ? this.lockers[0] : null
-
-            if (existingLockerRoom) {
-              // Use existing locker room
-              const lockerRoomIndex = this.roomWithProducts.findIndex(room =>
-                room.id === existingLockerRoom.id
-              );
-
-              if (lockerRoomIndex > -1) {
-                this.tabIndex = lockerRoomIndex;
-                this.locker_room_action.created = false;
-                this.productData = this.roomWithProducts[lockerRoomIndex].product;
-                this.locker_room_product.room_id = existingLockerRoom.id;
-                this.room_id = existingLockerRoom.id;
-                this.generateNameSuggestion(this.productData);
-              }
-            }
-            else {
-              // Create new locker room
-              this.createLocker(this.locker_room_product.room_name).then(async (room) => {
-                this.locker_room_action.created = true;
-                this.locker_room_product.room_id = room.data.data.id;
-
-                // Refresh locker products
-                await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
-                  if (res) {
-                    this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true');
-                  }
-                });
-
-                // Set to newly created locker room
-                this.tabIndex = this.roomWithProducts.length - 1;
-                this.productData = this.roomWithProducts[this.tabIndex].product;
-                this.room_id = room.data.data.id;
-              });
-            }
-          }
         }
-      }
-      public async handleModalCloseEvent(){
-        if(this.locker_room_product_type === 'collection_product' && this.locker_room_action.created){
-          const ok = await this.ref['confirm-locker-modal'].showConfirm()
-          if(ok){
-            // let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
-            //   return locker_product.id === this.room_id
-            // });
-            // await this.$store.dispatch('deleteRoom', {id: this.room_id, index: lockerRoomIndex});
-            // this.locker_room_action.created = false;
-            // this.locker_room_action.saved = false;
-            // this.product_name = "";
-            await this.$store.dispatch('getLockers');
-            this.hideVModal('add-to-lockerroom');
-            this.$emit('genImages', true)
-          }
-
-        }
-        else{
-          this.hideVModal('add-to-lockerroom');
-          this.$emit('genImages', true)
-        }
-
-      }
-
-     public async handleBeforeClose(event) {
-        event.cancel()
-        if(this.locker_room_product_type === 'collection_product' && this.locker_room_action.created){
-          const ok = await this.ref['confirm-locker-modal'].showConfirm()
-          if(ok){
-            // let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
-            //   return locker_product.id === this.room_id
-            // });
-            // await this.$store.dispatch('deleteRoom', {id: this.room_id, index: lockerRoomIndex});
-            // this.locker_room_action.created = false;
-            // this.locker_room_action.saved = false;
-            // this.product_name = "";
-            await this.$store.dispatch('getLockers');
-            this.hideVModal('add-to-lockerroom');
-            this.$emit('genImages', true)
-          }
-
-        }
-        else{
-          this.hideVModal('add-to-lockerroom');
-          this.$emit('genImages', true)
-        }
-      }
-      async shareOrderProductDesignUrl() {
-        let locker_data = await this.getLockerProductData()
-        this.showLoader = true
-        return await this.$store.dispatch("SHARE_DESIGN_URL", createFormData(locker_data));
-
       }
     }
+  }
+  public async handleModalCloseEvent(){
+    if(this.locker_room_product_type === 'collection_product' && this.locker_room_action.created){
+      const ok = await this.ref['confirm-locker-modal'].showConfirm()
+      if(ok){
+        // let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
+        //   return locker_product.id === this.room_id
+        // });
+        // await this.$store.dispatch('deleteRoom', {id: this.room_id, index: lockerRoomIndex});
+        // this.locker_room_action.created = false;
+        // this.locker_room_action.saved = false;
+        // this.product_name = "";
+        await this.$store.dispatch('getLockers');
+        this.hideVModal('add-to-lockerroom');
+        this.$emit('genImages', true)
+      }
+
+    }
+    else{
+      this.hideVModal('add-to-lockerroom');
+      this.$emit('genImages', true)
+    }
+
+  }
+  public async handleBeforeClose(event) {
+    event.cancel()
+    if(this.locker_room_product_type === 'collection_product' && this.locker_room_action.created){
+      const ok = await this.ref['confirm-locker-modal'].showConfirm()
+      if(ok){
+        // let lockerRoomIndex = this.roomWithProducts.findIndex((locker_product) => {
+        //   return locker_product.id === this.room_id
+        // });
+        // await this.$store.dispatch('deleteRoom', {id: this.room_id, index: lockerRoomIndex});
+        // this.locker_room_action.created = false;
+        // this.locker_room_action.saved = false;
+        // this.product_name = "";
+        await this.$store.dispatch('getLockers');
+        this.hideVModal('add-to-lockerroom');
+        this.$emit('genImages', true)
+      }
+
+    }
+    else{
+      this.hideVModal('add-to-lockerroom');
+      this.$emit('genImages', true)
+    }
+  }
+  async shareOrderProductDesignUrl() {
+    let locker_data = await this.getLockerProductData()
+    this.showLoader = true
+    return await this.$store.dispatch("SHARE_DESIGN_URL", createFormData(locker_data));
+
+  }
+}
 
 </script>
 
