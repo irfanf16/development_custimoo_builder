@@ -374,7 +374,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             product_custom_texts = active_factory_product.product_custom_texts
           }
 
-          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail, shuffle_color_number, group_patterns } = active_factory_product
+          let {custom_logos, defaultcolors:default_colors, groupcolors:group_colors, product_roster_detail, shuffle_color_number, group_patterns, svg_groups } = active_factory_product
           fixed_logo_index = active_factory_product.fixed_logo_index
          if(product_edit_info_object.type == "cart_product" && active_product_detail.factory_products[0].reorder_data) {
            this.$store.commit('SET_PRODUCT_EDIT_INFO_OBJECT', { cart_product_info : {...product_edit_info_object.cart_product_info, reorder_data : active_product_detail.factory_products[0].reorder_data} })
@@ -412,7 +412,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
           let customizer_data: Record<any, any> = {
             active_product_id: active_product_id, custom_logos:custom_logos, product_custom_texts:product_custom_texts,
             default_colors:default_colors, group_colors:group_colors, product_roster_detail: product_roster_detail,
-            shuffle_color_number: shuffle_color_number, group_patterns: group_patterns
+            shuffle_color_number: shuffle_color_number, group_patterns: group_patterns, svg_groups: svg_groups
           }
           await this.setCustomizerData(customizer_data)
           this.$store.commit('RESET_UNDO');
@@ -540,6 +540,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
       product_custom_texts,
       default_colors,
       group_colors,
+      svg_groups,
       product_roster_detail,
       shuffle_color_number,
       group_patterns
@@ -590,6 +591,16 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     if (default_colors && default_colors.length > 0) {
       emit_color_change_event = true
       await this.$store.dispatch('overRideDefaultColors', default_colors);
+    }
+    const parsedSvgGroups = typeof svg_groups === 'string' ? JSON.parse(svg_groups || '[]') : (svg_groups || []);
+    if (parsedSvgGroups && parsedSvgGroups.length > 0) {
+      const customSvgGroups = parsedSvgGroups.filter((group: Record<any, any>) => group && group.is_custom);
+      if (customSvgGroups.length > 0) {
+        this.$store.dispatch('setCustomSvgGroups', customSvgGroups);
+      }
+      else {
+        this.$store.dispatch('setCustomSvgGroups', []);
+      }
     }
     if (group_colors) {
       if (group_colors.constructor.name == "Array" && group_colors.length == 0) {

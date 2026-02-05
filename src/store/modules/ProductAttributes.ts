@@ -65,6 +65,7 @@ const ProductAttributes:Module<any, any> = {
     groupColors: {},
     groupPatterns: {},
     svgGroups: [],
+    customSvgGroups: [],
     currentColorApplied: 'group',
     rosterDetails: {},
     productionSVGs: {},
@@ -751,6 +752,11 @@ const ProductAttributes:Module<any, any> = {
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
       if(svgGroups) {
         state.svgGroups = svgGroups
+      }
+    },
+    SET_CUSTOM_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
+      if(svgGroups) {
+        state.customSvgGroups = svgGroups
       }
     },
     UPDATE_SVG_GROUPS (state: Record<any, any>, color: Record<any, any>) {
@@ -1698,6 +1704,9 @@ const ProductAttributes:Module<any, any> = {
     getSvgGroups: state => {
       return state.svgGroups
     },
+    getCustomSvgGroups: state => {
+      return state.customSvgGroups
+    },
     getRosterDetails: state => (prd_id = state.selectedPrdId) => {
       if(!state.rosterDetails[prd_id]) {
         return []
@@ -2000,6 +2009,9 @@ const ProductAttributes:Module<any, any> = {
     },
     setSvgGroups ({commit}, payload) {
       commit('SET_SVG_GROUPS', payload)
+    },
+    setCustomSvgGroups ({commit}, payload) {
+      commit('SET_CUSTOM_SVG_GROUPS', payload)
     },
     updateSvgGroups ({commit}, payload){
       commit('UPDATE_SVG_GROUPS', payload)

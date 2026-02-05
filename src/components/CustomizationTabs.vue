@@ -37,6 +37,12 @@
               <div class="d-none d-lg-block">
                 <ColorAccordion :tabIndex="tabIndex" :productColors="productColors" :key="selectedProduct.id" />
               </div>
+              <div
+                class="my-5 px-2"
+                v-if="customSvgGroups.length"
+              >
+                <custom-svg-groups />
+              </div>
               <!--            for mobile-->
               <div class="color-tabs d-lg-none">
                 <ColorTabs :productColors="productColors"/>
@@ -113,6 +119,7 @@ import {filter} from "lodash"
 import ModalAction from "@/mixins/ModalAction";
 import OrderSummary from "@/components/OrderSummary.vue";
 import ProductExtractedColors from './ProductExtractedColors.vue'
+import CustomSvgGroups from './CustomSvgGroups.vue'
 
 @Component<CustomizationTabs>({
   components: {
@@ -123,7 +130,8 @@ import ProductExtractedColors from './ProductExtractedColors.vue'
     CollarStyle,
     EditRosterAreaTab,
     ColorTabs,
-    ProductExtractedColors
+    ProductExtractedColors,
+    CustomSvgGroups
   },
   beforeDestroy() {
     const self: Record<any, any> = this;
@@ -147,6 +155,10 @@ export default class CustomizationTabs extends Mixins(RosterDetailsGlobal, Custo
   @Prop({ required: true }) readonly products_fonts!: Record<any, any>
   @Prop({required: true}) isColorShuffled!: boolean
   @Prop({required: true}) customTextIndex!: number
+
+  get customSvgGroups(): Record<any, any>[] {
+    return this.$store.getters.getCustomSvgGroups || []
+  }
   private mobileScreen = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
   public showLoader = false
   public text_add_count = 0

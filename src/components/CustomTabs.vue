@@ -13,6 +13,9 @@
       <span class="dragControl" @dblclick="setMinMax(0)" v-touch:start="setPlayersDataHeight(0)" v-touch-options="{touchClass: 'active'}" v-touch:moving="resizeTab(0)"></span>
 
       <ColorAccordionMobile @showOther="updateOtherTab" :productColors="productColors" :key="selectedProduct.id" />
+      <div class="my-1 px-2" v-if="customSvgGroups.length">
+        <custom-svg-groups />
+      </div>
     </div>
     <div class="customize_controls pt-4" :class="{'other_tab': this.showOtherTab}" v-if="this.$store.getters.getActiveTab === 2 && selectedProduct.allow_name_number">
       <span class="close minimizer" @click="this.hideAll"><b-icon-dash /></span>
@@ -128,6 +131,7 @@ import ModalAction from "@/mixins/ModalAction";
 import CustomizationTabsMixin from '../mixins/CustomizationTabsMixin'
 import ColorAccordionMobile from "@/components/mobile/ColorAccordionMobile.vue";
 import RosterTabMixin from "@/mixins/RosterTabMixin";
+import CustomSvgGroups from "./CustomSvgGroups.vue";
 
 
 @Component<CustomTabs>({
@@ -137,7 +141,8 @@ import RosterTabMixin from "@/mixins/RosterTabMixin";
     TextCustomization,
     EditRosterAreaTab,
     Collars,
-    RosterTableMobile
+    RosterTableMobile,
+    CustomSvgGroups
   },
   async mounted() {
     this.productColorsManipulation()
@@ -155,6 +160,10 @@ export default class CustomTabs extends Mixins(cartModalData, CustomizationTabsM
   @Prop() sideTabIndex!: number
   @Prop() maximized!: boolean
   @Prop() tabIcons!: Record<any, any>
+  
+  get customSvgGroups(): Record<any, any>[] {
+    return this.$store.getters.getCustomSvgGroups || []
+  }
   private activeFont = 0;
   private activeEye = -1;
   private playersDataHeight = 0;
