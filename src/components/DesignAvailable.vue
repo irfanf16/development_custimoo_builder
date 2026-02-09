@@ -1,8 +1,8 @@
 <template>
   <div>
-    <b-tabs v-if="selectedProduct.productstyles && selectedProduct.productstyles.length && this.$store.getters.getDesignBrowseMode !== 'ALL' ">
+    <b-tabs v-if="selectedProduct.productstyles && selectedProduct.productstyles.length">
       <b-tab @click="handleAllTabClick" title="All"></b-tab>
-    
+
       <!-- Only show category tabs in normal mode -->
       <b-tab
         v-for="(category, category_index) in selectedProduct.productstyles[styleIndex].design_categories"
@@ -13,7 +13,7 @@
     </b-tabs>
 
     <div class="available-designs-section px-3 px-lg-0" ref="designs" v-if="selectedProduct">
-      
+
       <template v-if="selectedProduct?.productstyles?.[styleIndex] &&
          filteredDesigns.length">
         <div class="design-col" v-for="(design, index) in filteredDesigns" :key="`${design.id}-${currentCategoryIndex}`" :id="index" :class="{'selected_design': design.id == selectedDesignId}" ref="design_item">
@@ -129,7 +129,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
   }
-  
+
 
   mounted() {
     this.$eventBus.$on("product_designs_selection_reset", this.handleProductDesignsSelectionInfoReset)
@@ -146,7 +146,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     // this.setupObserver()
      this.loadDesignsByStyleIndex()
   }
-  
+
 
   beforeDestroy() {
     this.$eventBus.$off("product_designs_selection_reset")
@@ -201,7 +201,7 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
     const selectedDesign = this.filteredDesigns[index]
 
     if (!selectedDesign) return
-    if (this.$store.getters.getDesignBrowseMode === 'ALL') {    
+    if (this.$store.getters.getDesignBrowseMode === 'ALL') {
 
       this.$store.commit('CHANGE_STYLE_INDEX', selectedDesign._styleIndex)
     }
@@ -289,13 +289,15 @@ public handleCategoryChange(tab_index: number) {
         )
     )
 
-  // 🔥 render immediately
+
   this.filteredDesigns.forEach(d => {
-    Vue.set(d, 'design_show_on_scroll', 1)
+    Vue.set(d, 'design_show_on_scroll', 0)
   })
   this.first_load = true
   this.$nextTick(() => {
-    this.setupObserver()
+    requestAnimationFrame(() => {
+      this.setupObserver()
+    })
   })
 }
 public loadDesignsByStyleIndex() {
@@ -316,22 +318,20 @@ public loadDesignsByStyleIndex() {
       })
     })
   } else {
-   this.filteredDesigns =
+    this.filteredDesigns =
       this.selectedProduct.productstyles[this.styleIndex].productdesigns
 
-    // 🔥 force render everything
+
     this.filteredDesigns.forEach(d => {
-      Vue.set(d, 'design_show_on_scroll', 1)
+      Vue.set(d, 'design_show_on_scroll', 0)
     })
 
-    // 🧹 cleanup observer
-    if (this.observer) {
-      this.observer.disconnect()
-      this.observer = null
-    } 
+    this.$nextTick(() => {
+      requestAnimationFrame(() => {
+        this.setupObserver()
+      })
+    })
   }
-
-  this.$nextTick(this.setupObserver)
 }
 
 
