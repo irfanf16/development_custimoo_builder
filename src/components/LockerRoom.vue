@@ -27,7 +27,15 @@
                 <draggable ghostClass="locker-tab-ghost" :data-title="`${room.room_name}`" :group="{name: `locker-${i}`, pull: false, put: true}"
                            :data-room-id="room.id" :data-room-index="i"
                            @add="lockerProductsChanged($event, i)" v-bind="{animation: 250, delayOnTouchOnly: true, delay: 500}">
-                  <span @click="changeColor" style="white-space: nowrap">{{ room.room_name }}</span>
+                  <span @click="changeColor" style="white-space: nowrap; display: flex; justify-content: center; align-items: center;">
+                    {{ room.room_name }}
+                   <span v-if="getSelectedCount(room)" 
+                      class="badge p-1 ml-3" 
+                      :style=" tabIndex === i ? { backgroundColor: '#f8f9fa', color: '#212529' } : { backgroundColor: '#219f84', color: 'white' }"
+                    >
+                      {{ getSelectedCount(room) }}
+                    </span>
+                  </span>
                 </draggable>
                 <a v-if="!getSelectionMode.readonly" style="right: 13px" title="Rename locker" @click="renameLockerModal($event, room)" class="remove-tab theme-bg-color theme-color">
                   <b-icon-pencil-fill />
@@ -1097,6 +1105,11 @@ private getSelectedProducts(): any[] {
     .filter(product => this.selectedCollectionProducts.includes(product.id));
   return selectedProducts;
 }
+ getSelectedCount(room) {
+    return room.product.filter(p =>
+      this.selectedCollectionProducts.includes(p.id)
+    ).length
+  }
 
 
 private async uploadCartAssets(product: any, factory_product_id: string): Promise<any> {

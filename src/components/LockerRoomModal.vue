@@ -33,7 +33,6 @@
                       />
         </div>
       </div>
-
       <div v-if="shopMode" class="text-right modal-footer">
         <b-button @click="addProductsToShop" variant="secondary" class="light">Add Products To Shop</b-button>
         <b-button @click="cancelAddingProductsToShop" variant="secondary" class="light">Cancel</b-button>
@@ -41,8 +40,54 @@
       <template v-else>
         <div v-if="!getSelectionMode.readonly && lockerActiveTabIndex == 0" class="text-right modal-footer">
         <b-button v-if="$can('create-shop') && selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading" @click="createShop">Create a shop</b-button>
-        <b-button
+          <!-- TODO: Add All Items to Cart -->
+        <div class="d-inline-flex group-actions">
+            <div>
+              <div class="d-flex align-items-center justify-content-end w-100 gap-1">
+                <!-- <b-button variant="secondary" class="light" @click="resetShopState">Close</b-button> -->
+                <div v-if="canAccessCompanyFeatures() && (selectedCollectionProducts.length > 0)" class=" group-actions">
+                 <b-button
         v-if="canAccessCompanyFeatures() && (selectedCollectionProducts.length > 0) && !isEcommercePlatform()"
+                    variant="secondary"
+                    @click="handleAddToCart"
+                    :disabled="$store.getters.getCartLoading">
+                    {{ $store.getters.getCartLoading ? 'Adding to Cart...' : 'Add to Cart' }}
+                    <span v-if="selectedCollectionProducts.length > 0 && !$store.getters.getCartLoading" class="badge badge-light ml-2">
+                      {{ selectedCollectionProducts.length }}
+                    </span>
+
+                      <img v-if="$store.getters.getCartLoading" width="20" height="20" src="@assets/images/loading.gif"/>
+
+                  </b-button>
+
+                  <b-button :disabled="$store.getters.getCartLoading" variant="secondary" class="position-relative has-dropdown top-actions">
+                    <b-icon icon="chevron-up"></b-icon>
+                    <ul v-if="!$store.getters.getCartLoading" class="dropdown-actions">
+                      <li @click="selectAllProducts">
+                        <div class="d-flex align-items-center gap-2">
+                          <label class="custom-checkbox">
+                            <input
+                              type="checkbox"
+                              :checked="isCurrentLockerFullySelected"
+                              @change="selectAllProducts"
+                            >
+                            <span></span>
+                          </label>
+                          <div>
+                            <div>Select All</div>
+                            <div class="subtext">Add All items to Cart</div>
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
+                  </b-button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <!-- <b-button
+        v-if="canAccessCompanyFeatures() && (selectedCollectionProducts.length > 0)"
           variant="secondary"
           @click="handleAddToCart"
           :disabled="$store.getters.getCartLoading">
@@ -53,7 +98,7 @@
 
             <img v-if="$store.getters.getCartLoading" width="20" height="20" src="@assets/images/loading.gif"/>
 
-        </b-button>
+        </b-button> -->
         <b-button v-if="selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading"  @click="addExistingDesignCollection"  v-b-modal.modal-center-existingCollection variant="secondary" style="margin-right: 5px">Add to existing collection</b-button>
         <b-button v-if="selectedCollectionProducts.length>0" :disabled="$store.getters.getCartLoading" @click="addDesignCollection" variant="secondary">Create new collection</b-button>
 
@@ -79,7 +124,7 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue, Mixins, Prop} from 'vue-property-decorator'
+import {Component, Vue, Mixins, Prop, Watch} from 'vue-property-decorator'
 import LockerRoom from '@/components/LockerRoom.vue'
 import ModalAction from '@/mixins/ModalAction'
 import { canAccessCompanyFeatures, getLockerRoomSelectedProducts, getShopDefaultObject, getShopProductsFromLockerProducts, isEcommercePlatform} from "@/helpers/Helpers";
@@ -99,6 +144,103 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   private screenWidth = this.mobileScreen ? window.screen.availWidth : (window.screen.availWidth - 100)
 
   public isShopsTabActive = false
+
+  private get tabIndex() {
+    return this.$store.getters.getLockerTabsIndex ?? 0
+  }
+
+  // get isCurrentLockerFullySelected(): boolean {
+  //   // this.lockerTick;
+  //   const lockerRoom = this.$refs.lockerRoom as any;
+  //   if (!lockerRoom) return false;
+
+  //   // const lockers = lockerRoom.getLockerProducts;
+  //   const lockers = this.$store.getters.getLockerProducts
+  //   const activeIndex = this.tabIndex;
+  //   if (!lockers || activeIndex == null) return false;
+
+  //   const activeLocker = lockers[activeIndex];
+  //   if (!activeLocker?.product?.length) return false;
+
+  //   const activeLockerProductIds: number[] = activeLocker.product.map((p: any) => p.id);
+  //   const selectedSet = new Set<number>(this.selectedCollectionProducts as number[]);
+
+  //   return activeLockerProductIds.every(id => selectedSet.has(id));
+  // }
+  get isCurrentLockerFullySelected(): boolean {
+    const lockers = this.$store.getters.getLockerProducts;
+    const activeIndex = this.tabIndex;
+
+    if (!lockers?.length || activeIndex == null) return false;
+
+    const activeLocker = lockers[activeIndex];
+    if (!activeLocker?.product?.length) return false;
+
+    const selectedSet = new Set(this.selectedCollectionProducts);
+    return activeLocker.product.every((p: any) =>
+      selectedSet.has(p.id)
+    );
+  }
+
+
+  // public selectAllProducts() {
+  //   const lockerRoom = this.$refs.lockerRoom as any;
+
+  //   if (!lockerRoom) return;
+
+  //   // Get all product IDs from locker room
+  //   const allProductIds = lockerRoom.getLockerProducts
+  //     .flatMap(locker => locker.product)
+  //     .map(product => product.id);
+
+  //   const alreadySelected = this.selectedCollectionProducts.length === allProductIds.length;
+
+  //   // Toggle select / deselect all
+  //   this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {
+  //     attribute: 'locker_products',
+  //     value: alreadySelected ? [] : allProductIds
+  //   });
+  // }
+
+  public selectAllProducts() {
+    const lockers = this.$store.getters.getLockerProducts;
+    const activeIndex = this.tabIndex;
+
+    if (!lockers || activeIndex == null) return;
+
+    const activeLocker = lockers[activeIndex];
+    if (!activeLocker?.product?.length) return;
+
+    const activeLockerProductIds = activeLocker.product.map(
+      (p: any) => p.id
+    );
+
+    const selectedSet = new Set<number>(
+      this.selectedCollectionProducts
+    );
+
+    const isFullySelected = activeLockerProductIds.every(id =>
+      selectedSet.has(id)
+    );
+
+    let updatedSelection: number[];
+
+    if (isFullySelected) {
+      updatedSelection = this.selectedCollectionProducts.filter(
+        id => !activeLockerProductIds.includes(id)
+      );
+    } else {
+      activeLockerProductIds.forEach(id => selectedSet.add(id));
+      updatedSelection = Array.from(selectedSet);
+    }
+
+    this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS', {
+      attribute: 'locker_products',
+      value: [...updatedSelection]
+    });
+  }
+
+
 
   public company = this.$store.getters.getCompany;
   private opacityset = false;
@@ -133,7 +275,7 @@ export default class LockerRoomModal extends Mixins(ModalAction){
     this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
     this.$store.commit('SET_SELECTED_COLLECTION_PRODUCTS',{"attribute": "deleted_products", "value": []})
     this.$emit('editCollectionModal')
- }
+}
 
   public editShopModal = () => {
     this.$store.commit('SET_COLLECTION_ITEMS', {id: "", name: "", link: "", collection_products: []})
@@ -142,7 +284,7 @@ export default class LockerRoomModal extends Mixins(ModalAction){
 
 
 
- }
+}
 
   public addMoreCollectionModal = () => {
     if(this.$store.getters.getSelectionMode.shopAddmoreMode){
@@ -295,3 +437,52 @@ export default class LockerRoomModal extends Mixins(ModalAction){
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.custom-checkbox{
+  input{
+    display: none;
+  }
+
+  span{
+    display: block;
+    height: 20px;
+    width: 20px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+
+    &::after, &::before{
+      content: '';
+      display: none;
+      position: absolute;
+      width: 2px;
+      background-color: #fff;
+    }
+
+    &::before {
+      height: 10px;
+      left: 10px;
+      top: 4px;
+      transform: rotate(45deg);
+    }
+
+    &::after {
+      height: 6px;
+      left: 5px;
+      top: 8px;
+      transform: rotate(-45deg);
+    }
+  }
+
+  input:checked + span {
+    background: var(--theme-color);
+    border-color: var(--theme-color);
+
+    &::after, &::before{
+      display: block;
+    }
+  }
+}
+</style>
