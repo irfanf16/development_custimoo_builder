@@ -1271,6 +1271,9 @@ const parseSvgStringFileFromSource = async (svg_string: string, factory_product:
           });
 
           const payload = getLogoSVG(custom_logos_without_base64, factory_product.measurement_ratio, production_file_initial_dimension);
+            custom_logos_without_base64.forEach((logo, index) => {
+            delete logo.base_64;
+          });
           logo_max_width = payload.width;
           svg_string += payload.svg_string;
         }
@@ -3535,18 +3538,18 @@ const getImagePreview = (
       const placeholder = `${baseStorageUrl}placeholder.png`;
       return usePlaceholder ? appendQuery(placeholder) : "";
     }
-  
+
     // Case 2: Input is a path string
     if (typeof fileOrPath === "string") {
       const fullPath = `${baseStorageUrl}${fileOrPath}`;
       return appendQuery(fullPath);
     }
-  
+
     // Case 3: Input is a File object
     if (fileOrPath instanceof File) {
       return URL.createObjectURL(fileOrPath);
     }
-  
+
     return ""; // fallback
 };
 
