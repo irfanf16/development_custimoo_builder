@@ -139,6 +139,21 @@ import SceneMixin from "@/mixins/SceneMixin";
     if (this.mounted_time) {
       clearTimeout(this.mounted_time)
     }
+
+    // Dispose Fabric canvases to prevent memory leaks when component is destroyed
+    const sameCanvas = this.frontCanvas === this.backCanvas;
+    if (this.frontCanvas) {
+      try {
+        this.frontCanvas.dispose();
+      } catch (_) { /* ignore if already disposed */ }
+      (this as any).frontCanvas = null;
+    }
+    if (this.backCanvas && !sameCanvas) {
+      try {
+        this.backCanvas.dispose();
+      } catch (_) { /* ignore if already disposed */ }
+      (this as any).backCanvas = null;
+    }
   },
   async mounted() {
     this.sceneMountedAction()

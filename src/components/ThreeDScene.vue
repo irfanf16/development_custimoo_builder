@@ -72,6 +72,46 @@ import SceneMixin from "@/mixins/SceneMixin";
       this.animationId = null;
     }
 
+    // Remove container event listeners to prevent leaks
+    if (this.container) {
+      if (this._containerMouseDown) {
+        this.container.removeEventListener('mousedown', this._containerMouseDown as EventListener, false);
+        this._containerMouseDown = undefined;
+      }
+      if (this._containerMouseUp) {
+        this.container.removeEventListener('mouseup', this._containerMouseUp as EventListener, false);
+        this._containerMouseUp = undefined;
+      }
+      if (this._containerTouchStart) {
+        this.container.removeEventListener('touchstart', this._containerTouchStart as EventListener, false);
+        this._containerTouchStart = undefined;
+      }
+      if (this._containerTouchEnd) {
+        this.container.removeEventListener('touchend', this._containerTouchEnd as EventListener, false);
+        this._containerTouchEnd = undefined;
+      }
+    }
+
+    // Dispose Fabric canvas and clear all listeners
+    if (this.canvas) {
+      try {
+        this.canvas.dispose();
+      } catch (_) { /* ignore if already disposed */ }
+      (this as any).canvas = null;
+    }
+
+    // Dispose Three.js texture (CanvasTexture holds GPU memory)
+    if (this.texture) {
+      this.texture.dispose();
+      (this as any).texture = null;
+    }
+
+    // Dispose OrbitControls (removes DOM listeners)
+    if (this.controls) {
+      this.controls.dispose();
+      (this as any).controls = null;
+    }
+
     if (this.composer) {
       this.composer.passes.forEach(pass => pass.dispose && pass.dispose());
       this.composer = null;
@@ -93,11 +133,15 @@ import SceneMixin from "@/mixins/SceneMixin";
     }
 
     if (this.renderer) {
+      if (this.container && this.renderer.domElement && this.renderer.domElement.parentNode === this.container) {
+        this.container.removeChild(this.renderer.domElement);
+      }
       this.renderer.dispose();
       this.renderer.forceContextLoss();
-      this.renderer.domElement = null;
-      this.renderer = null;
+      (this.renderer as any).domElement = null;
+      (this as any).renderer = null;
     }
+    (this as any).container = null;
   },
   async mounted() {
     this._isAlive = true;
@@ -183,6 +227,10 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
   private animationId: number | null = null;
   private _isAlive = false;
   private smaaPass = new SMAAPass(window.innerWidth, window.innerHeight);
+  private _containerMouseDown?: (evt: MouseEvent) => void;
+  private _containerMouseUp?: () => void;
+  private _containerTouchStart?: (evt: TouchEvent) => void;
+  private _containerTouchEnd?: () => void;
 
   get initializingProductData() {
     return this.$store.getters.getInitializingProductData
@@ -2165,6 +2213,12 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     function setObjectMoving() {
       self.isObjectMoving = 0
     }
+
+    // Store listener refs so we can remove them in beforeDestroy (prevents memory leaks)
+    self._containerMouseDown = onMouseEvt;
+    self._containerMouseUp = setObjectMoving;
+    self._containerTouchStart = onTouch;
+    self._containerTouchEnd = setObjectMoving;
   }
 
   private getIntersects(point, objects, camera) {
