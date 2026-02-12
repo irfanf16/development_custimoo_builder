@@ -273,7 +273,7 @@
                           v-else
                           title="Override product info"
                         />
-                      </a>                      
+                      </a>
                       <a
                         class="btn remove absolute"
                         @click.stop="removeShopProduct(productIndex)"
@@ -905,8 +905,14 @@ public formatProdCustomPrice(product:any){
     this.isPasswordModalOpen = !this.isPasswordModalOpen;
     if(this.isPasswordModalOpen) {
       this.$nextTick(() => {
-        this.$refs['shop-password-input'].value = this.shopPassword
-        this.$refs['shop-confirm-password-input'].value = this.shopConfirmPassword
+        const passwordInput = this.$refs['shop-password-input'] as HTMLInputElement | undefined
+        const confirmInput = this.$refs['shop-confirm-password-input'] as HTMLInputElement | undefined
+        if (passwordInput) {
+          passwordInput.value = this.shopPassword
+        }
+        if (confirmInput) {
+          confirmInput.value = this.shopConfirmPassword
+        }
       })
     }
     this.isShareModalOpen = false;
@@ -936,10 +942,10 @@ public formatProdCustomPrice(product:any){
   }
 
   public setPassword() {
-    const shopPasswordInput = this.$refs['shop-password-input'] as HTMLInputElement
-    const shopConfirmPasswordInput = this.$refs['shop-confirm-password-input'] as HTMLInputElement
-    const shopPassword = shopPasswordInput.value
-    const shopConfirmPassword = shopConfirmPasswordInput.value
+    const shopPasswordInput = this.$refs['shop-password-input'] as HTMLInputElement | undefined
+    const shopConfirmPasswordInput = this.$refs['shop-confirm-password-input'] as HTMLInputElement | undefined
+    const shopPassword = shopPasswordInput?.value ?? ''
+    const shopConfirmPassword = shopConfirmPasswordInput?.value ?? ''
     if (shopPassword || shopConfirmPassword) {
       if (shopPassword === shopConfirmPassword) {
         this.shopPassword = shopPassword
@@ -1058,10 +1064,16 @@ copyShareLink() {
 
   togglePasswordVisibility(type: string) {
     if(type === 'password') {
-      this.shopPassword = (this.$refs['shop-password-input'] as HTMLInputElement).value
+      const passwordInput = this.$refs['shop-password-input'] as HTMLInputElement | undefined
+      if (passwordInput) {
+        this.shopPassword = passwordInput.value
+      }
       this.showPassword = !this.showPassword
     } else if(type === 'confirmPassword') {
-      this.shopConfirmPassword = (this.$refs['shop-confirm-password-input'] as HTMLInputElement).value
+      const confirmInput = this.$refs['shop-confirm-password-input'] as HTMLInputElement | undefined
+      if (confirmInput) {
+        this.shopConfirmPassword = confirmInput.value
+      }
       this.showConfirmPassword = !this.showConfirmPassword
     }
   }
