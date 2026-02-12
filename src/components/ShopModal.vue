@@ -157,43 +157,37 @@
                 </ul>
               </b-button>
             </div>
-      <transition v-if="isProductsUrlModalOpen" name="fade-zoom">
-  <div class="product-popover-backdrop" @click="toggleProductsUrlModal">
-    <div class="product-popover" @click.stop>
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <span class="fw-bold text-lg text-gray-800 fs-3">
-          Add your own product by URL
-        </span>
-        <span
-          @click="toggleProductsUrlModal"
-          class="cursor-pointer text-gray-400 hover:text-gray-600 transition"
-        >
-          <b-icon-x class="fs-4"></b-icon-x>
-        </span>
-      </div>
+            <transition v-if="isProductsUrlModalOpen" name="fade-zoom">
+              <div class="product-popover-backdrop" @click="toggleProductsUrlModal">
+                <div class="product-popover" @click.stop>
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold text-lg text-gray-800 fs-3">
+                      Add your own product by URL
+                    </span>
+                    <span
+                      @click="toggleProductsUrlModal"
+                      class="cursor-pointer text-gray-400 hover:text-gray-600 transition"
+                    >
+                      <b-icon-x class="fs-4"></b-icon-x>
+                    </span>
+                  </div>
 
-      <div class="d-flex align-items-center gap-2" role="dialog">
-        <b-input
-          type="text"
-          placeholder="Enter your URL"
-          class="flex-grow-1"
-          v-model="productsUrl"
-          @keyup.enter="fetchUrlProducts"
-        />
-        <b-button @click="fetchUrlProducts">Submit</b-button>
-      </div>
-    </div>
-  </div>
-</transition>
-
-
-
-
+                  <div class="d-flex align-items-center gap-2" role="dialog">
+                    <b-input
+                      type="text"
+                      placeholder="Enter your URL"
+                      class="flex-grow-1"
+                      v-model="productsUrl"
+                      @keyup.enter="fetchUrlProducts"
+                    />
+                    <b-button @click="fetchUrlProducts">Submit</b-button>
+                  </div>
+                </div>
+              </div>
+            </transition>
           </div>
-
         </div>
       </div>
-
       <div class="modal-body">
         <div class="d-flex flex-row-reverse">
           <div class="position-relative pl-3 md:pl-4 ml-2 md:ml-4 gap-1 d-flex flex-column"
@@ -241,75 +235,112 @@
             <div class="loader" v-if="showLoader"><img style="width: 100px" src="@assets/images/loading.gif" /></div>
             <b-form inline>
               <b-container fluid>
-                <div class="row gap-y-5" :options="{ animation: 250, delayOnTouchOnly: true, delay: 500 }">
-                  <b-col cols="12" md="6" lg="4" xl="3" v-for="(product, productIndex) in shop.products"
-                    :key="`product-${productIndex}-b-col`">
-                    <b-card>
-                        <div class="product-status-badge" :class="product.status === 'expired' ? 'expired' : 'active'">
-                          {{ product.status === "expired" ? 'Expired' : 'Active' }}
-                        </div>
-                      <!-- Delete button -->
-                      <a class="btn remove edit absolute" @click="editShopProduct(productIndex, product)" v-if="!product.product_locker_room_id">
-                        <b-icon-check v-if="product.override_product_info"
-                          title="Use product default info"></b-icon-check>
-                        <b-icon-pencil v-else title="Override product info"></b-icon-pencil>
-                      </a>
-                      <a class="btn remove absolute" @click="removeShopProduct(productIndex)"
-                        title="Remove product from shop">
+                <draggable
+                  v-model="shop.products"
+                  tag="div"
+                  class="row gap-y-5"
+                  :multiDrag="true"
+                  :forceFallback="true"
+                  :preventOnFilter="false"
+                  v-bind="{ animation: 250, delayOnTouchOnly: true, delay: 500}"
+                  @end="onShopProductsDragEnd"
+                >
+                  <b-col
+                    cols="12"
+                    md="6"
+                    lg="4"
+                    xl="3"
+                    v-for="(product, productIndex) in shop.products"
+                    :key="product.id || productIndex"
+                  >
+                    <b-card class="select-none">
+                      <div
+                        class="product-status-badge"
+                        :class="product.status === 'expired' ? 'expired' : 'active'"
+                      >
+                        {{ product.status === "expired" ? 'Expired' : 'Active' }}
+                      </div>
+                      <a
+                        class="btn remove edit absolute"
+                        @click.stop="editShopProduct(productIndex, product)"
+                        v-if="!product.product_locker_room_id"
+                      >
+                        <b-icon-check
+                          v-if="product.override_product_info"
+                          title="Use product default info"
+                        />
+                        <b-icon-pencil
+                          v-else
+                          title="Override product info"
+                        />
+                      </a>                      
+                      <a
+                        class="btn remove absolute"
+                        @click.stop="removeShopProduct(productIndex)"
+                        title="Remove product from shop"
+                      >
                         <font-awesome-icon :icon="['fas', 'trash-alt']" />
                       </a>
-
                       <div class="text-center fs-2 toggle_pdf">
                         <div class="mt-3 respCanvas">
                           <div>
-                            <img :src="imagePreview(product.front_image, false, product?.random_string ?? '')" alt="">
+                            <img
+                              :src="imagePreview(product.front_image, false, product?.random_string ?? '')"
+                              alt=""
+                            />
                           </div>
                           <div>
-                            <img :src="imagePreview(product.back_image, false, product?.random_string ?? '')" alt="">
+                            <img
+                              :src="imagePreview(product.back_image, false, product?.random_string ?? '')"
+                              alt=""
+                            />
                           </div>
                         </div>
-                        <template>
-                          <div class="mt-2 d-block gap-1">
-                            <div>
-                              <b-form-input class="w-100" placeholder="Product Nick Name"
-                                v-model="product.custom_name"></b-form-input>
-                            </div>
+                        <div class="mt-2 d-block gap-1">
+                          <b-form-input
+                            class="w-100"
+                            placeholder="Product Nick Name"
+                            v-model="product.custom_name"
+                            @mousedown.stop
+                          />
+                        </div>
+                        <div class="mt-3 toggle_pdf text-left">
+                          <div class="product-description">
+                            <textarea
+                              class="form-control w-100"
+                              rows="7"
+                              v-model="product.custom_description"
+                              @mousedown.stop
+                            />
                           </div>
-
-                          <div class="mt-3 toggle_pdf text-left">
-                            <div class="product-description">
-                              <textarea class="form-control w-100" rows="7"
-                                v-model="product.custom_description"></textarea>
-                            </div>
-                          </div>
-
-                          <div class="mt-3 text-left">
-                            <label class="fw-bold d-block mb-1">Custom Price</label>
-                            <b-input-group>
-                              <!-- restrict input to numeric values only; use number type and keydown guard -->
-                              <b-form-input
-                                type="number"
-                                inputmode="decimal"
-                                step="0.01"
-                                min="0"
-                                placeholder="Custom Price"
-                                v-model.number="product.custom_price"
-                                @keydown="onCustomPriceKeydown($event)"
-                                @paste="onCustomPricePaste($event)"
-                                @blur="formatProdCustomPrice(product)"
-                                aria-describedby="currency-badge"
-                              />
+                        </div>
+                        <div class="mt-3 text-left">
+                          <label class="fw-bold d-block mb-1">Custom Price</label>
+                          <b-input-group>
+                            <b-form-input
+                              type="number"
+                              inputmode="decimal"
+                              step="0.01"
+                              min="0"
+                              placeholder="Custom Price"
+                              v-model.number="product.custom_price"
+                              @keydown="onCustomPriceKeydown($event)"
+                              @paste="onCustomPricePaste($event)"
+                              @blur="formatProdCustomPrice(product)"
+                              @mousedown.stop
+                              aria-describedby="currency-badge"
+                            />
                             <b-input-group-append>
-                              <b-input-group-text id="currency-badge">{{ activeCurrencyCode }}</b-input-group-text>
+                              <b-input-group-text id="currency-badge">
+                                {{ activeCurrencyCode }}
+                              </b-input-group-text>
                             </b-input-group-append>
                           </b-input-group>
                         </div>
-                        </template>
                       </div>
                     </b-card>
                   </b-col>
-
-                </div>
+                </draggable>
               </b-container>
             </b-form>
           </div>
@@ -318,7 +349,6 @@
           @own-product-upserted="handleOwnProductUpserted"
           @own-product-upsert-cancelled="handleShopOwnProductUpsertCancelEvent" />
       </div>
-
       <div class="modal-footer">
         <div class="d-flex align-items-center justify-content-end w-100 gap-1">
           <b-button variant="secondary" class="light" @click="resetShopState">Close</b-button>
@@ -329,7 +359,6 @@
 
             <b-button variant="secondary" class="position-relative has-dropdown top-actions">
               <b-icon icon="chevron-up"></b-icon>
-
               <ul class="dropdown-actions">
                 <li @click="saveShop('draft')">
                   <div>Save to Draft</div>
@@ -342,12 +371,9 @@
       </div>
     </modal>
   </span>
-
 </template>
 
 <script lang="ts">
-
-
 import { Component, Mixins, Prop, Vue, Watch } from 'vue-property-decorator'
 import CollectionPDF from "@/components/CollectionPDF.vue";
 import { http } from "@/httpCommon";
@@ -362,8 +388,11 @@ import { handleResponseException, santaClone, getImagePreview, showToastedMessag
 import VsToast from '@vuesimple/vs-toast';
 import moment from "moment";
 import { find, maxBy } from 'lodash';
+import draggable from 'vuedraggable'
+
 @Component({
   components: {
+    draggable,
     ShopOwnProductModal,
     ShopCoverUploader,
     FileUploader,
@@ -430,7 +459,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   }
 
   //data props ends
-   mounted() {
+  mounted() {
     this.domDocument?.addEventListener('click', this.handleClickOutside)
   }
   //computed props starts
@@ -473,6 +502,21 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   //computed props ends
 
   //methods starts
+  public onShopProductsDragEnd(e) {
+    this.shop.products.forEach((product, index) => {
+      product.sort_order = index + 1
+    })
+    if(e.newIndex !== e.oldIndex) {
+      const shopPayload = this.getShopPayload()
+      const url = this.shop.id ? `customer-shops/${this.shop.id}` : 'customer-shops'
+      http.post(url, shopPayload).then(successResponse => {
+        this.$store.commit('UPDATE_SHOPS', successResponse.data.result);
+        // this.$emit('shop-saved', shopPayload)
+      }).catch(errorResponse => {
+        handleResponseException(errorResponse)
+      })
+    }
+  }
 
   public fetchUrlProducts() {
     this.showLoader = true;
@@ -1376,6 +1420,10 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
 .product-status-badge.active {
   background: #2ecc71; /* green */
 }
+.select-none {
+  user-select: none;
+  -webkit-user-select: none;
+}
 
 .password-row {
   position: relative;
@@ -1392,6 +1440,4 @@ $shadow: 0 12px 28px rgba(0, 0, 0, .08);
 .eye-icon:hover {
   color: #000;
 }
-
-
 </style>

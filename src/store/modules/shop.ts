@@ -104,8 +104,14 @@ const Shop: Module<any, any> = {
           ...product,
           sizes: sizesArray
         };
+      })
+      // Sort Product by sort_order
+      .sort((a, b) => {
+        const orderA = a.sort_order ?? 0;
+        const orderB = b.sort_order ?? 0;
+        return orderA - orderB;
       });
-    
+
       state.customerShops.splice(shopIndex, 1, {
         ...existingShop,
         ...payload,
