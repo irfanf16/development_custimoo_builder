@@ -42,14 +42,15 @@
                       <div class="row m-0 url-row password-row">
                         <input
                           class="url-input"
+                          ref="shop-password-input"
                           :type="(!isPasswordHashed && showPassword) ? 'text' : 'password'"
                           placeholder="Password"
-                          v-model="shopPassword"
-                          autocomplete="off"
+                          :value="isPasswordHashed ? '' : shopPassword"
+                          autocomplete="new-password"
                           novalidate
                         />
                         <template v-if="!isPasswordHashed">
-                          <span  class="eye-icon" @click.stop="showPassword = !showPassword">
+                          <span  class="eye-icon" @click.stop="togglePasswordVisibility('password')">
                             <b-icon-eye v-if="showPassword"></b-icon-eye>
                             <b-icon-eye-slash v-else></b-icon-eye-slash>
                           </span>
@@ -61,15 +62,16 @@
                       <div class="row m-0 mt-2 url-row password-row">
                         <input
                           class="url-input"
+                          ref="shop-confirm-password-input"
                           :type="(!isPasswordHashed && showConfirmPassword) ? 'text' : 'password'"
                           placeholder="Confirm password"
-                          v-model="shopConfirmPassword"
-                          autocomplete="off"
+                          :value="isPasswordHashed ? '' : shopConfirmPassword"
+                          autocomplete="new-password"
                           novalidate
                         />
 
                         <template v-if="!isPasswordHashed">
-                          <span class="eye-icon" @click.stop="showConfirmPassword = !showConfirmPassword">
+                          <span class="eye-icon" @click.stop="togglePasswordVisibility('confirmPassword')">
                             <b-icon-eye v-if="showConfirmPassword"></b-icon-eye>
                             <b-icon-eye-slash v-else></b-icon-eye-slash>
                           </span>
@@ -86,16 +88,14 @@
                     </button>
                     <button class="copy-cta mt-3 mb-0" @click="setPassword"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                        class="bi bi-floppy" viewBox="0 0 16 16">
-                        <path d="M11 2H9v3h2V2Z" />
-                        <path
-                          d="M14 2v12H2V2h1v5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2h1Zm-3 0v3H5V2h6Zm3-1H2a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1Z" />
-                      </svg>
-                      <template v-if="isEditingShop">
-                        Update
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                      class="bi bi-shield-check" viewBox="0 0 16 16">
+                      <path d="M5.072 1.133a1 1 0 0 1 .856 0l5 2A1 1 0 0 1 11.5 4v4c0 3.053-2.086 5.89-5 6-2.914-.11-5-2.947-5-6V4a1 1 0 0 1 .572-.867l5-2z"/>
+                      <path d="M10.854 6.354a.5.5 0 0 0-.708-.708L7 8.793 5.854 7.646a.5.5 0 1 0-.708.708l1.5 1.5a.5.5 0 0 0 .708 0l3.5-3.5z"/>
+                    </svg>
+                      <template>
+                        Validate
                       </template>
-                      <template v-else>Set</template>
                     </button>
                   </div>
                 </div>
@@ -642,10 +642,11 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       if (this.shop?.plain_password) {
         this.shopPassword = this.shop.plain_password;
         this.shopConfirmPassword = this.shop.plain_password;
-      } else {
-        this.shopPassword = this.shop.password;
-        this.shopConfirmPassword = this.shop.password;
       }
+      // else {
+      //   this.shopPassword = this.shop.password;
+      //   this.shopConfirmPassword = this.shop.password;
+      // }
 
       this.isPasswordModalOpen = false;
       this.isShareModalOpen = false;
@@ -736,6 +737,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       formData.append('_method', 'PUT');
     }
     formData.append("is_shop_password_protected", JSON.stringify(this.isShopPasswordProtected));
+    formData.append("update_password", this.shop.password && !this.shopPassword ? "false" : "true")
     if(this.isShopPasswordProtected) {
         formData.append("password", this.shopPassword)
         formData.append("password_confirmation", this.shopConfirmPassword )
@@ -827,7 +829,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       handleResponseException(errorResponse)
     })
   }
-  
+
   public onCustomPriceKeydown(e: KeyboardEvent): void {
     const allowedKeys: string[] = ['Backspace', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight', 'Delete', 'Home', 'End'];
     const key = e.key;
@@ -901,6 +903,12 @@ public formatProdCustomPrice(product:any){
 
   public togglePasswordModal() {
     this.isPasswordModalOpen = !this.isPasswordModalOpen;
+    if(this.isPasswordModalOpen) {
+      this.$nextTick(() => {
+        this.$refs['shop-password-input'].value = this.shopPassword
+        this.$refs['shop-confirm-password-input'].value = this.shopConfirmPassword
+      })
+    }
     this.isShareModalOpen = false;
     this.isProductsUrlModalOpen = false;
 
@@ -928,6 +936,33 @@ public formatProdCustomPrice(product:any){
   }
 
   public setPassword() {
+    const shopPasswordInput = this.$refs['shop-password-input'] as HTMLInputElement
+    const shopConfirmPasswordInput = this.$refs['shop-confirm-password-input'] as HTMLInputElement
+    const shopPassword = shopPasswordInput.value
+    const shopConfirmPassword = shopConfirmPasswordInput.value
+    if (shopPassword || shopConfirmPassword) {
+      if (shopPassword === shopConfirmPassword) {
+        this.shopPassword = shopPassword
+        this.shopConfirmPassword = shopConfirmPassword
+        if(this.shop.id) {
+          this.shop.plain_password = this.shopPassword
+        } else {
+          this.shop.password = this.shopPassword
+        }
+        this.shop.password_confirmation = this.shopConfirmPassword
+        this.isPasswordModalOpen = false;
+        this.showPassword = false;
+        this.showConfirmPassword = false;
+        showToastedMessage("Shop password protection enabled")
+      } else {
+        showToastedMessage("Password and confirm password must be same", "error")
+      }
+    } else {
+      showToastedMessage("Password and Confirm Password fields are required and must match", "error")
+    }
+  }
+
+  public setPassword_back() {
     if (this.shopPassword || this.shopConfirmPassword) {
       if (this.shopPassword === this.shopConfirmPassword) {
         if(this.shop.id) {
@@ -1019,6 +1054,16 @@ copyShareLink() {
     this.showVModal('locker-modal')
     this.hideVModal('create-update-shop-modal')
     this.$emit('shop-model-closed')
+  }
+
+  togglePasswordVisibility(type: string) {
+    if(type === 'password') {
+      this.shopPassword = (this.$refs['shop-password-input'] as HTMLInputElement).value
+      this.showPassword = !this.showPassword
+    } else if(type === 'confirmPassword') {
+      this.shopConfirmPassword = (this.$refs['shop-confirm-password-input'] as HTMLInputElement).value
+      this.showConfirmPassword = !this.showConfirmPassword
+    }
   }
 
   //methods ends
