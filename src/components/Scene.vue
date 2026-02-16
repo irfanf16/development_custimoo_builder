@@ -1284,8 +1284,11 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             self.$eventBus.$emit('setTotalTabs')
           }
           if (ImageData.file_extension == 'svg' && this.productType == 'customized') {
-            this.getSvgGroups()
+           await this.getSvgGroups()
           } else {
+            if(this.mainPreview) {
+              await this.$store.dispatch('setSvgGroups', [])
+            }
             this.showLoader = false
           }
 
