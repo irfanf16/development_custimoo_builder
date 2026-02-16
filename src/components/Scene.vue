@@ -1074,6 +1074,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   }
 
   public async getSvgGroups() {
+    // Clear store first so ColorAccordion/consumers don't show previous design's parts while we build
+    if (this.mainPreview) {
+      await this.$store.dispatch('setSvgGroups', [])
+    }
     this.svgGroups = []
     this.initialSvgGroups = []
     let design = this.frontDesign._objects? this.frontDesign._objects : [this.frontDesign]

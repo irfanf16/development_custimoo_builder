@@ -750,9 +750,8 @@ const ProductAttributes:Module<any, any> = {
       }
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
-      if(svgGroups) {
-        state.svgGroups = svgGroups
-      }
+      // Always replace (never merge) so switching design doesn't duplicate previous design's parts
+      state.svgGroups = Array.isArray(svgGroups) ? [...svgGroups] : []
     },
     SET_CUSTOM_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
       if(svgGroups) {
