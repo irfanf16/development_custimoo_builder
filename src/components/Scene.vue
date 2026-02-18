@@ -1077,6 +1077,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     // Clear store first so ColorAccordion/consumers don't show previous design's parts while we build
     if (this.mainPreview) {
       await this.$store.dispatch('setSvgGroups', [])
+      await this.$store.dispatch('setInitialSvgGroups', [])
     }
     this.svgGroups = []
     this.initialSvgGroups = []

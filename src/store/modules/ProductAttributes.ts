@@ -1402,7 +1402,7 @@ const ProductAttributes:Module<any, any> = {
       state.collectionMode[mode] = true;
     },
     SET_INITIAL_SVG_GROUPS(state, payload) {
-      state.initialSvgGroups = payload
+      state.initialSvgGroups = Array.isArray(payload) ? [...payload] : []
     },
     SET_SHOP_PRODUCTS_ROSTERS_UPDATE(state, { productId, roster }) {
       state.shop_products_rosters = {
