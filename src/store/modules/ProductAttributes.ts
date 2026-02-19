@@ -751,7 +751,19 @@ const ProductAttributes:Module<any, any> = {
     },
     SET_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
       // Always replace (never merge) so switching design doesn't duplicate previous design's parts
-      state.svgGroups = Array.isArray(svgGroups) ? [...svgGroups] : []
+      //state.svgGroups = Array.isArray(svgGroups) ? [...svgGroups] : []
+      if (!Array.isArray(svgGroups)) {
+        state.svgGroups = []
+        return
+      }
+      // Remove duplicates by id — keep only first occurrence of each id
+      const seenIds = new Set<any>()
+      state.svgGroups = svgGroups.filter((item: any) => {
+        const id = item?.id
+        if (seenIds.has(id)) return false
+        seenIds.add(id)
+        return true
+      })
     },
     SET_CUSTOM_SVG_GROUPS (state: Record<any, any>, svgGroups: Record<any, any>) {
       if(svgGroups) {
