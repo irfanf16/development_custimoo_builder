@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-tabs v-if="selectedProduct.productstyles && selectedProduct.productstyles.length">
+    <b-tabs v-if="selectedProduct.productstyles[styleIndex].design_categories.length && selectedProduct.productstyles.length">
       <b-tab @click="handleAllTabClick" title="All"></b-tab>
 
       <!-- Only show category tabs in normal mode -->
@@ -270,7 +270,10 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   }
 
 public handleAllTabClick() {
-  this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')
+  const isAllMode = this.$store.getters.getDesignBrowseMode === 'ALL'
+  if(isAllMode) {
+    this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')
+  }
   this.loadDesignsByStyleIndex()
 }
 public handleCategoryChange(tab_index: number) {
