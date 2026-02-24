@@ -275,7 +275,7 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
 
       public getSameNameCount (products, name) {
         if (this.roomWithProducts.length && this.productData.length) {
-          return products.filter((product) => product.product_name.includes(name)).length + 1;
+          return products.filter((product) => product.product_name?.includes(name)).length + 1;
         } else {
           return 0;
         }
@@ -332,9 +332,9 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
           shuffle_color_number = locker_room_product.shuffle_color_number
         }
         let locker_data: Record<any, any> = {
-          addons: this.selectedProduct.active_addons.filter(addon => {
+          addons: this.selectedProduct?.active_addons?.filter(addon => {
             return addon.selected;
-          }),
+          }) ?? [],
           roster_url: this.rosterUrl,
           room_id: this.room_id,
           product_id: product_id,
@@ -653,11 +653,7 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
   public async handleModalOpenEvent() {
     this.$emit('genImages')
     if(!checkIsEmpty(this.locker_room_product)) {
-      await this.$store.dispatch('GET_LOCKER_PRODUCTS').then((res) => {
-        if (res) {
-          this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true')
-        }
-      });
+      await this.$store.dispatch('GET_LOCKER_PRODUCTS', 'fetch_all=true');
       this.product_name = this.locker_room_product.product_name
       if(this.locker_room_product_type === "order_product"){
           this.tabIndex = 0;
@@ -666,8 +662,8 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
       //create locker room with collection name if not exists
       if (this.locker_room_product_type === "collection_product") {
         // Check if locker room already exists by name
-        const existingLockerRoom = this.lockers.length > 0 ? this.lockers[0] : null
-
+        const existingLockerRoom = this.lockers.length > 0 ? this.lockers[this.tabIndex ?? 0] : null
+      
         if (existingLockerRoom) {
           // Use existing locker room
           const lockerRoomIndex = this.roomWithProducts.findIndex(room =>
