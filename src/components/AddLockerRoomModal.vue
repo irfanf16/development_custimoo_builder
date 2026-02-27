@@ -331,12 +331,14 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
           svg_parts = locker_room_product.svg_parts ? locker_room_product.svg_parts : []
           shuffle_color_number = locker_room_product.shuffle_color_number
         }
+        // ensure room_id fallback if not set yet
+        const resolved_room_id = this.room_id || (this.lockers && this.lockers.length ? (this.lockers[this.tabIndex ?? 0]?.id || this.lockers[0].id) : 0)
         let locker_data: Record<any, any> = {
           addons: this.selectedProduct?.active_addons?.filter(addon => {
             return addon.selected;
           }) ?? [],
           roster_url: this.rosterUrl,
-          room_id: this.room_id,
+          room_id: resolved_room_id,
           product_id: product_id,
           product_name: this.product_name,
           svg_parts,
