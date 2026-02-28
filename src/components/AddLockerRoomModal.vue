@@ -283,6 +283,10 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
 
       public async saveExistingProductToLockerRoom() {
         this.showLoader = true
+        // ensure a valid room_id is selected (fallback to first locker)
+        if ((!this.room_id || this.room_id === 0) && this.lockers && this.lockers.length) {
+          this.room_id = this.lockers[this.tabIndex ?? 0]?.id || this.lockers[0].id
+        }
         let locker_data: Record<any, any> = await this.getLockerProductData();
         if(this.locker_room_product_type == 'collection_product'){
           locker_data.locker_id = this.locker_room_product.locker_id;
@@ -371,6 +375,10 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
         // syncGroupColorsWithSvgGroups() // for now don't sync may be look into it later
         this.showLoader = true
         if (this.isCustomerAuthenticated) {
+            // ensure room_id is set before composing locker payload  
+          if ((!this.room_id || this.room_id === 0) && this.lockers && this.lockers.length) {
+            this.room_id = this.lockers[this.tabIndex ?? 0]?.id || this.lockers[0].id
+          }
           const currentDesign = this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter((item: Record<any, any>) => {
             return item.design_show
           })
