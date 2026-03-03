@@ -3510,6 +3510,7 @@ const getShopDefaultObject = (updatedValues = {}) => {
       status: "",
       publish_at: null,
       unpublish_at: null,
+      is_price_visible: true,
       products: [] as Record<any, any>[],
     },
     ...updatedValues,
