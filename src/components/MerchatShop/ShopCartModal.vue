@@ -57,10 +57,10 @@
                 class="d-flex justify-content-between w-100 cart_summary"
               >
                 <span>{{ product.name }}</span>
-                <span>{{ product.total ? product.total.toFixed(2) : '' }} {{currency}}</span>
+                <span v-if="getShopInfo?.isPriceVisible">{{ product.total ? product.total.toFixed(2) : '' }} {{currency}}</span>
               </div>
             </template>
-            <div class="d-flex justify-content-between w-100 sub_header">
+            <div class="d-flex justify-content-between w-100 sub_header" v-if="getShopInfo?.isPriceVisible">
               <span>Total</span>
               <span v-if="groupedCartProducts.length > 0">
                 {{ groupedCartProducts.reduce((acc, cur) => acc + cur.total, 0).toFixed(2) }} {{ currency }}
@@ -445,6 +445,9 @@ export default class ShopCartModal extends Mixins(
   }
   get isCustomerAuthenticated(): boolean {
     return this.$store.getters.isCustomerAuthenticated
+  }
+  get getShopInfo(): Record<any, any> {
+    return this.$store.getters.getShopInfo;
   }
   @Watch('isCustomerAuthenticated')
   handleAuthStatusChange(newVal: boolean) :void{

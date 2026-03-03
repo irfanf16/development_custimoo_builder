@@ -51,7 +51,7 @@
           </div>
 
           <!-- Price -->
-            <div class="text-danger fw-bold fs-large">{{cumulativeQty}} x {{ product.price }} =  {{ totalPrice }} {{ currency }}</div>
+            <div class="text-danger fw-bold fs-large" v-if="getShopInfo?.isPriceVisible">{{cumulativeQty}} x {{ product.price }} =  {{ totalPrice }} {{ currency }}</div>
         </div>
 
         <!-- Accordions -->
@@ -75,7 +75,7 @@
                   <ul class="w-100">
                     <li v-for="(addon, i) in product.addons" :key="i"  class="d-flex justify-content-between">
                       <span>{{ addon.name }}</span>
-                      <span>{{ addon.price }} {{ currency }}</span>
+                      <span v-if="getShopInfo?.isPriceVisible">{{ addon.price }} {{ currency }}</span>
                     </li>
                   </ul>
                 </div>
@@ -156,6 +156,10 @@ export default class CardProductCard extends Mixins(RosterTabMixin) {
 
   get currency():string{
     return this.$store.getters.getShopCurrency;
+  }
+
+  get getShopInfo(): Record<any, any> {
+    return this.$store.getters.getShopInfo;
   }
 
   selectThumb(src: string) {

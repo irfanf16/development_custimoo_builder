@@ -146,7 +146,6 @@ export default class MerchantShop extends  Mixins(ErrorMessages) {
   public isCartModalOpen = false;
 
 
-
   async created() {
     this.slug = this.$route.params.slug;
     await this.fetchShopProducts(null);
@@ -199,6 +198,7 @@ export default class MerchantShop extends  Mixins(ErrorMessages) {
         const shopInfo = {
           name: response.name,
           logo: response.logo,
+          isPriceVisible: response.is_price_visible,
         };
         this.$store.commit("SET_SHOP_INFO", shopInfo);
         this.products = response.products;

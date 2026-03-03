@@ -22,7 +22,7 @@
     <div class="product-details">
       <div class="product-text-row">
         <h5 class="product-title">{{ product?.name }}</h5>
-        <div class="product-price">{{ currency }} {{ product?.price }}</div>
+        <div class="product-price" v-if="getShopInfo?.isPriceVisible">{{ currency }} {{ product?.price }}</div>
       </div>
       <p class="product-description" v-html="product?.description"></p>
     </div>
@@ -60,6 +60,10 @@ export default class ProductCard extends Vue {
    public onImageLoad(): void {
     this.loading = false;
      console.log("loading", this.loading)
+  }
+
+  get getShopInfo(): Record<any, any> {
+    return this.$store.getters.getShopInfo;
   }
 }
 </script>

@@ -206,6 +206,13 @@
                 <span class="slider" ></span>
               </label>
             </div>
+            <div class="switch-row">
+              <label class="text-muted" for="">Show Price</label>
+              <label class="switch" for="show-price">
+                <input type="checkbox" id="show-price" v-model="shop.is_price_visible" />
+                <span class="slider"></span>
+              </label>
+            </div>
             <div>
               <h2 class="fs-2 mb-2 font-weight-bolder">Upload Shop Logo</h2>
               <FileUploader :selectedFileUrl="shop.logo" :filesListing="recentLogos" @selected-file="handleLogoUpdate">
@@ -753,6 +760,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
     formData.append("slug", this.shop.slug)
     formData.append("status", shop.status)
     formData.append("timezone", Intl.DateTimeFormat().resolvedOptions().timeZone)
+    formData.append("is_price_visible", shop.is_price_visible)
     if(shop.publish_at) {
       formData.append("publish_at", shop.publish_at)
     }
