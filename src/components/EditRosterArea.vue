@@ -88,9 +88,6 @@ export default class EditRosterArea extends Vue {
   get styleIndex(): number {
     return this.$store.getters.getCurrentStyleIndex;
   }
-  get notifications(){
-    return this.$store.getters.getNotifications
-  }
   get company(){
     return this.$store.getters.getCompany
   }

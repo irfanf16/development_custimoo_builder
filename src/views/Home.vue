@@ -154,22 +154,6 @@
                         Reset
                       </button>
                     </li>
-                    <li v-if="isCustomerAuthenticated && false">
-                      <a class="icon mr-0" id="bell" @click="notificationsDropDown"><font-awesome-icon :icon="['fas', 'bell']"/><span class="notification-counter"> {{ notificationsCounter}}</span></a>
-                      <div v-if="notifications.length" class="notifications"  :style="dropdownStyle" id="box">
-                        <template v-for="(notification, ind) in notifications" >
-                          <div :key="ind" class="notifications-item" :class="[notification.read_at === null || notification.read_at === '' ? 'font-weight-bold' : '' ]">
-                            <div @click="readNotification(notification)" class="text d-flex align-items-start justify-content-between">
-                              <p v-if="notification.type == 'roster_updated'" @click="editProduct(notification.product.room_id, notification.product.id)">{{notification.description}}</p>
-                              <p v-if="notification.type == 'order_activity'"><router-link  :to="{ name: 'OrderDetail', params: { order_id: notification.order_id }}">{{notification.description}}</router-link></p>
-                              <div class="date">
-                                <div class="day" >{{ notification.created_at | formatDate }}</div>
-                              </div>
-                            </div>
-                          </div>
-                        </template>
-                      </div>
-                    </li>
                     <li class="position-relative" v-if="isCustomerAuthenticated && canAccessCompanyFeatures() && !isEcommercePlatform">
                       <a  class="icon mr-0" @click="openCartModal">
                         <font-awesome-icon :icon="['fas', 'cart-arrow-down']" /><span class="notification-counter"> {{ cartItemsCount}}</span>
@@ -867,7 +851,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
 
     if (this.isCustomerAuthenticated){
-      await this.$store.dispatch('getNotifications')
       await  getPermissions()
       if((this as any).$can('create-shop')){
         this.getDefaultCoverPhotos()
@@ -1090,10 +1073,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     this.$store.commit('SET_RECENT_LOGOS')
   }
 
-  get notifications() {
-    return this.$store.getters.getNotifications
-  }
-
   // get editCart(): Record<any, any> {
   //   return this.$store.getters.getEditCart
   // }
@@ -1113,18 +1092,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }
 
     return returnVal;
-  }
-
-  get notificationsCounter() {
-    let unread_notification_counter = 0
-    if (this.$store.getters.getNotifications.length) {
-      this.$store.getters.getNotifications.forEach((notification: Record<any, any>) => {
-        if (notification.read_at === '' || notification.read_at === null) {
-          unread_notification_counter += 1
-        }
-      })
-    }
-    return unread_notification_counter
   }
 
   get canvasReady() {
@@ -2039,13 +2006,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
   get hideColorSection() {
     return this.$store.getters.getHideColorSection
   }
-
-  public async readNotification(notification: Record<any, any>) {
-    if (notification.read_at === null || notification.read_at === '') {
-      await this.$store.dispatch('readNotification', notification.id)
-    }
-  }
-
 
   private async cancelCart() {
     let self: Record<any, any> = this;

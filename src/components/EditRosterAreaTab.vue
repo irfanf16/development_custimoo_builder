@@ -128,10 +128,6 @@ export default class EditRosterAreaTab extends Mixins(ModalAction) {
     return this.$store.getters.getCurrentStyleIndex;
   }
 
-  get notifications(){
-    return this.$store.getters.getNotifications
-  }
-
   get getProductEditInfoObject() {
     return this.$store.getters.getProductEditInfoObject
   }

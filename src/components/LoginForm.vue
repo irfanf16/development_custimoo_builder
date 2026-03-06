@@ -329,7 +329,6 @@ import { Component, Mixins, Prop, Vue } from 'vue-property-decorator';
           this.$store.commit('SET_RECENT_LOGOS')
           await this.$store.dispatch('getLockerRoomColors')
           await this.$store.dispatch('getLockers')
-          await this.$store.dispatch('getNotifications')
           await getPermissions()
           await this.$store.dispatch('getCartServer', {})
           this.email = ''
@@ -363,7 +362,6 @@ import { Component, Mixins, Prop, Vue } from 'vue-property-decorator';
           this.$store.commit('SET_RECENT_LOGOS')
           await this.$store.dispatch('getLockerRoomColors')
           await this.$store.dispatch('getLockers')
-          await this.$store.dispatch('getNotifications')
           await  getPermissions()
           await this.$store.dispatch('getCartServer', {})
           this.showToast(res.data.message, 'success')

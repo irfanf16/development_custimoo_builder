@@ -1670,7 +1670,6 @@ const authenticateUser = async (token: string, only_authenticate= false) => {
     await Store.commit("SET_RECENT_LOGOS");
     await Store.dispatch('getLockerRoomColors')
     await Store.dispatch('getCartServer', {})
-    await Store.dispatch('getNotifications')
     await getPermissions()
 
   }else{

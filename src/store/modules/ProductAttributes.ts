@@ -125,7 +125,6 @@ const ProductAttributes:Module<any, any> = {
     canvas_ready: false,
     start_load_designs: false,
     start_load_products: false,
-    notifications:[],
     cartItemId:'',
     editCart: {
       cartId: 0,
@@ -190,15 +189,6 @@ const ProductAttributes:Module<any, any> = {
     SET_INITIALIZING_PRODUCTS_DATA(state:Record<any,any>, payload: boolean) {
       state.initializing_product_data = payload
     },
-    UPDATE_NOTIFICATION(state:Record<any, any>, payload){
-     const index =  state.notifications.findIndex((item:Record<any, any>)=>{
-        return item.id == payload.id
-      })
-      Vue.set(state.notifications[index], 'read_at', payload.date)
-    },
-    SET_NOTIFICATIONS(state:Record<any, any>, payload) {
-      state.notifications  = payload
-    },
     SET_VECTOR_LOGOS(state:Record<any, any>, payload) {
       state.vector_logos  = payload
     },
@@ -207,11 +197,6 @@ const ProductAttributes:Module<any, any> = {
     },
     setIsShareDesign(state:Record<any, any>, payload) {
       state.isShareDesign  = payload
-    },
-    UPDATE_NOTIFICATIONS(state:Record<any, any>, payload){
-      if (payload){
-        state.notifications.unshift(payload)
-      }
     },
 
     Change_Locker_Active_Tab(state:Record<any, any>, payload) {
@@ -1544,9 +1529,6 @@ const ProductAttributes:Module<any, any> = {
     getIsRosterOpened: state => {
       return state.isRosterOpened
     },
-    getNotifications: state => {
-      return state.notifications
-    },
     getVectorLogos: state => {
       return state.vector_logos
     },
@@ -2213,29 +2195,6 @@ const ProductAttributes:Module<any, any> = {
         }
       }).catch(err => {
         console.log(err)
-      })
-    },
-    async getNotifications({commit}){
-      try {
-        await http.get('customer/notifications').then((res) => {
-          commit('SET_NOTIFICATIONS', res.data.data)
-        })
-      }
-      catch (e:any) {
-        commit('SET_NOTIFICATIONS', [])
-      }
-
-    },
-    readNotification({commit}, id){
-     return  http.post('read/notification', {id:id}).then((res) => {
-        if(res.status == 200){
-          const payload = {
-            id: id,
-            date: res.data.data
-          }
-          commit('UPDATE_NOTIFICATION', payload)
-        }
-        return res
       })
     },
     setRevertRosterBOOL({commit},payload){
