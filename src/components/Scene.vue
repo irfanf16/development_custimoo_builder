@@ -128,8 +128,8 @@ import SceneMixin from "@/mixins/SceneMixin";
       self.$eventBus.$off("customLogoStoreUpdated", this.customLogoStoreUpdatedHandler)
       self.$eventBus.$off("resetLogosCanvas", this.resetLogosFromCanvas)
     }
-    
-    
+
+
     if (this.front_time) {
       clearTimeout(this.front_time)
     }
@@ -407,7 +407,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             }
           }
 
-          let zoom = canvas.getZoom();
+          let zoom = canvas?.getZoom();
           if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
             canvas.zoomToPoint({
               x: zoom_point.x,
@@ -911,7 +911,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
   public frontCanvasRender(render_time = 300) :void {
     if (this.front_time) clearTimeout(this.front_time);
     this.front_time = setTimeout(() => {
-      this.frontCanvas.requestRenderAll()
+      this.frontCanvas?.requestRenderAll()
 
       if((this.mainPreview && !this.back) || this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', true)
@@ -924,7 +924,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (this.back_time) clearTimeout(this.back_time)
 
     this.back_time = setTimeout(() => {
-      this.backCanvas.requestRenderAll()
+      this.backCanvas?.requestRenderAll()
 
       if(this.mainPreview || this.mobileScreen) {
         this.$store.commit('SET_START_LOAD_DESIGNS', true)
@@ -1486,7 +1486,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if(this.selectedProductId == this.product_id) {
       self.$eventBus.$on("addAddons", this.addAddons)
     }
-    
+
     self.$eventBus.$on("fixedLogoResetAndAdd", this.resetAndAddFixedLogos)
     self.$eventBus.$on("changeDefaultColors", this.changeDefaultColorsEvent)
     self.$eventBus.$on("changeGroupColors", this.changeGroupColorsEvent)
@@ -1590,7 +1590,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       this.front_zoom_point = pointer
     }
 
-    let zoom = canvas.getZoom();
+    let zoom = canvas?.getZoom();
     zoom *= 0.999 ** delta;
 
     this.zoomCanvas(side, zoom)
@@ -1864,7 +1864,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     if (side == 'back') {
       zoom_point = this.back_zoom_point
     }
-    let zoom = canvas.getZoom();
+    let zoom = canvas?.getZoom();
     if (zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
       canvas.zoomToPoint({
         x: zoom_point.x,
@@ -1987,7 +1987,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         zoom_point = this.back_zoom_point
       }
 
-      let zoom = canvas.getZoom();
+      let zoom = canvas?.getZoom();
       if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
         canvas.zoomToPoint({
           x: zoom_point.x,
@@ -2479,7 +2479,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
             options.crossOrigin = 'Anonymous'
 
             const boundaries_clip = fabric.util.groupSVGElements(img) as fabric.Group
-            canvas.viewportCenterObject(boundaries_clip)
+            canvas?.viewportCenterObject(boundaries_clip)
             boundaries_clip.set({
               scaleX: design.scaleX,
               scaleY: design.scaleY,
@@ -2542,7 +2542,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
       apply_boundary = this.cloneFabricObjects(safe_zone)
     }
 
-    let zoom = canvas.getZoom();
+    let zoom = canvas?.getZoom();
     if(zoom != 1 && zoom_point != undefined && zoom_point.x && zoom_point.y) {
       canvas.zoomToPoint({
         x: zoom_point.x,
@@ -2569,7 +2569,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         inverted: true,
       })
       boundaries_clip.center().setCoords()
-      canvas.viewportCenterObject(boundaries_clip)
+      canvas?.viewportCenterObject(boundaries_clip)
 
       let clipped_parts
       if(excluded_clip_id) {
@@ -2599,7 +2599,7 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         inverted: true
       })
       clip.center().setCoords()
-      canvas.viewportCenterObject(clip)
+      canvas?.viewportCenterObject(clip)
 
       logo_or_text.clipPath = clip
       // canvas.add(clip)
@@ -3055,15 +3055,15 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
     const custom_text = self.product_custom_text_objects[custom_text_index]
     if(custom_text) {
       for(let i = 0; i < custom_text.length; i++) {
-        self.frontCanvas.remove(custom_text[i])
+        self.frontCanvas?.remove(custom_text[i])
         if(this.back) {
-          self.backCanvas.remove(custom_text[i])
+          self.backCanvas?.remove(custom_text[i])
         }
         const otherSideText = this.otherSideTexts[custom_text_index + '' + i]
         if(otherSideText) {
-          this.frontCanvas.remove(otherSideText)
+          this.frontCanvas?.remove(otherSideText)
           if(this.back) {
-            this.backCanvas.remove(otherSideText)
+            this.backCanvas?.remove(otherSideText)
           }
         }
       }
@@ -3204,23 +3204,23 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                       }
                       self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
                       if (custom_text_item.placement.toLowerCase() == 'front') {
-                        self.frontCanvas.add(fabric_text)
+                        self.frontCanvas?.add(fabric_text)
                         render_front_canvas = true
                         fabric_text.on('selected', (e: Record<any, any>) => {
                           this.showDimensions(e, self.dimTextFront)
                         })
-                        self.frontCanvas.on('selection:cleared', () => {
+                        self.frontCanvas?.on('selection:cleared', () => {
                           self.dimTextFront.set({
                             visible: false
                           })
                         })
                       } else {
-                        self.backCanvas.add(fabric_text)
+                        self.backCanvas?.add(fabric_text)
                         render_back_canvas = true
                         fabric_text.on('selected', (e: Record<any, any>) => {
                           this.showDimensions(e, self.dimTextBack)
                         })
-                        self.backCanvas.on('selection:cleared', () => {
+                        self.backCanvas?.on('selection:cleared', () => {
                           self.dimTextBack.set({
                             visible: false
                           })
@@ -3281,10 +3281,10 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                   self.product_custom_text_objects[custom_text_index][customTextItemIndex] = fabric_text
 
                   if (custom_text_item.placement.toLowerCase() == 'front') {
-                    self.frontCanvas.add(fabric_text)
+                    self.frontCanvas?.add(fabric_text)
                     render_front_canvas = true
                   } else {
-                    self.backCanvas.add(fabric_text)
+                    self.backCanvas?.add(fabric_text)
                     render_back_canvas = true
                   }
                   this.applyClipPath(fabric_text as fabric.Group, custom_text_item.placement)

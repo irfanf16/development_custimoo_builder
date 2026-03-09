@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-tabs v-if="selectedProduct.productstyles[styleIndex].design_categories.length && selectedProduct.productstyles.length">
+    <b-tabs v-if="selectedProduct.productstyles[styleIndex] >=0  && selectedProduct.productstyles[styleIndex].design_categories.length && selectedProduct.productstyles.length">
       <b-tab @click="handleAllTabClick" title="All"></b-tab>
 
       <!-- Only show category tabs in normal mode -->
@@ -68,6 +68,7 @@ import {getDomDocument} from "@/helpers/Helpers";
   watch: {
   styleIndex() {
     this.currentCategoryIndex = 0
+    console.log('styleIndex watch', this.$store.getters.getCurrentStyleIndex)
     this.loadDesignsByStyleIndex()
   }
 }
@@ -199,12 +200,18 @@ export default class DesignAvailable extends Mixins(HideUpdateLockerButton, Logo
   public async changeDesign(index: number) {
 
     const selectedDesign = this.filteredDesigns[index]
-
     if (!selectedDesign) return
+    const lastActiveProductData: Record<any, any> = {
+      design_index: index,
+      design_id: selectedDesign.id
+    }
     if (this.$store.getters.getDesignBrowseMode === 'ALL') {
+      lastActiveProductData.style_index = selectedDesign._styleIndex
+      lastActiveProductData.style_id = this.selectedProduct.productstyles[selectedDesign._styleIndex].id
 
       this.$store.commit('CHANGE_STYLE_INDEX', selectedDesign._styleIndex)
     }
+    this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", lastActiveProductData)
 
     const targetStyleIndex = this.styleIndex
     const targetStyle = this.selectedProduct.productstyles[targetStyleIndex]
@@ -277,20 +284,21 @@ public handleAllTabClick() {
   this.loadDesignsByStyleIndex()
 }
 public handleCategoryChange(tab_index: number) {
+  if(this.styleIndex < 0) return
   if (this.$store.getters.getDesignBrowseMode === 'ALL') return
 
   const currentCategory =
-    this.selectedProduct.productstyles[this.styleIndex].design_categories[tab_index]
+    this.selectedProduct.productstyles[this.styleIndex]?.design_categories?.[tab_index]
 
   this.currentCategoryIndex = tab_index
 
-  this.filteredDesigns =
+  this.filteredDesigns = currentCategory ?
     this.selectedProduct.productstyles[this.styleIndex].productdesigns.filter(
       (design: any) =>
         design.front_design.design_categories_pivot.some(
           (pivot: any) => pivot.design_category_id === currentCategory.id
         )
-    )
+    ) : []
 
 
   this.filteredDesigns.forEach(d => {
@@ -304,6 +312,7 @@ public handleCategoryChange(tab_index: number) {
   })
 }
 public loadDesignsByStyleIndex() {
+  if(this.styleIndex < 0) return
   if (!this.selectedProduct?.productstyles?.length) return
    const isAllMode = this.$store.getters.getDesignBrowseMode === 'ALL'
   if (isAllMode) {

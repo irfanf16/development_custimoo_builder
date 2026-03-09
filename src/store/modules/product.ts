@@ -31,7 +31,8 @@ const Product:Module<any, any> = {
       isAnyRosterCopied: false,
       copiedRosterFromId: null,
       rosterData: null
-    }
+    },
+    product_search_text: ''
   },
   getters:{
     getSkuInformation(state:Record<any, any>){
@@ -91,6 +92,9 @@ const Product:Module<any, any> = {
     },
     getCopiedRoster(state: Record<any, any>) {
       return state.copiedRoster;
+    },
+    getProductSearchText(state: Record<any, any>) {
+      return state.product_search_text;
     }
   },
   mutations:{
@@ -178,6 +182,9 @@ const Product:Module<any, any> = {
       state.copiedRoster.isAnyRosterCopied = true
       state.copiedRoster.copiedRosterFromId = payload.copiedRosterFromId;
       state.copiedRoster.rosterData = JSON.parse(JSON.stringify(payload.rosterData));
+    },
+    SET_PRODUCT_SEARCH_TEXT(state: Record<any, any>, payload: string) {
+      state.product_search_text = payload
     }
   },
   actions: {

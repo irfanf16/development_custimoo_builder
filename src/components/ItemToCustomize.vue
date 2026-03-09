@@ -149,14 +149,11 @@
      </template>
     </h2>
     <div class="select-designs" :class="{'opened': showDesigns, 'uploaderOpened': uploaderOpened}">
-      <DesignAvailable 
+      <DesignAvailable
         v-if="startLoadDesigns || designBrowseMode === 'ALL' || designBrowseMode === 'STYLE'"
-          :key="designBrowseMode === 'ALL'
-            ? `all-styles`
-            : `style-${selectedProduct.productstyles[styleIndex]?.id}`"
+          :key="designAvailableComponentKey"
           :products_fonts="products_fonts"
       />
-
     </div>
   </div>
 </template>
@@ -198,8 +195,9 @@ import { FetchCategories } from '@/mixins/SelectedProductMixin';
       this.$emit('switchTabs')
     }
 
-    this.$on('update:search_products', (search_val: string) => {
+    this.$eventBus.$on('update:search_products', (search_val: string) => {
       self.search = search_val ? search_val : ''
+      this.$store.commit('SET_PRODUCT_SEARCH_TEXT', self.search)
     })
 
     let ecommerce_update_id = this.$route.query.update_item;
@@ -236,6 +234,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
   @Watch('search')
   searchChanged() {
+    this.$store.commit('SET_PRODUCT_SEARCH_TEXT', this.search)
     this.$emit('update:search_products', this.search)
   }
 
@@ -248,6 +247,21 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
   }
 
   /* getters/computed props starts */
+
+  get designAvailableComponentKey(): string {
+    const selectedProduct = this.$store.getters.getSelectedProduct
+    if(selectedProduct) {
+      const styleIndex = this.$store.getters.getCurrentStyleIndex
+      const designId = this.$store.getters.getSelectedDesignId
+      const styleId = selectedProduct.productstyles[styleIndex]?.id
+      const productStyleDesignsCount = selectedProduct.productstyles[styleIndex]?.productdesigns?.length
+      const key = `component-design-available-key-style-${styleId}-design-${designId}-${productStyleDesignsCount}`
+      return key
+    }  else {
+      const key = `${Math.random().toString(36).substring(2, 15)}`
+      return key
+    }
+  }
 
   get hide_filter_if_only_one_exists():boolean {
     return !((this.CustomizedCount === 0 && this.PersonalizedCount === 0) || (this.PersonalizedCount === 0 && this.PrivateProductCount === 0) || (this.CustomizedCount === 0 && this.PrivateProductCount === 0))
@@ -402,7 +416,7 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
     }
     if(isClear) {
       this.search = "";
-      this.$emit('update:search_products', this.search)
+      this.$eventBus.$emit('update:search_products', this.search)
     }
 
     if(this.timeout) {
@@ -491,7 +505,6 @@ export default class ItemToCustomize extends Mixins(ProductsQueryParamsMixin, ex
 
     const categories_promise = this.fetchCategories(prd_type);
     categories_promise.then(async (cat_response: Record<any, any>) => {
-      console.log(cat_response)
       const query_params = [
         `category_id=${cat_response.product_category_id}`,
         `customized=${cat_response.customized}`,

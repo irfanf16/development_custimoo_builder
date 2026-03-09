@@ -645,7 +645,6 @@ Vue.filter('formatDate', function(value:string) {
     self.$eventBus.$off('cancelCart', this.cancelCart)
   },
   async mounted() {
-    console.log("inside mounted")
     /*
     * if order_update_identifier value is set then it means the page is not refreshed and if it is empty then page is refreshed in that case delete existing order updated data
     * */
@@ -1923,7 +1922,6 @@ export default class Home extends Mixins(ErrorMessages, LockerProducts, handleMa
     }, 10)
   }
   public async forceResetStore(edit_info_obj) {
-     this.$store.commit('RESET_PRODUCT_EDIT_INFO_OBJECT');
      this.$store.commit('SET_DURING_RESET', true)
         this.search_products = '';
         if(this.$refs['ItemToCustomize']) {

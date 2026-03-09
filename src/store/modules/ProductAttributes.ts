@@ -258,6 +258,18 @@ const ProductAttributes:Module<any, any> = {
         state.selectedPrdId = state.products[payload.active_product_index].id;
       }
     },
+    SET_PRODUCT_STYLES(state: Record<any, any>, payload: Record<any, any>){
+      let productIndex = state.selectedIndex
+      if('product_id' in payload) {
+        productIndex =  state.products.findIndex((product:Record<any, any>)=>{
+          return product.id == payload.product_id
+        })
+      }
+      if(productIndex >= 0) {
+        Vue.set(state.products[productIndex], 'productstyles', payload.product_styles)
+        Vue.set(state.products[productIndex], 'is_all_designs_loaded', true)
+      }
+    },
     SET_STOCK_COUNT(state:Record<any,any>, payload:number){
       state.stock_count = payload;
     },
@@ -938,8 +950,7 @@ const ProductAttributes:Module<any, any> = {
         cartId: 0,
         cartItemId: ''
       }
-
-      state.products_rosters = {}
+      // state.products_rosters = {}
       state.locked_designs = {}
       state.group_patterns = {}
 
@@ -1713,7 +1724,7 @@ const ProductAttributes:Module<any, any> = {
         return state.products_rosters
       if(roster_index >= 0)
         return state.products_rosters[product_id][roster_index]
-      return state.products_rosters[product_id]
+      return state.products_rosters[product_id] || []
     },
     getAllRosterDetails: state  => {
       return state.rosterDetails
@@ -2080,9 +2091,10 @@ const ProductAttributes:Module<any, any> = {
     createShop({ commit }, payload) {
       return http.post("customer-shops", payload)
     },
-    resetStore({commit}){
+    resetStore({commit, getters}){
       resetCustomizedAddons()
       commit('RESET_STORE')
+      commit('SET_PRODUCTS_ROSTERS')
       commit('RESET_CUSTOM_TEXTS')
       commit('RESET_CUSTOM_LOGOS')
     },

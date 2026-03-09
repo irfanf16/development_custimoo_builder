@@ -1680,7 +1680,8 @@ const authenticateUser = async (token: string, only_authenticate= false) => {
 
 const lastActiveProductDefaultObject = (keys_default_values = {}) => {
   const default_obj = {
-    fixed_logo_index: 0, category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null, search_products: null, style_index: 0, style_id: null,
+    fixed_logo_index: 0, category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null,
+    /*search_products: null,*/ style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: {}, default_colors: [], group_colors: {}, logo_colors: [],
     roster_detail: [], products_rosters: {}, shuffle_color_number: 1, addons_info: {}, group_patterns: {}
   }
@@ -1716,7 +1717,7 @@ const getDataToSetLastActiveProduct = () => {
       design_id: selected_design.id,
       product_index: Store.getters.getSelectedIndex,
       product_id: selected_product.product_id,
-      search_products: null,
+      // search_products: null,
       style_index: style_index,
       style_id: product_style.id,
       page_no: Store.getters.getProductsNextPageNo? Store.getters.getProductsNextPageNo - 1 : 1,
@@ -2248,7 +2249,6 @@ const removeKeyInitialPersitantItems = () => {
 
   }*/
   const custimoo = getKeyItemFromLocalStorage('custimo');
-  console.log(custimoo);
 }
 
 const getReOrderInfoObject = (default_value= {}): Record<any, any> => {
@@ -3642,6 +3642,55 @@ const setAppComponentKey = () => {
   Store.commit('SET_APP_COMPONENT_KEY')
 }
 
+const getProductWithAllStylesAndDesigns = (product_id: number) => {
+  const productSearchText = Store.getters.getProductSearchText ?? ''
+  if(!productSearchText) {
+    Store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
+    Store.commit('SET_START_LOAD_DESIGNS', true)
+    http.get(`/list/products?active_product_id=${product_id}&paginate=false&product_with_all_styles_designs=true`).then(response => {
+      const responseData = response.data.products.data[0];
+      let productStyles = responseData.productstyles
+      const interval = setInterval(() => {
+        if(Store.getters.getApplicationMounted) {
+          const product = Store.getters.getSelectedProduct
+          const activeProductStyleIndex = Store.getters.getCurrentStyleIndex
+          const productSelectedStyle = product.productstyles[activeProductStyleIndex] || null
+          if(productSelectedStyle) {
+            let designId = productSelectedStyle.productdesigns?.filter(design => design.design_show)[0]?.id
+            if(!designId) {
+              designId = productSelectedStyle.productdesigns?.filter(design => design.is_default)[0]?.id
+            }
+            productStyles.forEach((style: Record<any, any>, styleIndex: number) => {
+              if(style.id == productSelectedStyle.id) {
+                style.productdesigns.forEach((design: Record<any, any>) => {
+                  if(design.id === designId) {
+                    design.design_show = 1
+                  } else {
+                    design.design_show = 0
+                  }
+                })
+              }
+            })
+            product.productstyles.forEach((selectedProductStyle: Record<any, any>, styleIndex: number) => {
+              const getStyle = productStyles.find((style: Record<any, any>) => style.id == selectedProductStyle.id)
+              if(getStyle) {
+                Vue.set(selectedProductStyle, 'productdesigns', getStyle.productdesigns)
+              }
+            })
+            clearInterval(interval)
+            Store.commit('SET_START_LOAD_DESIGNS', false)
+            Store.commit('SET_INITIALIZING_PRODUCTS_DATA', false)
+          } else {
+            clearInterval(interval)
+            Store.commit('SET_START_LOAD_DESIGNS', false)
+            Store.commit('SET_INITIALIZING_PRODUCTS_DATA', false)
+          }
+        }
+      }, 1000)
+      return productStyles
+    })
+  }
+}
 
 
 
@@ -3668,7 +3717,8 @@ export {
   findActivityWithPosition, findActivity, mergeActivityArray, resetCustomizedAddons, getStyleSelectedAddons, base64ToFile, isBase64File, createFormData, decodeHtmlEntities, getProductLogoTechnologies, generateRandomString, isEcomCompanyWithOrderTab,isValidEmail,
   containsObject, getAllSvgGroups, getAllSvgGroupsFor3D, extractSvgGroups, canAccessCompanyFeatures, getShopDefaultObject, getShopProductsFromLockerProducts, getLockerRoomSelectedProducts, getShopProductDefaultObject, getImagePreview, showToastedMessage, can,
 
-  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, normalize,getCompanyBaseUrl,getCustomProductFilePathInfo, setAppComponentKey
+  getShopLastProductSortOrder, createDefaultPlayer, formatCustomPrice, normalize,getCompanyBaseUrl,getCustomProductFilePathInfo, setAppComponentKey,
+  getProductWithAllStylesAndDesigns
 
 
 };

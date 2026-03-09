@@ -197,6 +197,9 @@ Vue.use(VueGtag, {
 import { can } from "@/helpers/Helpers"
 Vue.prototype.$can = can
 
+import GlobalMixin from "./GlobalMixin";
+Vue.mixin(GlobalMixin)
+
 @Component<CommonImportMixin>({
   i18n
 })
@@ -204,7 +207,7 @@ export default class CommonImportMixin extends Vue{
   async mounted () {
 
    //font awsome icons not showing issue fixed
-    const rootDocument = getDomDocument(true); 
+    const rootDocument = getDomDocument(true);
 
     const alreadyExists = Array.from(rootDocument.querySelectorAll('style')).some(
       (styleEl: any) => styleEl.textContent?.includes('font-awesome')
@@ -267,9 +270,8 @@ export default class CommonImportMixin extends Vue{
     * so here we get the url and pass it to customizer to navigate to that route.
     * */
 
-    
+
     if(iframe) {
-      console.log('iframe loaded');
       setTimeout(async()=>{
         const url_params = getUrlParameter()
         if(url_params) {

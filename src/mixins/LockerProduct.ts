@@ -31,7 +31,8 @@ import {
   base64ToFile,
   decodeHtmlEntities,
   isEcommercePlatform,
-  updateLastActiveProductData
+  updateLastActiveProductData,
+  getProductWithAllStylesAndDesigns
 } from '@/helpers/Helpers'
 import { GTAGEVENTS, trackEvent } from '@/helpers/analytics-events';
 import {http} from "@/httpCommon";
@@ -50,7 +51,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
   public inputText = ''      // instant typing (smooth)
   private initialLockerProducts: Record<any, any>[] = [];
   public debouncedSearch!: (val: string) => void
-  
+
   get mainTotalTabs(){
     return this.$store.getters.getMainTotalTabs;
   }
@@ -59,7 +60,7 @@ export class LockerProducts extends Mixins(FetchCategories, ModalAction) {
     let self: Record<any, any> = this;
     const product_id  = locker_product.product_id;
     const locker_product_id  = locker_product.id;
-    this.$emit('update:search')
+    this.$eventBus.$emit('update:search_products', '')
     this.fetchCategories(null, product_id).then(async (cat_response: Record<any, any>) => {
       if(cat_response.no_product_found) {
         return;
@@ -102,7 +103,7 @@ public created() {
     }
     let locker_products_count = this.initialLockerProducts.length || locker_products.length;
     let locker_room_index = locker_products.findIndex((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
-    
+
     if (this.searchText) {
       let filtered_locker_rooms = locker_products.filter((locker) => locker.room_name.toLowerCase().includes(this.searchText.toLowerCase()));
       if (locker_room_index !== -1) {
@@ -193,10 +194,14 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         last_sync_id = query_param_array[1];
       }
     })
+    if(!url_obj.searchParams.has('styles_with_default_or_required_design')) {
+      url_obj.searchParams.append('styles_with_default_or_required_design', 'true');
+    }
     url = url_obj.pathname + url_obj.search;
     http.get(url).then(async (response: Record<any, any>) => {
       const response_data = response.data;
-      const {active_product_id, products: {data: retrieved_products}} = response_data
+      const {active_product_id, products: {data: retrieved_products}} = response_data;
+      getProductWithAllStylesAndDesigns(active_product_id)
       if(retrieved_products.length > 0) {
         if(last_sync_id) {
           this.$store.commit('SET_LAST_SYNC_ID', last_sync_id)
@@ -237,7 +242,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     let self: Record<any, any> = this;
     const last_active_product_data = JSON.parse(JSON.stringify(this.$store.getters.getLastActiveProductData))
     await exitFromEditMode()
-    await this.$emit('update:search');
+    await this.$eventBus.$emit('update:search_products', '');
     await eventBus.$emit('useProductOriginalColors')
     await hideLockerProductUpdateButton()
     await this.$store.commit('RESET_CUSTOM_TEXTS');
@@ -299,7 +304,6 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         return false;
       }
     }
-
     let append_products: boolean =  response_products_obj.current_page > 1;
     this.$store.commit("SET_PRODUCTS_NEXT_PAGE_NO", next_page_url ? current_page + 1 : null)
 
@@ -324,12 +328,11 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
         }
         let active_product: Record<any, any> = retrieved_products[active_product_index]
         // Handle merge styles case
-        console.log("active",active_product.merge_styles)
         if (active_product.merge_styles === 1) {
-          this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')      
+          this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')
         }
         else{
-          this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE')      
+          this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE')
         }
 
         let product_custom_texts: Record<any, any>[] = active_product.product_custom_texts;
@@ -399,8 +402,8 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
                 active_style_index  = findIndex(active_product_styles, (style: Record<any, any>) => {
                   return style.id == active_style_id
                 })
-               
-                this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);  
+
+                this.$store.commit('CHANGE_STYLE_INDEX', active_style_index);
                 const active_style_designs = active_product_styles[active_style_index].productdesigns
                 active_design_index  = findIndex(active_style_designs, (design: Record<any, any>) => {
                   return design.id == active_design_id
@@ -464,7 +467,7 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
             sub_category_id: selected_sub_category.sub_category_id, sub_category_index: selected_sub_category.sub_category_index,
             product_index: active_product_index, product_id: active_product_id, fixed_logo_index: fixed_logo_index,
             style_id: active_style_id, style_index: active_style_index, design_index: active_design_index, design_id: active_design_id,
-            search_products: self.search_products, customized: this.$store.getters.getCustomized,
+            /*search_products: self.search_products,*/ customized: this.$store.getters.getCustomized,
             personalized: this.$store.getters.getPersonalized, private_product:this.$store.getters.getPrivateProduct,
             products_rosters: this.$store.getters.getProductRosters('all'), default_colors: last_active_prod_data.default_colors,
             group_colors: last_active_prod_data.group_colors, addons_info: addons_info, group_patterns: last_active_prod_data.group_patterns
@@ -639,9 +642,9 @@ export class handleMainProducts extends Mixins(FetchCategories, HideUpdateLocker
     /*
     * As handleMainProduct is being used as mixin. So the search_products data attribute may not exists in some components that's why this check is added
     * */
-    if(self.search_products !== undefined) {
-      last_active_prod_data.search_products = self.search_products;
-    }
+    // if(self.search_products !== undefined) {
+    //   last_active_prod_data.search_products = self.search_products;
+    // }
     self.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", last_active_prod_data);
     return last_active_prod_data;
   }
@@ -768,9 +771,9 @@ export class ProductsQueryParamsMixin extends Vue {
           `active_product_id=${last_active_product_data.product_id}`,
           `style_id=${last_active_product_data.style_id}`, `design_id=${last_active_product_data.design_id}`, 'paginate=false'
         )
-        if(last_active_product_data.search_products) {
-          query_params.push(`title=${last_active_product_data.search_products}`)
-        }
+        // if(last_active_product_data.search_products) {
+        //   query_params.push(`title=${last_active_product_data.search_products}`)
+        // }
       }
       if(selected_category.category_id) {
         query_params.push(`category_id=${selected_category.category_id}`)
@@ -1047,6 +1050,77 @@ public setAllMode() {
   // 🔥 START LOADER
   this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
   this.$store.commit('SET_START_LOAD_DESIGNS', true)
+  if(!this.selectedProduct) return;
+
+  const styles = this.selectedProduct.productstyles
+  if (!styles || !styles.length) return
+
+  const selectedProduct = this.selectedProduct;
+  const selectedStyle = this.selectedProduct.productstyles[this.styleIndex];
+  const selectedDesignId =  this.$store.getters.getSelectedDesignId;
+
+
+  // 1️⃣ find selected style or default style
+  let targetStyleIndex = -1;
+  if(selectedStyle) {
+    targetStyleIndex = selectedProduct.productstyles.findIndex(style => selectedStyle && selectedStyle.id === style.id)
+    if(targetStyleIndex !== -1) {
+      this.$store.commit('CHANGE_STYLE_INDEX', -1)
+    }
+  }
+  if(targetStyleIndex === -1) {
+    targetStyleIndex = selectedProduct.productstyles.findIndex(style => style.default_style)
+  }
+
+  // 2️⃣ find selected design or default design
+  let targetDesignIndex = -1
+  if(selectedDesignId) {
+    targetDesignIndex = selectedProduct.productstyles[targetStyleIndex].productdesigns.findIndex(design => selectedDesignId === design.id)
+  }
+  if(targetDesignIndex === -1) {
+    targetDesignIndex = selectedProduct.productstyles[targetStyleIndex].productdesigns.findIndex(design => design.is_default)
+  }
+
+  this.$nextTick(() => {
+    // 2️⃣ set style index (Scene/Home depends on this)
+  this.$store.commit('CHANGE_STYLE_INDEX', targetStyleIndex)
+
+  // 3️⃣ reset all designs
+  styles.forEach(style => {
+    style.productdesigns.forEach(design => {
+      Vue.set(design, 'design_show', 0)
+    })
+  })
+
+  // 4️⃣ activate default style and design
+  const targetStyle = styles[targetStyleIndex]
+  const targetDesign = targetStyle.productdesigns[targetDesignIndex]
+
+  Vue.set(targetDesign, 'design_show', 1)
+
+  this.$store.dispatch('setSelectedProductDesignID', targetDesign.id)
+
+  this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+    style_index: targetStyleIndex,
+    style_id: targetStyle.id,
+    design_index: targetDesignIndex,
+    design_id: targetDesign.id
+  })
+
+  // 🔥 STOP LOADER
+  this.$store.commit('SET_START_LOAD_DESIGNS', false)
+  this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', false)
+
+  this.hideLockerProductUpdateButton(false)
+  })
+}
+
+public setAllMode_back() {
+  this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'ALL')
+
+  // 🔥 START LOADER
+  this.$store.commit('SET_INITIALIZING_PRODUCTS_DATA', true)
+  this.$store.commit('SET_START_LOAD_DESIGNS', true)
 
   const styles = this.selectedProduct.productstyles
   if (!styles || !styles.length) return
@@ -1097,7 +1171,49 @@ public setAllMode() {
   this.hideLockerProductUpdateButton(false)
 }
 
-public changeStyleIndex(i: number) {
+public changeStyleIndex(targetStyleIndex: number) {
+  let self: Record<any, any> = this;
+  const beforeChangeStyleBrowseMode = this.$store.getters.getDesignBrowseMode;
+  const activeStyleIndex = this.$store.getters.getCurrentStyleIndex;
+  this.$store.commit('CHANGE_STYLE_INDEX', -1)
+  this.$nextTick(() => {
+      this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE')
+      this.startLoader()
+
+      const selectedStyle = this.selectedProduct.productstyles[activeStyleIndex];
+      const selectedDesignId =  this.$store.getters.getSelectedDesignId;
+      const selectedDesignName = selectedStyle.productdesigns.find(design => design.id === selectedDesignId)?.design_name?.toLowerCase() || ''
+
+      const targetStyle = this.selectedProduct.productstyles[targetStyleIndex];
+
+      let targetStyleDesignIndex = -1;
+      if(selectedDesignName) {
+        targetStyleDesignIndex = targetStyle.productdesigns.findIndex(design => design.design_name.toLowerCase() === selectedDesignName)
+      }
+      if(targetStyleDesignIndex === -1) {
+        targetStyleDesignIndex = targetStyle.productdesigns.findIndex(design => design.design_show === 1)
+      }
+      const targetStyleDesign = targetStyle.productdesigns[targetStyleDesignIndex];
+      targetStyle.productdesigns.forEach((design, designIndex) => {
+        this.$set(design, 'design_show', designIndex === targetStyleDesignIndex ? 1 :0)
+      })
+      this.$store.commit('CHANGE_STYLE_INDEX', targetStyleIndex)
+      this.$store.dispatch('setSelectedProductDesignID', targetStyleDesign.id)
+
+      this.$store.commit("SET_LAST_ACTIVE_PRODUCT_DATA", {
+        style_index: targetStyleIndex,
+        style_id: targetStyle.id,
+        design_index: targetStyleDesignIndex,
+        design_id: targetStyleDesign.id
+      })
+
+      this.stopLoader()
+      this.hideLockerProductUpdateButton(false)
+  })
+}
+
+
+public changeStyleIndex_back(i: number) {
   const targetStyleIndex = i
 
   this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE')
@@ -1116,6 +1232,7 @@ public changeStyleIndex(i: number) {
 
   async productDesigns(index: number) {
     if (index != this.selectedProductIndex) {
+      getProductWithAllStylesAndDesigns(this.$store.getters.getProducts[index].id)
       this.$store.commit("RESET_PRODUCT_DESIGNS_SELECTION_INFO")
       if(this.logoColorsInfo.using_logo_colors) {
         this.useLogoColors(false)
@@ -1130,6 +1247,8 @@ public changeStyleIndex(i: number) {
       if(edit_info_obj.type == "reorder_product" && confirmed_value) {
         return false;
       }
+      this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE');
+      this.$store.commit('CHANGE_STYLE_INDEX', 0);
       // this.$store.commit('Change_Locker_Tabs_Index', undefined)
       await this.$store.dispatch('setSelectedIndex', {selectedIndex: index, selected_id: this.products[index].id})
       await this.$store.dispatch("getSkuInformation", this.products[index].product_id);
@@ -1146,8 +1265,7 @@ public changeStyleIndex(i: number) {
         }
         return;
       }
-      this.$store.commit('CHANGE_DESIGN_BROWSE_MODE', 'STYLE');
-      this.$store.commit('CHANGE_STYLE_INDEX', 0);
+
       let design_index = 0;
       let selected_product_design = this.selectedProduct.productstyles[style_index].productdesigns.filter((product_design: Record<any, any>, product_design_index: number) => {
         if (product_design.design_show === 1) {
