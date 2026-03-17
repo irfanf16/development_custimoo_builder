@@ -3674,6 +3674,7 @@ const getProductWithAllStylesAndDesigns = (product_id: number) => {
             product.productstyles.forEach((selectedProductStyle: Record<any, any>, styleIndex: number) => {
               const getStyle = productStyles.find((style: Record<any, any>) => style.id == selectedProductStyle.id)
               if(getStyle) {
+                Vue.set(product.productstyles[styleIndex], 'design_categories', getStyle.design_categories)
                 Vue.set(selectedProductStyle, 'productdesigns', getStyle.productdesigns)
               }
             })
