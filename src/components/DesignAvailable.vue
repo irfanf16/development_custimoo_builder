@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-tabs v-if="selectedProduct.productstyles[styleIndex] >=0  && selectedProduct.productstyles[styleIndex].design_categories.length && selectedProduct.productstyles.length">
+    <b-tabs v-if="selectedProduct.productstyles[styleIndex]  && selectedProduct.productstyles[styleIndex].design_categories.length && selectedProduct.productstyles.length">
       <b-tab @click="handleAllTabClick" title="All"></b-tab>
 
       <!-- Only show category tabs in normal mode -->
