@@ -359,6 +359,7 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
           product_roster_detail: product_roster_detail,
           fixed_logo_index: 0,
           svgcolors: distinct,
+          svg_groups: svg_groups,
           locker_product_type: this.locker_room_product_type
         }
         if(fixed_logo_index != undefined) {
@@ -429,6 +430,7 @@ export default class AddLockerRoomModal extends Mixins(ErrorMessages, ModalActio
             product_roster_detail: this.productRosterDetail,
             fixed_logo_index: fixed_logo_index,
             svgcolors: distinct,
+            svg_groups: svgGroups,
             grouped_addons: selected_grouped_addons,
             ungrouped_addons: selected_ungrouped_addons,
             group_patterns: Store.getters.getGroupPatterns
