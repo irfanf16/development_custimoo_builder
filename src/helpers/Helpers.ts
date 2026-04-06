@@ -3506,6 +3506,7 @@ const getShopDefaultObject = (updatedValues = {}) => {
       slug: "",
       logo: "",
       cover_photo: "",
+      currency_id: null,
       status: "",
       publish_at: null,
       unpublish_at: null,

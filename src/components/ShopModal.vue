@@ -236,6 +236,24 @@
               <h2 class="fs-2 mb-2 font-weight-bolder">Shop Expiry</h2>
                 <date-picker :config="datepickerOptions"  v-model="shop.unpublish_at" class="mb-2" placeholder="Select Shop Expiry Date"></date-picker>
             </div>
+            <hr class="my-1" />
+            <div>
+              <h2 class="fs-2 mb-2 font-weight-bolder">Shop Currency</h2>
+              <b-form-select
+                v-model="shop.currency_id"
+                class="mb-2"
+                :disabled="companyCurrencies.length === 0"
+              >
+                <option :value="null" disabled>Select Shop Currency</option>
+                <option
+                  v-for="currency in companyCurrencies"
+                  :key="`shop-currency-${currency.value}`"
+                  :value="String(currency.value)"
+                >
+                  {{ currency.label }}
+                </option>
+              </b-form-select>
+            </div>
           </div>
 
           <div class="design-collection-form" style="flex-basis: 80%">
@@ -353,6 +371,7 @@
           </div>
         </div>
         <ShopOwnProductModal :ownProductData="ownProductEditInfo.product"
+          :shopCurrencyCode="activeCurrencyCode"
           @own-product-upserted="handleOwnProductUpserted"
           @own-product-upsert-cancelled="handleShopOwnProductUpsertCancelEvent" />
       </div>
@@ -428,6 +447,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   public showDropdown = false
   public showPassword: boolean = false;        // default SHOW
   public showConfirmPassword: boolean = false; // default SHOW
+  public currencies: Record<any, any>[] = [];
 
 
   public productsUrl = ''
@@ -468,6 +488,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   //data props ends
   mounted() {
     this.domDocument?.addEventListener('click', this.handleClickOutside)
+    this.getAllCurrencies();
   }
   //computed props starts
 
@@ -503,7 +524,66 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   }
 
   get activeCurrencyCode() {
-    return this.$store.getters.getProductPriceObject?.active_currency?.code ?? ''
+    const currentValue = this.shop?.currency_id == null ? "" : String(this.shop.currency_id);
+    const selectedCurrency = this.companyCurrencies.find((currency) => String(currency.value) === currentValue);
+    return selectedCurrency?.code ?? this.$store.getters.getProductPriceObject?.active_currency?.code ?? ''
+  }
+
+  get companyCurrencies() {
+    const normalizeCurrency = (currency: any) => {
+      if (typeof currency === "string") {
+        return { value: currency, code: currency, label: currency };
+      }
+      const value =
+        currency?.id ?? currency?.code ?? currency?.currency_code ?? null;
+      const code = currency?.code ?? currency?.currency_code ?? "";
+      const symbol = currency?.symbol ? ` (${currency.symbol})` : "";
+      const label = code
+        ? `${code}${symbol}`
+        : currency?.label ?? currency?.name ?? "";
+      return { value, code, label };
+    };
+
+    if (Array.isArray(this.currencies) && this.currencies.length > 0) {
+      return this.currencies
+        .map((currency) => normalizeCurrency(currency))
+        .filter((currency) => currency.value);
+    }
+
+    const settingsCurrencies =
+      this.$store.getters.getSetting("currencies")?.currencies ?? [];
+    if (!Array.isArray(settingsCurrencies)) {
+      return [];
+    }
+    return settingsCurrencies
+      .map((currency) => normalizeCurrency(currency))
+      .filter((currency) => currency.value);
+  }
+
+  get defaultCompanyCurrencyId() {
+    const settingsCurrencies =
+      this.$store.getters.getSetting("currencies")?.currencies ?? [];
+    const defaultCurrencyCode =
+      Array.isArray(settingsCurrencies) && settingsCurrencies.length > 0
+        ? typeof settingsCurrencies[0] === "string"
+          ? settingsCurrencies[0]
+          : settingsCurrencies[0]?.code ??
+            settingsCurrencies[0]?.currency_code ??
+            null
+        : null;
+
+    if (defaultCurrencyCode) {
+      const matchedCurrency = this.companyCurrencies.find((currency) => {
+        return (
+          String(currency.code).toUpperCase() ===
+          String(defaultCurrencyCode).toUpperCase()
+        );
+      });
+      if (matchedCurrency?.value) {
+        return matchedCurrency.value;
+      }
+    }
+    return null;
   }
 
   //computed props ends
@@ -644,6 +724,8 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       this.shop = santaClone(this.shopData);
       this.shop.logo = logo;
       this.shop.cover_photo = coverPhoto;
+      this.syncShopCurrencySelection();
+      this.applyShopCurrencyToProductPrices(false);
 
       // Populate password fields
       if (this.shop?.plain_password) {
@@ -659,6 +741,11 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
       this.isShareModalOpen = false;
       this.isProductsUrlModalOpen = false;
       this.getMerchantProducts();
+  }
+
+  @Watch('shop.currency_id')
+  public onShopCurrencyIdChanged(): void {
+    this.applyShopCurrencyToProductPrices(true);
   }
 
   public addProductToShopFromLockerRoom() {
@@ -759,6 +846,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
     formData.append("cover_photo", shop.cover_photo)
     formData.append("slug", this.shop.slug)
     formData.append("status", shop.status)
+    formData.append("currency_id", shop.currency_id)
     formData.append("timezone", Intl.DateTimeFormat().resolvedOptions().timeZone)
     formData.append("is_price_visible", shop.is_price_visible)
     if(shop.publish_at) {
@@ -1047,6 +1135,112 @@ public formatProdCustomPrice(product:any){
     }
   }
   return false
+  }
+
+  public getAllCurrencies() {
+    http
+      .get("/currency")
+      .then((response) => {
+        const result = response?.data?.result;
+        this.currencies = Array.isArray(result)
+          ? result
+          : Array.isArray(result?.currencies)
+          ? result.currencies
+          : Array.isArray(response?.data)
+          ? response.data
+          : [];
+
+        if (!this.shop.currency_id) {
+          this.$set(
+            this.shop,
+            "currency_id",
+            this.defaultCompanyCurrencyId == null
+              ? null
+              : String(this.defaultCompanyCurrencyId)
+          );
+        }
+        this.syncShopCurrencySelection();
+      })
+      .catch(() => {
+        this.currencies = [];
+        this.syncShopCurrencySelection();
+      });
+  }
+
+  public syncShopCurrencySelection() {
+    const options = this.companyCurrencies;
+    if (!options.length || !this.shop) {
+      return;
+    }
+
+    const currentValue =
+      this.shop.currency_id == null ? "" : String(this.shop.currency_id);
+    const hasMatchingOption = options.some(
+      (currency) => String(currency.value) === currentValue
+    );
+    if (hasMatchingOption) {
+      if (this.shop.currency_id !== currentValue) {
+        this.$set(this.shop, "currency_id", currentValue);
+      }
+      return;
+    }
+
+    const defaultValue =
+      this.defaultCompanyCurrencyId == null
+        ? null
+        : String(this.defaultCompanyCurrencyId);
+    this.$set(this.shop, "currency_id", defaultValue);
+  }
+
+  private applyShopCurrencyToProductPrices(isCurrencySwitch = false): void {
+  if (!this.shop?.products?.length || !this.shop?.currency_id) return;
+
+  const currencyId = String(this.shop.currency_id);
+
+  const isTruthy = (v: any) => v === true || String(v).toLowerCase() === "true" || Number(v) === 1;
+
+  this.shop.products = this.shop.products.map((product: any) => {
+
+    // detect custom product
+    const isCustom =
+      isTruthy(product?.is_custom_product) ||
+      ((product?.product_locker_room_id == null && product?.product_id == null) &&
+        !isTruthy(product?.is_added_from_locker));
+
+    if (isCustom) return product;
+
+    // find currency price
+    const skuCurrencies =
+      product?.product_locker_room?.product?.sku?.skucurrency ??
+      product?.product_locker_room?.sku?.skucurrency ??
+      product?.product?.sku?.skucurrency ?? [];
+
+    const match = skuCurrencies?.find((c: any) => {
+      const id = c?.pivot?.currency_id ?? c?.currency_id ?? c?.id;
+      return String(id) === currencyId;
+    });
+
+    const currencyPrice = Number(match?.pivot?.price ?? match?.price ?? 0);
+
+    // decide final price
+    let price = currencyPrice;
+
+    if (!isCurrencySwitch) {
+      const custom = Number(product?.custom_price);
+      const normal = Number(product?.price);
+
+      if (Number.isFinite(custom)) price = custom;
+      else if (Number.isFinite(normal)) price = normal;
+    }
+
+    const formatted = formatCustomPrice(price);
+
+    return {
+      ...product,
+      custom_price: formatted,
+      price: formatted,
+    };
+  });
 }
 
 copyShareLink() {

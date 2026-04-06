@@ -273,6 +273,8 @@ export default class ShopOwnProductModal extends Mixins(ErrorMessages, ModalActi
     }
   }) readonly ownProductData!: Record<any, any>;
 
+  @Prop({ required: false, default: '' }) readonly shopCurrencyCode!: string;
+
   //props ends
 
   //data props starts
@@ -324,7 +326,7 @@ export default class ShopOwnProductModal extends Mixins(ErrorMessages, ModalActi
   }
 
   get activeCurrencyCode() {
-    return this.$store.getters.getProductPriceObject?.active_currency?.code ?? ''
+    return this.shopCurrencyCode || (this.$store.getters.getProductPriceObject?.active_currency?.code ?? '')
   }
 
 
@@ -520,7 +522,9 @@ export default class ShopOwnProductModal extends Mixins(ErrorMessages, ModalActi
       }
       this.setProductSelectedSizes()
     } else {
-      this.ownProduct = getShopProductDefaultObject()
+      this.ownProduct = getShopProductDefaultObject({
+        is_custom_product: true,
+      })
       this.setProductSizes()
     }
   }
@@ -580,7 +584,13 @@ export default class ShopOwnProductModal extends Mixins(ErrorMessages, ModalActi
     }
     const selectedSizes = this.ownProduct.sizes.filter(selectedSize => selectedSize.is_selected)
     this.activeImage = ''
-    this.$emit('own-product-upserted', {...this.ownProduct, ...{sizes: selectedSizes}})
+    const ownProductPayload = {
+      ...this.ownProduct,
+      sizes: selectedSizes,
+      // Products created from this modal are custom products by definition.
+      is_custom_product: true,
+    }
+    this.$emit('own-product-upserted', ownProductPayload)
     this.hideVModal('shop-own-product-modal')
   }
 
