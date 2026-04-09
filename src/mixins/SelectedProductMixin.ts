@@ -49,19 +49,79 @@ export class ProductColors extends Vue {
 
 @Component
 export class ProductFonts extends Vue {
-  public async productFonts() {
+  /** Per custom-text row index: font dropdown options for that row's container. */
+  public product_fonts_by_text: Record<any, any>[][] = []
+
+  // get selectedProductId(): Record<any, any> {
+  //   return this.$store.getters.getSelectedProductId
+  // }
+
+// public async productFonts(selectedFont?: string) {
+//   console.log('This is Selected Here', selectedFont)
+//   const self: Record<any, any> = this;
+//     console.log('productFont method called, selectedProduct:', self.$store.getters.getSelectedProduct);
+
+//     const product_name_fonts = self.$store.getters.getSelectedProduct.namefonts;
+    
+//     // Use this product's previously selected font when switching back, else first font
+//     if (!selectedFont && product_name_fonts.length > 0) {
+      
+//       const savedForProduct = self.$store.getters.getSelectedFontForCurrentProduct;
+//       const exists = savedForProduct && product_name_fonts.some((f: Record<any, any>) => f.file_name === savedForProduct);
+//       selectedFont = exists ? savedForProduct : product_name_fonts[0].file_name;
+//     }
+    
+//     self.product_fonts = product_name_fonts
+//     .filter((font: Record<any, any>) => font.file_name === selectedFont)
+//     .flatMap((font: Record<any, any>) => font.json_data)
+//     .map((font: Record<any, any>) => ({
+//       label: font.name.replace('-', ' ').toUpperCase(),
+//       value: font.name,
+//       url: process.env.VUE_APP_STORAGE_URL + font.path
+//     }));
+//     this.$store.commit('SET_SELECTED_FONT', { selectedFont: selectedFont })
+
+// }
+public async productFonts(customTextIndex?: number, selectedFont?: string) {
+  const self: Record<any, any> = this;
+
+  const product_name_fonts = self.$store.getters.getSelectedProduct.namefonts;
+
+  const list = product_name_fonts
+    .filter((font: Record<any, any>) => font.file_name === selectedFont)
+    .flatMap((font: Record<any, any>) => font.json_data)
+    .map((font: Record<any, any>) => ({
+      label: font.name.replace('-', ' ').toUpperCase(),
+      value: font.name,
+      url: process.env.VUE_APP_STORAGE_URL + font.path
+    }));
+
+  if (typeof customTextIndex === 'number') {
+    self.$set(self.product_fonts_by_text, customTextIndex, list);
+  }
+  // Legacy: mobile / callers without a row index still use the single list
+  if (customTextIndex === undefined) {
+    self.product_fonts = list;
+  }
+}
+  public async productFont() {
     const self: Record<any, any> = this;
-    const product_name_fonts = self.$store.getters.getSelectedProduct.namefonts
-    product_name_fonts.forEach((product_name_font: Record<any, any>) => {
-      const name_font_data = product_name_font.json_data
-      name_font_data.forEach((name_font_datum: Record<any, any>) => {
-        self.product_fonts.push({
-          label: name_font_datum.name.replace('-', ' ').toUpperCase(),
-          value: name_font_datum.name,
-          url: process.env.VUE_APP_STORAGE_URL + name_font_datum.path
-        })
-      })
-    })
+    self.product_font_dropdown = [];
+    const product_name_fonts_dropdown = self.$store.getters.getSelectedProduct.namefonts;
+    product_name_fonts_dropdown.forEach((product_name_font: Record<any, any>) => {
+      self.product_font_dropdown.push({
+        text: product_name_font.file_name,
+        value: product_name_font.file_name,
+        json_data: product_name_font.json_data
+      });
+    });
+    
+    
+    // const savedForProduct = self.$store.getters.getSelectedFontForCurrentProduct;
+    // const exists = savedForProduct && self.product_font_dropdown.some((f: Record<any, any>) => f.value === savedForProduct);
+    // self.selected_font_family = exists ? savedForProduct : (self.product_font_dropdown.length > 0 ? self.product_font_dropdown[0].value : '');
+
+
   }
 }
 

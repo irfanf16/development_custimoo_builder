@@ -53,10 +53,11 @@ export default class CustomizationTabsMixin extends Vue{
     const productFonts = this.selectedProduct.namefonts
     const shadow_dom = (this.$root as Record<any,any>).$options.shadowRoot;
     if (productFonts.length){
-      const item = productFonts[0].json_data
-      if(item) {
-        this.fontOptions = []
-        item.forEach((fonts: any, key: number) => {
+      this.fontOptions = []
+      for (let c = 0; c < productFonts.length; c++) {
+        const item = productFonts[c].json_data
+        if (!item) continue
+        item.forEach((fonts: any) => {
           let fontNameParam = fonts.path.split('/').reverse()
           fontNameParam = fontNameParam[0].split('.')
           const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()

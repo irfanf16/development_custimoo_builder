@@ -121,6 +121,7 @@ const ProductAttributes:Module<any, any> = {
       color: '',
       flood_fill: false
     },
+    selectedFont: "",
     editLockerProduct: [],
     canvas_ready: false,
     start_load_designs: false,
@@ -256,6 +257,7 @@ const ProductAttributes:Module<any, any> = {
       if('active_product_index' in payload) {
         state.selectedIndex = payload.active_product_index;
         state.selectedPrdId = state.products[payload.active_product_index].id;
+        // state.selectedFont = state.last_active_product_data?.selectedFontByProduct?.[state.selectedPrdId] ?? '';
       }
     },
     SET_PRODUCT_STYLES(state: Record<any, any>, payload: Record<any, any>){
@@ -285,6 +287,7 @@ const ProductAttributes:Module<any, any> = {
     SET_SELECTED(state: Record<any, any>, payload: Record<any, any>){
       state.selectedIndex = payload.selectedIndex;
       state.selectedPrdId = payload.selected_id;
+      // state.selectedFont = state.last_active_product_data?.selectedFontByProduct?.[state.selectedPrdId] ?? '';
     },
     SET_PRODUCT_TYPE(state: Record<any, any>, payload: Record<any, any>){
       Vue.set(state, payload.prd_type, payload.value)
@@ -803,6 +806,16 @@ const ProductAttributes:Module<any, any> = {
         state.currentColorApplied = colorApplied
       }
     },
+    // SET_SELECTED_FONT(state: Record<any, any>, font: Record<any, any>) {
+    //   if(font?.selectedFont) {
+    //     state.selectedFont = font.selectedFont;
+    //     // const existing = state.last_active_product_data?.selectedFontByProduct || {};
+    //     updateLastActiveProductData({
+    //       selectedFont: font.selectedFont,
+    //       // selectedFontByProduct: { ...existing, [state.selectedPrdId]: font.selectedFont }
+    //     });
+    //   }
+    // },
     ADD_TO_PRODUCTS(state:Record<any, any>, payload){
       state.products.push(payload);
     },
@@ -1139,6 +1152,12 @@ const ProductAttributes:Module<any, any> = {
         updated_payload[payload_key] = payload_value
       }
       state.product_edit_info_object = Object.assign({}, state.product_edit_info_object, updated_payload);
+      // updateLastActiveProductData({product_custom_texts: state.product_custom_texts})
+
+      // updateLastActiveProductData({
+      //   selectedFont: font.selectedFont,
+      //   selectedFontByProduct: { ...existing, [state.selectedPrdId]: font.selectedFont }
+      // });
     },
     SET_LAST_ACTIVE_PRODUCT_DATA(state:Record<any, any>, payload)
     {
@@ -1152,7 +1171,11 @@ const ProductAttributes:Module<any, any> = {
       for (const [payload_key, payload_value] of Object.entries(payload)) {
         if(payload_key == 'product_custom_texts') {
           updated_payload[payload_key] = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
-        } else {
+        } 
+        // else if(payload_key == 'selectedFontByProduct') {
+        //   updated_payload[payload_key] = {...(state.last_active_product_data.selectedFontByProduct || {}), ...(payload.selectedFontByProduct || {})}
+        // } 
+        else {
           updated_payload[payload_key] = payload_value
         }
       }
@@ -1215,6 +1238,7 @@ const ProductAttributes:Module<any, any> = {
           Vue.set(state.product_custom_texts, product_id, payload.value)
         }
       }
+      console.log('Updated product_custom_texts in state :', state.product_custom_texts);
       updateLastActiveProductData({product_custom_texts: state.product_custom_texts})
     },
     REMOVE_CUSTOM_TEXT(state: Record<any, any>, payload) {
@@ -1676,6 +1700,9 @@ const ProductAttributes:Module<any, any> = {
     getSelectedDesignId: state => {
       return state.selectedDesignId
     },
+    // getSelectedFontForCurrentProduct: state => {
+    //   return state.last_active_product_data?.selectedFontByProduct?.[state.selectedPrdId] ?? state.selectedFont
+    // },
     getCustomTexts: state => (for_all_products= false, product_id = state.selectedPrdId) => {
       if(for_all_products)
         return state.product_custom_texts

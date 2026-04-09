@@ -21,7 +21,8 @@
           @input="handleCustomTextInputChange($event, customTextIndex)" @focusin="expandTextCustomizer(customTextIndex)"
           @keypress="preventSpace($event, product_custom_text.type)"></b-form-input>
         <button v-b-toggle="`text-accordion-${customTextIndex}`"
-          class="d-flex align-items-center btn btn-secondary light">
+          class="d-flex align-items-center btn btn-secondary light"
+          @click="refreshFontListForRow(customTextIndex)">
           <span class="minus d-flex align-items-center">
             <BIconDash class="minus" /> Collapse
           </span>
@@ -39,19 +40,32 @@
         <button @click="applySameTextStyle(customTextIndex)" class="btn btn-secondary btn-sm">Use styling for every
           text/number</button>
       </div>
-
       <b-collapse accordion="my-accordion" v-model="text_accordion[customTextIndex]" :visible="false"
         :key="`accordion-${selectedProductId+customTextIndex}`" :id="`text-accordion-${customTextIndex}`"
         :ref="`text-accordion-${customTextIndex}`" role="tabpanel">
         <div class="dropdown-divider"></div>
+        <div>
+          <b-form-select
+           :value="product_custom_texts[customTextIndex].selected_container"
+            :style="{ fontSize: '14px', height: '35px', outline: 'none', boxShadow: 'none' }"
+            :options="product_font_dropdown"
+            @change="onDropdownFontChange(customTextIndex, $event)"
+          >
+            <template #first>
+              <b-form-select-option :value="null" disabled>
+                -- Select Font --
+              </b-form-select-option>
+            </template>
+          </b-form-select>
+        </div>
         <div class="font-type-area">
           <div class="fade-right w-100 py-2">
             <div class="overflow-auto d-flex align-items-center theme-scroll-h pointer pb-2 fontList ">
-              <div v-for="(product_font, product_font_index) in product_fonts"
+              <div v-for="(product_font, product_font_index) in fontListForCustomText(customTextIndex)"
                 :key="`product_font_${product_font_index}`"
-                @click="handleCustomTextFontChange(customTextIndex,  product_font.value)"
+                @click="handleCustomTextFontChange(customTextIndex, product_font.value, true)"
                 :style="{ fontSize: '20px',  fontFamily: product_font.value}" style="white-space: nowrap"
-                @mouseenter="setLeft" :class="{ 'pr-3': product_font_index + 1 == product_fonts.length }" role="button">
+                @mouseenter="setLeft" :class="{ 'pr-3': product_font_index + 1 == fontListForCustomText(customTextIndex).length }" role="button">
                 <div class="font_tooltip">{{product_custom_text.value ? product_font.label : ''}}</div>
                 <span
                   :key="`product_custom_text_${customTextIndex}_font-${product_custom_text.font_family&&product_custom_text.font_family}`"
@@ -173,7 +187,6 @@
                                       <b-button size="sm" class="btn-locker-color" variant="secondary"
                                         @click="setActiveLockerIndex(i)" :class="{'active': i == activeLockerIndex}"
                                         :key="`locker_${i}`">
-                                        <!--                  {{ room && room.folders[0].folder_name}}-->
                                         {{room && room.room_name}}
                                       </b-button>
                                     </template>
@@ -241,19 +254,12 @@
                                   </div>
                                 </div>
                               </b-tab>
-
-                              <!--                              <template #tabs-end>-->
-                              <!--                                <b-nav-item>Others</b-nav-item>-->
-                              <!--                                <b-nav-item v-if="selectedProduct.is_custom_color_allowed" :class="{ active: othersActive }" @click="selectType(index, true)"></b-nav-item>-->
-                              <!--                              </template>-->
                             </b-tabs>
                           </div>
                         </b-tab>
                       </template>
                     </b-tabs>
                   </div>
-
-
 
                   <!-- Tabs content ends -->
 
@@ -294,7 +300,9 @@ import {getClosestColor, getColorEncoding} from "@/pantoneColor";
   async mounted() {
     let self: Record<any, any> = this;
 
-    await this.productFonts();
+    await this.productFont();
+    this.syncCustomTextFontSelectionForEdit();
+    await this.syncAllCustomTextFontLists();
 
     await getLockerColors();
 
@@ -332,7 +340,9 @@ export default class CustomizationText extends Mixins(TextCustomizationTab) {
   get selectedProduct(): Record<any, any> {
     return this.$store.getters.getSelectedProduct
   }
-
+  get getLastActiveProductData() {
+    return this.$store.getters.getLastActiveProductData;
+  }
   get lockerColors() {
     return this.$store.getters.getLockerColors
   }
@@ -347,6 +357,22 @@ export default class CustomizationText extends Mixins(TextCustomizationTab) {
     activeTextField[0].focus();
   }
 
+  @Watch('selectedProductId')
+  async selectedProductIdChanged() {
+    await this.productFont();
+    this.syncCustomTextFontSelectionForEdit();
+    await this.syncAllCustomTextFontLists();
+  }
+
+  // When the font dropdown options change (e.g. after product switch), validate that each
+  // custom text's selected_container still exists in the new list. If not, fall back to
+  // the first available option and persist the change to the store.
+  @Watch('product_font_dropdown')
+  onProductFontDropdownChanged() {
+    console.log('Here is Running i am');
+    this.validateAndFixSelectedContainers();
+  }
+
   public setLeft($event:Record<any, any>){
     $event.target.children[0].style.top = ($event.pageY + 30)+"px"
     $event.target.children[0].style.left = $event.pageX+"px"
@@ -354,6 +380,7 @@ export default class CustomizationText extends Mixins(TextCustomizationTab) {
 
   private expandTextCustomizer(custom_text_index: number){
     (this.$refs[`text-accordion-${custom_text_index}`] as Record<any, any>)[0].show = true;
+    this.refreshFontListForRow(custom_text_index);
   }
 
   private preventSpace($event, type){

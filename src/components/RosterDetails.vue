@@ -203,7 +203,7 @@
       <AddToCartButton :products_fonts="products_fonts"></AddToCartButton>
       <AdminSalesRepresentativeModal ref="cart-representative-modal" />
     </div>
-      <confirm-modal class="confirm-copy-modal" message="You already have a roster copied. Do you want to copy this product’s roster instead?"
+      <confirm-modal class="confirm-copy-modal" message="You already have a roster copied. Do you want to copy this productï¿½s roster instead?"
                    cancel_text="Cancel" confirm_text="Yes, copy this roster" ref="confirm-recopy" name="confirm-recopy"></confirm-modal>
   </div>
 </template>

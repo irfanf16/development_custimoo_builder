@@ -398,24 +398,26 @@ export default class CollectionViewPDF extends Mixins(ErrorMessages,LockerProduc
       const product = products[product_index]
       const productFonts = product.namefonts;
       if (productFonts.length){
-        const item = productFonts[0].json_data
-        if(item) {
-          for(let i = 0; i < item.length; i++) {
-            const font = item[i]
-            let fontNameParam = font.path.split('/').reverse()
-            fontNameParam = fontNameParam[0].split('.')
-            const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
-            const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}?nocache=11`
-            if(!this.products_fonts[fontNameParam[0]]) {
-              const font_object = await this.loadFont(url)
-              if(font_object) {
-                const final_font = {
-                  value: fontNameParam[0] as string,
-                  text: fontName as string,
-                  url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
-                  opentype_font: font_object
+        for (let c = 0; c < productFonts.length; c++) {
+          const item = productFonts[c].json_data
+          if(item) {
+            for(let i = 0; i < item.length; i++) {
+              const font = item[i]
+              let fontNameParam = font.path.split('/').reverse()
+              fontNameParam = fontNameParam[0].split('.')
+              const fontName = fontNameParam[0].replace('-', ' ').toUpperCase()
+              const url =`${process.env.VUE_APP_STORAGE_URL}${font.path}?nocache=11`
+              if(!this.products_fonts[fontNameParam[0]]) {
+                const font_object = await this.loadFont(url)
+                if(font_object) {
+                  const final_font = {
+                    value: fontNameParam[0] as string,
+                    text: fontName as string,
+                    url:`${process.env.VUE_APP_STORAGE_URL}${font.path}`,
+                    opentype_font: font_object
+                  }
+                  Vue.set(this.products_fonts, fontNameParam[0], final_font)
                 }
-                Vue.set(this.products_fonts, fontNameParam[0], final_font)
               }
             }
           }

@@ -72,19 +72,25 @@
                         v-html="activityStatus[item_status_activity.status].message">
                       </div>
                       <span v-if="item_status_activity.status"></span>
-
+                    
+                    </template>
+                    <!-- TODO: Show the Order Details Here in Case of Shipped Status --> 
+                    <template v-else-if="item_status_activity.status === ORDERSHIPPED">
+                      <div class="activity-text p-2 fs-2 text-muted">
+                        {{ activityStatus[item_status_activity.status].message }}
+                      </div>
                     </template>
                     <template v-else>
                       <div class="activity-text p-2 fs-2 text-muted">
                         {{ activityStatus[item_status_activity.status].message }}
                       </div>
-                        <div v-if="item_status_activity.status == QUALITYCONTROL" >
+                      <div v-if="item_status_activity.status == QUALITYCONTROL" >
                             <span class="badge" :class="{
-                              'badge-success': item_status_activity.activity_items[0].quality_control.qa_status == 'Approved',
-                              'badge-danger': item_status_activity.activity_items[0].quality_control.qa_status == 'Rejected',
-                              'badge-warning': item_status_activity.activity_items[0].quality_control.qa_status == 'Pending',
+                            'badge-success': item_status_activity.activity_items[0].quality_control.qa_status == 'Approved',
+                            'badge-danger': item_status_activity.activity_items[0].quality_control.qa_status == 'Rejected',
+                            'badge-warning': item_status_activity.activity_items[0].quality_control.qa_status == 'Pending',
                             }">{{ item_status_activity.activity_items[0].quality_control.qa_status }}</span>
-                          </div>
+                      </div>
                     </template>
                     <div class="images-grid p-2 d-flex gap-1 w-100">
                       <div class="d-flex align-items-stretch flex-wrap gap-1">
@@ -224,13 +230,13 @@
 
                     </div>
                     <template v-if="item_status_activity.status == QUALITYCONTROL">
-                            <div v-for="(report, index) in item_status_activity.activity_items[0].quality_control.reports" :key="`report-${index}`" >
-                            {{ index + 1 }}. QC report {{report.status}}: <a :href="report.pdf_url" class="text-primary" target="_blank">
-                                {{ report.pdf_name }}
-                              </a> submitted at {{ report.created_at | formatDate('DD/MM/YYYY  ') }}
-                            </div>
+                      <div v-for="(report, index) in item_status_activity.activity_items[0].quality_control.reports" :key="`report-${index}`" >
+                      {{ index + 1 }}. QC report {{report.status}}: <a :href="report.pdf_url" class="text-primary" target="_blank">
+                          {{ report.pdf_name }}
+                        </a> submitted at {{ report.created_at | formatDate('DD/MM/YYYY  ') }}
+                      </div>
 
-                          </template>
+                    </template>
 
                     <div class="comment-row px-2 pb-2 d-flex gap-1 mt-1"
                       v-if="order.general_comments && item_status_activity_index === 0">

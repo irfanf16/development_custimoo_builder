@@ -1568,14 +1568,19 @@ export class cartModalData extends Mixins(ErrorMessages,handleMainProducts,exitE
       }
 
       self.$store.dispatch('addedToCart', false)
-      self.$store.dispatch('setCartLoading',true);
+      // self.$store.dispatch('setCartLoading',true);
       let collection_view = self.$store.getters.getCollectionView;
       let cart_product = await getActiveProductData(product_fonts);
+      console.log("This is my Product Fonts", product_fonts)
+      console.log("This is my Cart Product Data Here", cart_product)
 
       self.$store.dispatch('setRevertRosterBOOL',true);
       let post_data: Record<any, any> = {
         factory_product: cart_product
       }
+      console.log("This is my Cart Data Here", post_data.product_custom_texts)
+
+
       const factory_product_id = getRandom(4, 'alpha_numeric')+getDateTimeFormatted()+getRandom(4, 'alpha_numeric');
       post_data.factory_product.id = factory_product_id;
       (post_data as Record<any,any>).get_quote = get_quote.quote;

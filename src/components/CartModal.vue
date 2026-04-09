@@ -721,6 +721,7 @@ export default class CartModal extends Mixins(ErrorMessages, LockerProducts, han
   }
 
   public async editCartItem(cart_item_index: number, factory_product_index: number, edit=true, backToCart=false) {
+    console.log("Edit is CLicked and is here");
     let self = this;
     let cart_item = self.cartItems[cart_item_index];
     let cart_item_product = cart_item.factory_products[factory_product_index];

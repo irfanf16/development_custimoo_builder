@@ -11,6 +11,8 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
   public activeLockerIndex = 0
   public activeFolderIndex = 0
   public product_fonts: Record<any, any>[] = []
+  public product_font_dropdown: Record<any, any>[] = []
+  public selected_font_family = '';
   public handle_text_change_timer:any = 0 // this will hold the id returned by the setTimeout()
   public active_jersey_part: number[] = [];
   public text_accordion:boolean[] = [];
@@ -187,9 +189,9 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
           new_fixed_text.items[0].y_axis_3d = custom_text.items[0].y_axis_3d;
         }
       } else {
-        new_fixed_text.items[0].y_axis = (new_line_y_axis <= max_y_axis) ? new_line_y_axis : custom_text.items[0].y_axis;  
+        new_fixed_text.items[0].y_axis = (new_line_y_axis <= max_y_axis) ? new_line_y_axis : custom_text.items[0].y_axis;
       }
-     
+
       this.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", {
         index: self.product_custom_texts.length,
         value: new_fixed_text,
@@ -281,6 +283,104 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
       emitter: "placement", custom_text_index:custom_text_index, custom_text_item_index: custom_text_item_index, value: self.product_custom_texts[custom_text_index]
     });
   }
+  /**
+   * When editing from cart, custom texts may have font_family but missing selected_container (family).
+   * When selected_container is not set, set it to the first dropdown option (and font_family to first style).
+   * Sync selected_container from font_family so the dropdown shows correctly, then refresh the font list.
+   */
+  syncCustomTextFontSelectionForEdit(): string | null {
+    const self: Record<any, any> = this;
+    const customTexts = self.product_custom_texts;
+    if (!customTexts || !customTexts.length || !self.product_font_dropdown.length) return null;
+    const firstFamilyOption = self.product_font_dropdown[0];
+    const firstFontName = firstFamilyOption?.json_data?.[0]?.name;
+    let familyToShow: string | null = null;
+    customTexts.forEach((custom_text: Record<any, any>, index: number) => {
+      const hasSelectedFont = custom_text.selected_container;
+      if (hasSelectedFont) {
+        if (!familyToShow) familyToShow = custom_text.selected_container;
+        return;
+      }
+      const fontFamily = custom_text.font_family;
+      if (fontFamily) {
+        const familyOption = self.product_font_dropdown.find((f: Record<any, any>) =>
+          f.json_data && f.json_data.some((j: Record<any, any>) => j.name === fontFamily));
+        if (familyOption) {
+          self.$set(custom_text, 'selected_container', familyOption.value);
+          if (!familyToShow) familyToShow = familyOption.value;
+          self.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', { index, value: custom_text });
+        }
+        return;
+      }
+      // No selected_container and no font_family: set to first option
+      if (firstFamilyOption && firstFontName) {
+        self.$set(custom_text, 'selected_container', firstFamilyOption.value);
+        custom_text.font_family = firstFontName;
+        if (!familyToShow) familyToShow = firstFamilyOption.value;
+        self.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', { index, value: custom_text });
+      }
+    });
+    return familyToShow;
+  }
+
+  /** Load font lists for every custom text row from its selected_container. */
+  syncAllCustomTextFontLists() {
+    this.product_custom_texts.forEach((ct: Record<any, any>, i: number) => {
+      const family = ct.selected_container;
+      if (family) this.productFonts(i, family);
+    });
+  }
+
+  fontListForCustomText(customTextIndex: number): Record<any, any>[] {
+    const row = this.product_fonts_by_text[customTextIndex];
+    return row && row.length ? row : [];
+  }
+
+  /** Refresh the horizontal font list to show the given row's selected family (e.g. when expanding that row). */
+  refreshFontListForRow(customTextIndex: number) {
+    const selectedFamily = this.product_custom_texts[customTextIndex]?.selected_container;
+    if (selectedFamily) {
+      this.productFonts(customTextIndex, selectedFamily);
+    }
+  }
+
+  /**
+   * Validates each custom text's selected_container against product_font_dropdown.
+   * If the current selected_container value is not found in the dropdown options,
+   * falls back to the first dropdown option and updates the store.
+   */
+  validateAndFixSelectedContainers() {
+    const self: Record<any, any> = this;
+    if (!self.product_font_dropdown || !self.product_font_dropdown.length) return;
+    const firstOption = self.product_font_dropdown[0];
+    const fontFamily = firstOption.json_data?.[0]?.name;
+    console.log('First font family:', fontFamily);
+    self.product_custom_texts.forEach((custom_text: Record<any, any>, index: number) => {
+      const exists = custom_text.selected_container &&
+        self.product_font_dropdown.some((f: Record<any, any>) => f.value === custom_text.selected_container);
+      if (!exists) {
+        self.$set(custom_text, 'selected_container', firstOption.value);
+        self.$set(custom_text, 'font_family', fontFamily);
+        self.$store.commit('SET_PRODUCT_CUSTOM_TEXTS', { index, value: custom_text });
+      }
+    });
+    this.syncAllCustomTextFontLists();
+  }
+
+  /** When user selects a font family from the dropdown, update the font list and apply its first font style */
+    onDropdownFontChange(customTextIndex: number, selectedContainer: string) {
+    const self: Record<any, any> = this;
+    if (!selectedContainer) return;
+    const familyOption = self.product_font_dropdown.find((f: Record<any, any>) => f.value === selectedContainer);
+    if (!familyOption || !familyOption.json_data || familyOption.json_data.length === 0) return;
+    // Refresh the horizontal font list to show styles of the selected family
+    this.productFonts(customTextIndex, selectedContainer);
+    const firstFontName = familyOption.json_data[0].name;
+    self.product_custom_texts[customTextIndex].selected_container = selectedContainer;
+    self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: customTextIndex, value: self.product_custom_texts[customTextIndex]})
+    this.handleCustomTextFontChange(customTextIndex, firstFontName);
+  }
+ 
   async handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
     const self:Record<any, any> = this;
     await this.hideLockerProductUpdateButton()

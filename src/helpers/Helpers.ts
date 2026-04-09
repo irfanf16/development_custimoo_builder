@@ -1004,13 +1004,35 @@ const getPermissions = async () => {
 
 const setRetrievedProductsCustomTexts = (retrieved_products: Record<any, any>[], reset=false) => {
   const last_active_product_custom_texts = Store.getters.getLastActiveProductData['product_custom_texts']
-  const retrieved_products_custom_texts = retrieved_products.map((retrieved_product: Record<any, any>) => {
-    if(reset) {
-      return retrieved_product.product_texts
+const retrieved_products_custom_texts = retrieved_products.map(
+    (retrieved_product: Record<any, any>) => {
+
+      let productTexts;
+
+      if (reset) {
+        productTexts = retrieved_product.product_texts;
+      } else {
+        const product_id = retrieved_product.id;
+
+        productTexts =
+          last_active_product_custom_texts &&
+          last_active_product_custom_texts[product_id]
+            ? last_active_product_custom_texts[product_id]
+            : JSON.parse(JSON.stringify(retrieved_product.product_texts));
+      }
+
+      const firstFamily = retrieved_product.namefonts?.[0];
+      const firstFamilyValue = firstFamily?.file_name ?? null;
+      const firstFontName = firstFamily?.json_data?.[0]?.name ?? null;
+
+      return productTexts.map((text: Record<any, any>) => ({
+        ...text,
+        selected_container: text.selected_container ?? text.selected_font ?? firstFamilyValue,
+        font_family: text.font_family ?? firstFontName
+      }));
     }
-    const product_id = retrieved_product.id;
-    return last_active_product_custom_texts && last_active_product_custom_texts[product_id] ? last_active_product_custom_texts[product_id] : JSON.parse(JSON.stringify(retrieved_product.product_texts));
-  })
+  )
+  console.log("retrieved_products_custom_texts", retrieved_products_custom_texts)
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: santaClone(retrieved_products_custom_texts) })
 }
 //type could be locker_product, cart_product, order_product, reorder_product
@@ -1683,7 +1705,8 @@ const lastActiveProductDefaultObject = (keys_default_values = {}) => {
     fixed_logo_index: 0, category_index: 0, category_id: null, design_index: 0, design_id: null, product_index: 0, product_id: null,
     /*search_products: null,*/ style_index: 0, style_id: null,
     page_no: 1, customized: true, personalized: false, private_product: false, product_custom_texts: {}, custom_logos: {}, default_colors: [], group_colors: {}, logo_colors: [],
-    roster_detail: [], products_rosters: {}, shuffle_color_number: 1, addons_info: {}, group_patterns: {}
+    roster_detail: [], products_rosters: {}, shuffle_color_number: 1, addons_info: {}, group_patterns: {},
+    // selectedFontByProduct: {}
   }
   return {...default_obj, ...keys_default_values}
 }
@@ -1710,6 +1733,10 @@ const getDataToSetLastActiveProduct = () => {
         }
       }
     }
+    const lastActive = Store.getters.getLastActiveProductData;
+    // const existingFontByProduct = lastActive?.selectedFontByProduct || {};
+    const currentProductId = Store.getters.getSelectedProductId;
+    // const currentFont = Store.getters.getSelectedFontForCurrentProduct;
     last_active_product_default_object = lastActiveProductDefaultObject({
       category_index: category_index,
       category_id: category_id,
@@ -1732,6 +1759,7 @@ const getDataToSetLastActiveProduct = () => {
       roster_detail: Store.getters.getProductRosters(),
       products_rosters: Store.getters.getProductRosters('all'),
       group_patterns: Store.getters.getGroupPatterns,
+      // selectedFontByProduct: currentFont ? { ...existingFontByProduct, [currentProductId]: currentFont } : existingFontByProduct,
     })
   }
   return last_active_product_default_object;
