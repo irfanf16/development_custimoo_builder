@@ -100,7 +100,6 @@ export default class ShopLogoUploader extends Mixins(ErrorMessages, ModalAction)
       this.collection_logo.path = URL.createObjectURL(this.collection_logo.file)
       this.collection_logo.collection_id = this.collection_id
       this.collection_logo.fileuploading = true;
-      console.log("After", this.collection_logo)
       this.$emit("update-logo", this.collection_logo)
     }
 
@@ -108,7 +107,7 @@ export default class ShopLogoUploader extends Mixins(ErrorMessages, ModalAction)
   }
 
   public async handleLogoChange(recent_logo){
-    
+
     await this.removeLogo()
     // this.collection_logo.path = recent_logo.logo_url
     // this.collection_logo.extension = recent_logo.logo_url.split('.').pop()
@@ -125,7 +124,6 @@ export default class ShopLogoUploader extends Mixins(ErrorMessages, ModalAction)
       is_recent_logo: true,
     }
     this.$emit("update-logo", newLogo)
-    console.log("loggg", this.collection_logo)
   }
 
   public validateLogo(): boolean {

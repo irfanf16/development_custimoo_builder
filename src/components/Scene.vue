@@ -697,7 +697,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
                     groupColors[item.id].gradient_colors.forEach((gradient_color, gradient_color_index) => {
                       if (item.fill.colorStops[gradient_color_index]) {
                         const final_color = this.getGroupColorBySvgGroup(item.id as string, gradient_color_index)
-                        console.log(item.fill.colorStops[gradient_color_index], 'yasir')
                         item.fill.colorStops[gradient_color_index].color = final_color.color
                       }
                     })
@@ -764,9 +763,6 @@ export default class Scene extends Mixins(HideUpdateLockerButton, CustomLogosMix
         let appliedDefaultColors: any = [];
         let useColorIndex = 0
         const sequences = getPermutation(this.shuffle_color_number, this.parts.length)
-        if(this.mainPreview) {
-          console.log(this.parts, 'this.parts')
-        }
         sequences.forEach((sequence: number) => {
           const svg_part = this.parts[sequence]
           if(svg_part) {

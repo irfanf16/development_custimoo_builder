@@ -68,7 +68,6 @@ import {getDomDocument} from "@/helpers/Helpers";
   watch: {
   styleIndex() {
     this.currentCategoryIndex = 0
-    console.log('styleIndex watch', this.$store.getters.getCurrentStyleIndex)
     this.loadDesignsByStyleIndex()
   }
 }

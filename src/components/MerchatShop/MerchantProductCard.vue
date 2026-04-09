@@ -59,7 +59,6 @@ export default class ProductCard extends Vue {
   }
    public onImageLoad(): void {
     this.loading = false;
-     console.log("loading", this.loading)
   }
 
   get getShopInfo(): Record<any, any> {

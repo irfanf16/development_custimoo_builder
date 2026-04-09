@@ -369,7 +369,6 @@ export default class CustomizationText extends Mixins(TextCustomizationTab) {
   // the first available option and persist the change to the store.
   @Watch('product_font_dropdown')
   onProductFontDropdownChanged() {
-    console.log('Here is Running i am');
     this.validateAndFixSelectedContainers();
   }
 

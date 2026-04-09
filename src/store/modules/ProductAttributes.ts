@@ -1171,10 +1171,10 @@ const ProductAttributes:Module<any, any> = {
       for (const [payload_key, payload_value] of Object.entries(payload)) {
         if(payload_key == 'product_custom_texts') {
           updated_payload[payload_key] = {...state.last_active_product_data.product_custom_texts, ...payload.product_custom_texts}
-        } 
+        }
         // else if(payload_key == 'selectedFontByProduct') {
         //   updated_payload[payload_key] = {...(state.last_active_product_data.selectedFontByProduct || {}), ...(payload.selectedFontByProduct || {})}
-        // } 
+        // }
         else {
           updated_payload[payload_key] = payload_value
         }
@@ -1238,7 +1238,6 @@ const ProductAttributes:Module<any, any> = {
           Vue.set(state.product_custom_texts, product_id, payload.value)
         }
       }
-      console.log('Updated product_custom_texts in state :', state.product_custom_texts);
       updateLastActiveProductData({product_custom_texts: state.product_custom_texts})
     },
     REMOVE_CUSTOM_TEXT(state: Record<any, any>, payload) {

@@ -1032,7 +1032,6 @@ const retrieved_products_custom_texts = retrieved_products.map(
       }));
     }
   )
-  console.log("retrieved_products_custom_texts", retrieved_products_custom_texts)
   Store.commit("SET_PRODUCT_CUSTOM_TEXTS", { append: true, value: santaClone(retrieved_products_custom_texts) })
 }
 //type could be locker_product, cart_product, order_product, reorder_product
@@ -1140,10 +1139,12 @@ const applyColorToSVG = (factory_product:Record<any,any>, svg_doc:Record<any,any
         if(doc_elem_id.toLowerCase() == svg_group_item.id.toLowerCase() && ($(doc_item_element)[0] as Record<any, any>).gradientUnits === undefined) { //exclude gradient item it self
           if(svg_group_item.gradient_colors) {
             let gradient_id = $(doc_item_element).attr('fill') as string
-            gradient_id = gradient_id.substring(gradient_id.indexOf('(') + 1, gradient_id.lastIndexOf(')'))
-            svg_group_item.gradient_colors.forEach((gradient_color: Record<any, any>, g_index: number) => {
-              $(svg_doc).find(gradient_id).children().eq(g_index).css('stop-color', gradient_color.color)
-            })
+            if(gradient_id) {
+              gradient_id = gradient_id.substring(gradient_id.indexOf('(') + 1, gradient_id.lastIndexOf(')'))
+              svg_group_item.gradient_colors.forEach((gradient_color: Record<any, any>, g_index: number) => {
+                $(svg_doc).find(gradient_id).children().eq(g_index).css('stop-color', gradient_color.color)
+              })
+            }
           } else {
             $(doc_item_element).attr("fill", svg_group_item.color);
             if($(doc_item_element).children().length > 0){

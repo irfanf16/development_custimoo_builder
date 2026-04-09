@@ -148,7 +148,6 @@ export class LogoPlacementTabMixin extends Mixins(CustomLogosMixin) {
     }
     this.custom_logo_tab_index = logo_index - 1
     self.$eventBus.$emit('handleNonVectorCustomLogosCount')
-    console.log('heyss')
     await updateLastActiveProductData({ custom_logos: this.$store.getters.getCustomLogos("all")})
   }
 
@@ -168,7 +167,7 @@ export class LogoPlacementTabMixin extends Mixins(CustomLogosMixin) {
     this.customLogos[custom_logo_index].logo_technology = updated_value;
     this.$store.commit('SET_CUSTOM_LOGOS', {logo_index: custom_logo_index, custom_logos:  this.customLogos[custom_logo_index]})
     self.$eventBus.$emit('handleCustomLogoUpdatedEvent', this.customLogos[custom_logo_index])
-    
+
     await handleProductPriceUpdate();
   }
 

@@ -779,9 +779,7 @@ export default class ShopModal extends Mixins(ModalAction, CustomerShopMixin) {
   }
 
   public handleLogoUpdate(selectedFile) {
-    // console.log('hey', selectedFile)
     this.shop.logo = selectedFile.file ?? selectedFile.url
-    // console.log("selectedFile", selectedFile)
   }
 
   public handleCoverPhotoUpdate(selectedFile) {
@@ -1118,7 +1116,6 @@ public formatProdCustomPrice(product:any){
   }
 
   public disableDates(ymd, date) {
-    console.log("Sss", ymd, date)
   // Disable dates before today
   const today = new Date()
   today.setHours(0, 0, 0, 0)

@@ -109,7 +109,6 @@ router.beforeEach(async (to, from, next) => {
     }
   }).observe(document, {subtree: true, childList: true});
   window.onhashchange = () => {
-    console.log('hash updated')
     if (window.location.hash.startsWith('#/share')) {
       // Extract the current URL and query string
       const currentUrl = new URL(window.location.href);
@@ -117,11 +116,8 @@ router.beforeEach(async (to, from, next) => {
       // Parse query parameters
       const hashWithoutParams = window.location.hash.split('?')[0]; // The hash route without query params
       const queryParams = new URLSearchParams(window.location.hash.split('?')[1]);
-      console.log('queryParams', queryParams)
       // Check if 'reloaded' is already present in the query parameters
       if (!queryParams.has('reloaded')) {
-        console.log('Appending reloaded=true and reloading');
-
         // Add 'reloaded=true' to the query parameters
         queryParams.set('reloaded', 'true');
 

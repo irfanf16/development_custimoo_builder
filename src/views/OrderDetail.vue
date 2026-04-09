@@ -72,9 +72,9 @@
                         v-html="activityStatus[item_status_activity.status].message">
                       </div>
                       <span v-if="item_status_activity.status"></span>
-                    
+
                     </template>
-                    <!-- TODO: Show the Order Details Here in Case of Shipped Status --> 
+                    <!-- TODO: Show the Order Details Here in Case of Shipped Status -->
                     <template v-else-if="item_status_activity.status === ORDERSHIPPED">
                       <div class="activity-text p-2 fs-2 text-muted">
                         {{ activityStatus[item_status_activity.status].message }}
@@ -975,8 +975,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
           // Find the order item and update its activity_items
           const orderItem = this.order.items.find((item: any) => item.id === this.order_item_id);
 
-          console.log(JSON.parse(JSON.stringify(orderItem)));
-          console.log("res", response.data)
           if (orderItem) {
             const customerReviewActivity = orderItem.status_activities.find(
               (activity: any) => activity.status === this.CUSTOMERREVIEW
@@ -985,7 +983,6 @@ export default class OrderDetail extends Mixins(ErrorMessages) {
               customerReviewActivity.activity_items = response.data.result.activity_items;
             }
           }
-          console.log('after orderItem', orderItem)
 
         }
       })

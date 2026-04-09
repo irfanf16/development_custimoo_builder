@@ -354,7 +354,6 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     if (!self.product_font_dropdown || !self.product_font_dropdown.length) return;
     const firstOption = self.product_font_dropdown[0];
     const fontFamily = firstOption.json_data?.[0]?.name;
-    console.log('First font family:', fontFamily);
     self.product_custom_texts.forEach((custom_text: Record<any, any>, index: number) => {
       const exists = custom_text.selected_container &&
         self.product_font_dropdown.some((f: Record<any, any>) => f.value === custom_text.selected_container);
@@ -380,7 +379,7 @@ export default class TextCustomizationTab extends Mixins(HideUpdateLockerButton,
     self.$store.commit("SET_PRODUCT_CUSTOM_TEXTS", { index: customTextIndex, value: self.product_custom_texts[customTextIndex]})
     this.handleCustomTextFontChange(customTextIndex, firstFontName);
   }
- 
+
   async handleCustomTextFontChange(custom_text_index: number, selected_font: string) {
     const self:Record<any, any> = this;
     await this.hideLockerProductUpdateButton()

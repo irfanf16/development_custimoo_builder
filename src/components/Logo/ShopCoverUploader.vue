@@ -105,7 +105,6 @@ export default class ShopLogoUploader extends Mixins(ErrorMessages, ModalAction,
   }
 
   public async handleCoverChange(recent_cover){
-    console.log("revent", recent_cover)
     await this.removeCover()
     this.recent_cover_preview = recent_cover
     const newLogo = {

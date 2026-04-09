@@ -128,7 +128,6 @@ export default class FileUploader extends Mixins(ErrorMessages, ModalAction) {
   public validateFile(): boolean {
     const input: string | File = this.file.file ?? this.file.url;
     const file_extension = this.getExtension(input);
-    console.log("file_extension", file_extension)
     const valid_extension = ['jpg', 'gif', 'png', 'jpeg', 'svg'].includes(file_extension)
     if (!valid_extension) {
       this.showError(`Can not upload load with extension ${file_extension}. Allowed extensions are (jpg, gif, png, jpeg, svg)`)

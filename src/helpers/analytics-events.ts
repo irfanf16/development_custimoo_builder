@@ -30,7 +30,6 @@ export function trackEvent(eventName: EventName, params: EventParams = {}) {
 
   // Ensure dataLayer exists
   (window as any).dataLayer = (window as any).dataLayer || [];
-  console.log(eventData);
   (window as any).dataLayer.push(eventData);
 
   if (process.env.NODE_ENV !== "production") {
