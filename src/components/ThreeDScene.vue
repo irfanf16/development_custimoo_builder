@@ -417,7 +417,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             const svgIndex = this.svgGroups.findIndex(group => group.id === part);
             if (svgIndex !== -1) {
               const svgGroup = this.svgGroups[svgIndex]
-              if (svgGroup.gradient_colors) {
+              if (svgGroup.gradient_colors && svgGroup.gradient_colors[gradient_color_index]) {
                 const final_color = this.getDefaultColorBySvgGroup(svgGroup.id, defaultColors[useColorIndex])
                 svgGroup.gradient_colors[gradient_color_index].color = final_color.color
                 svgGroup.gradient_colors[gradient_color_index].pantone = final_color.pantone
@@ -648,7 +648,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       await this.$store.dispatch('setSvgGroups', this.svgGroups)
       await this.$store.dispatch('setInitialSvgGroups', this.initialSvgGroups);
     }
- 
+
     if (!this.logos.length) {
       this.callChangeColors()
     }
@@ -704,7 +704,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
 
     // const light = new THREE.HemisphereLight(0xffffff, 0x080820, 0.3)
     // this.scene.add(light)
-    
+
     const intensity = 100;
     const directionalLight = new THREE.RectAreaLight(0xffffff, 6, 10, 10);
     directionalLight.lookAt( 0, 0, -60 )
@@ -788,7 +788,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
           }
         })
       }
-       
+
       if (this.productCustomTexts) {
         this.productCustomTexts.forEach((custom_text: Record<any, any>, index: number) => {
           if (custom_text.value) {
@@ -1192,7 +1192,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       } else {
         diffY = Math.abs(anchorTop - maxTop) * (anchorGroup.scaleY ?? 1);
       }
-      
+
       // Adjust the design position to center it relative to the anchor
       const currentLeft = design.left ?? 0;
       const currentTop = design.top ?? 0;
@@ -1368,7 +1368,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
          }
         const img = fabric.util.groupSVGElements(objects) as fabric.Group
         img.scaleToHeight(logo.height as number / this.canvasHeightRatio)
-        
+
         img.set({
           left: fabricJSPoint.x,
           top: fabricJSPoint.y,
@@ -2380,7 +2380,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             const objectToClip = clipGroup._objects.filter((obj, clip_id) => clip_id !== object_number);
 
             objectToClip.forEach((obj) => clipGroup.remove(obj));
-            
+
             clipGroup._objects[0].clipPath = undefined
             // @ts-ignore
             const originalMatrix = clipGroup._objects[0].calcTransformMatrix(true)
@@ -2399,7 +2399,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
             Object.assign(pattern, {
               id: `pattern_${svg_part}_${occurrence_count}`
             })
-            
+
             const patternRect = new fabric.Rect({
               left: designObject.left,
               top: designObject.top,
@@ -2507,8 +2507,8 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
       /(<svg[^>]*>)/i,
       `$1<g transform="scale(1,-1) translate(0, -${this.canvasResolution})">`
     ).replace(/<\/svg>/i, '</g></svg>');
-    
-    
+
+
     Object.keys(this.patterns).forEach((svg_part) => {
       const angle = this.groupPatterns[svg_part]?.angle;
       if (angle) {
@@ -2531,7 +2531,7 @@ export default class ThreeDScene extends Mixins(HideUpdateLockerButton, CustomLo
     });
     return svg;
   }
-  
+
   public getRealSize(px: number) {
     const unit = this.$store.getters.getSetting('measurement_unit')?.unit
     const pxScaled = px / this.design.scaleX;
