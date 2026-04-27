@@ -2421,10 +2421,15 @@ const handleProductPriceUpdate = async (commit=true, product: Record<any, any>={
         if(ecommerce_product.size_variants) {
           is_multi_prices = true;
           const size_variants = ecommerce_product.size_variants;
+          const base_unit_price = parseFloat(String(product_price)) || 0;
           product_price_with_quantity = 0;
           product_roster.forEach(roster_item => {
-            const roster_price = parseFloat(size_variants[roster_item.size].price);
-            const qty =  parseInt(roster_item.quantity);
+            const size_entry = size_variants[roster_item.size];
+            const roster_price =
+              size_entry != null && size_entry.price != null
+                ? parseFloat(String(size_entry.price))
+                : base_unit_price;
+            const qty = parseInt(String(roster_item.quantity), 10) || 0;
             if(product_multi_prices[roster_item.size]) {
               const updated_qty =  product_multi_prices[roster_item.size].quantity + qty;
               product_multi_prices[roster_item.size] = { quantity : updated_qty, price : roster_price, sub_price : updated_qty * roster_price }
